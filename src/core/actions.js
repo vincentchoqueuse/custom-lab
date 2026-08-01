@@ -33,6 +33,16 @@ export const coreActions = {
       api.reveal();
     },
   },
-  // 'freeze' ships in phase 3 (freeze-frame ghost); listed in the default
-  // manifest actions but not yet registered — skipped by the UI until then.
+  freeze: {
+    id: 'freeze',
+    icon: 'snowflake',
+    label: STR.ACTION_FREEZE,
+    shortcut: 'F',
+    run(api) {
+      // Pin the current plot as a gray dashed ghost; toggle clears it.
+      // Display state only — never in the URL (not link-reproducible, by
+      // design).
+      api.toggleFreeze();
+    },
+  },
 };

@@ -1,14 +1,21 @@
 {
-  "name": "enib-lab",
+  "name": "custom-lab",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "license": "AGPL-3.0",
+  "homepage": "https://vincentchoqueuse.github.io/custom-lab/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vincentchoqueuse/custom-lab.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "node scripts/run-checks.js"
+    "check": "node scripts/run-checks.js",
+    "new:experiment": "node scripts/new-experiment.js",
+    "new:subject": "node scripts/new-subject.js"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.2.5",

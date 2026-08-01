@@ -2,7 +2,7 @@
 // localStorage — NEVER experiment state, which lives in the URL.
 // Single owner of the storage keys and of the private-mode try/catch.
 
-const key = (name) => `enib-lab:${name}`;
+const key = (name) => `custom-lab:${name}`;
 
 /** @returns {string|null} */
 export function readPref(name) {

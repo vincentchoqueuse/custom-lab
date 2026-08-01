@@ -87,6 +87,7 @@
       <button
         class="action-btn"
         class:primary={a.id === 'randomizeSeed'}
+        class:on={a.id === 'freeze' && !!app.ghost}
         onclick={() => runAction(a.id)}
       >
         <Icon name={a.icon} size={14} />
