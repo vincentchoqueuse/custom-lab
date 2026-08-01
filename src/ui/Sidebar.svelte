@@ -4,6 +4,7 @@
   import { STR } from '../core/strings.js';
   import { writePref } from '../core/prefs.js';
   import Icon from './Icon.svelte';
+  import AppIcon from './AppIcon.svelte';
 
   let collapsed = $state({});
 
@@ -24,7 +25,7 @@
 
 <aside class="sidebar" class:collapsed={!app.ui.sidebar}>
   <div class="side-top">
-    <div class="brand">{STR.APP_NAME}</div>
+    <div class="brand"><AppIcon size={24} /> {STR.APP_NAME}</div>
     <button class="side-toggle" onclick={toggleSidebar} title="{STR.COLLAPSE_SIDEBAR} (⌘B)">
       <Icon name="panel-left" size={16} />
     </button>
