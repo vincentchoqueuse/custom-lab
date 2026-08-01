@@ -1,0 +1,27 @@
+{
+  "name": "enib-lab",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "license": "AGPL-3.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node scripts/run-checks.js"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.2.5",
+    "@fontsource/ibm-plex-sans": "^5.2.5",
+    "d3-array": "^3.2.4",
+    "d3-format": "^3.1.0",
+    "d3-interpolate": "^3.0.1",
+    "d3-scale": "^4.0.2",
+    "d3-shape": "^3.2.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "svelte": "^5.19.0",
+    "vite": "^6.0.11"
+  }
+}
