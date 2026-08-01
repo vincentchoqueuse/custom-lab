@@ -101,7 +101,10 @@ kbd {
 
 .app {
   display: flex;
+  /* dvh: iOS Safari's 100vh includes the area behind the dynamic toolbar,
+     which pushed the Prompt Bar below the visible viewport on iPad */
   height: 100vh;
+  height: 100dvh;
   background: var(--background);
   color: var(--foreground);
 }
@@ -131,11 +134,32 @@ kbd {
   margin-left: -261px;
 }
 
+.sidebar .side-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px 6px 20px;
+}
+
 .sidebar .brand {
   font-weight: 600;
   font-size: 14.5px;
-  padding: 16px 20px 8px;
   letter-spacing: 0.2px;
+}
+
+.sidebar .side-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  border-radius: 8px;
+  color: var(--muted-fg);
+  transition: background var(--t), color var(--t);
+}
+
+.sidebar .side-toggle:hover {
+  background: var(--sidebar-hover);
+  color: var(--foreground);
 }
 
 .sidebar .search-btn {
@@ -399,6 +423,9 @@ kbd {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  /* center the tabs + plot block in the leftover height (tall viewports);
+     'safe' keeps the top reachable when the content overflows instead */
+  justify-content: safe center;
   flex: 1;
   min-height: 0;
 }
@@ -487,6 +514,17 @@ kbd {
 .plot-area > .plot-svg {
   position: relative;
   z-index: 1;
+}
+
+/* figure + pills must fit the viewport: cap the plot height to the space
+   left after the chrome (header, tabs, statline, prompt bar ≈ 250px) — the
+   svg letterboxes inside the white card, so nothing ever scrolls out.
+   The ghost gets the same cap so both snapshots stay aligned. */
+.plot-area > .plot-svg,
+.plot-ghost svg {
+  max-height: max(260px, calc(100vh - 250px));
+  max-height: max(260px, calc(100dvh - 250px));
+  margin: 0 auto;
 }
 
 /* freeze-frame ghost: grayed, dashed snapshot pinned under the live plot */
