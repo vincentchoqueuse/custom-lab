@@ -8,6 +8,7 @@
   } from '../core/store.svelte.js';
   import { subjects } from '../core/registry.js';
   import { STR } from '../core/strings.js';
+  import Icon from './Icon.svelte';
 
   let { onpresent } = $props();
 
@@ -59,7 +60,7 @@
     {#if m?.presets.length}
       <button onclick={() => (menuOpen = !menuOpen)} aria-haspopup="listbox">
         <span>{scene?.title ?? STR.SCENE}</span>
-        <span style="color: var(--muted)">▾</span>
+        <Icon name="chevron-down" size={14} />
       </button>
       {#if menuOpen}
         <div class="menu" role="listbox">
@@ -76,8 +77,11 @@
 
   <div class="right">
     <button class="url-chip" onclick={copyUrl} title={STR.COPY_LINK}>
-      {copied ? STR.COPIED : `🔗 ${hash || '#/'}`}
+      <Icon name={copied ? 'check' : 'link'} size={13} />
+      <span class="txt">{copied ? STR.COPIED : hash || '#/'}</span>
     </button>
-    <button class="icon-btn" onclick={onpresent} title="{STR.PRESENTATION} (L)">⛶</button>
+    <button class="icon-btn" onclick={onpresent} title="{STR.PRESENTATION} (L)">
+      <Icon name="maximize" size={15} />
+    </button>
   </div>
 </header>

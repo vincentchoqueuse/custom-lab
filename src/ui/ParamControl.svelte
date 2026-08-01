@@ -56,7 +56,7 @@
 <div class="param-control" title={spec.description ?? ''}>
   <div class="head">
     <span class="name">{spec.name}</span>
-    {#if spec.unit}<span class="dim" style="color: var(--muted)">({spec.unit})</span>{/if}
+    {#if spec.unit}<span class="dim" style="color: var(--muted-fg)">({spec.unit})</span>{/if}
     {#if spec.type !== 'readonly'}
       <span class="value">
         {formatValue(spec.type === 'readonly' ? undefined : value, precision)}{spec.unit

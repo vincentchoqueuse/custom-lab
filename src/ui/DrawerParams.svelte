@@ -6,6 +6,7 @@
   import { app, manifest, setDrawer, validationMessage } from '../core/store.svelte.js';
   import { STR } from '../core/strings.js';
   import ParamControl from './ParamControl.svelte';
+  import Icon from './Icon.svelte';
 
   const m = $derived(manifest());
   const invalid = $derived(validationMessage());
@@ -24,8 +25,10 @@
 <aside class="drawer" class:open={app.drawer} aria-hidden={!app.drawer}>
   {#if m}
     <h2>
-      <span>⚙ {STR.PARAMETERS}</span>
-      <button class="icon-btn" onclick={() => setDrawer(false)} title={STR.CLOSE}>✕</button>
+      <span class="ttl"><Icon name="settings" size={15} /> {STR.PARAMETERS}</span>
+      <button class="icon-btn" onclick={() => setDrawer(false)} title={STR.CLOSE}>
+        <Icon name="x" size={14} />
+      </button>
     </h2>
 
     {#if invalid}

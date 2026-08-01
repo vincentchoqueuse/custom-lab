@@ -5,6 +5,7 @@
   import { app } from '../core/store.svelte.js';
   import { STR } from '../core/strings.js';
   import { formatValue } from '../core/scales.js';
+  import Icon from './Icon.svelte';
 
   const entries = $derived(Object.entries(app.result.observables ?? {}));
 
@@ -60,14 +61,18 @@
 <div class="inspector" role="dialog" aria-label={STR.INSPECTOR}>
   <h2>
     <span>{STR.OBSERVABLES}</span>
-    <button onclick={() => (app.ui.inspector = false)} title={STR.CLOSE}>✕</button>
+    <button onclick={() => (app.ui.inspector = false)} title={STR.CLOSE}>
+      <Icon name="x" size={14} />
+    </button>
   </h2>
   {#each entries as [name, o] (name)}
     <div class="obs-row">
       <span>{name}</span>
       <span class="obs-type">{o.type}{dims(o)}</span>
       <span class="obs-preview">{preview(o)}</span>
-      <button onclick={() => downloadObs(name, o)} title={STR.DOWNLOAD}>⬇</button>
+      <button onclick={() => downloadObs(name, o)} title={STR.DOWNLOAD}>
+        <Icon name="download" size={13} />
+      </button>
     </div>
   {/each}
 </div>

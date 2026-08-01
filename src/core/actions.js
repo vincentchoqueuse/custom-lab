@@ -8,7 +8,7 @@ import { STR } from './strings.js';
 export const coreActions = {
   randomizeSeed: {
     id: 'randomizeSeed',
-    icon: '🎲',
+    icon: 'dice',
     label: STR.ACTION_DRAW,
     shortcut: 'R',
     run(api) {
@@ -19,7 +19,7 @@ export const coreActions = {
   },
   resetDefaults: {
     id: 'resetDefaults',
-    icon: '↺',
+    icon: 'rotate-ccw',
     label: STR.ACTION_RESET,
     run(api) {
       api.resetDefaults();
@@ -27,7 +27,7 @@ export const coreActions = {
   },
   revealHidden: {
     id: 'revealHidden',
-    icon: '👁',
+    icon: 'eye',
     label: STR.ACTION_REVEAL,
     run(api) {
       api.reveal();

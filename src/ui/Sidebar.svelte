@@ -2,6 +2,7 @@
   import { app } from '../core/store.svelte.js';
   import { subjects } from '../core/registry.js';
   import { STR } from '../core/strings.js';
+  import Icon from './Icon.svelte';
 
   let collapsed = $state({});
 
@@ -27,7 +28,7 @@
 <aside class="sidebar" class:collapsed={!app.ui.sidebar}>
   <div class="brand">{STR.APP_NAME}</div>
   <button class="search-btn" onclick={() => (app.ui.palette = true)}>
-    <span>🔍 {STR.SEARCH}</span>
+    <span class="lbl"><Icon name="search" size={15} /> {STR.SEARCH}</span>
     <kbd>⌘K</kbd>
   </button>
   <nav>
@@ -52,17 +53,17 @@
   </nav>
   <footer>
     <button onclick={toggleTheme} title={STR.THEME}>
-      {app.ui.theme === 'light' ? '🌙' : '☀️'}
+      <Icon name={app.ui.theme === 'light' ? 'moon' : 'sun'} size={15} />
     </button>
     <button class:on={app.ui.teacher} onclick={toggleTeacher} title={STR.TEACHER_MODE}>
-      🗒
+      <Icon name="note" size={15} />
     </button>
     <button
       class:on={app.ui.inspector}
       onclick={() => (app.ui.inspector = !app.ui.inspector)}
       title={STR.INSPECTOR}
     >
-      &lbrace;&rbrace;
+      <Icon name="braces" size={15} />
     </button>
   </footer>
 </aside>

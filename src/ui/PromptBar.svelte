@@ -15,6 +15,7 @@
   import { STR } from '../core/strings.js';
   import { formatValue } from '../core/scales.js';
   import ParamControl from './ParamControl.svelte';
+  import Icon from './Icon.svelte';
 
   const m = $derived(manifest());
   const pills = $derived(visiblePills());
@@ -25,7 +26,7 @@
   const hasMasked = $derived(masked.size > 0);
   const allActions = $derived(
     hasMasked && !actions.some((a) => a.id === 'revealHidden')
-      ? [...actions, { id: 'revealHidden', icon: '👁', label: STR.ACTION_REVEAL }]
+      ? [...actions, { id: 'revealHidden', icon: 'eye', label: STR.ACTION_REVEAL }]
       : actions
   );
 
@@ -66,7 +67,7 @@
           onclick={() => toggle(key)}
           title={masked.has(key) ? STR.MASKED_HINT : (m.params[key].description ?? '')}
         >
-          <span class="dim">🎛</span>
+          <span class="dim"><Icon name="sliders" size={13} /></span>
           {pillText(key)}
         </button>
         {#if openKey === key}
@@ -79,14 +80,18 @@
   </div>
   <div class="actions">
     {#each allActions as a (a.id)}
-      <button class="action-btn" onclick={() => runAction(a.id)}>
-        <span>{a.icon}</span>
+      <button
+        class="action-btn"
+        class:primary={a.id === 'randomizeSeed'}
+        onclick={() => runAction(a.id)}
+      >
+        <Icon name={a.icon} size={14} />
         <span>{a.label}</span>
         {#if a.shortcut}<kbd>{a.shortcut}</kbd>{/if}
       </button>
     {/each}
     <button class="action-btn" onclick={() => setDrawer(!app.drawer)}>
-      <span>⚙</span>
+      <Icon name="settings" size={14} />
       <span>{STR.PARAMETERS}</span>
       <kbd>P</kbd>
     </button>
