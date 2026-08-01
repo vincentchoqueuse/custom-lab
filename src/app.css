@@ -29,6 +29,7 @@
   --sidebar: #f9f9f9;
   --sidebar-hover: #ececec;
   --sidebar-active: #e3e3e5;
+  --sidebar-label: #a1a1aa;
   --destructive: #dc2626;
 }
 
@@ -48,6 +49,7 @@
   --sidebar: #171717;
   --sidebar-hover: #212121;
   --sidebar-active: #2c2c2e;
+  --sidebar-label: #6b6b71;
   --destructive: #ef4444;
 }
 
@@ -198,7 +200,7 @@ kbd {
 .sidebar .subject-title {
   font-size: 12px;
   font-weight: 600;
-  color: var(--muted-fg);
+  color: var(--sidebar-label);
   padding: 16px 10px 4px;
   width: 100%;
   text-align: left;
