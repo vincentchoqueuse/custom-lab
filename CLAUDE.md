@@ -1,0 +1,758 @@
+ # ENIB Lab — a scientific demonstration engine for teaching
+
+Document organized from durable to interchangeable:
+**Vision → Concepts → UX → Architecture → Implementation.**
+
+---
+
+# 1. Vision
+
+A **purely static** web application (no server, deployable on Netlify) that serves as a
+**live demonstration instrument for lecture halls**: a catalog of interactive
+experiments (statistics, estimation, detection, digital communications) that are
+scriptable, projectable, and drivable. Not a course companion — the professor's bench.
+
+Project identity: **static, reproducible, declarative, centered on pedagogical
+staging rather than parameter editing.**
+
+## Non-negotiable principles
+
+1. **Fully static.** Everything runs in the browser. No backend, no API.
+2. **The URL is the API.** All state (experiment, params, view, preset, panels) is
+   encoded in the hash. One link = one reproducible lecture scene.
+3. **Declarative.** Each experiment is a self-contained directory described by a
+   manifest. The core knows no experiment by name.
+4. **Adding an experiment never modifies the core.** Automatic discovery via
+   `import.meta.glob`. Zero hand-maintained index files.
+5. **Strict layer separation**: scientific computation → observables → declarative
+   views → graphic components. Views NEVER perform scientific computation.
+6. **AGPL-3.0. Code, UI, and commits in English.** Pedagogical content (param labels,
+   experiment titles, teacher notes, preset names) is authored in the course's teaching
+   language — French for ENIB courses — and lives entirely in the manifests. All UI
+   strings of the core are centralized in a single `src/core/strings.js` module
+   (plain English constants, no i18n framework — extension point per principle 7).
+7. **Extension points over premature features.** Any future capability (stories,
+   incremental execution, remote control, voting, annotations) must be addable without
+   breaking the manifest and compute contracts, but **no dedicated infrastructure is
+   implemented before a concrete need justifies it.** This principle overrides any
+   proposal to enrich the model.
+
+---
+
+# 2. Concepts
+
+## The experiment
+
+An **experiment** is a self-contained pedagogical object: one computation, named
+observables, representations, lecture scenes, actions. It lives in one directory,
+described by a declarative manifest.
+
+## Data flow
+
+```
+compute(params)          — pure, seeded, stateless, runs in a worker
+      ↓
+observables              — named, typed, serializable quantities
+      ↓
+declarative views        — {type, source, overlays, layout} in the manifest
+      ↓
+graphic components       — generic (Histogram, Line, Scatter…), reused everywhere
+```
+
+## Observables
+
+Every displayable quantity is a named observable produced by `compute()`. Its type is
+**inferred by default** (`Float64Array` → vector, `number` → scalar, `{x, y}` →
+series, `[{...}]` → records); an optional `meta` field resolves ambiguities and adds
+richness (unit, label, precision). Export, inspector and overlays rely on these types
+— without imposing ceremony on the simple case.
+
+## Scenes (presets)
+
+A preset is a complete lecture scene: params, active view, visible pills, masked
+params (black box), panel states, teacher notes. Presets chain via keyboard (←/→):
+the preset list IS the lecture script.
+
+## Actions
+
+An action is a named operation exposed by the core or an experiment
+(`randomizeSeed`, `resetDefaults`, `revealHidden`, `freeze`, `exportSvg`,
+`exportPng`…). The Prompt Bar renders the actions declared in the manifest; keyboard
+shortcuts bind to them. Adding an action never requires touching the UI.
+
+## Engine capabilities (anti-regression checklist)
+
+An experiment can:
+- ✓ produce typed observables
+- ✓ have multiple views (declarative, or custom with justification)
+- ✓ have multiple presets/scenes with teacher notes
+- ✓ be replayed identically (seed in the URL)
+- ✓ be driven by URL (full state in the hash)
+- ✓ be driven by keyboard (lecture-ready shortcuts)
+- ✓ expose actions in the Prompt Bar
+- ✓ be numerically verified (`check.js`)
+- ✓ be exported (SVG, PNG, clipboard)
+- ✓ be inspected (raw observables, developer panel)
+- ✓ be frozen for before/after comparison (`freeze` action)
+- ✓ survive live teaching (worker timeout, graceful compute errors)
+- ◌ be storyboarded (stories) — extension point, not implemented
+- ◌ run incrementally (`step()`, recorders) — extension point
+- ◌ be remote-controlled (WebRTC) — extension point
+- ◌ be driven by a MIDI controller (Web MIDI, pills ↔ CCs) — extension point
+- ◌ be animated (parameter sequences) — extension point
+
+---
+
+# 3. UX
+
+## Philosophy: modern chatbot, not dashboard
+
+The interface drops the cluttered academic-dashboard structure (MATLAB/RStudio) in
+favor of the clean, centered ergonomics of a modern chatbot (Open WebUI / ChatGPT /
+Claude.ai):
+
+- **The plot is the answer**: the central area is devoted to the chart card, with
+  zero distraction.
+- **The Prompt Bar**: the scene's 2–4 priority parameters are editable pills at the
+  bottom — where a chatbot puts its input box — next to the actions.
+- **Preset as model picker**: lecture scenes are selected from a central dropdown in
+  the header, like choosing `GPT-4o / Claude` in a chatbot.
+- **Progressive disclosure**: ultra-clean screen by default; the full parameter
+  drawer opens only for secondary variables.
+
+## Reference layout
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│ ☰  Statistics / Confidence intervals      [ Preset: All is well ▾ ] [🔗] [L] │
+├──────────────────────────────────────────────────────────────────────────┤
+│ 🗒 [Teacher Mode banner — current scene notes, when enabled]             │
+├──────────────────────────────────────────────────────────────────────────┤
+│  [Tabs: Realizations | Distribution of x̄ | Coverage vs N]               │
+│                                                                          │
+│                       [ MAIN PLOT CARD ]                                 │
+│                                                                          │
+│            statline: coverage = 0.948 · half-width ±0.72                 │
+├──────────────────────────────────────────────────────────────────────────┤
+│  [ 🎛 N = 30 ] [ 🎛 1−α = 0.95 ]         [ 🎲 Draw (R) ] [ ⚙ Parameters (P) ] │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+(Tab titles, pill labels and preset names above come from the manifest and are shown
+in the course language; the chrome — Parameters, Draw, Presets, Search… — is English.)
+
+## Interface components
+
+**Left sidebar (Open WebUI style).** Dark (`#1b1f27`), ~260 px, collapsible (`⌘B`),
+rounded items, soft hover, active item in solid accent. Top button: "Search
+experiments" (`⌘K`). Tree: subjects (uppercase mono, collapsible) → experiments.
+Footer: light/dark theme toggle for the central area, Teacher Mode button (🗒).
+
+**Clean header.** Breadcrumb `Subject / Experiment`. **Central preset selector**,
+LLM-model-picker style — one click applies the full scene. Right side: copyable URL
+chip, presentation mode button (`L`).
+
+**Central area.** Teacher Mode banner (scene notes; never projected by default, never
+in the URL). Light-background PlotFrame (projector legibility), pure SVG rendering,
+statline of key observables, export. Minimal tabs when the experiment has several
+views.
+
+**Prompt Bar (bottom bar).** Fixed at the bottom, inspired by LLM input bars. Pills =
+the active preset's `visible` params. Clicking a pill opens a **NON-modal popover**
+(slider/toggle) above it — the popover stays open while dragging and **the plot
+remains fully visible**: the look→adjust→look loop is never interrupted. Right of the
+pills: the manifest's actions (including `🎲 Draw`).
+
+**Parameter drawer (right slide-in).** Hidden by default, slides in (~300 px),
+generated from the schema (groups, visibleIf, validate, derived, display). Contains
+ALL parameters. **Never a modal for parameters, here or anywhere.**
+
+**Inspector (developer panel).** Discreetly accessible (menu or shortcut): list of the
+current experiment's observables with type, dimensions, value preview, download. A
+debugging tool for experiment authors, not shown in class.
+
+## Keyboard shortcuts (lecture-ready)
+
+Canonical table — any shortcut change happens HERE and nowhere else:
+
+| Key | UX action | Mnemonic |
+|---|---|---|
+| `⌘K` / `Ctrl+K` | Open the Command Palette (experiment search) | *K* — standard |
+| `⌘B` / `Ctrl+B` | Show / hide the Sidebar | side**B**ar |
+| `P` | Open / hide the parameter Drawer | **P**arameters |
+| `R` | `randomizeSeed` action (draw again) | **R**andomize |
+| `F` | `freeze` action — freeze/unfreeze the plot for before/after comparison (phase 3) | **F**reeze |
+| `L` | **L**ecture Presentation Mode: **fullscreen** (Fullscreen API) + strokes ×1.6 + type ×1.3 + minimal chrome | **L**ecture |
+| `←` / `→` | Previous / next preset (the lecture script on keys) | — |
+| `Esc` | Exit fullscreen / clear freeze ghost / close popover or palette | — |
+
+Rules: single-letter shortcuts are inert while a text field has focus; fullscreen uses
+the browser Fullscreen API (native `Esc` exit).
+
+## Display modes
+
+- **Prompt Bar**: always visible; `masked` → the pill shows "?" (black box),
+  `revealHidden` action to unveil.
+- **Drawer**: closed by default, state in the URL, controllable per preset.
+- **Teacher Mode**: scene-notes banner above the plot.
+- **Presentation Mode** (`L`): readable from the back of a lecture hall.
+- **Freeze frame** (`F`, `freeze` action): the current plot is pinned as a **gray
+  dashed ghost in the background**; any subsequent change (slider, draw) renders on
+  top in color. The pedagogical sequence question → prediction → observation →
+  explanation becomes one gesture: freeze, ask, move, compare. Re-freezing replaces
+  the ghost; `Esc` or `F` again clears it. Universal implementation: snapshot of the
+  rendered SVG (grayed DOM clone under the plot), which works for any view —
+  declarative or custom — without touching views or compute. The ghost is display
+  state, NOT in the URL (not link-reproducible, by design).
+- **Export**: SVG (source of truth), PNG 2×, PNG copy to clipboard.
+
+---
+
+# 4. Architecture
+
+## Contract: compute.js and observables
+
+```js
+/**
+ * PURE. Stateless, no UI dependency, no DOM access. Runs in a Web Worker.
+ * Deterministic at fixed seed. NO lifecycle (setup/reset/dispose): purity is what
+ * makes compute testable in Node, cacheable and transferable — an optional
+ * incremental step() contract may one day exist ALONGSIDE it, never instead of it.
+ * @param {object} params — values conforming to the manifest schema
+ * @returns {{ observables: Object }}
+ */
+export function compute(params) {
+  // ...
+  return {
+    observables: {
+      means: mFloat64,                        // inferred: vector
+      coverage: 0.948,                        // inferred: scalar
+      theoreticalDensity: { x, y },           // inferred: series
+      intervals: [{ lo, hi, ok }],            // inferred: records
+      meanHalfWidth: { value: 0.72,           // optional meta when useful
+                       meta: { label: 'mean half-width', precision: 2 } },
+    },
+  };
+}
+```
+
+Rules:
+- Every displayable quantity is a named observable; views and overlays reference them
+  by name and never compute anything scientific (pixel scaling: yes; variance: never).
+- Seeded RNG (`core/rng.js`, mulberry32) exclusively. Never `Math.random()`.
+- `Float64Array` vectorization in hot loops; no arrays of objects on hot paths.
+- Serializable data only (worker → UI transfer).
+
+## Core defaults (convention over configuration)
+
+To keep experiments minimal, the core applies these defaults; a manifest only writes
+what deviates. **These conventions are part of the core contract** (applied by the
+registry at load time):
+
+- **`seed` is injected** into every schema (`type: 'seed'`, default 42). Determinism
+  is a contract requirement, not an experiment choice — impossible to forget.
+- **`type: 'float'`** is the implicit param type.
+- **`actions`** defaults to `['randomizeSeed', 'freeze', 'resetDefaults']`.
+- **`groups`** absent → one flat group.
+- **`layout: 'plot'`** is implied when a view has a `plot` key.
+- **`scenes.js` is auto-discovered** by the registry (same glob as manifests) and
+  merged as `presets`. In a scene: `view` defaults to the first view, `drawer` to
+  `false`, `masked` to `[]`.
+- **`story`** absent → reserved extension point (state-machine lead noted in phase 5).
+- **Params are declared with field factories** from `core/fields.js` (Django-style):
+  `float`, `int`, `bool`, `select`, `log`, `readonly`. Factories return the plain
+  param objects the registry consumes, **validate at load time** (min < max, default
+  within bounds, select default present in options, sane step) and **throw named
+  errors** — a typo fails at first `npm run dev`, never silently in class.
+  **Three separate semantic keys, never concatenated in one string**:
+  `name` — the displayed symbol ('f', 'φ', 'N'; first positional argument, defaults
+  to the param key); `description` — what it is ('fréquence', 'phase'); `unit` —
+  'Hz', 'rad', 'dB'. Rendering: pills show `name = value unit`; the drawer shows
+  the name with the description as secondary text; the description also feeds the
+  tooltip. Every param has a `default` (no nullable fields: the URL contract and
+  resetDefaults require it); every other key is optional.
+- **Views are declared with factories** from `core/views.js`, mirroring the field
+  factories: `view(id, title, plotSpec)`, `custom(id, title, loader)`, and one
+  factory per graphic type — `histogram`, `line`, `scatter`, `bars`, `vline`,
+  `hline`, `density`, `band`. The same factory works as main plot or as overlay,
+  by position. Style keys are **flat** (`color`, `dashed`, `width` — no nested
+  `style` object), consistent with the field factories. Factories validate at load
+  time (known types, sane axes/scale/domain) and throw named errors; observable
+  `source` names, unknowable at load time, are cross-checked against the first
+  compute result in dev mode — a view referencing a missing observable warns
+  immediately instead of rendering an empty plot.
+- **`core/checks.js`** provides `standardChecks` factories (e.g.
+  `standardChecks.determinism(compute, params, observableName)`); the determinism
+  check is mandatory and scaffolded by default.
+
+## Contract: manifest.js (full-schema reference)
+
+This example deliberately exercises the whole schema (select, readonly, visibleIf,
+validate, derived, display, groups, custom view). For the minimal nominal case, see
+the sinusoid example further down.
+
+```js
+import { float, int, select, readonly } from '../../core/fields.js';
+import { view, custom, histogram, line, density, vline, hline } from '../../core/views.js';
+
+/** @type {import('../../core/types').ExperimentManifest} */
+export default {
+  id: 'confidence-intervals',
+  title: 'Intervalles de confiance',            // course language (French here)
+  subtitle: 'Couverture fréquentiste et largeur des IC',
+  tags: ['fréquentiste', 'IC', 'Student'],
+
+  params: {
+    mu:    float('μ', { description: 'moyenne vraie',       min: 0,    max: 10,  step: 0.1,  default: 5 }),
+    sigma: float('σ', { description: 'écart-type',          min: 0.5,  max: 5,   step: 0.1,  default: 2 }),
+    N:     int('N',   { description: "taille d'échantillon", min: 2,    max: 200, default: 30 }),
+    M:     int('M',   { description: "nombre d'IC",          min: 10,   max: 100, default: 40 }),
+    conf:  float('1−α', { description: 'niveau de confiance visé',
+                          min: 0.80, max: 0.99, step: 0.01, default: 0.95, precision: 2 }),
+    known: select('σ connue ?', { options: [
+              { value: false, label: 'non — IC de Student' },
+              { value: true,  label: 'oui — IC gaussien' }], default: false }),
+    dof:   readonly('ν', { description: 'degrés de liberté', visibleIf: { known: false } }),
+    // no seed here: injected by the core
+  },
+  // Factories: float, int, bool, select, log, readonly (+ seed, injected).
+  //  - first positional arg = name (displayed symbol; defaults to the param key)
+  //  - log: logarithmic slider — MANDATORY for any parameter spanning several
+  //    orders of magnitude (SNR in dB, probabilities 1e-6…1e-1).
+  //  - options, all optional except default: description, unit, min, max, step,
+  //    precision, visibleIf ({param: value} or {param: [values]} — evaluated by
+  //    the UI, never in views).
+
+  validate: [
+    { when: p => p.N < 2, message: 'N doit être ≥ 2' },        // course language
+    { when: p => p.M * p.N > 1e7, message: 'M×N trop grand pour rester fluide' },
+  ],
+  // An invalid state blocks computation (not input) and shows the message.
+
+  derived: {
+    meanVariance: { label: 'σ²/N', calc: p => (p.sigma ** 2 / p.N).toFixed(3) },
+  },
+  // Drawer convenience quantities — simple UI-side arithmetic, never serious
+  // statistics.
+
+  groups: [
+    { title: 'Modèle',          params: ['mu', 'sigma', 'known', 'dof'] },
+    { title: 'Échantillonnage', params: ['N', 'M', 'conf'] },
+  ],
+
+  // actions omitted → core default [randomizeSeed, freeze, resetDefaults].
+  // Experiments may later declare their own actions { id, label, run } —
+  // extension point, no dedicated infrastructure before need.
+
+  views: [
+    // CUSTOM view: the M stacked segments fit no generic type.
+    custom('realizations', 'Réalisations', () => import('./views/Realizations.svelte')),
+
+    view('distribution', 'Distribution de x̄',
+      histogram('means', {
+        overlays: [
+          density('theoreticalDensity', { color: '#D95319' }),
+          vline('mu', { color: '#EDB120', dashed: true, label: 'μ' }),
+        ],
+        axes: { x: 'x̄', y: 'fréquence' },
+      })),
+
+    view('coverage', 'Couverture vs N',
+      line('coverageVsN', {
+        overlays: [hline(p => p.conf, { dashed: true, label: '1−α' })],
+        axes: { x: 'N', y: 'couverture empirique' },
+      })),
+  ],
+  // Factories: view(id, title, plotSpec) / custom(id, title, loader).
+  // Plot & overlay factories (same factory, main or overlay by position):
+  // histogram, line, scatter, bars, vline, hline, density, band — first arg is
+  // the observable source (or a param name / p => fn for vline/hline), flat
+  // style keys (color, dashed, width, opacity, label).
+  //
+  // Axes: string shorthand = label with linear scale. Object form for anything
+  // else: { label, scale: 'linear'|'log', unit, format, domain: [min, max] }.
+  // Example (a phase-2 BER curve):
+  //   axes: { x: { label: 'SNR', unit: 'dB' },
+  //           y: { label: 'BER', scale: 'log', domain: [1e-6, 1] } }
+  // ViewHost maps scale to core/scales.js (d3 scaleLinear/scaleLog) — log axes
+  // get proper decade ticks and SI formatting for free.
+  //
+  // RULE: declarative first. A custom view must be justified in a comment.
+  // A custom pattern repeated twice becomes a generic type in ui/plots/.
+
+  // No `presets` here: lecture scenes live in scenes.js, auto-discovered by the
+  // registry and merged into the manifest. No `story` either (absent = reserved
+  // extension point, no engine implemented).
+};
+```
+
+## Contract: scenes.js — the lecture script
+
+Separated from the manifest because it has a different edit rhythm: this is the file
+reopened the night before class, and the file a colleague adapts to their own lecture
+while keeping manifest and compute untouched.
+
+```js
+// experiments/stats/confidence-intervals/scenes.js
+// Auto-discovered by the registry. Defaults: view = first view, drawer = false.
+export default [
+  {
+    id: 'scene-1', title: 'Tout va bien (N=30)',
+    params: { N: 30, conf: 0.95 },
+    visible: ['N', 'conf'],    // Prompt Bar pills
+    masked: [],                 // black box: pill shows "?", revealHidden action
+    notes: `Question à poser AVANT de bouger N :
+« Si je passe N de 30 à 200, la couverture change-t-elle ? »
+Réponse attendue fausse : "elle augmente". Montrer que seule la largeur diminue.`,
+  },
+  {
+    id: 'scene-2', title: 'Niveau α = 0.20',
+    params: { conf: 0.80 },
+    visible: ['conf'],
+    notes: `Faire compter les intervalles rouges à voix haute (~1 sur 5).`,
+  },
+];
+// notes: Teacher Mode only. Never projected by default, never in the URL.
+```
+
+## Contract: check.js — numerical correctness harness
+
+```js
+import { compute } from './compute.js';
+export const checks = [
+  {
+    name: 'empirical coverage ≈ 1−α (σ known)',
+    category: 'statistical',       // numeric | statistical | performance
+    run() {
+      const { observables: o } = compute({ mu: 5, sigma: 2, N: 30, M: 10000,
+                                           conf: 0.95, known: true, seed: 1 });
+      return { ok: Math.abs(o.coverage - 0.95) < 0.01,
+               detail: `cov=${o.coverage.toFixed(4)}` };
+    },
+  },
+];
+```
+
+`npm run check` walks every `experiments/**/check.js`, prints a ✓/✗ table grouped by
+category, plus each check's execution time (performance-regression detection with no
+dedicated benchmark infrastructure).
+**No experiment is done without `numeric` or `statistical` checks.** UI code can be
+wrong without consequence; a wrong formula projected in a lecture hall is
+unacceptable.
+
+## State & URL
+
+Format: `#/{subject}/{experiment}?param1=…&view=…&drawer=0&preset=scene-2`
+- Minimal serialization: only params ≠ default appear.
+- `router.js`: single source of truth for state↔URL (bidirectional, replaceState
+  while dragging, pushState on release).
+- The seed is part of the state: `randomizeSeed` increments it, so the URL stays
+  reproducible after every draw.
+- Teacher `notes` never travel through the URL.
+- **Strict casting on decode**: everything in a URL is a string; `router.js` converts
+  according to the manifest type (`float` → parseFloat, `int` → parseInt, `bool` →
+  `=== 'true'`, `select` → validated against `options`). An out-of-bounds or
+  unparsable value **silently falls back to the default** — a hand-edited or
+  truncated URL must never produce an invalid state or a crash.
+- **Readable format**: multiple values comma-separated (`?v=1,2,3`), never unreadable
+  `%20`/`%22` escapes. The URL is meant to be read, written on a whiteboard, and
+  edited by hand.
+
+## Generic graphic components
+
+Shared SVG primitives: `Axes`, `Histogram`, `Line`, `Scatter`, `Bars` + overlays
+`VLine`, `HLine`, `Density`, `Band`. All accept ready-made observables and style
+options; none computes anything scientific. `ViewHost` interprets
+`{layout, plot, overlays}` and composes these primitives.
+
+**Scales (`core/scales.js`).** A thin wrapper re-exporting the project's configured
+d3 primitives: `scaleLinear`, `scaleLog` (phase-2 SNR), `ticks`, `bin`, `line`/`area`
+path generators, and a `format` preset (SI units, fixed precision). All `ui/plots/`
+primitives AND custom views import from THIS module, never from d3 directly — one
+import point, one place to configure defaults, and pixel scaling remains the only
+"computation" allowed in a view.
+
+## Lecture guard — live robustness
+
+A slider pushed to an extreme in front of 200 students must never freeze the screen
+or crash the app. The `worker-host` applies three protections:
+
+1. **Computation status.** Any task exceeding ~100 ms switches the statline to
+   `status: 'computing'` (discreet indicator, no full-screen spinner); the last valid
+   result stays displayed meanwhile.
+2. **Timeout and resurrection.** Beyond 1.5 s, the worker-host kills the worker
+   (`worker.terminate()`), spawns a clean one, restores the last valid params and
+   shows in the statline: `⚠ Computation aborted — values too large`. The lecture
+   goes on; the manifest's `validate` rules remain the first line of defense (M×N
+   bounds), the timeout is the safety net.
+3. **Graceful errors.** `compute.worker.js` wraps every compute execution in a
+   generic try/catch: any exception (division by zero, invalid bounds in a custom
+   compute) surfaces as `status: 'error'` and renders `⚠ Computation error` on the
+   PlotFrame — never a silent crash, never a white screen.
+
+## Canonical minimal experiment: the sinusoid
+
+The floor of the contract — a complete experiment in ~90 lines, four files, zero UI
+code. This is the reference for the README, the "write your experiment in 30 minutes"
+tutorial, and the scaffold templates. Every remaining line is a decision.
+
+```js
+// experiments/signal/sinusoid/manifest.js
+// Core defaults apply: seed injected, default actions, single flat group,
+// scenes.js auto-discovered, layout 'plot' implied.
+import { float } from '../../core/fields.js';
+import { view, line } from '../../core/views.js';
+
+/** @type {import('../../core/types').ExperimentManifest} */
+export default {
+  id: 'sinusoid',
+  title: 'La sinusoïde',
+  subtitle: 'Amplitude, fréquence, phase — et un peu de bruit',
+  tags: ['signal', 'sinusoïde', 'fondamentaux'],
+
+  params: {
+    A:     float('A', { description: 'amplitude', min: 0,     max: 2,    step: 0.05, default: 1 }),
+    f:     float('f', { description: 'fréquence', min: 0.5,   max: 20,   step: 0.1,  default: 3,
+                        unit: 'Hz', precision: 1 }),
+    phi:   float('φ', { description: 'phase',     min: -3.14, max: 3.14, step: 0.01, default: 0,
+                        unit: 'rad', precision: 2 }),
+    sigma: float('σ', { description: 'bruit',     min: 0,     max: 1,    step: 0.02, default: 0 }),
+  },
+
+  views: [
+    view('time', 'Temporel',
+      line('noisy', {
+        overlays: [line('clean', { color: '#D95319', width: 2 })],
+        axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
+      })),
+  ],
+};
+```
+
+```js
+// experiments/signal/sinusoid/scenes.js
+export default [
+  {
+    id: 'phase', title: 'Scène 1 · La phase, ça décale',
+    params: { A: 1, f: 3, phi: 0, sigma: 0 },
+    visible: ['phi'],
+    notes: `Un seul potard : φ. Geler (F) à φ=0, puis tourner.
+Question : « φ = π/2, j'obtiens quelle courbe connue ? »
+Le fantôme gris montre le sinus d'origine, le cosinus se superpose.`,
+  },
+  {
+    id: 'noise', title: 'Scène 2 · Le signal dans le bruit',
+    params: { A: 1, f: 3, phi: 0, sigma: 0.5 },
+    visible: ['sigma', 'A'],
+    notes: `Marteler R : le bruit change, la sinusoïde rouge reste.
+Monter σ jusqu'à ce que l'œil perde le signal (~σ = A).
+Teaser : « et pourtant, on peut retrouver A, f, φ exactement —
+c'est tout le programme du semestre. »`,
+  },
+];
+```
+
+```js
+// experiments/signal/sinusoid/compute.js
+import { mulberry32, gaussFrom } from '../../core/rng.js';
+
+const FS = 200;   // sampling rate (Hz)
+const T = 2;      // duration (s)
+
+/** PURE, stateless, seeded. `seed` is injected by the core. */
+export function compute({ A, f, phi, sigma, seed }) {
+  const gauss = gaussFrom(mulberry32(seed));
+  const n = FS * T;
+  const t = new Float64Array(n);
+  const clean = new Float64Array(n);
+  const noisy = new Float64Array(n);
+
+  for (let i = 0; i < n; i++) {
+    t[i] = i / FS;
+    clean[i] = A * Math.sin(2 * Math.PI * f * t[i] + phi);
+    noisy[i] = clean[i] + sigma * gauss();
+  }
+
+  return {
+    observables: {
+      clean: { x: t, y: clean },
+      noisy: { x: t, y: noisy },
+      snrDb: {
+        value: sigma > 0 ? 10 * Math.log10((A * A / 2) / (sigma * sigma)) : Infinity,
+        meta: { label: 'SNR', unit: 'dB', precision: 1 },
+      },
+    },
+  };
+}
+```
+
+```js
+// experiments/signal/sinusoid/check.js
+import { compute } from './compute.js';
+import { standardChecks } from '../../core/checks.js';
+
+export const checks = [
+  {
+    name: 'clean sinusoid: exact value at known points',
+    category: 'numeric',
+    run() {
+      const { observables: o } = compute({ A: 2, f: 1, phi: 0, sigma: 0, seed: 1 });
+      // f=1 Hz, FS=200: sample 50 is t=0.25 s → sin(π/2) → A
+      const v = o.clean.y[50];
+      return { ok: Math.abs(v - 2) < 1e-12, detail: `x(0.25)=${v}` };
+    },
+  },
+  {
+    name: 'noise power ≈ σ² (large-sample)',
+    category: 'statistical',
+    run() {
+      const { observables: o } = compute({ A: 0, f: 1, phi: 0, sigma: 0.7, seed: 2 });
+      const y = o.noisy.y;
+      const p = y.reduce((a, b) => a + b * b, 0) / y.length;
+      return { ok: Math.abs(p - 0.49) < 0.05, detail: `power=${p.toFixed(4)}` };
+    },
+  },
+  standardChecks.determinism(compute,
+    { A: 1, f: 3, phi: 1, sigma: 0.5, seed: 7 }, 'noisy'),
+];
+// Note for deterministic signals: assert exact known values (1e-12), not
+// statistical tolerances — those are for stochastic observables only.
+```
+
+## Scaffold
+
+`npm run new:experiment` (interactive Node script, ~100 lines, no heavy deps):
+1. Questions: subject (existing + "new"), id, title, template.
+2. Templates: `monte-carlo` (M/N/seed params, wired histogram view) and
+   `parametric-curve` (parameter sweep, line view).
+3. Writes the four files: a pre-filled `manifest.js` (params, declarative view),
+   a `scenes.js` with one example scene (pills + notes), a `compute.js` returning
+   functional dummy observables, and a `check.js` that includes the mandatory
+   `standardChecks.determinism` plus one trivial passing test.
+4. **Criterion: the experiment appears in the sidebar and runs immediately**, before
+   any domain code. The scaffold modifies no existing file.
+
+`npm run new:subject`: creates the directory + `_subject.js`.
+
+---
+
+# 5. Implementation
+
+## Stack
+
+- **Svelte 5** (runes: `$state`, `$derived`, `$effect`) + **Vite**. No SvelteKit
+  (pure static, hash routing suffices).
+- **d3 (math & layout modules) + SVG rendered by Svelte** — the standard d3+Svelte
+  integration pattern: d3 computes (scales, ticks, path strings, formats,
+  histogram bins), Svelte renders the SVG from state. Assumed modules: `d3-scale`,
+  `d3-array`, `d3-shape`, `d3-format`, `d3-interpolate` — imported piecemeal, never
+  the full `d3` bundle. `d3-selection` (and any DOM-manipulating module) is not
+  used: Svelte owns the DOM, and both the freeze-frame snapshot and SVG export rely
+  on the SVG being a pure function of state. No high-level charting library
+  (Plotly, ECharts…) on top.
+- **Web Workers**: a generic worker dynamically imports the requested `compute.js`;
+  30 Hz throttling while dragging.
+- Typed JSDoc on the contracts.
+- Type: IBM Plex Sans (UI) / IBM Plex Mono (data). System fallback.
+- **MATLAB plot palette**: `#0072BD`, `#D95319`, `#EDB120`, `#7E2F8E`, `#77AC30`.
+  UI accent: `#0e7c86`.
+
+## Directory layout
+
+```
+/
+├── CLAUDE.md
+├── package.json
+├── vite.config.js
+├── scripts/
+│   └── new-experiment.js
+├── src/
+│   ├── main.js
+│   ├── App.svelte
+│   ├── core/
+│   │   ├── registry.js           # glob over manifests + scenes, applies core defaults
+│   │   ├── router.js             # hash routing + strict-cast state↔URL
+│   │   ├── store.svelte.js       # global reactive state (runes)
+│   │   ├── rng.js                # mulberry32 — the ONLY allowed generator
+│   │   ├── actions.js            # core action registry
+│   │   ├── observables.js        # type inference + meta
+│   │   ├── scales.js             # thin wrapper over d3-scale/array/shape/format
+│   │   ├── fields.js             # field factories (float, int, select…) + load-time validation
+│   │   ├── views.js              # view/plot/overlay factories + load-time validation
+│   │   ├── checks.js             # standardChecks factories (determinism…)
+│   │   ├── strings.js            # all core UI strings (English constants)
+│   │   ├── worker-host.js        # worker + 30 Hz throttle + lecture guard
+│   │   └── compute.worker.js
+│   ├── ui/
+│   │   ├── Sidebar.svelte
+│   │   ├── CommandPalette.svelte
+│   │   ├── Header.svelte         # breadcrumb + preset selector + actions
+│   │   ├── Workspace.svelte      # composes: TeacherBanner, Tabs, ViewHost,
+│   │   │                         #   PlotFrame, PromptBar
+│   │   ├── DrawerParams.svelte
+│   │   ├── Inspector.svelte      # developer panel (raw observables)
+│   │   └── plots/
+│   └── experiments/
+│       ├── stats/
+│       │   ├── _subject.js       # { title: 'Statistiques & Estimation', order: 1 }
+│       │   └── confidence-intervals/
+│       │       ├── manifest.js   # definition (stable)
+│       │       ├── scenes.js     # lecture script (edited before each class)
+│       │       ├── compute.js    # the science
+│       │       ├── check.js      # the harness
+│       │       └── views/        # custom views only
+│       ├── signal/
+│       │   └── sinusoid/         # canonical minimal experiment (see § above)
+│       ├── detection/
+│       └── comm/
+└── tests/                        # optional — the main harness is check.js
+```
+
+## Conventions
+
+- **Code, UI chrome, comments, commit messages: English.** Pedagogical content
+  (labels, titles, notes, validation messages) lives in manifests, in the course
+  language.
+- Commits: prefixes `core:`, `exp(confidence-intervals):`, `ui:`, `scaffold:`,
+  `check:`.
+- After any new experiment or compute change: `npm run check`.
+- **Declarative first**; custom justified in a comment; repeated pattern → promoted.
+- **Never a modal for parameters**; non-modal popovers, plot always visible.
+- No runtime dependency without written justification in the commit (light, durable
+  bundle). Assumed dependencies: Svelte, and the d3 math/layout modules listed in
+  the Stack section — always imported piecemeal (`import { scaleLinear } from
+  'd3-scale'`), never the full `d3` bundle, and always consumed through
+  `core/scales.js`. `d3-selection` and any DOM-manipulating d3 module remain
+  excluded: Svelte owns the DOM (freeze-frame and SVG export depend on it).
+- localStorage: cosmetic preferences only (theme, sidebar, teacher mode) — never
+  experiment state, which lives in the URL.
+- Responsive (sidebar as mobile drawer, adapted Prompt Bar); baseline accessibility
+  (visible focus, `prefers-reduced-motion`, AA contrast).
+
+## Development phases
+
+1. **Core + chatbot UX**: full core (registry, router with strict casting, store,
+   rng, actions, observables, scales, worker-host with **lecture guard**: status,
+   1.5 s timeout + resurrection, try/catch), Sidebar, Header with preset selector,
+   Workspace (Tabs, ViewHost, PlotFrame, PromptBar with non-modal popovers and
+   actions, TeacherBanner), generated DrawerParams (visibleIf, validate, derived,
+   display), generic plots + overlays. Full validation on
+   `stats/confidence-intervals`.
+2. **Trial by fire**: `detection/neyman-pearson` (`log` param for SNR,
+   densities+threshold / ROC / Pd vs SNR) to stress-test and **lock the manifest
+   schema**. No other experiment before this lock.
+3. **Lecture polish**: CommandPalette, full shortcuts, Presentation Mode, Teacher
+   Mode, **freeze frame (F)**, Inspector, exports (SVG, PNG, clipboard), scaffold.
+4. **Catalog**: histogram/density, LLN-CLT, bias/variance, MLE, CRB vs MLE, then
+   digital communications.
+5. **Extension points** (nothing implemented before a concrete need — principle 7):
+   story engine (lead: state machine whose transitions trigger
+   animation/panel/note/view change), incremental `step()` contract + recorders
+   (continuous drawing, LMS, PLL, Kalman), WebRTC remote control (PeerJS),
+   QR-code prediction voting, **MIDI CC mapping of visible pills (Web MIDI API:
+   scene presets map pills to fixed CCs — no MIDI-learn needed; soft takeover for
+   absolute encoders; buttons bound to actions randomizeSeed/freeze/prev-next
+   preset; Launch Control XL as reference device; Chrome/Edge only, fine for
+   projection)**, parameter animations, sharedState between side-by-side
+   views, a Figure abstraction if layouts prove insufficient, annotation overlay,
+   config timeline, CSV/JSON export, compute cache, experiment-defined actions.
