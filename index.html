@@ -12,31 +12,32 @@
   <body>
     <div id="app"></div>
     <script>
-      // Startup watchdog (plain ES5, runs everywhere): if the app bundle
-      // fails to execute — stale cached page referencing replaced assets,
-      // or a script error on this browser — never leave a blank page:
-      // show what happened and offer a reload.
+      // Compatibility polyfills for older classroom tablets (plain ES5).
+      // Svelte 5 needs structuredClone (Safari 15.4+), queueMicrotask
+      // (Safari 12.1+) and globalThis (Safari 12.1+).
+      window.globalThis || (window.globalThis = window);
+      window.queueMicrotask ||
+        (window.queueMicrotask = function (cb) {
+          Promise.resolve().then(cb);
+        });
+      window.structuredClone ||
+        (window.structuredClone = function (v) {
+          // plain-data fallback — sufficient for the app's param snapshots
+          return v === undefined ? v : JSON.parse(JSON.stringify(v));
+        });
+
+      // Startup watchdog (plain ES5, runs everywhere): never leave a blank
+      // page. Errors render immediately; a 4 s timer covers silent failures.
       (function () {
         var errors = [];
-        window.addEventListener(
-          'error',
-          function (e) {
-            var target = e.target || {};
-            errors.push(e.message || target.src || target.href || 'resource failed to load');
-          },
-          true
-        );
-        window.addEventListener('unhandledrejection', function (e) {
-          errors.push((e.reason && e.reason.message) || String(e.reason));
-        });
-        setTimeout(function () {
+        function render() {
           var app = document.getElementById('app');
           if (!app || app.children.length > 0) return;
           app.innerHTML =
             '<div style="font-family:system-ui,sans-serif;max-width:560px;margin:15vh auto;padding:0 20px;color:#18181b">' +
             '<h1 style="font-size:18px">Custom Lab failed to start</h1>' +
             '<p style="color:#52525b;font-size:14px">The application script did not run. ' +
-            'This usually means a cached page is pointing at outdated files after a deployment.</p>' +
+            'This usually means an unsupported browser feature or a cached page pointing at outdated files.</p>' +
             '<p><button onclick="location.reload()" style="padding:9px 16px;border:1px solid #18181b;' +
             'border-radius:8px;background:#18181b;color:#fff;font-size:14px;cursor:pointer">Reload</button></p>' +
             (errors.length
@@ -46,9 +47,34 @@
                 '</pre>'
               : '') +
             '</div>';
-        }, 4000);
+        }
+        window.__bootReport = function (msg) {
+          errors.push(String(msg));
+          render();
+        };
+        window.addEventListener(
+          'error',
+          function (e) {
+            var target = e.target || {};
+            window.__bootReport(
+              e.message || target.src || target.href || 'resource failed to load'
+            );
+          },
+          true
+        );
+        window.addEventListener('unhandledrejection', function (e) {
+          window.__bootReport((e.reason && e.reason.message) || String(e.reason));
+        });
+        setTimeout(render, 4000);
       })();
     </script>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module">
+      // Boot through a dynamic import so ANY failure of the module graph
+      // (fetch, parse, evaluation) is caught and displayed — Safari mutes
+      // module-script errors from window.onerror.
+      import('/src/main.js').catch(function (e) {
+        window.__bootReport(e && e.name ? e.name + ': ' + e.message : e);
+      });
+    </script>
   </body>
 </html>
