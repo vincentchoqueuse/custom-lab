@@ -50,6 +50,7 @@
         }
         window.__bootReport = function (msg) {
           errors.push(String(msg));
+          errors.length === 1 && errors.push('UA: ' + navigator.userAgent);
           render();
         };
         window.addEventListener(
@@ -68,13 +69,6 @@
         setTimeout(render, 4000);
       })();
     </script>
-    <script type="module">
-      // Boot through a dynamic import so ANY failure of the module graph
-      // (fetch, parse, evaluation) is caught and displayed — Safari mutes
-      // module-script errors from window.onerror.
-      import('/src/main.js').catch(function (e) {
-        window.__bootReport(e && e.name ? e.name + ': ' + e.message : e);
-      });
-    </script>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>

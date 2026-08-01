@@ -8,6 +8,11 @@
 //   3. exceptions inside compute surface as status 'error' (see worker).
 
 import { STR } from './strings.js';
+// Vite inline-worker import: the worker ships as a Blob inside the bundle.
+// Required for the legacy-only (SystemJS) build, which would otherwise drop
+// the separate worker asset emitted by the modern pass; Blob classic workers
+// also run on every old Safari. Dev gets a module worker automatically.
+import ComputeWorker from './compute.worker.js?worker&inline';
 
 const THROTTLE_MS = 33; // ≈ 30 Hz
 const COMPUTING_MS = 100;
@@ -25,12 +30,7 @@ let timeoutTimer = null;
 let lastValid = null; // {expKey, params} of the last successful compute
 
 function spawn() {
-  // dev: Vite serves the worker as an ES module; build: classic iife bundle
-  // (module workers require Safari 15+, too recent for classroom tablets)
-  worker = new Worker(
-    new URL('./compute.worker.js', import.meta.url),
-    import.meta.env.DEV ? { type: 'module' } : undefined
-  );
+  worker = new ComputeWorker();
   worker.onmessage = onMessage;
 }
 
