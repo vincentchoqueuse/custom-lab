@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "node scripts/run-checks.js"
+    "check": "node scripts/run-checks.js",
+    "new:experiment": "node scripts/new-experiment.js",
+    "new:subject": "node scripts/new-subject.js"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.2.5",

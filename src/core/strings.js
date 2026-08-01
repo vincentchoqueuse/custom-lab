@@ -12,6 +12,8 @@ export const STR = {
   ACTION_DRAW: 'Draw',
   ACTION_RESET: 'Reset',
   ACTION_REVEAL: 'Reveal',
+  ACTION_FREEZE: 'Freeze',
+  FROZEN: 'frozen',
   COPY_LINK: 'Copy link',
   COPIED: 'Copied!',
   PRESENTATION: 'Presentation mode',

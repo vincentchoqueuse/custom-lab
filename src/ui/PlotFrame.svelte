@@ -1,12 +1,23 @@
 <script>
   // The plot card: SVG view + statline (key scalar observables, computation
   // status) + export (SVG source of truth, PNG 2×, PNG to clipboard).
-  import { app } from '../core/store.svelte.js';
+  import { onMount } from 'svelte';
+  import { app, registerGhostCapturer } from '../core/store.svelte.js';
   import { STR } from '../core/strings.js';
   import { formatValue } from '../core/scales.js';
   import ViewHost from './ViewHost.svelte';
+  import Icon from './Icon.svelte';
 
   let frameEl = $state(null);
+
+  // the LIVE svg is a direct child of .plot-area (the ghost's clone is not)
+  const liveSvg = () => frameEl?.querySelector('.plot-area > svg.plot-svg');
+
+  onMount(() => {
+    // freeze-frame: hand the store a way to snapshot the rendered SVG —
+    // works for any view, declarative or custom, without touching them
+    registerGhostCapturer(() => liveSvg()?.outerHTML ?? null);
+  });
 
   const obs = $derived(app.result.observables);
   const status = $derived(app.result.status);
@@ -24,7 +35,7 @@
   /* ---------- export ------------------------------------------------------ */
 
   function svgSource() {
-    const svg = frameEl?.querySelector('svg.plot-svg');
+    const svg = liveSvg();
     if (!svg) return null;
     const vb = svg.viewBox.baseVal;
     const clone = svg.cloneNode(true);
@@ -95,6 +106,10 @@
 
 <div class="plot-card" bind:this={frameEl}>
   <div class="plot-area">
+    {#if app.ghost}
+      <!-- freeze-frame ghost: grayed dashed snapshot UNDER the live plot -->
+      <div class="plot-ghost" aria-hidden="true">{@html app.ghost}</div>
+    {/if}
     {#if obs}
       <ViewHost />
     {:else if status === 'error' || status === 'invalid'}
@@ -110,6 +125,9 @@
     <span class="stats mono">
       {scalars.map(statText).join('  ·  ')}
     </span>
+    {#if app.ghost}
+      <span class="frozen-chip"><Icon name="snowflake" size={12} /> {STR.FROZEN}</span>
+    {/if}
     {#if status === 'computing'}
       <span class="status computing">{STR.COMPUTING}</span>
     {:else if status === 'aborted' || app.notice}

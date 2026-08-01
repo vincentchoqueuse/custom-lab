@@ -15,6 +15,9 @@ export const app = $state({
   revealed: false, // revealHidden action state (per-scene black box)
   result: { status: 'idle', observables: null, message: '' },
   notice: '', // sticky lecture-guard message, cleared on next user change
+  // freeze-frame ghost: SVG snapshot markup, or null. Display state ONLY —
+  // never serialized in the URL (not link-reproducible, by design).
+  ghost: null,
   ui: {
     sidebar: true,
     theme: 'light',
@@ -27,6 +30,14 @@ export const app = $state({
 
 let lastWritten = null;
 let dragStartHash = null;
+
+// The ghost needs the rendered SVG at freeze time; DOM access belongs to the
+// UI, so PlotFrame registers a capturer and the freeze action calls it.
+let ghostCapturer = null;
+
+export function registerGhostCapturer(fn) {
+  ghostCapturer = fn;
+}
 
 /* ---------- derived accessors (plain functions: they read reactive state) */
 
@@ -130,6 +141,7 @@ function handleHash() {
   app.drawer = dec.drawer ?? scene?.drawer ?? false;
   app.revealed = false;
   app.notice = '';
+  app.ghost = null;
   app.result = { status: 'idle', observables: null, message: '' };
   syncUrl(false); // normalize whatever was typed by hand
 }
@@ -193,6 +205,7 @@ export function stepPreset(dir) {
 
 export function setView(id) {
   app.view = id;
+  app.ghost = null; // a ghost from another view would be a misleading overlay
   syncUrl(true);
 }
 
@@ -214,6 +227,9 @@ const actionApi = {
   },
   reveal: () => {
     app.revealed = true;
+  },
+  toggleFreeze: () => {
+    app.ghost = app.ghost ? null : (ghostCapturer?.() ?? null);
   },
 };
 

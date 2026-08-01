@@ -22,6 +22,8 @@
     check: '<path d="M20 6 9 17l-5-5"/>',
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+    snowflake:
+      '<line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/>',
     download:
       '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
   };

@@ -130,6 +130,10 @@
       case 'R':
         runAction('randomizeSeed');
         break;
+      case 'f':
+      case 'F':
+        runAction('freeze');
+        break;
       case 'l':
       case 'L':
         togglePresentation();
@@ -144,6 +148,7 @@
         // popovers and the palette close themselves; fullscreen exits natively
         if (app.ui.palette) app.ui.palette = false;
         else if (app.ui.inspector) app.ui.inspector = false;
+        else if (app.ghost) app.ghost = null; // clear the freeze ghost
         break;
     }
   }
