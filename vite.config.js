@@ -10,7 +10,12 @@ export default defineConfig({
     target: ['es2018', 'safari13'],
   },
   worker: {
-    // The compute worker uses import.meta.glob dynamic imports — requires ES format.
-    format: 'es',
+    // Classic (iife) worker: module workers require Safari 15+, too recent
+    // for classroom tablets. The compute glob's dynamic imports are inlined
+    // into the single worker bundle.
+    format: 'iife',
+    rollupOptions: {
+      output: { inlineDynamicImports: true },
+    },
   },
 });

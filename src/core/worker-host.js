@@ -25,7 +25,12 @@ let timeoutTimer = null;
 let lastValid = null; // {expKey, params} of the last successful compute
 
 function spawn() {
-  worker = new Worker(new URL('./compute.worker.js', import.meta.url), { type: 'module' });
+  // dev: Vite serves the worker as an ES module; build: classic iife bundle
+  // (module workers require Safari 15+, too recent for classroom tablets)
+  worker = new Worker(
+    new URL('./compute.worker.js', import.meta.url),
+    import.meta.env.DEV ? { type: 'module' } : undefined
+  );
   worker.onmessage = onMessage;
 }
 
