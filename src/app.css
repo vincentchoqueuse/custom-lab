@@ -196,7 +196,7 @@ kbd {
 }
 
 /* section labels, ChatGPT/Open WebUI style: small, sentence case, muted —
-   the collapse chevron only appears on hover */
+   the +/− collapse indicator only appears on hover */
 .sidebar .subject-title {
   font-size: 12px;
   font-weight: 600;
@@ -213,7 +213,9 @@ kbd {
 .sidebar .subject-title .chev {
   opacity: 0;
   color: var(--muted-fg);
-  font-size: 10px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
   transition: opacity var(--t);
 }
 
@@ -719,24 +721,6 @@ kbd {
 .action-btn.on {
   border-color: var(--ring);
   box-shadow: 0 0 0 3px var(--ring-soft);
-}
-
-/* primary action (Draw) — shadcn default/primary button */
-.action-btn.primary {
-  background: var(--primary);
-  color: var(--primary-fg);
-  border-color: var(--primary);
-}
-
-.action-btn.primary:hover {
-  opacity: 0.9;
-}
-
-.action-btn.primary kbd {
-  background: transparent;
-  border-color: currentColor;
-  color: inherit;
-  opacity: 0.6;
 }
 
 /* non-modal popover: opens above the pill, plot stays fully visible */

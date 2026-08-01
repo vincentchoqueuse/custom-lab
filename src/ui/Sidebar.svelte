@@ -38,7 +38,7 @@
     {#each subjects as subject (subject.id)}
       <button class="subject-title" onclick={() => toggleSubject(subject.id)}>
         <span>{subject.title}</span>
-        <span class="chev">{collapsed[subject.id] ? '▸' : '▾'}</span>
+        <span class="chev">{collapsed[subject.id] ? '+' : '−'}</span>
       </button>
       {#if !collapsed[subject.id]}
         {#each subject.experiments as exp (exp.key)}
