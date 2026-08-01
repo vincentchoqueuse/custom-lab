@@ -143,8 +143,9 @@ in the course language; the chrome — Parameters, Draw, Presets, Search… — 
 
 ## Interface components
 
-**Left sidebar (Open WebUI style).** Dark (`#1b1f27`), ~260 px, collapsible (`⌘B`),
-rounded items, soft hover, active item in solid accent. Top button: "Search
+**Left sidebar (Open WebUI style).** Theme-aware neutral (`#f9f9f9` light /
+`#171717` dark), ~260 px, collapsible (`⌘B`), rounded items, soft gray hover,
+active item in neutral gray (never a color accent). Top button: "Search
 experiments" (`⌘K`). Tree: subjects (uppercase mono, collapsible) → experiments.
 Footer: light/dark theme toggle for the central area, Teacher Mode button (🗒).
 
@@ -654,8 +655,14 @@ export const checks = [
   30 Hz throttling while dragging.
 - Typed JSDoc on the contracts.
 - Type: IBM Plex Sans (UI) / IBM Plex Mono (data). System fallback.
-- **MATLAB plot palette**: `#0072BD`, `#D95319`, `#EDB120`, `#7E2F8E`, `#77AC30`.
-  UI accent: `#0e7c86`.
+- **MATLAB plot palette**: `#0072BD`, `#D95319`, `#EDB120`, `#7E2F8E`, `#77AC30`
+  — reserved for data marks inside plots.
+- **UI chrome: shadcn/ui design language.** Neutral white/black/zinc palette
+  only (shadcn zinc tokens: background/foreground, muted `#f4f4f5`/`#71717a`,
+  border `#e4e4e7`, primary `#18181b`; dark equivalents). Outline buttons with
+  subtle shadow, primary action in near-black, lucide-style inline SVG icons —
+  no emojis in the chrome, no color accent. The UI must read as an Open WebUI /
+  shadcn application.
 
 ## Directory layout
 
@@ -674,6 +681,11 @@ export const checks = [
 │   │   ├── router.js             # hash routing + strict-cast state↔URL
 │   │   ├── store.svelte.js       # global reactive state (runes)
 │   │   ├── rng.js                # mulberry32 — the ONLY allowed generator
+│   │   ├── numeric.js            # shared pure math (normalPdf, erf, quantiles,
+│   │   │                         #   Student t, trapz, small linear solver) —
+│   │   │                         #   importable from compute.js and check.js
+│   │   ├── laws.js               # canonical sampling laws (draw + exact moments)
+│   │   ├── prefs.js              # cosmetic localStorage prefs (single owner)
 │   │   ├── actions.js            # core action registry
 │   │   ├── observables.js        # type inference + meta
 │   │   ├── scales.js             # thin wrapper over d3-scale/array/shape/format

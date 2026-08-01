@@ -1,0 +1,22 @@
+// Cosmetic preferences (theme, sidebar, teacher mode) persisted in
+// localStorage — NEVER experiment state, which lives in the URL.
+// Single owner of the storage keys and of the private-mode try/catch.
+
+const key = (name) => `enib-lab:${name}`;
+
+/** @returns {string|null} */
+export function readPref(name) {
+  try {
+    return localStorage.getItem(key(name));
+  } catch {
+    return null; // private mode / storage disabled: defaults apply
+  }
+}
+
+export function writePref(name, value) {
+  try {
+    localStorage.setItem(key(name), value);
+  } catch {
+    /* private mode: preference simply not persisted */
+  }
+}
