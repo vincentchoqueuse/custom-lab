@@ -3,12 +3,13 @@
 // the exact moments of both variables, and N transformed realizations.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
+import { normalPdf } from '../../../core/numeric.js';
 
 // Canonical base laws (fixed parameters — a and b do the transforming).
 const LAWS = {
   gaussian: {
     range: [-4, 4],
-    pdf: (x) => Math.exp(-(x * x) / 2) / Math.sqrt(2 * Math.PI),
+    pdf: (x) => normalPdf(x),
     sample: (rand, gauss) => gauss(),
     mean: 0,
     variance: 1,

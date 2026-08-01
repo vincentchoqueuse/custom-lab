@@ -4,6 +4,7 @@
 // E[Y|X=x], and both marginal densities.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
+import { normalPdf } from '../../../core/numeric.js';
 
 /**
  * @param {{mux: number, muy: number, sigmax: number, sigmay: number,
@@ -93,7 +94,7 @@ export function compute({ mux, muy, sigmax, sigmay, rho, N, seed }) {
     for (let i = 0; i < ng; i++) {
       const x = mu - 4 * s + (8 * s * i) / (ng - 1);
       gx[i] = x;
-      gy[i] = Math.exp(-((x - mu) ** 2) / (2 * s * s)) / (s * Math.sqrt(2 * Math.PI));
+      gy[i] = normalPdf(x, mu, s);
     }
     return { x: gx, y: gy };
   };

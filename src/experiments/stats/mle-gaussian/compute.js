@@ -3,10 +3,7 @@
 // pdfs and the log-likelihood profile in μ.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-
-function normalPdf(x, m, s) {
-  return Math.exp(-((x - m) ** 2) / (2 * s * s)) / (s * Math.sqrt(2 * Math.PI));
-}
+import { normalPdf } from '../../../core/numeric.js';
 
 /**
  * @param {{mu: number, sigma: number, N: number, model: 'mean'|'both',

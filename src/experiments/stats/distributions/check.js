@@ -1,5 +1,6 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
+import { trapz } from '../../../core/numeric.js';
 
 const BASE = {
   law: 'gaussian', N: 500, a: 0, b: 1, mu: 0, sigma: 1, lambda: 1.5, p: 0.3, n: 10, seed: 7,
@@ -7,12 +8,6 @@ const BASE = {
 
 const CONTINUOUS = ['uniform', 'gaussian', 'exponential', 'rayleigh'];
 const DISCRETE = ['bernoulli', 'binomial', 'poisson'];
-
-function trapz(x, y) {
-  let s = 0;
-  for (let i = 1; i < x.length; i++) s += ((y[i] + y[i - 1]) / 2) * (x[i] - x[i - 1]);
-  return s;
-}
 
 /** linear interpolation of a series at x (series x ascending). */
 function interp(series, x) {

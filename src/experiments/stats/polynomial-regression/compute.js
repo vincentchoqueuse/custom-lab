@@ -3,45 +3,11 @@
 // XᵀX â = Xᵀy, and expose true/fitted curves plus both coefficient sets.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 //
-// No linear-algebra dependency: the system is (d+1) ≤ 10 unknowns, solved by
-// Gaussian elimination with partial pivoting below (experiment-owned science,
-// per the no-runtime-dependency-without-justification rule). On [-1, 1] the
+// No external linear-algebra dependency: the system is (d+1) ≤ 10 unknowns,
+// solved by core/numeric.js's pivoted Gaussian elimination. On [-1, 1] the
 // normal equations stay well within float64 accuracy for d ≤ 9.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-
-/** Solve A·z = b in place (partial pivoting). A is n×n row-major. */
-function solve(A, b) {
-  const n = b.length;
-  for (let col = 0; col < n; col++) {
-    let piv = col;
-    for (let r = col + 1; r < n; r++) {
-      if (Math.abs(A[r][col]) > Math.abs(A[piv][col])) piv = r;
-    }
-    if (A[piv][col] === 0) throw new Error('singular normal equations');
-    if (piv !== col) {
-      [A[piv], A[col]] = [A[col], A[piv]];
-      [b[piv], b[col]] = [b[col], b[piv]];
-    }
-    for (let r = col + 1; r < n; r++) {
-      const f = A[r][col] / A[col][col];
-      for (let c = col; c < n; c++) A[r][c] -= f * A[col][c];
-      b[r] -= f * b[col];
-    }
-  }
-  const z = new Float64Array(n);
-  for (let r = n - 1; r >= 0; r--) {
-    let s = b[r];
-    for (let c = r + 1; c < n; c++) s -= A[r][c] * z[c];
-    z[r] = s / A[r][r];
-  }
-  return z;
-}
-
-function polyval(coeffs, x) {
-  let y = 0;
-  for (let k = coeffs.length - 1; k >= 0; k--) y = y * x + coeffs[k];
-  return y;
-}
+import { solveLinearSystem, polyval } from '../../../core/numeric.js';
 
 /**
  * @param {{a0: number, a1: number, a2: number, a3: number, d: number,
@@ -76,7 +42,7 @@ export function compute({ a0, a1, a2, a3, d, N, sigma, seed }) {
   for (let j = 0; j < K; j++) {
     XtX.push(Array.from({ length: K }, (_, k) => pow[j + k]));
   }
-  const aHat = solve(XtX, Array.from(rhs));
+  const aHat = solveLinearSystem(XtX, Array.from(rhs));
 
   // residual RMSE
   let ssr = 0;

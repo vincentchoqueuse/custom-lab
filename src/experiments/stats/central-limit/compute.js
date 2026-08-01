@@ -3,6 +3,7 @@
 // CORRECT variance, N(μ, σ²/n).
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32 } from '../../../core/rng.js';
+import { normalPdf } from '../../../core/numeric.js';
 
 // One draw + exact first two moments per law (fixed canonical parameters,
 // except Bernoulli's p which is a manifest param).
@@ -60,7 +61,7 @@ export function compute(params) {
   for (let i = 0; i < ng; i++) {
     const x = mu - 4.2 * sd + (8.4 * sd * i) / (ng - 1);
     gx[i] = x;
-    gy[i] = Math.exp(-((x - mu) ** 2) / (2 * sd * sd)) / (sd * Math.sqrt(2 * Math.PI));
+    gy[i] = normalPdf(x, mu, sd);
   }
 
   // histogram of the means, binned here so edges can align with the discrete

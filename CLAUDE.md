@@ -681,6 +681,9 @@ export const checks = [
 │   │   ├── router.js             # hash routing + strict-cast state↔URL
 │   │   ├── store.svelte.js       # global reactive state (runes)
 │   │   ├── rng.js                # mulberry32 — the ONLY allowed generator
+│   │   ├── numeric.js            # shared pure math (normalPdf, erf, quantiles,
+│   │   │                         #   Student t, trapz, small linear solver) —
+│   │   │                         #   importable from compute.js and check.js
 │   │   ├── actions.js            # core action registry
 │   │   ├── observables.js        # type inference + meta
 │   │   ├── scales.js             # thin wrapper over d3-scale/array/shape/format

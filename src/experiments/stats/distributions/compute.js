@@ -4,24 +4,7 @@
 // integer support for discrete ones, ECDF staircase for both).
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-
-/* ---------- special functions -------------------------------------------- */
-
-/** erf — Abramowitz & Stegun 7.1.26, |ε| < 1.5e-7 (plotting/statline grade). */
-function erf(x) {
-  const s = x < 0 ? -1 : 1;
-  x = Math.abs(x);
-  const t = 1 / (1 + 0.3275911 * x);
-  const y =
-    1 -
-    ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t +
-      0.254829592) *
-      t *
-      Math.exp(-x * x);
-  return s * y;
-}
-
-const normCdf = (x, m, s) => 0.5 * (1 + erf((x - m) / (s * Math.SQRT2)));
+import { normalPdf, normalCdf } from '../../../core/numeric.js';
 
 /* ---------- the law catalog ----------------------------------------------- */
 // Each law: continuous → {range, pdf, cdf}; discrete → {kmax, pmf}.
@@ -44,9 +27,8 @@ const LAWS = {
     discrete: false,
     range: (q) => [q.mu - 4 * q.sigma, q.mu + 4 * q.sigma],
     sample: (q, rand, gauss) => q.mu + q.sigma * gauss(),
-    pdf: (q, x) =>
-      Math.exp(-((x - q.mu) ** 2) / (2 * q.sigma ** 2)) / (q.sigma * Math.sqrt(2 * Math.PI)),
-    cdf: (q, x) => normCdf(x, q.mu, q.sigma),
+    pdf: (q, x) => normalPdf(x, q.mu, q.sigma),
+    cdf: (q, x) => normalCdf(x, q.mu, q.sigma),
     mean: (q) => q.mu,
     variance: (q) => q.sigma ** 2,
   },

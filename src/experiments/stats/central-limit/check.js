@@ -1,5 +1,6 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
+import { trapz } from '../../../core/numeric.js';
 
 const BASE = { law: 'dice', n: 10, M: 5000, p: 0.1, seed: 11 };
 
@@ -9,9 +10,7 @@ export const checks = [
     category: 'numeric',
     run() {
       const { observables: o } = compute({ ...BASE });
-      const { x, y } = o.gaussPdf;
-      let s = 0;
-      for (let i = 1; i < x.length; i++) s += ((y[i] + y[i - 1]) / 2) * (x[i] - x[i - 1]);
+      const s = trapz(o.gaussPdf.x, o.gaussPdf.y);
       return { ok: Math.abs(s - 1) < 1e-3, detail: `∫=${s.toFixed(5)}` };
     },
   },
