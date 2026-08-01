@@ -193,17 +193,30 @@ kbd {
   padding: 0 12px;
 }
 
+/* section labels, ChatGPT/Open WebUI style: small, sentence case, muted —
+   the collapse chevron only appears on hover */
 .sidebar .subject-title {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--muted-fg);
-  padding: 14px 8px 6px;
+  padding: 16px 10px 4px;
   width: 100%;
   text-align: left;
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  border-radius: 8px;
+}
+
+.sidebar .subject-title .chev {
+  opacity: 0;
+  color: var(--muted-fg);
+  font-size: 10px;
+  transition: opacity var(--t);
+}
+
+.sidebar .subject-title:hover .chev {
+  opacity: 1;
 }
 
 .sidebar .exp-link {
