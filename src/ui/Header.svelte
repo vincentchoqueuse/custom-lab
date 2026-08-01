@@ -5,6 +5,7 @@
     activeScene,
     applyPreset,
     currentHash,
+    toggleSidebar,
   } from '../core/store.svelte.js';
   import { subjects } from '../core/registry.js';
   import { STR } from '../core/strings.js';
@@ -51,6 +52,11 @@
 
 <header class="header">
   <div class="left">
+    {#if !app.ui.sidebar}
+      <button class="icon-btn" onclick={toggleSidebar} title="{STR.COLLAPSE_SIDEBAR} (⌘B)">
+        <Icon name="panel-left" size={15} />
+      </button>
+    {/if}
     <span class="crumb">
       {subjectTitle} / <strong>{m?.title ?? ''}</strong>
     </span>

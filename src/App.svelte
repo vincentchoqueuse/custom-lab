@@ -7,10 +7,11 @@
     runAction,
     stepPreset,
     setDrawer,
+    toggleSidebar,
   } from './core/store.svelte.js';
   import { schedule, onResult } from './core/worker-host.js';
   import { normalizeAll } from './core/observables.js';
-  import { readPref, writePref } from './core/prefs.js';
+  import { readPref } from './core/prefs.js';
   import { crossCheckSources } from './core/views.js';
   import { manifest } from './core/store.svelte.js';
   import Sidebar from './ui/Sidebar.svelte';
@@ -75,13 +76,10 @@
   function loadPrefs() {
     const theme = readPref('theme');
     if (theme === 'light' || theme === 'dark') app.ui.theme = theme;
-    app.ui.sidebar = readPref('sidebar') !== '0';
+    // no stored preference: start collapsed on narrow screens (tablet/phone)
+    const sidebarPref = readPref('sidebar');
+    app.ui.sidebar = sidebarPref !== null ? sidebarPref !== '0' : window.innerWidth > 900;
     app.ui.teacher = readPref('teacher') === '1';
-  }
-
-  function toggleSidebar() {
-    app.ui.sidebar = !app.ui.sidebar;
-    writePref('sidebar', app.ui.sidebar ? '1' : '0');
   }
 
   async function togglePresentation() {

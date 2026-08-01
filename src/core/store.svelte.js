@@ -5,6 +5,7 @@
 import { getExperiment, firstExperimentKey, defaultsFor } from './registry.js';
 import { parseHash, decodeQuery, encodeHash } from './router.js';
 import { coreActions } from './actions.js';
+import { writePref } from './prefs.js';
 
 export const app = $state({
   expKey: null,
@@ -212,6 +213,12 @@ export function setView(id) {
 export function setDrawer(open) {
   app.drawer = open;
   syncUrl(true);
+}
+
+/** Collapse/expand the sidebar (⌘B, sidebar and header toggle buttons). */
+export function toggleSidebar() {
+  app.ui.sidebar = !app.ui.sidebar;
+  writePref('sidebar', app.ui.sidebar ? '1' : '0');
 }
 
 /* ---------- actions ------------------------------------------------------- */
