@@ -4,7 +4,7 @@
 // integer support for discrete ones, ECDF staircase for both).
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-import { normalPdf, normalCdf } from '../../../core/numeric.js';
+import { normalPdf, normalCdf, mean, variance } from '../../../core/numeric.js';
 
 /* ---------- the law catalog ----------------------------------------------- */
 // Each law: continuous → {range, pdf, cdf}; discrete → {kmax, pmf}.
@@ -133,15 +133,9 @@ export function compute(params) {
   const gauss = gaussFrom(rand);
 
   const samples = new Float64Array(N);
-  let sum = 0;
-  for (let i = 0; i < N; i++) {
-    samples[i] = L.sample(params, rand, gauss);
-    sum += samples[i];
-  }
-  const xbar = sum / N;
-  let ss = 0;
-  for (let i = 0; i < N; i++) ss += (samples[i] - xbar) ** 2;
-  const s2 = N > 1 ? ss / (N - 1) : 0;
+  for (let i = 0; i < N; i++) samples[i] = L.sample(params, rand, gauss);
+  const xbar = mean(samples);
+  const s2 = variance(samples, { mean: xbar });
 
   let theoreticalPdf;
   let empiricalPdf;

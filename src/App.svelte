@@ -10,6 +10,7 @@
   } from './core/store.svelte.js';
   import { schedule, onResult } from './core/worker-host.js';
   import { normalizeAll } from './core/observables.js';
+  import { readPref, writePref } from './core/prefs.js';
   import { crossCheckSources } from './core/views.js';
   import { manifest } from './core/store.svelte.js';
   import Sidebar from './ui/Sidebar.svelte';
@@ -72,21 +73,15 @@
   /* ---------- cosmetic prefs (localStorage: never experiment state) ------- */
 
   function loadPrefs() {
-    try {
-      const theme = localStorage.getItem('enib-lab:theme');
-      if (theme === 'light' || theme === 'dark') app.ui.theme = theme;
-      app.ui.sidebar = localStorage.getItem('enib-lab:sidebar') !== '0';
-      app.ui.teacher = localStorage.getItem('enib-lab:teacher') === '1';
-    } catch {
-      /* private mode: defaults */
-    }
+    const theme = readPref('theme');
+    if (theme === 'light' || theme === 'dark') app.ui.theme = theme;
+    app.ui.sidebar = readPref('sidebar') !== '0';
+    app.ui.teacher = readPref('teacher') === '1';
   }
 
   function toggleSidebar() {
     app.ui.sidebar = !app.ui.sidebar;
-    try {
-      localStorage.setItem('enib-lab:sidebar', app.ui.sidebar ? '1' : '0');
-    } catch {}
+    writePref('sidebar', app.ui.sidebar ? '1' : '0');
   }
 
   async function togglePresentation() {

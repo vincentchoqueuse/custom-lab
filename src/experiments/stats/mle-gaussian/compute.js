@@ -3,7 +3,7 @@
 // pdfs and the log-likelihood profile in μ.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-import { normalPdf } from '../../../core/numeric.js';
+import { normalPdf, mean } from '../../../core/numeric.js';
 
 /**
  * @param {{mu: number, sigma: number, N: number, model: 'mean'|'both',
@@ -14,12 +14,8 @@ export function compute({ mu, sigma, N, model, seed }) {
   const gauss = gaussFrom(mulberry32(seed));
 
   const samples = new Float64Array(N);
-  let sum = 0;
-  for (let i = 0; i < N; i++) {
-    samples[i] = mu + sigma * gauss();
-    sum += samples[i];
-  }
-  const muHat = sum / N;
+  for (let i = 0; i < N; i++) samples[i] = mu + sigma * gauss();
+  const muHat = mean(samples);
 
   // MLE variance: division by N (biased — a pedagogical point, see scenes)
   let ss = 0;

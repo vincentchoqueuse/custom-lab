@@ -1,5 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
 import { view, line, band, hline } from '../../../core/views.js';
+import { canonicalLaws } from '../../../core/laws.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -40,10 +41,10 @@ export default {
   },
 
   derived: {
-    precision: { label: 'σ/√n à l\'horizon', calc: (q) => {
-      const v = q.law === 'dice' ? 35 / 12 : q.law === 'uniform' ? 1 / 12 : q.law === 'exponential' ? 1 : q.p * (1 - q.p);
-      return Math.sqrt(v / q.n).toFixed(4);
-    } },
+    precision: {
+      label: 'σ/√n à l\'horizon',
+      calc: (q) => Math.sqrt(canonicalLaws[q.law].variance(q) / q.n).toFixed(4),
+    },
   },
 
   groups: [

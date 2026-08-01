@@ -2,6 +2,7 @@
   // Generic axes + grid. Accepts linear or log scales from core/scales.js —
   // log axes get decade ticks (minor labels blanked by d3's tickFormat).
   import { format } from '../../core/scales.js';
+  import { FONT_MONO, FONT_UI } from './frame.js';
 
   let { xs, ys, xAxis = {}, yAxis = {}, w, h, k = 1, kt = 1 } = $props();
 
@@ -13,9 +14,6 @@
   function axisLabel(a) {
     return a.label ? `${a.label}${a.unit ? ` (${a.unit})` : ''}` : '';
   }
-
-  const FONT_MONO = 'IBM Plex Mono, ui-monospace, monospace';
-  const FONT_UI = 'IBM Plex Sans, system-ui, sans-serif';
 </script>
 
 <g>

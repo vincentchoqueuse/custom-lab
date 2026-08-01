@@ -1,5 +1,7 @@
 <script>
   // Horizontal reference line (param, scalar observable, or p => fn).
+  import { FONT_MONO } from './frame.js';
+
   let { ys, y, spec = {}, w, k = 1, kt = 1 } = $props();
 
   const color = $derived(spec.color ?? '#EDB120');
@@ -23,7 +25,7 @@
       text-anchor="end"
       font-size={12 * kt}
       fill={color}
-      font-family="IBM Plex Mono, ui-monospace, monospace">{spec.label}</text
+      font-family={FONT_MONO}>{spec.label}</text
     >
   {/if}
 </g>

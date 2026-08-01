@@ -4,7 +4,9 @@
   // scaling and binning only, never scientific computation) and composes the
   // generic SVG primitives.
   import { scaleLinear, scaleLog, bin } from '../../core/scales.js';
+  import { FRAME, strokeScale, typeScale } from './frame.js';
   import Axes from './Axes.svelte';
+  import Legend from './Legend.svelte';
   import Histogram from './Histogram.svelte';
   import Line from './Line.svelte';
   import Scatter from './Scatter.svelte';
@@ -16,15 +18,9 @@
 
   let { spec, obs, params, pres = false } = $props();
 
-  const W = 760;
-  const H = 430;
-  const M = { top: 20, right: 28, bottom: 48, left: 62 };
-  const iw = W - M.left - M.right;
-  const ih = H - M.top - M.bottom;
-
-  // presentation mode: strokes ×1.6, type ×1.3
-  const k = $derived(pres ? 1.6 : 1);
-  const kt = $derived(pres ? 1.3 : 1);
+  const { W, H, M, iw, ih } = FRAME;
+  const k = $derived(strokeScale(pres));
+  const kt = $derived(typeScale(pres));
 
   function axisSpec(a) {
     return typeof a === 'string' ? { label: a, scale: 'linear' } : { scale: 'linear', ...(a ?? {}) };
@@ -200,18 +196,6 @@
         <HLine {ys} y={l.v} spec={l.s} w={iw} {k} {kt} />
       {/if}
     {/each}
-    {#each legend as e, i (e.label)}
-      <g transform="translate({iw - 8},{12 + i * 18 * kt})">
-        <rect x="-14" y="-4" width="14" height="5" rx="2" fill={e.color} />
-        <text
-          x="-20"
-          y="2"
-          text-anchor="end"
-          font-size={11.5 * kt}
-          fill="#52525b"
-          font-family="IBM Plex Sans, system-ui, sans-serif">{e.label}</text
-        >
-      </g>
-    {/each}
+    <Legend entries={legend} {iw} {kt} />
   </g>
 </svg>

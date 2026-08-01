@@ -3,32 +3,8 @@
 // CORRECT variance, N(μ, σ²/n).
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32 } from '../../../core/rng.js';
-import { normalPdf } from '../../../core/numeric.js';
-
-// One draw + exact first two moments per law (fixed canonical parameters,
-// except Bernoulli's p which is a manifest param).
-const LAWS = {
-  dice: {
-    sample: (q, rand) => 1 + Math.floor(rand() * 6),
-    mean: () => 3.5,
-    variance: () => 35 / 12,
-  },
-  uniform: {
-    sample: (q, rand) => rand(),
-    mean: () => 0.5,
-    variance: () => 1 / 12,
-  },
-  exponential: {
-    sample: (q, rand) => -Math.log(1 - rand()),
-    mean: () => 1,
-    variance: () => 1,
-  },
-  bernoulli: {
-    sample: (q, rand) => (rand() < q.p ? 1 : 0),
-    mean: (q) => q.p,
-    variance: (q) => q.p * (1 - q.p),
-  },
-};
+import { normalPdf, mean, variance } from '../../../core/numeric.js';
+import { canonicalLaws } from '../../../core/laws.js';
 
 /**
  * @param {{law: string, n: number, M: number, p: number, seed: number}} params
@@ -36,21 +12,17 @@ const LAWS = {
  */
 export function compute(params) {
   const { law, n, M, seed } = params;
-  const L = LAWS[law];
+  const L = canonicalLaws[law];
   const rand = mulberry32(seed);
 
   const means = new Float64Array(M);
-  let acc = 0;
   for (let m = 0; m < M; m++) {
     let s = 0;
     for (let i = 0; i < n; i++) s += L.sample(params, rand);
     means[m] = s / n;
-    acc += means[m];
   }
-  const empMean = acc / M;
-  let ss = 0;
-  for (let m = 0; m < M; m++) ss += (means[m] - empMean) ** 2;
-  const empSd = Math.sqrt(ss / (M - 1));
+  const empMean = mean(means);
+  const empSd = Math.sqrt(variance(means, { mean: empMean }));
 
   // the CLT Gaussian: same mean, variance σ²/n
   const mu = L.mean(params);

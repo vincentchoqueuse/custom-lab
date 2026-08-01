@@ -684,6 +684,8 @@ export const checks = [
 │   │   ├── numeric.js            # shared pure math (normalPdf, erf, quantiles,
 │   │   │                         #   Student t, trapz, small linear solver) —
 │   │   │                         #   importable from compute.js and check.js
+│   │   ├── laws.js               # canonical sampling laws (draw + exact moments)
+│   │   ├── prefs.js              # cosmetic localStorage prefs (single owner)
 │   │   ├── actions.js            # core action registry
 │   │   ├── observables.js        # type inference + meta
 │   │   ├── scales.js             # thin wrapper over d3-scale/array/shape/format

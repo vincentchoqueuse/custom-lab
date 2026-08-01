@@ -2,6 +2,7 @@
   import { app } from '../core/store.svelte.js';
   import { subjects } from '../core/registry.js';
   import { STR } from '../core/strings.js';
+  import { writePref } from '../core/prefs.js';
   import Icon from './Icon.svelte';
 
   let collapsed = $state({});
@@ -12,16 +13,12 @@
 
   function toggleTheme() {
     app.ui.theme = app.ui.theme === 'light' ? 'dark' : 'light';
-    try {
-      localStorage.setItem('enib-lab:theme', app.ui.theme);
-    } catch {}
+    writePref('theme', app.ui.theme);
   }
 
   function toggleTeacher() {
     app.ui.teacher = !app.ui.teacher;
-    try {
-      localStorage.setItem('enib-lab:teacher', app.ui.teacher ? '1' : '0');
-    } catch {}
+    writePref('teacher', app.ui.teacher ? '1' : '0');
   }
 </script>
 

@@ -4,31 +4,7 @@
 // primitive breaks segments on non-finite values).
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32 } from '../../../core/rng.js';
-
-// One draw + exact first two moments per law (fixed canonical parameters,
-// except Bernoulli's p which is a manifest param).
-const LAWS = {
-  dice: {
-    sample: (q, rand) => 1 + Math.floor(rand() * 6),
-    mean: () => 3.5,
-    variance: () => 35 / 12,
-  },
-  uniform: {
-    sample: (q, rand) => rand(),
-    mean: () => 0.5,
-    variance: () => 1 / 12,
-  },
-  exponential: {
-    sample: (q, rand) => -Math.log(1 - rand()),
-    mean: () => 1,
-    variance: () => 1,
-  },
-  bernoulli: {
-    sample: (q, rand) => (rand() < q.p ? 1 : 0),
-    mean: (q) => q.p,
-    variance: (q) => q.p * (1 - q.p),
-  },
-};
+import { canonicalLaws } from '../../../core/laws.js';
 
 /** Log-spaced integer checkpoints 1…n (≈ 260, unique, ascending). */
 function logCheckpoints(n) {
@@ -48,7 +24,7 @@ function logCheckpoints(n) {
  */
 export function compute(params) {
   const { law, n, K, seed } = params;
-  const L = LAWS[law];
+  const L = canonicalLaws[law];
   const rand = mulberry32(seed);
   const mu = L.mean(params);
   const sd = Math.sqrt(L.variance(params));

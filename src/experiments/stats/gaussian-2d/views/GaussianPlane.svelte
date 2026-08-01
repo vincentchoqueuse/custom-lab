@@ -8,17 +8,15 @@
 -->
 <script>
   import { scaleLinear, linePath } from '../../../../core/scales.js';
+  import { FRAME, strokeScale, typeScale } from '../../../../ui/plots/frame.js';
   import Axes from '../../../../ui/plots/Axes.svelte';
+  import Legend from '../../../../ui/plots/Legend.svelte';
 
   let { observables: obs, params, pres = false } = $props();
 
-  const W = 760;
-  const H = 430;
-  const M = { top: 20, right: 28, bottom: 48, left: 62 };
-  const iw = W - M.left - M.right;
-  const ih = H - M.top - M.bottom;
-  const k = $derived(pres ? 1.6 : 1);
-  const kt = $derived(pres ? 1.3 : 1);
+  const { W, H, M, iw, ih } = FRAME;
+  const k = $derived(strokeScale(pres));
+  const kt = $derived(typeScale(pres));
 
   // equal-aspect window centered on the 3σ ellipse
   const window_ = $derived.by(() => {
@@ -113,18 +111,6 @@
       <path d={pathOf('ellipse3', true)} stroke="#D95319" stroke-width={1.4 * k} fill="none" opacity="0.6" />
     </g>
 
-    {#each legend as e, i (e.label)}
-      <g transform="translate({iw - 8},{12 + i * 18 * kt})">
-        <rect x="-14" y="-4" width="14" height="5" rx="2" fill={e.color} />
-        <text
-          x="-20"
-          y="2"
-          text-anchor="end"
-          font-size={11.5 * kt}
-          fill="#52525b"
-          font-family="IBM Plex Sans, system-ui, sans-serif">{e.label}</text
-        >
-      </g>
-    {/each}
+    <Legend entries={legend} {iw} {kt} />
   </g>
 </svg>

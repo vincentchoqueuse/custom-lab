@@ -8,17 +8,14 @@
 -->
 <script>
   import { scaleLinear } from '../../../../core/scales.js';
+  import { FRAME, strokeScale, typeScale, FONT_MONO } from '../../../../ui/plots/frame.js';
   import Axes from '../../../../ui/plots/Axes.svelte';
 
   let { observables, params, pres = false } = $props();
 
-  const W = 760;
-  const H = 430;
-  const M = { top: 20, right: 28, bottom: 48, left: 62 };
-  const iw = W - M.left - M.right;
-  const ih = H - M.top - M.bottom;
-  const k = $derived(pres ? 1.6 : 1);
-  const kt = $derived(pres ? 1.3 : 1);
+  const { W, H, M, iw, ih } = FRAME;
+  const k = $derived(strokeScale(pres));
+  const kt = $derived(typeScale(pres));
 
   const intervals = $derived(observables?.intervals?.value ?? []);
   const mu = $derived(params.mu);
@@ -82,7 +79,7 @@
       y={14 * kt}
       font-size={12 * kt}
       fill="#EDB120"
-      font-family="IBM Plex Mono, ui-monospace, monospace">μ</text
+      font-family={FONT_MONO}>μ</text
     >
   </g>
 </svg>
