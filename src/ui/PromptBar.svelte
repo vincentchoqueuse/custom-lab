@@ -36,6 +36,10 @@
   function pillText(key) {
     const spec = m.params[key];
     if (masked.has(key)) return `${spec.name} = ?`;
+    if (spec.type === 'select') {
+      const opt = spec.options.find((o) => o.value === app.params[key]);
+      return `${spec.name} = ${opt?.label ?? app.params[key]}`;
+    }
     const precision = spec.precision ?? (spec.type === 'int' ? 0 : undefined);
     const unit = spec.unit ? ` ${spec.unit}` : '';
     return `${spec.name} = ${formatValue(app.params[key], precision)}${unit}`;

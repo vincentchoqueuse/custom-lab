@@ -167,6 +167,15 @@
 
   const xs = $derived(mkScale(xAxis, xDomain, [0, iw]));
   const ys = $derived(mkScale(yAxis, yDomain, [ih, 0]));
+
+  // data layers carrying a `label` get a legend chip (vline/hline draw their
+  // own inline labels)
+  const DEFAULT_COLORS = { density: '#D95319' };
+  const legend = $derived(
+    layers
+      .filter((l) => l.s.label && l.kind !== 'vline' && l.kind !== 'hline' && l.kind !== 'none')
+      .map((l) => ({ label: l.s.label, color: l.s.color ?? DEFAULT_COLORS[l.kind] ?? '#0072BD' }))
+  );
 </script>
 
 <svg class="plot-svg" viewBox="0 0 {W} {H}" role="img">
@@ -190,6 +199,19 @@
       {:else if l.kind === 'hline' && Number.isFinite(l.v)}
         <HLine {ys} y={l.v} spec={l.s} w={iw} {k} {kt} />
       {/if}
+    {/each}
+    {#each legend as e, i (e.label)}
+      <g transform="translate({iw - 8},{12 + i * 18 * kt})">
+        <rect x="-14" y="-4" width="14" height="5" rx="2" fill={e.color} />
+        <text
+          x="-20"
+          y="2"
+          text-anchor="end"
+          font-size={11.5 * kt}
+          fill="#52525b"
+          font-family="IBM Plex Sans, system-ui, sans-serif">{e.label}</text
+        >
+      </g>
     {/each}
   </g>
 </svg>
