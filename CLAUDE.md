@@ -146,7 +146,8 @@ in the course language; the chrome — Parameters, Draw, Presets, Search… — 
 **Left sidebar (Open WebUI style).** Theme-aware neutral (`#f9f9f9` light /
 `#171717` dark), ~260 px, collapsible (`⌘B`), rounded items, soft gray hover,
 active item in neutral gray (never a color accent). Top button: "Search
-experiments" (`⌘K`). Tree: subjects (uppercase mono, collapsible) → experiments.
+experiments" (`⌘K`). Tree: subjects (small muted sentence-case labels,
+ChatGPT-style, collapsible with a hover-only chevron) → experiments.
 Footer: light/dark theme toggle for the central area, Teacher Mode button (🗒).
 
 **Clean header.** Breadcrumb `Subject / Experiment`. **Central preset selector**,
