@@ -1,4 +1,4 @@
- # ENIB Lab — a scientific demonstration engine for teaching
+# Custom Lab — a scientific demonstration engine for teaching
 
 Document organized from durable to interchangeable:
 **Vision → Concepts → UX → Architecture → Implementation.**
