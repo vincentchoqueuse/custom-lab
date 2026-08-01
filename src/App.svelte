@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import {
     app,
     initFromHash,
@@ -60,7 +60,10 @@
     const invalid = validationMessage();
     if (invalid) {
       // An invalid state blocks computation (not input) and shows the message.
-      app.result = { ...app.result, status: 'invalid', message: invalid };
+      // untrack: reading app.result here must not make this effect re-run on
+      // its own write (infinite loop).
+      const prev = untrack(() => app.result);
+      app.result = { ...prev, status: 'invalid', message: invalid };
       return;
     }
     schedule(key, params);

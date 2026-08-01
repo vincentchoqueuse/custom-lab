@@ -97,7 +97,7 @@
   <div class="plot-area">
     {#if obs}
       <ViewHost />
-    {:else if status === 'error'}
+    {:else if status === 'error' || status === 'invalid'}
       <div class="plot-placeholder">{app.result.message}</div>
     {:else}
       <div class="plot-placeholder">{STR.COMPUTING}</div>
