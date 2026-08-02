@@ -11,75 +11,13 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32 } from '../../../core/rng.js';
 import { normalCdf } from '../../../core/numeric.js';
+import { hamming74, repetition3, enumerateHard, berHardExact } from '../../../core/codes.js';
 
 const DB_GRID = Array.from({ length: 9 }, (_, i) => 1.5 * i); // 0…12 dB
 const BLOCKS_CURVE = 3000; // blocks per Monte Carlo point of the BER curve
 const SHOW_BLOCKS = 60; // blocks displayed in the frame view
 
 const Q = (x) => 1 - normalCdf(x);
-
-/** Hamming (7,4): block layout [d1 d2 d3 d4 p1 p2 p3]. */
-const hamming74 = {
-  n: 7,
-  k: 4,
-  decode(r) {
-    const s1 = r[4] ^ r[0] ^ r[1] ^ r[3];
-    const s2 = r[5] ^ r[0] ^ r[2] ^ r[3];
-    const s3 = r[6] ^ r[1] ^ r[2] ^ r[3];
-    // syndrome → flipped position (columns of H), 0-based; −1 = no error
-    const pos = [-1, 4, 5, 0, 6, 1, 2, 3][s1 + 2 * s2 + 4 * s3];
-    const out = r.slice(0, 4);
-    if (pos >= 0 && pos < 4) out[pos] ^= 1;
-    return out;
-  },
-};
-
-/** Repetition ×3: one message bit per block, majority vote. */
-const repetition3 = {
-  n: 3,
-  k: 1,
-  decode(r) {
-    return [r[0] + r[1] + r[2] >= 2 ? 1 : 0];
-  },
-};
-
-/**
- * Exact enumeration of the 2ⁿ error patterns: message errors per pattern
- * (linear code → analyzed on the all-zero codeword) and per-weight average.
- */
-function enumeratePatterns(code) {
-  const { n, k } = code;
-  const perPattern = new Float64Array(1 << n);
-  const weight = new Uint8Array(1 << n);
-  const betaSum = new Float64Array(n + 1);
-  const betaCnt = new Float64Array(n + 1);
-  for (let m = 0; m < 1 << n; m++) {
-    const r = Array.from({ length: n }, (_, j) => (m >> j) & 1);
-    let w = 0;
-    for (let j = 0; j < n; j++) w += r[j];
-    const out = code.decode(r);
-    let errs = 0;
-    for (let j = 0; j < k; j++) errs += out[j];
-    perPattern[m] = errs;
-    weight[m] = w;
-    betaSum[w] += errs;
-    betaCnt[w] += 1;
-  }
-  const beta = new Float64Array(n + 1);
-  for (let w = 0; w <= n; w++) beta[w] = betaSum[w] / betaCnt[w];
-  return { perPattern, weight, beta };
-}
-
-/** Exact post-decoding BER on a BSC(p), from the pattern enumeration. */
-function berExact(code, enumr, p) {
-  const { n, k } = code;
-  let acc = 0;
-  for (let m = 0; m < 1 << n; m++) {
-    const w = enumr.weight[m];
-    acc += enumr.perPattern[m] * p ** w * (1 - p) ** (n - w);
-  }
-  return acc / k;
-}
 
 /**
  * @param {{code: string, ebn0Db: number, Nbits: number, seed: number}} params
@@ -90,7 +28,7 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
   const code = codeName === 'hamming74' ? hamming74 : repetition3;
   const { n, k } = code;
   const R = k / n;
-  const enumr = enumeratePatterns(code);
+  const enumr = enumerateHard(code);
 
   const pOf = (gb, rate) => Q(Math.sqrt(2 * rate * gb));
   const gb = 10 ** (ebn0Db / 10);
@@ -108,7 +46,7 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
         w += r[j];
       }
       if (w === 0) continue; // no channel error → no decoding error
-      const out = code.decode(r);
+      const out = code.decodeHard(r);
       for (let j = 0; j < k; j++) {
         if (out[j]) {
           bitErr++;
@@ -138,7 +76,7 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
     ft[i] = (12 * i) / (NF - 1);
     const g = 10 ** (ft[i] / 10);
     fyU[i] = pOf(g, 1);
-    fyC[i] = berExact(code, enumr, pOf(g, R));
+    fyC[i] = berHardExact(code, enumr, pOf(g, R));
   }
   const mx = new Float64Array(DB_GRID.length);
   const my = new Float64Array(DB_GRID.length);
@@ -176,7 +114,7 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
         meta: { label: 'BER décodé', precision: 5 },
       },
       berOutTh: {
-        value: berExact(code, enumr, p),
+        value: berHardExact(code, enumr, p),
         meta: { label: 'théorie exacte', precision: 5 },
       },
       berUncoded: {
