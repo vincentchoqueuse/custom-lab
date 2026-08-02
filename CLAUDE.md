@@ -1,4 +1,4 @@
-# Custom Lab — a scientific demonstration engine for teaching
+# Pupitre — a scientific demonstration engine for teaching
 
 Document organized from durable to interchangeable:
 **Vision → Concepts → UX → Architecture → Implementation.**

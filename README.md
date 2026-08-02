@@ -1,4 +1,4 @@
-# Custom Lab
+# Pupitre
 
 **Live site: <https://vincentchoqueuse.github.io/custom-lab/>**
 
