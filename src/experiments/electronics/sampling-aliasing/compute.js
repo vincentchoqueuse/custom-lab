@@ -6,6 +6,7 @@
 // the true line spectrum vs the folded one, and the folding diagram
 // f_app(f) — the sawtooth that explains the wagon-wheel effect.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { sinc } from '../../../core/numeric.js';
 
 const NG = 1200; // dense grid for the "continuous" signal and reconstruction
 const H_MAX = 12; // square-wave harmonics kept in the spectrum view
@@ -31,8 +32,6 @@ function sourceValue(source, f, t) {
   if (source === 'sine') return Math.sin(2 * Math.PI * f * t);
   return Math.sign(Math.sin(2 * Math.PI * f * t)) || 1;
 }
-
-const sinc = (x) => (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
 
 /**
  * @param {{source: string, f: number, fe: number, seed: number}} params

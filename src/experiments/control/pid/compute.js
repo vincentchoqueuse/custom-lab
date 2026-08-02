@@ -8,6 +8,7 @@
 //   P alone: steady-state error 1/(1+Kp) — measured against theory.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
+import { rk4Step } from '../../../core/numeric.js';
 
 const H = 0.005; // loop period (s)
 const T_END = 20;
@@ -17,20 +18,7 @@ const TAU_F = 0.05; // derivative filter time constant
 const KEEP = 4; // display decimation (800 points)
 
 /** Plant dynamics: x = [y, y'], input u (+ load d): y'' = u + d − 2y' − y. */
-function plantDeriv(x, u) {
-  return [x[1], u - 2 * x[1] - x[0]];
-}
-
-function rk4Plant(x, u, h) {
-  const k1 = plantDeriv(x, u);
-  const k2 = plantDeriv([x[0] + (h / 2) * k1[0], x[1] + (h / 2) * k1[1]], u);
-  const k3 = plantDeriv([x[0] + (h / 2) * k2[0], x[1] + (h / 2) * k2[1]], u);
-  const k4 = plantDeriv([x[0] + h * k3[0], x[1] + h * k3[1]], u);
-  return [
-    x[0] + (h / 6) * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]),
-    x[1] + (h / 6) * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]),
-  ];
-}
+const plantDeriv = (u) => (x) => [x[1], u - 2 * x[1] - x[0]];
 
 /**
  * @param {{Kp: number, Ki: number, Kd: number, sigma: number, seed: number}} params
@@ -95,7 +83,7 @@ export function compute({ Kp, Ki, Kd, sigma, seed }) {
 
     if (i === n) break;
     const d = ti >= T_DIST ? D_LOAD : 0;
-    x = rk4Plant(x, u + d, H);
+    x = rk4Step(plantDeriv(u + d), x, ti, H);
     if (!Number.isFinite(x[0]) || Math.abs(x[0]) > CLAMP) x = [CLAMP, 0];
   }
 

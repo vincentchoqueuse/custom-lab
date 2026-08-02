@@ -1,10 +1,9 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
-import { normalCdf } from '../../../core/numeric.js';
+import { qfunc } from '../../../core/numeric.js';
 import { hamming74, codewordTable } from '../../../core/codes.js';
 
 const BASE = { code: 'hamming74', ebn0Db: 4, Nbits: 100000, seed: 29 };
-const Q = (x) => 1 - normalCdf(x);
 
 export const checks = [
   {
@@ -36,7 +35,7 @@ export const checks = [
     category: 'statistical',
     run() {
       const { observables: o } = compute({ ...BASE, code: 'repetition3' });
-      const p = Q(Math.sqrt(2 * 10 ** (BASE.ebn0Db / 10)));
+      const p = qfunc(Math.sqrt(2 * 10 ** (BASE.ebn0Db / 10)));
       const se = Math.sqrt((p * (1 - p)) / BASE.Nbits);
       const err = Math.abs(o.berSoft.value - p);
       return { ok: err < 4 * se, detail: `|Δ|=${err.toFixed(5)} < ${(4 * se).toFixed(5)}` };

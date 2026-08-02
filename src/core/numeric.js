@@ -36,6 +36,45 @@ export function variance(a, { sample = true, mean: m = mean(a) } = {}) {
   return sample ? (n > 1 ? ss / (n - 1) : 0) : ss / n;
 }
 
+/* ---------- helpers shared by compute.js files --------------------------- */
+
+/** Normalized sinc: sin(πx)/(πx), sinc(0) = 1. */
+export function sinc(x) {
+  return x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x);
+}
+
+/** Decibels → linear power ratio. */
+export function dbToLin(db) {
+  return 10 ** (db / 10);
+}
+
+/**
+ * One classic Runge-Kutta 4 step for array states: f(x, t) returns dx/dt.
+ * @param {(x: number[], t: number) => number[]} f
+ */
+export function rk4Step(f, x, t, h) {
+  const n = x.length;
+  const k1 = f(x, t);
+  const k2 = f(x.map((v, i) => v + (h / 2) * k1[i]), t + h / 2);
+  const k3 = f(x.map((v, i) => v + (h / 2) * k2[i]), t + h / 2);
+  const k4 = f(x.map((v, i) => v + h * k3[i]), t + h);
+  const out = new Array(n);
+  for (let i = 0; i < n; i++) out[i] = x[i] + (h / 6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+  return out;
+}
+
+/** Flat [x0, y0, x1, y1, …] pairs → a {x, y} series observable. */
+export function pairsToSeries(arr) {
+  const m = arr.length / 2;
+  const x = new Float64Array(m);
+  const y = new Float64Array(m);
+  for (let i = 0; i < m; i++) {
+    x[i] = arr[2 * i];
+    y[i] = arr[2 * i + 1];
+  }
+  return { x, y };
+}
+
 /* ---------- Gaussian ------------------------------------------------------ */
 
 /** N(mu, sigma²) density. */
@@ -60,6 +99,11 @@ export function erf(x) {
 /** N(mu, sigma²) cumulative distribution function. */
 export function normalCdf(x, mu = 0, sigma = 1) {
   return 0.5 * (1 + erf((x - mu) / (sigma * Math.SQRT2)));
+}
+
+/** Gaussian tail Q(x) = P(N(0,1) > x) = 1 − Φ(x). */
+export function qfunc(x) {
+  return 1 - normalCdf(x);
 }
 
 /**
