@@ -1,5 +1,5 @@
 import { float, select } from '../../../core/fields.js';
-import { view, custom, line, band, vline } from '../../../core/views.js';
+import { view, plane, line, band, vline } from '../../../core/views.js';
 import { requiredOrder } from './compute.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
@@ -88,8 +88,15 @@ export default {
         },
       })
     ),
-    // CUSTOM view: equal-aspect s-plane — see views/PZPlane.svelte
-    custom('poles', 'Pôles et zéros', () => import('./views/PZPlane.svelte')),
+    plane('poles', 'Pôles et zéros', {
+      clouds: [{ source: 'zeros', color: '#0072BD', r: 4, opacity: 0.95, label: 'zéros (sur jω)' }],
+      markers: { source: 'poles', color: '#D95319', label: 'pôles' },
+      circle: { radius: 1, label: 'cercle |s| = ωp' },
+      segments: [{ x1: 0, y1: -5, x2: 0, y2: 5 }],
+      axes: { x: 'Re(s)/ωp', y: 'Im(s)/ωp' },
+      minHalf: 1.4,
+      maxHalf: 5,
+    }),
     view(
       'delay',
       'Retard de groupe',

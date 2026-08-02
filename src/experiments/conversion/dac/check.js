@@ -1,5 +1,5 @@
 import { compute } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { sinc } from '../../../core/numeric.js';
 
 // f0 = 1000 Hz sits on a 62.5 Hz bin of the 16 ms spectrum window, and so
@@ -15,10 +15,8 @@ export const checks = [
       const { observables: o } = compute(BASE);
       // upBars carries the stuffed stream (originals at multiples of L),
       // upLine the filtered one, on the same time base
-      let worst = 0;
-      for (let i = 0; i < o.upBars.y.length; i++) {
-        if (o.upBars.y[i] !== 0) worst = Math.max(worst, Math.abs(o.upLine.y[i] - o.upBars.y[i]));
-      }
+      const originals = range(o.upBars.y.length).filter((i) => o.upBars.y[i] !== 0);
+      const worst = maxGap(originals, (i) => o.upLine.y[i], (i) => o.upBars.y[i]);
       return { ok: worst < 1e-12, detail: `max|interp−sample|=${worst.toExponential(2)}` };
     },
   },
@@ -28,14 +26,14 @@ export const checks = [
     run() {
       // measured absolute baseband level vs the ZOH theory (the interpolation
       // FIR adds a small passband ripple: 0.1 dB tolerance)
-      let worst = 0;
-      let detail = '';
-      for (const L of [1, 4]) {
-        const { observables: o } = compute({ ...BASE, L });
-        const th = 20 * Math.log10(Math.abs(sinc(1000 / (L * 8000))));
-        worst = Math.max(worst, Math.abs(o.baseDb - th));
-        detail += `L=${L}:${o.baseDb.toFixed(3)}/${th.toFixed(3)} `;
-      }
+      const worst = maxGap(
+        [1, 4],
+        (L) => compute({ ...BASE, L }).observables.baseDb,
+        (L) => 20 * Math.log10(Math.abs(sinc(1000 / (L * 8000))))
+      );
+      const detail = [1, 4]
+        .map((L) => `L=${L}:${compute({ ...BASE, L }).observables.baseDb.toFixed(3)}`)
+        .join(' ');
       return { ok: worst < 0.1, detail: detail.trim() + ' dB' };
     },
   },

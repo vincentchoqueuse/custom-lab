@@ -1,5 +1,5 @@
 import { compute, combGain } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
 const FS = 8000;
 // f0 = 125 Hz = 64 bins of the 4096-point window: harmonics on exact bins
@@ -16,13 +16,13 @@ export const checks = [
       const D = 32;
       const tooth = (3 * FS) / D;
       const dip = (3.5 * FS) / D;
-      const gaps = [
-        combGain('ff', tooth, D, g) - (1 + g),
-        combGain('ff', dip, D, g) - (1 - g),
-        combGain('fb', tooth, D, g) - 1 / (1 - g),
-        combGain('fb', dip, D, g) - 1 / (1 + g),
-      ].map(Math.abs);
-      const worst = Math.max(...gaps);
+      const cases = [
+        ['ff', tooth, 1 + g],
+        ['ff', dip, 1 - g],
+        ['fb', tooth, 1 / (1 - g)],
+        ['fb', dip, 1 / (1 + g)],
+      ];
+      const worst = maxGap(cases, ([s, f]) => combGain(s, f, D, g), ([, , th]) => th);
       return { ok: worst < 1e-12, detail: `max gap=${worst.toExponential(2)}` };
     },
   },
@@ -31,11 +31,11 @@ export const checks = [
     category: 'numeric',
     run() {
       const { observables: o } = compute({ ...BASE, structure: 'fb', D: 25, g: 0.8 });
-      let worst = 0;
-      for (let n = 0; n < o.hImp.length; n++) {
-        const th = n % 25 === 0 ? 0.8 ** (n / 25) : 0;
-        worst = Math.max(worst, Math.abs(o.hImp[n] - th));
-      }
+      const worst = maxGap(
+        range(o.hImp.length),
+        (n) => o.hImp[n],
+        (n) => (n % 25 === 0 ? 0.8 ** (n / 25) : 0)
+      );
       return { ok: worst < 1e-15, detail: `max|h[n]−g^(n/D)|=${worst.toExponential(2)}` };
     },
   },

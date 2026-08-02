@@ -137,10 +137,9 @@ export function compute({ family, fp, fstop, Amax, Amin }) {
       zone1,
       zone2,
       delay: { x: gf, y: gy },
-      polesX: Float64Array.from(px),
-      polesY: Float64Array.from(py),
-      zerosX: Float64Array.from(zx),
-      zerosY: Float64Array.from(zy),
+      // {x, y} series: the shape a declarative plane consumes
+      poles: { x: Float64Array.from(px), y: Float64Array.from(py) },
+      zeros: { x: Float64Array.from(zx), y: Float64Array.from(zy) },
       numProto: num, // normalized prototype (ωp = 1) — Inspector download
       denProto: den,
       numReal, // denormalized (rad/s)

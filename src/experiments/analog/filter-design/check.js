@@ -1,5 +1,5 @@
 import { compute, requiredOrder } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { polyEvalComplex } from '../../../core/numeric.js';
 
 const SPEC = { fp: 1000, fstop: 2000, Amax: 1, Amin: 40, seed: 1 };
@@ -31,11 +31,11 @@ export const checks = [
     name: 'passband anchor: |H(j·ωp)| = −Amax exactly (butter, cheby1, ellip)',
     category: 'numeric',
     run() {
-      let worst = 0;
-      for (const family of ['butter', 'cheby1', 'ellip']) {
-        const { observables: o } = compute({ family, ...SPEC });
-        worst = Math.max(worst, Math.abs(o.edgeDb - -1));
-      }
+      const worst = maxGap(
+        ['butter', 'cheby1', 'ellip'],
+        (family) => compute({ family, ...SPEC }).observables.edgeDb,
+        () => -1
+      );
       return { ok: worst < 1e-6, detail: `max|H(fp)+1dB|=${worst.toExponential(2)}` };
     },
   },
@@ -43,11 +43,11 @@ export const checks = [
     name: 'stopband anchor: cheby2 and ellip give exactly Amin at fa',
     category: 'numeric',
     run() {
-      let worst = 0;
-      for (const family of ['cheby2', 'ellip']) {
-        const { observables: o } = compute({ family, ...SPEC });
-        worst = Math.max(worst, Math.abs(o.attStopDb.value - 40));
-      }
+      const worst = maxGap(
+        ['cheby2', 'ellip'],
+        (family) => compute({ family, ...SPEC }).observables.attStopDb.value,
+        () => 40
+      );
       return { ok: worst < 0.05, detail: `max|att−40|=${worst.toExponential(2)} dB` };
     },
   },
@@ -98,9 +98,9 @@ export const checks = [
       let detail = '';
       for (const family of ['butter', 'cheby1', 'cheby2', 'ellip']) {
         const { observables: o } = compute({ family, ...SPEC });
-        for (const re of o.polesX) ok = ok && re < 0;
-        for (const re of o.zerosX) ok = ok && re === 0;
-        detail += `${family}:${o.polesX.length}p/${o.zerosX.length}z `;
+        for (const re of o.poles.x) ok = ok && re < 0;
+        for (const re of o.zeros.x) ok = ok && re === 0;
+        detail += `${family}:${o.poles.x.length}p/${o.zeros.x.length}z `;
       }
       return { ok, detail: detail.trim() };
     },
@@ -115,12 +115,14 @@ export const checks = [
         const mag = (p) => Math.hypot(...polyEvalComplex(p, 0, w));
         return 20 * Math.log10(mag(num) / mag(den));
       };
-      let worst = 0;
-      for (let i = 0; i < o.response.x.length; i += 25) {
-        const f = o.response.x[i];
-        const db = evalDb(o.numReal, o.denReal, 2 * Math.PI * f);
-        if (o.response.y[i] > -85) worst = Math.max(worst, Math.abs(db - o.response.y[i]));
-      }
+      const sampled = range(Math.ceil(o.response.x.length / 25), (k) => k * 25).filter(
+        (i) => o.response.y[i] > -85
+      );
+      const worst = maxGap(
+        sampled,
+        (i) => evalDb(o.numReal, o.denReal, 2 * Math.PI * o.response.x[i]),
+        (i) => o.response.y[i]
+      );
       return { ok: worst < 1e-6, detail: `max gap=${worst.toExponential(2)} dB` };
     },
   },

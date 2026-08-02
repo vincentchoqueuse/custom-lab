@@ -4,7 +4,6 @@
 //   m = 1: y = K(1 − (1 + ω₀t)e^(−ω₀t))
 //   m > 1: two real poles −ω₀(m ∓ √(m²−1)), biexponential
 // Observables: the step response with its ±5% band and envelope, the poles
-// on the ω₀ circle (angle cos⁻¹ m), and |H(jω)| with its resonance
 // Mr = K/(2m√(1−m²)) at ωr = ω₀√(1−2m²) when m < 1/√2.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 
@@ -70,7 +69,6 @@ export function compute({ K, m, w0 }) {
   const overshoot = Math.max(0, ((yMax - K) / K) * 100);
   const overshootTh = m < 1 - EPS ? 100 * Math.exp((-m * Math.PI) / Math.sqrt(1 - m * m)) : 0;
 
-  // poles: on the ω₀ circle for m < 1, on the real axis beyond
   let px;
   let py;
   if (m < 1) {
@@ -81,15 +79,7 @@ export function compute({ K, m, w0 }) {
     px = [-w0 * (m - s), -w0 * (m + s)];
     py = [0, 0];
   }
-  // ω₀-circle guide as a dot ring (rendered by the generic IQPlane)
-  const NC = 120;
-  const cx = new Float64Array(NC);
-  const cy = new Float64Array(NC);
-  for (let i = 0; i < NC; i++) {
-    const a = (2 * Math.PI * i) / NC;
-    cx[i] = w0 * Math.cos(a);
-    cy[i] = w0 * Math.sin(a);
-  }
+  // (the |s| = ω₀ guide circle is drawn by the plane view, not computed here)
 
   // |H(jω)| on a log grid centered exactly on ω₀
   const fw = new Float64Array(NW);
@@ -109,7 +99,6 @@ export function compute({ K, m, w0 }) {
       envHi: { x: t, y: eHi },
       envLo: { x: t, y: eLo },
       poles: { x: Float64Array.from(px), y: Float64Array.from(py) },
-      circleGuide: { x: cx, y: cy },
       freqResponse: { x: fw, y: fh },
       wr,
       overshoot: {

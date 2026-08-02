@@ -1,5 +1,5 @@
 import { compute } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
 const BASE = { fc: 1000, N: 45, win: 'rect', seed: 1 };
 
@@ -11,12 +11,8 @@ export const checks = [
     name: 'taps are exactly symmetric (linear phase by construction)',
     category: 'numeric',
     run() {
-      const { observables: o } = compute({ ...BASE, win: 'hamming' });
-      let worst = 0;
-      const h = o.hTaps;
-      for (let n = 0; n < h.length; n++) {
-        worst = Math.max(worst, Math.abs(h[n] - h[h.length - 1 - n]));
-      }
+      const h = compute({ ...BASE, win: 'hamming' }).observables.hTaps;
+      const worst = maxGap(range(h.length), (n) => h[n], (n) => h[h.length - 1 - n]);
       return { ok: worst < 1e-15, detail: `max|h[n]−h[N−1−n]|=${worst.toExponential(1)}` };
     },
   },
@@ -26,11 +22,11 @@ export const checks = [
     run() {
       // an approximation, not an identity: the truncated sinc tails leave a
       // percent-level bias (largest for rect, which keeps the ripply tails)
-      let worst = 0;
-      for (const win of ['rect', 'hann', 'hamming', 'blackman']) {
-        const { observables: o } = compute({ ...BASE, N: 81, win });
-        worst = Math.max(worst, Math.abs(o.dcGain.value - 1));
-      }
+      const worst = maxGap(
+        ['rect', 'hann', 'hamming', 'blackman'],
+        (win) => compute({ ...BASE, N: 81, win }).observables.dcGain.value,
+        () => 1
+      );
       return { ok: worst < 0.03, detail: `max|Σh−1|=${worst.toExponential(2)}` };
     },
   },

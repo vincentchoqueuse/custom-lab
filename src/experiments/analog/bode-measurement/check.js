@@ -1,5 +1,5 @@
 import { compute } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { standardChecks, maxGap } from '../../../core/checks.js';
 
 const RC = { system: 'rc', fc: 500, f0: 500, Q: 2, f: 100, sigma: 0.05, seed: 3 };
 
@@ -10,15 +10,12 @@ export const checks = [
     run() {
       // uniform sampling over an integer number of periods → the sin/cos
       // basis is exactly orthogonal and the fit is exact at σ = 0
-      let worst = 0;
-      for (const [system, f] of [['rc', 137], ['rc', 2000], ['order2', 480], ['order2', 3000]]) {
-        const { observables: o } = compute({ ...RC, system, f, sigma: 0 });
-        worst = Math.max(
-          worst,
-          Math.abs(o.gMeasDb.value - o.gThDb.value),
-          Math.abs(o.phMeasDeg.value - o.phThDeg.value)
-        );
-      }
+      const cases = [['rc', 137], ['rc', 2000], ['order2', 480], ['order2', 3000]];
+      const at = ([system, f]) => compute({ ...RC, system, f, sigma: 0 }).observables;
+      const worst = Math.max(
+        maxGap(cases, (c) => at(c).gMeasDb.value, (c) => at(c).gThDb.value),
+        maxGap(cases, (c) => at(c).phMeasDeg.value, (c) => at(c).phThDeg.value)
+      );
       return { ok: worst < 1e-9, detail: `max gap=${worst.toExponential(2)} (dB/°)` };
     },
   },
