@@ -1,7 +1,7 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 
-const BASE = { a0: 0.5, a1: -1, a2: -0.5, a3: 2, d: 3, N: 30, sigma: 0.3, seed: 5 };
+const BASE = { a0: 0.5, a1: -1, a2: -0.5, a3: 2, d: 3, N: 30, sigma: 0.3, lambda: 1, seed: 5 };
 
 export const checks = [
   {
@@ -30,6 +30,61 @@ export const checks = [
         worst = Math.max(worst, Math.abs(dot));
       }
       return { ok: worst < 1e-8, detail: `max|Xᵀr|=${worst.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'ridge λ→0 collapses onto least squares',
+    category: 'numeric',
+    run() {
+      const { observables: o } = compute({ ...BASE, lambda: 1e-3 });
+      let worst = 0;
+      for (let k = 0; k < o.coeffsHat.y.length; k++) {
+        worst = Math.max(worst, Math.abs(o.coeffsRidge.y[k] - o.coeffsHat.y[k]));
+      }
+      return { ok: worst < 0.02, detail: `max|Δaₖ|=${worst.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'ridge shrinks: penalized norm ≤ LS norm, training RMSE ≥ LS RMSE',
+    category: 'numeric',
+    run() {
+      const { observables: o } = compute({ ...BASE, d: 9, N: 20, sigma: 0.4, lambda: 10 });
+      const norm = (c) => c.slice(1).reduce((s, v) => s + v * v, 0);
+      const shrinks = norm(Array.from(o.coeffsRidge.y)) <= norm(Array.from(o.coeffsHat.y)) + 1e-12;
+      const fitsWorse = o.rmseRidge.value >= o.rmse.value - 1e-12;
+      return {
+        ok: shrinks && fitsWorse,
+        detail: `‖aᵣ‖²=${norm(Array.from(o.coeffsRidge.y)).toFixed(3)} ≤ ‖a‖²=${norm(Array.from(o.coeffsHat.y)).toFixed(3)}`,
+      };
+    },
+  },
+  {
+    name: 'Monte Carlo decomposition holds exactly: EQM = biais² + variance',
+    category: 'numeric',
+    run() {
+      const { observables: o } = compute({ ...BASE, d: 9, N: 20, sigma: 0.4 });
+      let worst = 0;
+      for (let g = 0; g < o.mseVsLambda.y.length; g++) {
+        worst = Math.max(
+          worst,
+          Math.abs(o.mseVsLambda.y[g] - (o.bias2VsLambda.y[g] + o.varVsLambda.y[g]))
+        );
+      }
+      return { ok: worst < 1e-9, detail: `max|Δ|=${worst.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'along λ: variance falls, bias² rises (overfit regime d = 9)',
+    category: 'statistical',
+    run() {
+      const { observables: o } = compute({ ...BASE, d: 9, N: 20, sigma: 0.4 });
+      const last = o.varVsLambda.y.length - 1;
+      const varFalls = o.varVsLambda.y[last] < 0.2 * o.varVsLambda.y[0];
+      const biasRises = o.bias2VsLambda.y[last] > 10 * (o.bias2VsLambda.y[0] + 1e-12);
+      return {
+        ok: varFalls && biasRises,
+        detail: `var ${o.varVsLambda.y[0].toFixed(4)}→${o.varVsLambda.y[last].toFixed(4)}, biais² ${o.bias2VsLambda.y[0].toExponential(1)}→${o.bias2VsLambda.y[last].toExponential(1)}`,
+      };
     },
   },
   {
