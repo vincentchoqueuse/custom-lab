@@ -23,6 +23,25 @@
   }
 </script>
 
+<!-- the three utility buttons, shared between the expanded footer and the
+     collapsed rail (same actions, different button class) -->
+{#snippet utils(cls)}
+  <button class={cls} onclick={toggleTheme} title={STR.THEME}>
+    <Icon name={app.ui.theme === 'light' ? 'moon' : 'sun'} size={15} />
+  </button>
+  <button class={cls} class:on={app.ui.teacher} onclick={toggleTeacher} title={STR.TEACHER_MODE}>
+    <Icon name="note" size={15} />
+  </button>
+  <button
+    class={cls}
+    class:on={app.ui.inspector}
+    onclick={() => (app.ui.inspector = !app.ui.inspector)}
+    title={STR.INSPECTOR}
+  >
+    <Icon name="braces" size={15} />
+  </button>
+{/snippet}
+
 <aside class="sidebar" class:collapsed={!app.ui.sidebar}>
   {#if app.ui.sidebar}
     <div class="side-top">
@@ -58,19 +77,7 @@
       {/each}
     </nav>
     <footer>
-      <button onclick={toggleTheme} title={STR.THEME}>
-        <Icon name={app.ui.theme === 'light' ? 'moon' : 'sun'} size={15} />
-      </button>
-      <button class:on={app.ui.teacher} onclick={toggleTeacher} title={STR.TEACHER_MODE}>
-        <Icon name="note" size={15} />
-      </button>
-      <button
-        class:on={app.ui.inspector}
-        onclick={() => (app.ui.inspector = !app.ui.inspector)}
-        title={STR.INSPECTOR}
-      >
-        <Icon name="braces" size={15} />
-      </button>
+      {@render utils('')}
     </footer>
   {:else}
     <!-- collapsed rail, ChatGPT style: logo (→ expand icon on hover) + icon
@@ -84,20 +91,7 @@
         <Icon name="search" size={15} />
       </button>
       <div class="rail-spacer"></div>
-      <button class="rail-btn" onclick={toggleTheme} title={STR.THEME}>
-        <Icon name={app.ui.theme === 'light' ? 'moon' : 'sun'} size={15} />
-      </button>
-      <button class="rail-btn" class:on={app.ui.teacher} onclick={toggleTeacher} title={STR.TEACHER_MODE}>
-        <Icon name="note" size={15} />
-      </button>
-      <button
-        class="rail-btn"
-        class:on={app.ui.inspector}
-        onclick={() => (app.ui.inspector = !app.ui.inspector)}
-        title={STR.INSPECTOR}
-      >
-        <Icon name="braces" size={15} />
-      </button>
+      {@render utils('rail-btn')}
     </div>
   {/if}
 </aside>

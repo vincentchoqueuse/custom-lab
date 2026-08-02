@@ -14,6 +14,17 @@ export function mean(a) {
 }
 
 /**
+ * Median (copies, does not mutate). Even length: mean of the two middle
+ * values.
+ * @param {ArrayLike<number>} a
+ */
+export function median(a) {
+  const s = Float64Array.from(a).sort();
+  const h = s.length >> 1;
+  return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2;
+}
+
+/**
  * Variance. `sample: true` (default) divides by n−1 (unbiased), false by n
  * (MLE).
  * @param {ArrayLike<number>} a
