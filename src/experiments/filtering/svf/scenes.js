@@ -22,7 +22,7 @@ Descendre f_c sous 330 Hz : il ne reste que la fondamentale — un sinus.`,
 est PROJETÉ en avant — glisser f_c lentement de 300 à 1200 Hz : la bosse
 balaie les harmoniques un à un. C'est exactement le geste du filtre d'un
 synthétiseur (le « wah » : f_c qui bouge, rien d'autre). Vue temporelle :
-la sonnerie (ringing) à f_c s'installe dans la forme d'onde.`,
+le ringing à f_c s'installe dans la forme d'onde.`,
   },
   {
     id: 'four',

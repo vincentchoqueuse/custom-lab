@@ -5,15 +5,15 @@ import { view, custom, line, vline } from '../../../core/views.js';
 export default {
   id: 'iir-design',
   title: 'Filtres RII par discrétisation',
-  subtitle: "Bilinéaire, pré-gauchissement, invariance impulsionnelle — l'analogique passe au numérique",
-  tags: ['numérique', 'RII', 'IIR', 'bilinéaire', 'invariance impulsionnelle', 'gauchissement'],
+  subtitle: "Bilinéaire, pre-warping, invariance impulsionnelle — l'analogique passe au numérique",
+  tags: ['numérique', 'RII', 'IIR', 'bilinéaire', 'invariance impulsionnelle', 'warping'],
 
   params: {
     method: select('méthode', {
       description: 'discrétisation du prototype analogique (Fs = 8 kHz)',
       options: [
-        { value: 'bilinear', label: 'bilinéaire pré-gauchie' },
-        { value: 'naive', label: 'bilinéaire naïve' },
+        { value: 'bilinear', label: 'bilinéaire avec pre-warping' },
+        { value: 'naive', label: 'bilinéaire sans pre-warping' },
         { value: 'impulse', label: 'invariance impulsionnelle' },
       ],
       default: 'bilinear',
@@ -73,10 +73,10 @@ export default {
     custom('zplane', 'Le plan z', () => import('./views/ZPlane.svelte')),
     view(
       'warp',
-      'Le gauchissement',
+      'Le warping',
       line('warp', {
         width: 2,
-        label: 'Ω(f) = 2Fs·tan(πf/Fs)',
+        label: 'warping Ω(f) = 2Fs·tan(πf/Fs)',
         overlays: [
           line('warpIdent', { color: '#D95319', dashed: true, label: 'identité (2πf)' }),
           vline('fc', { color: '#EDB120', dashed: true, label: 'f_c' }),
