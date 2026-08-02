@@ -260,13 +260,21 @@ kbd {
 
 .sidebar .subject-title .chev {
   display: inline-flex;
-  opacity: 0.55; /* always visible: the tree must say it can be folded */
+  opacity: 0;
   color: var(--muted-fg);
   transition: opacity var(--t);
 }
 
 .sidebar .subject-title:hover .chev {
   opacity: 1;
+}
+
+/* touch screens have no hover: there, the indicator stays visible or the
+   affordance would never show at all */
+@media (hover: none) {
+  .sidebar .subject-title .chev {
+    opacity: 0.55;
+  }
 }
 
 .sidebar .exp-link {
