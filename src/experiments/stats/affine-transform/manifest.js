@@ -7,6 +7,7 @@ export default {
   title: 'Transformation affine Y = aX + b',
   subtitle: 'Comment a et b déplacent, dilatent et retournent une densité',
   tags: ['transformation', 'variable aléatoire', 'moyenne', 'variance'],
+  group: 'Lois et théorèmes',
 
   params: {
     law: select('loi', {

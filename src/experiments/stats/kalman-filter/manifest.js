@@ -7,6 +7,7 @@ export default {
   title: 'Le filtre de Kalman',
   subtitle: 'Estimation récursive : prédire, corriger, et savoir de combien on se trompe',
   tags: ['Kalman', 'estimation récursive', 'Riccati'],
+  group: 'Régression et filtrage',
 
   params: {
     sigw: log('σw', {

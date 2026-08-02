@@ -7,6 +7,7 @@ export default {
   title: 'Estimation de fréquence (moindres carrés)',
   subtitle: 'Un critère non convexe estimé à la grille — le pas règle coût et précision',
   tags: ['moindres carrés', 'fréquence', 'grille', 'non convexe'],
+  group: 'Régression et filtrage',
 
   params: {
     f: float('f', {

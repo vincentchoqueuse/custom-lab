@@ -7,6 +7,7 @@ export default {
   title: 'Filtres RII par discrétisation',
   subtitle: "Bilinéaire, pré-gauchissement, invariance impulsionnelle — l'analogique passe au numérique",
   tags: ['numérique', 'RII', 'IIR', 'bilinéaire', 'invariance impulsionnelle', 'gauchissement'],
+  group: 'Filtrage numérique',
 
   params: {
     method: select('méthode', {

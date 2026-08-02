@@ -7,6 +7,7 @@ export default {
   title: 'Le filtre en peigne (comb)',
   subtitle: 'Un écho dans le temps, un peigne en fréquence — D règle les dents, g leur profondeur',
   tags: ['numérique', 'comb', 'écho', 'flanger', 'Karplus-Strong'],
+  group: 'Filtrage numérique',
 
   params: {
     structure: select('structure', {

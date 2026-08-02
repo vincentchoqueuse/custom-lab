@@ -7,6 +7,7 @@ export default {
   title: 'Séries de Fourier',
   subtitle: 'Reconstruire un signal harmonique par harmonique — et le phénomène de Gibbs',
   tags: ['analogique', 'Fourier', 'harmoniques', 'spectre', 'Gibbs'],
+  group: 'Signaux analogiques',
 
   params: {
     wave: select('signal', {

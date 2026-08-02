@@ -7,6 +7,7 @@ export default {
   title: 'Intervalles de confiance',
   subtitle: 'Couverture fréquentiste et largeur des IC',
   tags: ['fréquentiste', 'IC', 'Student'],
+  group: 'Estimateurs et performances',
 
   params: {
     mu: float('μ', { description: 'moyenne vraie', min: 0, max: 10, step: 0.1, default: 5 }),
