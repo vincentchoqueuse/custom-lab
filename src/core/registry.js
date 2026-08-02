@@ -5,9 +5,7 @@
 //   - `seed` param injected into every schema
 //   - `type: 'float'` implicit param type, `name` defaults to the param key
 //   - `actions` defaults to ['randomizeSeed', 'freeze', 'resetDefaults']
-//   - `groups` absent → one flat group (params AND, in the sidebar, the
-//     experiments of a subject: an optional `group` key on a manifest files
-//     it under a display heading, `groups` in _subject.js fixes their order)
+//   - `groups` absent → one flat group
 //   - `scenes.js` auto-discovered and merged as `presets`; in a scene, `view`
 //     defaults to the first view, `drawer` to false, `masked`/`visible` to []
 
@@ -97,42 +95,15 @@ for (const [path, mod] of Object.entries(manifestModules)) {
       id: loc.subject,
       title: meta.title ?? loc.subject,
       order: meta.order ?? 99,
-      groupOrder: meta.groups ?? [],
       experiments: [],
     });
   }
   subjectMap.get(loc.subject).experiments.push(manifest);
 }
 
-/**
- * Display groups inside a subject: declared order first (from _subject.js),
- * then any others in first-seen order; ungrouped experiments open the list
- * under a headingless group. A subject where nobody declares a `group`
- * yields exactly one flat group — the sidebar then renders as before.
- */
-function buildGroups(subject) {
-  const titles = [];
-  for (const t of subject.groupOrder) {
-    if (subject.experiments.some((e) => e.group === t)) titles.push(t);
-  }
-  for (const e of subject.experiments) {
-    if (e.group && !titles.includes(e.group)) titles.push(e.group);
-  }
-  const loose = subject.experiments.filter((e) => !e.group);
-  const groups = titles.map((title) => ({
-    title,
-    experiments: subject.experiments.filter((e) => e.group === title),
-  }));
-  if (loose.length || groups.length === 0) groups.unshift({ title: null, experiments: loose });
-  return groups;
-}
-
 /** Subjects sorted by order, each with its experiments (sidebar tree). */
 export const subjects = [...subjectMap.values()].sort((a, b) => a.order - b.order);
-for (const s of subjects) {
-  s.experiments.sort((a, b) => a.title.localeCompare(b.title));
-  s.groups = buildGroups(s);
-}
+for (const s of subjects) s.experiments.sort((a, b) => a.title.localeCompare(b.title));
 
 /** @param {string} key — 'subject/experiment' */
 export function getExperiment(key) {

@@ -1,1 +1,1 @@
-export default { title: 'Communications numériques', order: 4 };
+export default { title: 'Communications numériques', order: 9 };

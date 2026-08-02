@@ -99,20 +99,15 @@
           </span>
         </button>
         {#if !collapsed[subject.id]}
-          {#each subject.groups as group, gi (group.title ?? gi)}
-            {#if group.title}
-              <div class="group-title">{group.title}</div>
-            {/if}
-            {#each group.experiments as exp (exp.key)}
-              <a
-                class="exp-link"
-                class:active={app.expKey === exp.key}
-                href={`#/${exp.key}`}
-                title={exp.subtitle}
-              >
-                {exp.title}
-              </a>
-            {/each}
+          {#each subject.experiments as exp (exp.key)}
+            <a
+              class="exp-link"
+              class:active={app.expKey === exp.key}
+              href={`#/${exp.key}`}
+              title={exp.subtitle}
+            >
+              {exp.title}
+            </a>
           {/each}
         {/if}
       {/each}
