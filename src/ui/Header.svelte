@@ -4,11 +4,13 @@
     manifest,
     activeScene,
     applyPreset,
+    currentHash,
     toggleSidebar,
   } from '../core/store.svelte.js';
   import { subjects } from '../core/registry.js';
   import { STR } from '../core/strings.js';
   import Icon from './Icon.svelte';
+  import QrCode from './QrCode.svelte';
 
   let { onpresent } = $props();
 
@@ -19,8 +21,16 @@
   );
 
   let menuOpen = $state(false);
+  let qrOpen = $state(false);
   let copied = $state(false);
   let pickerEl = $state(null);
+  let qrEl = $state(null);
+
+  // live through replaceState updates (no hashchange event while dragging)
+  const hash = $derived(m ? currentHash() : '#/');
+  const href = $derived(
+    typeof location === 'undefined' ? hash : location.origin + location.pathname + hash
+  );
 
   function pick(id) {
     applyPreset(id);
@@ -37,10 +47,14 @@
 
   function onWindowPointerDown(e) {
     if (menuOpen && pickerEl && !pickerEl.contains(e.target)) menuOpen = false;
+    if (qrOpen && qrEl && !qrEl.contains(e.target)) qrOpen = false;
   }
 
   function onWindowKeydown(e) {
-    if (e.key === 'Escape' && menuOpen) menuOpen = false;
+    if (e.key === 'Escape') {
+      menuOpen = false;
+      qrOpen = false;
+    }
   }
 </script>
 
@@ -81,6 +95,19 @@
     <button class="icon-btn copy-btn" onclick={copyUrl} title={STR.COPY_LINK}>
       <Icon name={copied ? 'check' : 'link'} size={15} />
     </button>
+    <!-- QR of the scene URL — stays available in presentation mode, where a
+         lecture hall scans it from the projector -->
+    <div class="qr-anchor" bind:this={qrEl}>
+      <button class="icon-btn" class:on={qrOpen} onclick={() => (qrOpen = !qrOpen)} title={STR.QR_CODE}>
+        <Icon name="qr-code" size={15} />
+      </button>
+      {#if qrOpen}
+        <div class="qr-popover" role="dialog" aria-label={STR.QR_CODE}>
+          <QrCode text={href} size={236} />
+          <span class="qr-url mono">{hash}</span>
+        </div>
+      {/if}
+    </div>
     <a class="icon-btn" href={STR.REPO_URL} target="_blank" rel="noopener" title={STR.GITHUB}>
       <Icon name="github" size={15} />
     </a>
