@@ -4,6 +4,7 @@ import { view, line, bars, scatter, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'sampling-aliasing',
+  order: 1,
   title: 'Échantillonnage & repliement',
   subtitle: 'Shannon en direct : sous fe/2 tout va bien, au-dessus les fréquences se replient',
   tags: ['analogique', 'numérique', 'échantillonnage', 'repliement', 'aliasing', 'Shannon', 'Nyquist'],

@@ -4,6 +4,7 @@ import { view, custom, histogram, line, density, vline, hline } from '../../../c
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'confidence-intervals',
+  order: 6,
   title: 'Intervalles de confiance',
   subtitle: 'Couverture fréquentiste et largeur des IC',
   tags: ['fréquentiste', 'IC', 'Student'],

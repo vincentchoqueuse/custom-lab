@@ -264,6 +264,11 @@ registry at load time):
 - **`actions`** defaults to `['randomizeSeed', 'freeze', 'resetDefaults']`.
 - **`groups`** absent → one flat group.
 - **`layout: 'plot'`** is implied when a view has a `plot` key.
+- **`order` ranks the experiment inside its subject** — the lecture progression, not
+  the alphabet: the sidebar and the palette read a subject in the order the course
+  meets its demos. Absent → the experiment lands at the end of its subject,
+  alphabetically, so adding one still modifies nothing else (principle 4).
+  `_subject.js` carries the same key for the subjects themselves.
 - **`scenes.js` is auto-discovered** by the registry (same glob as manifests) and
   merged as `presets`. In a scene: `view` defaults to the first view, `drawer` to
   `false`, `masked` to `[]`.
@@ -312,6 +317,7 @@ import { view, custom, histogram, line, density, vline, hline } from '../../core
 /** @type {import('../../core/types').ExperimentManifest} */
 export default {
   id: 'confidence-intervals',
+  order: 6,                                     // rank inside the subject (lecture order)
   title: 'Intervalles de confiance',            // course language (French here)
   subtitle: 'Couverture fréquentiste et largeur des IC',
   tags: ['fréquentiste', 'IC', 'Student'],

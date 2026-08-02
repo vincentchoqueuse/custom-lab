@@ -4,6 +4,7 @@ import { view, line, histogram, scatter, vline, hline } from '../../../core/view
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'eye-diagram',
+  order: 3,
   title: 'Le diagramme de l\'œil',
   subtitle: 'ISI, bruit et instant d\'échantillonnage — la santé d\'une liaison en un regard',
   tags: ['diagramme de l\'œil', 'ISI', 'cosinus surélevé', 'Nyquist', 'PAM'],

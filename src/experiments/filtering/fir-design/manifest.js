@@ -4,6 +4,7 @@ import { view, line, bars, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'fir-design',
+  order: 2,
   title: 'Filtres RIF par fenêtrage',
   subtitle: 'Tronquer, fenêtrer, retarder — le design RIF en trois gestes',
   tags: ['numérique', 'RIF', 'FIR', 'fenêtrage', 'Gibbs', 'phase linéaire'],

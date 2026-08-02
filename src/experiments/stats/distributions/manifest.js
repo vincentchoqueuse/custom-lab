@@ -4,6 +4,7 @@ import { view, custom, line } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'distributions',
+  order: 1,
   title: 'Catalogue de lois',
   subtitle: 'pdf/pmf et CDF : théorie contre réalisations',
   tags: ['probabilités', 'lois', 'histogramme', 'CDF', 'Poisson', 'gaussienne'],

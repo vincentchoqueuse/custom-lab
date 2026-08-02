@@ -5,6 +5,7 @@ import { canonicalLaws } from '../../../core/laws.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'central-limit',
+  order: 5,
   title: 'Théorème central limite',
   subtitle: 'La moyenne de n tirages devient gaussienne — quelle que soit la loi',
   tags: ['TCL', 'CLT', 'convergence', 'gaussienne', 'moyenne'],

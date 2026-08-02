@@ -4,6 +4,7 @@ import { view, histogram, line, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'variance-estimators',
+  order: 2,
   title: 'Biais et variance d\'un estimateur',
   subtitle: 'Deux estimateurs de σ² : diviser par N ou par N−1 ?',
   tags: ['estimateur', 'biais', 'variance', 'distribution d\'échantillonnage'],

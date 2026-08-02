@@ -4,6 +4,7 @@ import { view, line, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'lti-response',
+  order: 2,
   title: 'Réponse d\'un système LTI quelconque',
   subtitle: 'Tapez num et den, choisissez l\'entrée — échelon, rampe ou sinusoïde',
   tags: ['LTI', 'fonction de transfert', 'échelon', 'rampe', 'régime permanent'],

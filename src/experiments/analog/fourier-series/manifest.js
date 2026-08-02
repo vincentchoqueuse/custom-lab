@@ -4,6 +4,7 @@ import { view, line, bars, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'fourier-series',
+  order: 1,
   title: 'Séries de Fourier',
   subtitle: 'Reconstruire un signal harmonique par harmonique — et le phénomène de Gibbs',
   tags: ['analogique', 'Fourier', 'harmoniques', 'spectre', 'Gibbs'],

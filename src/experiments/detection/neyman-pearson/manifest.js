@@ -4,6 +4,7 @@ import { view, line, band, scatter, vline, hline } from '../../../core/views.js'
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'neyman-pearson',
+  order: 1,
   title: 'Détecteur de Neyman-Pearson',
   subtitle: 'Signal connu dans un bruit gaussien : seuil, ROC et P_D vs SNR',
   tags: ['détection', 'Neyman-Pearson', 'ROC', 'fausse alarme', 'SNR'],

@@ -4,6 +4,7 @@ import { view, line, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'runge-kutta',
+  order: 1,
   title: 'Euler, RK2, RK4 : l\'ordre se paie',
   subtitle: 'Intégrer une équation différentielle — la pente de l\'erreur est l\'ordre',
   tags: ['Runge-Kutta', 'Euler', 'EDO', 'ordre', 'pendule', 'simulation'],

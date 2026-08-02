@@ -5,6 +5,7 @@ import { canonicalLaws } from '../../../core/laws.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'law-large-numbers',
+  order: 4,
   title: 'Loi des grands nombres',
   subtitle: 'Chaque trajectoire de x̄ₙ converge vers μ — à la vitesse 1/√n',
   tags: ['LGN', 'convergence', 'moyenne empirique', 'trajectoires'],

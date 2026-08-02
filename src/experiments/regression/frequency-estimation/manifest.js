@@ -4,6 +4,7 @@ import { view, line, scatter, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'frequency-estimation',
+  order: 3,
   title: 'Estimation de fréquence (moindres carrés)',
   subtitle: 'Un critère non convexe estimé à la grille — le pas règle coût et précision',
   tags: ['moindres carrés', 'fréquence', 'grille', 'non convexe'],

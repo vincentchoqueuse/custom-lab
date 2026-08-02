@@ -4,6 +4,7 @@ import { view, line, scatter } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'am-fm',
+  order: 3,
   title: 'Modulations AM et FM',
   subtitle: 'Bandes latérales, raies de Bessel et règle de Carson',
   tags: ['analogique', 'AM', 'FM', 'Bessel', 'Carson', 'modulation'],

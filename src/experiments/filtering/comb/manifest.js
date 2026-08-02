@@ -4,6 +4,7 @@ import { view, line, bars, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'comb',
+  order: 3,
   title: 'Le filtre en peigne (comb)',
   subtitle: 'Un écho dans le temps, un peigne en fréquence — D règle les dents, g leur profondeur',
   tags: ['numérique', 'comb', 'écho', 'flanger', 'Karplus-Strong'],

@@ -4,6 +4,7 @@ import { view, line, histogram, density, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'affine-transform',
+  order: 2,
   title: 'Transformation affine Y = aX + b',
   subtitle: 'Comment a et b déplacent, dilatent et retournent une densité',
   tags: ['transformation', 'variable aléatoire', 'moyenne', 'variance'],

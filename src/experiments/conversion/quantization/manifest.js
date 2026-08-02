@@ -4,6 +4,7 @@ import { view, line, histogram, density, vline, hline } from '../../../core/view
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'quantization',
+  order: 3,
   title: 'Quantification',
   subtitle: "L'escalier du CAN, son erreur, et la règle des 6 dB par bit",
   tags: ['numérique', 'CAN', 'quantification', 'SNR', 'dither'],

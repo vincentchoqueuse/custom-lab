@@ -4,6 +4,7 @@ import { view, plane, line, scatter } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'ber-chain',
+  order: 2,
   title: 'La chaîne BER complète',
   subtitle: 'Bits, codage de Gray, Eb/N₀ : la comparaison honnête des modulations',
   tags: ['BER', 'Gray', 'Eb/N0', 'mapping', 'chaîne de transmission'],

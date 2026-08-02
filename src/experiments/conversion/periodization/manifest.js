@@ -4,6 +4,7 @@ import { view, line, scatter, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'periodization',
+  order: 2,
   title: 'Échantillonner, c\'est périodiser',
   subtitle: 'Le spectre se recopie tous les Fe — et le repliement, c\'est la somme des copies',
   tags: ['analogique', 'numérique', 'échantillonnage', 'périodisation', 'Poisson', 'Shannon'],
