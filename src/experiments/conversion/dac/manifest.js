@@ -5,7 +5,7 @@ import { view, line, scatter, bars, vline } from '../../../core/views.js';
 export default {
   id: 'dac',
   title: 'Le CNA : suréchantillonnage et reconstruction',
-  subtitle: "Zéro-stuffing, filtre d'interpolation, escalier — et l'enveloppe en sinc",
+  subtitle: "Zero-stuffing, filtre d'interpolation, escalier — et l'enveloppe en sinc",
   tags: ['numérique', 'analogique', 'CNA', 'DAC', 'suréchantillonnage', 'interpolation', 'ZOH'],
 
   params: {
@@ -52,7 +52,7 @@ export default {
       'digital',
       'Le domaine numérique',
       bars('upBars', {
-        label: 'zéro-stuffing ×L',
+        label: 'zero-stuffing ×L',
         overlays: [line('upLine', { color: '#D95319', width: 2, label: 'après filtre' })],
         axes: { x: { label: 't', unit: 'ms' }, y: 'x[k] à L·Fs' },
       })

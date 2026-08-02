@@ -13,14 +13,14 @@ signature de la méthode — tout l'axe jω est enroulé sur le cercle unité.`,
   },
   {
     id: 'warping',
-    title: 'Scène 2 · Oublier le pré-gauchissement',
+    title: 'Scène 2 · Oublier le pre-warping',
     params: { method: 'naive', family: 'butter', n: 4, fc: 1000, Amax: 1 },
     visible: ['method', 'fc'],
-    notes: `Bilinéaire naïve, f_c = 1000 Hz : coupure obtenue 948 Hz. Monter
-f_c à 3000 : obtenue 2204 Hz — 800 Hz d'erreur ! L'onglet Gauchissement
-montre pourquoi : la tangente s'écarte de l'identité en montant vers Nyquist.
-Geler (F), repasser en pré-gauchie : la coupure retombe exactement sur la
-cible. Le pré-gauchissement ne corrige qu'UN point — mais c'est le bon.`,
+    notes: `Bilinéaire sans pre-warping, f_c = 1000 Hz : coupure obtenue
+948 Hz. Monter f_c à 3000 : obtenue 2204 Hz — 800 Hz d'erreur ! L'onglet
+Warping montre pourquoi : la tangente s'écarte de l'identité en montant vers
+Nyquist. Geler (F), réactiver le pre-warping : la coupure retombe exactement
+sur la cible. Le pre-warping ne corrige qu'UN point — mais c'est le bon.`,
   },
   {
     id: 'zplane',

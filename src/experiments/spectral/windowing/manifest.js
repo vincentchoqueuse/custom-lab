@@ -48,8 +48,8 @@ export default {
       ],
       default: 256,
     }),
-    pad: select('zéro-padding', {
-      description: 'facteur de bourrage de zéros (interpole, ne résout pas)',
+    pad: select('zero-padding', {
+      description: 'facteur de zero-padding (interpole, ne résout pas)',
       options: [
         { value: 1, label: '×1' },
         { value: 4, label: '×4' },

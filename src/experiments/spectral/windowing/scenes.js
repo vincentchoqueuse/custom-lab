@@ -12,12 +12,12 @@ c'est Fs/N (statline) : passer N de 256 à 1024 et regarder les raies maigrir.`,
   },
   {
     id: 'zero-padding',
-    title: 'Scène 2 · Le zéro-padding ne résout rien',
+    title: 'Scène 2 · Le zero-padding ne résout rien',
     params: { win: 'rect', df: 3, a2: 0, N: 256, pad: 1, f1: 200 },
     visible: ['pad', 'df', 'N'],
     notes: `Δf = 3 Hz < Fs/N = 3.9 Hz : UNE seule bosse. Prédiction à main levée :
-« si je zéro-padde ×16, je vois deux raies ? » Geler (F), passer ×16 : la courbe
-est plus lisse… et toujours une bosse. Le padding interpole, il n'invente pas
+« si je fais un zero-padding ×16, je vois deux raies ? » Geler (F), passer ×16 : la courbe
+est plus lisse… et toujours une bosse. Le zero-padding interpole, il n'invente pas
 d'information. Ce qui résout : N (passer à 1024 sépare).`,
   },
   {
