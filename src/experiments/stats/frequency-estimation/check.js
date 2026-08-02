@@ -1,75 +1,53 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 
-const BASE = { f: 5, A: 1, phi: 0, sigma: 0.3, f0: 5.2, seed: 17 };
+const BASE = { f: 5, A: 1, phi: 0, sigma: 0.3, step: 0.05, seed: 17 };
 
 export const checks = [
   {
-    name: 'zero noise: grid search recovers f exactly (parabolic refinement)',
+    name: 'zero noise: the argmin lands on the grid point nearest f (±Δf/2)',
     category: 'numeric',
     run() {
-      const { observables: o } = compute({ ...BASE, sigma: 0 });
-      const err = Math.abs(o.fGrid.value - BASE.f);
-      return { ok: err < 5e-3, detail: `|f̂−f|=${err.toExponential(2)}` };
-    },
-  },
-  {
-    name: 'well-initialized gradient and Newton agree with the grid minimizer',
-    category: 'numeric',
-    run() {
-      const { observables: o } = compute({ ...BASE });
-      const eg = Math.abs(o.fGrad.value - o.fGrid.value);
-      const en = Math.abs(o.fNewton.value - o.fGrid.value);
-      return {
-        ok: eg < 0.05 && en < 0.02,
-        detail: `|grad−grille|=${eg.toFixed(4)} |newton−grille|=${en.toFixed(4)}`,
-      };
-    },
-  },
-  {
-    name: 'far initialization traps gradient descent in a local basin',
-    category: 'numeric',
-    run() {
-      const { observables: o } = compute({ ...BASE, f0: 9 });
-      const trapped = Math.abs(o.fGrad.value - BASE.f);
-      return { ok: trapped > 0.5, detail: `|f̂grad−f|=${trapped.toFixed(3)} (stuck near f₀=9)` };
-    },
-  },
-  {
-    name: 'gradient iterates never increase the cost (Armijo backtracking)',
-    category: 'numeric',
-    run() {
-      const { observables: o } = compute({ ...BASE, f0: 9 });
-      const y = o.gradPath.y;
-      for (let k = 1; k < y.length; k++) {
-        if (y[k] > y[k - 1] + 1e-9)
-          return { ok: false, detail: `increase at iterate ${k}` };
+      // grid quantization is the ONLY error source at σ = 0
+      let worst = 0;
+      for (const step of [0.01, 0.1, 0.4]) {
+        const { observables: o } = compute({ ...BASE, sigma: 0, step });
+        worst = Math.max(worst, o.errHat.value / (step / 2));
       }
-      return { ok: true, detail: `${y.length} iterates, monotone` };
+      return { ok: worst <= 1 + 1e-9, detail: `max err/(Δf/2)=${worst.toFixed(3)}` };
     },
   },
   {
-    name: "Newton's basin is narrower than gradient's (f₀ = 5.4)",
+    name: 'evaluation count: nEvals = ⌊(FMAX−FMIN)/Δf⌋ + 1',
     category: 'numeric',
     run() {
-      // at 0.4 Hz from f the gradient still descends into the global basin,
-      // while Newton (needing J'' > 0) has already left it
-      const { observables: o } = compute({ ...BASE, f0: 5.4 });
-      const gradOk = Math.abs(o.fGrad.value - BASE.f) < 0.1;
-      const newtonLost = Math.abs(o.fNewton.value - BASE.f) > 0.5;
+      const { observables: o } = compute({ ...BASE, step: 0.05 });
+      const expected = Math.floor(19 / 0.05) + 1;
       return {
-        ok: gradOk && newtonLost,
-        detail: `grad=${o.fGrad.value.toFixed(3)} newton=${o.fNewton.value.toFixed(3)}`,
+        ok: o.nEvals.value === expected && o.gridPts.x.length === expected,
+        detail: `nEvals=${o.nEvals.value} (expected ${expected})`,
       };
     },
   },
   {
-    name: 'moderate noise: grid estimate stays within 0.05 Hz of f',
+    name: 'a step wider than the 1/T basin can miss the global minimum',
+    category: 'numeric',
+    run() {
+      // with Δf = 1.3 Hz and this seed the grid straddles the true basin:
+      // the estimate must land in ANOTHER basin (> 0.5 Hz away) — the
+      // pedagogical failure mode of scene 2
+      const { observables: o } = compute({ ...BASE, step: 1.3 });
+      return { ok: o.errHat.value > 0.5, detail: `|f̂−f|=${o.errHat.value.toFixed(3)} Hz` };
+    },
+  },
+  {
+    name: 'moderate noise, fine grid: f̂ within 0.05 Hz of f',
     category: 'statistical',
     run() {
-      const { observables: o } = compute({ ...BASE });
-      const err = Math.abs(o.fGrid.value - BASE.f);
-      return { ok: err < 0.05, detail: `|f̂−f|=${err.toFixed(4)} Hz` };
+      // the CRB at this SNR is ≈ 0.017 Hz; 0.05 covers ~3 standard errors
+      // on top of the 0.005 quantization floor (step 0.01)
+      const { observables: o } = compute({ ...BASE, step: 0.01 });
+      return { ok: o.errHat.value < 0.05, detail: `|f̂−f|=${o.errHat.value.toFixed(4)} Hz` };
     },
   },
   standardChecks.determinism(compute, { ...BASE }, 'costCurve'),

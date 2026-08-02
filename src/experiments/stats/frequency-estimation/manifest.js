@@ -1,12 +1,12 @@
-import { float } from '../../../core/fields.js';
+import { float, log } from '../../../core/fields.js';
 import { view, line, scatter, vline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'frequency-estimation',
   title: 'Estimation de fréquence (moindres carrés)',
-  subtitle: 'Un critère non convexe : grille, gradient et Newton face aux minima locaux',
-  tags: ['moindres carrés', 'fréquence', 'optimisation', 'gradient', 'Newton'],
+  subtitle: 'Un critère non convexe estimé à la grille — le pas règle coût et précision',
+  tags: ['moindres carrés', 'fréquence', 'grille', 'non convexe'],
 
   params: {
     f: float('f', {
@@ -19,9 +19,9 @@ export default {
       min: -3.14, max: 3.14, step: 0.01, default: 0, unit: 'rad', precision: 2,
     }),
     sigma: float('σ', { description: 'écart-type du bruit', min: 0, max: 2, step: 0.05, default: 0.3 }),
-    f0: float('f₀', {
-      description: 'initialisation des algorithmes itératifs',
-      min: 1, max: 18, step: 0.1, default: 5.2, unit: 'Hz', precision: 1,
+    step: log('Δf', {
+      description: 'pas de la grille de recherche',
+      min: 0.01, max: 2, default: 0.05, unit: 'Hz', precision: 3,
     }),
     // no seed here: injected by the core
   },
@@ -32,12 +32,29 @@ export default {
 
   groups: [
     { title: 'Signal (T = 1 s, Fs = 100 Hz)', params: ['f', 'A', 'phi', 'sigma'] },
-    { title: 'Optimisation', params: ['f0'] },
+    { title: 'Recherche sur grille', params: ['step'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
 
   views: [
+    // The star view: the least-squares cost over frequency, the evaluated
+    // grid points sitting ON the curve, and the argmin.
+    view(
+      'cost',
+      'Critère J(f)',
+      line('costCurve', {
+        width: 2,
+        label: 'J(f)',
+        overlays: [
+          scatter('gridPts', { color: '#7E2F8E', size: 3.5, opacity: 0.85, label: 'grille évaluée' }),
+          vline('f', { color: '#0072BD', dashed: true, width: 1.4, label: 'f' }),
+          vline('fHat', { color: '#77AC30', width: 1.6, label: 'f̂' }),
+        ],
+        axes: { x: { label: 'f', unit: 'Hz' }, y: 'J(f)' },
+      })
+    ),
+
     view(
       'signal',
       'Temporel',
@@ -49,25 +66,6 @@ export default {
           line('fittedSignal', { color: '#D95319', width: 2, dashed: true, label: 'estimé (grille)' }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
-      })
-    ),
-
-    // The star view: the least-squares cost over frequency, with each
-    // algorithm's iterates sitting ON the curve.
-    view(
-      'cost',
-      'Critère J(f)',
-      line('costCurve', {
-        width: 2,
-        label: 'J(f)',
-        overlays: [
-          scatter('gradPath', { color: '#7E2F8E', size: 3.5, opacity: 0.85, label: 'itérés gradient' }),
-          scatter('newtonPath', { color: '#EDB120', size: 3.5, opacity: 0.95, label: 'itérés Newton' }),
-          vline('f', { color: '#0072BD', dashed: true, width: 1.4 }),
-          vline('fGrid', { color: '#77AC30', width: 1.6, label: 'f̂ grille' }),
-          vline('f0', { color: '#a1a1aa', dashed: true, width: 1.4, label: 'f₀' }),
-        ],
-        axes: { x: { label: 'f', unit: 'Hz' }, y: 'J(f)' },
       })
     ),
   ],
