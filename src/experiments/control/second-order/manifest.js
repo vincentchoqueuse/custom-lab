@@ -1,0 +1,89 @@
+import { float, log } from '../../../core/fields.js';
+import { view, custom, line, vline, hline } from '../../../core/views.js';
+
+/** @type {import('../../../core/types').ExperimentManifest} */
+export default {
+  id: 'second-order',
+  title: 'Réponse d\'un second ordre',
+  subtitle: 'm et ω₀ racontent tout : temporel, pôles et fréquentiel du même système',
+  tags: ['second ordre', 'amortissement', 'pôles', 'résonance', 'réponse indicielle'],
+
+  params: {
+    K: float('K', { description: 'gain statique', min: 0.2, max: 2, step: 0.05, default: 1 }),
+    m: float('m', {
+      description: 'coefficient d\'amortissement',
+      min: 0.05,
+      max: 2,
+      step: 0.05,
+      default: 0.3,
+      precision: 2,
+    }),
+    w0: log('ω₀', {
+      description: 'pulsation propre',
+      min: 0.5,
+      max: 20,
+      default: 2,
+      unit: 'rad/s',
+    }),
+    // no seed here: injected by the core (unused: fully deterministic)
+  },
+
+  derived: {
+    regime: {
+      label: 'régime',
+      calc: (p) =>
+        p.m < 1 ? 'pseudo-périodique (m < 1)' : p.m === 1 ? 'critique (m = 1)' : 'apériodique (m > 1)',
+    },
+    q: { label: 'facteur de qualité Q = 1/2m', calc: (p) => (1 / (2 * p.m)).toFixed(2) },
+  },
+
+  groups: [
+    { title: 'Système', params: ['K', 'm', 'w0'] },
+  ],
+
+  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+
+  views: [
+    // step response with the exponential envelope and the ±5% band
+    view(
+      'step',
+      'Réponse indicielle',
+      line('stepResponse', {
+        width: 2.5,
+        label: 'y(t)',
+        overlays: [
+          line('envHi', { color: '#D95319', width: 1.3, dashed: true, label: 'enveloppe' }),
+          line('envLo', { color: '#D95319', width: 1.3, dashed: true }),
+          hline((p) => p.K, { color: '#EDB120', dashed: true, width: 1.6, label: 'K' }),
+          hline((p) => 1.05 * p.K, { color: '#a1a1aa', width: 1 }),
+          hline((p) => 0.95 * p.K, { color: '#a1a1aa', width: 1, label: '±5%' }),
+        ],
+        axes: { x: { label: 't', unit: 's' }, y: 'y(t)' },
+      })
+    ),
+
+    // CUSTOM view: equal-aspect pole plane (generic IQPlane) — the poles
+    // travel on the ω₀ circle as m varies, then split on the real axis.
+    custom('poles', 'Plan des pôles', () => import('./views/PolePlane.svelte')),
+
+    // |H(jω)| in log-log with the resonance when m < 1/√2
+    view(
+      'freq',
+      'Réponse fréquentielle',
+      line('freqResponse', {
+        color: '#7E2F8E',
+        width: 2.4,
+        label: '|H(jω)|',
+        overlays: [
+          vline((p) => p.w0, { color: '#EDB120', dashed: true, width: 1.8, label: 'ω₀' }),
+          vline('wr', { color: '#D95319', dashed: true, width: 1.6, label: 'ωr' }),
+          hline((p) => p.K, { color: '#a1a1aa', width: 1, dashed: true, label: 'K' }),
+        ],
+        axes: {
+          x: { label: 'ω', unit: 'rad/s', scale: 'log' },
+          y: { label: '|H|', scale: 'log' },
+        },
+      })
+    ),
+  ],
+};

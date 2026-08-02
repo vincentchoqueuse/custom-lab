@@ -20,6 +20,8 @@
     segments = [], // [{x1, y1, x2, y2}] dashed boundary lines
     minHalf = 1.4,
     maxHalf = 3,
+    xLabel = 'I',
+    yLabel = 'Q',
     legend = [],
     pres = false,
   } = $props();
@@ -52,7 +54,7 @@
     </clipPath>
   </defs>
   <g transform="translate({M.left},{M.top})">
-    <Axes {xs} {ys} xAxis={{ label: 'I' }} yAxis={{ label: 'Q' }} w={iw} h={ih} {k} {kt} />
+    <Axes {xs} {ys} xAxis={{ label: xLabel }} yAxis={{ label: yLabel }} w={iw} h={ih} {k} {kt} />
 
     <g clip-path="url(#iq-clip)">
       {#each segments as s, i (i)}
