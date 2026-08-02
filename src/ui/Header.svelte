@@ -49,7 +49,8 @@
 <header class="header">
   <div class="left">
     {#if !app.ui.sidebar}
-      <button class="icon-btn" onclick={toggleSidebar} title="{STR.COLLAPSE_SIDEBAR} (⌘B)">
+      <!-- mobile only (CSS): on desktop the collapsed rail carries the toggle -->
+      <button class="icon-btn side-open" onclick={toggleSidebar} title="{STR.COLLAPSE_SIDEBAR} (⌘B)">
         <Icon name="panel-left" size={15} />
       </button>
     {/if}

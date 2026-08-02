@@ -128,12 +128,60 @@ kbd {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  transition: margin-left var(--t);
+  transition: margin-left var(--t), width var(--t);
   overflow: hidden;
 }
 
+/* collapsed = ChatGPT-style icon rail on desktop (mobile hides it fully) */
 .sidebar.collapsed {
-  margin-left: -261px;
+  width: 58px;
+}
+
+.sidebar .rail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0;
+}
+
+.sidebar .rail-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  color: var(--muted-fg);
+  transition: background var(--t), color var(--t);
+}
+
+.sidebar .rail-btn:hover {
+  background: var(--sidebar-hover);
+  color: var(--foreground);
+}
+
+.sidebar .rail-btn.on {
+  background: var(--sidebar-active);
+  color: var(--foreground);
+}
+
+/* the logo swaps to the expand icon on hover, ChatGPT style */
+.sidebar .rail-brand .expand {
+  display: none;
+}
+
+.sidebar .rail-brand:hover .logo {
+  display: none;
+}
+
+.sidebar .rail-brand:hover .expand {
+  display: flex;
+}
+
+.sidebar .rail-spacer {
+  flex: 1;
 }
 
 .sidebar .side-top {
@@ -273,6 +321,11 @@ kbd {
 }
 
 /* ---------- header ------------------------------------------------------- */
+
+/* on desktop the collapsed rail carries the sidebar toggle */
+.header .side-open {
+  display: none;
+}
 
 .header {
   display: flex;
@@ -1039,4 +1092,14 @@ kbd {
     box-shadow: 8px 0 30px rgba(0, 0, 0, 0.25);
   }
 
+  /* no rail on small screens: collapsed slides fully off-canvas */
+  .sidebar.collapsed {
+    width: 260px;
+    margin-left: -261px;
+    box-shadow: none;
+  }
+
+  .header .side-open {
+    display: inline-flex;
+  }
 }
