@@ -7,6 +7,7 @@ export default {
   title: 'La cible : biais, variance, EQM',
   subtitle: 'Quatre estimateurs du centre — centré n\'est pas groupé, et l\'EQM tranche',
   tags: ['estimateur', 'biais', 'variance', 'EQM', 'rétrécissement'],
+  group: 'Estimateurs et performances',
 
   params: {
     mu: float('μ', { description: 'centre de la cible (deux coordonnées)', min: 0, max: 5, step: 0.1, default: 2 }),

@@ -7,6 +7,7 @@ export default {
   title: 'Filtres RIF par fenêtrage',
   subtitle: 'Tronquer, fenêtrer, retarder — le design RIF en trois gestes',
   tags: ['numérique', 'RIF', 'FIR', 'fenêtrage', 'Gibbs', 'phase linéaire'],
+  group: 'Filtrage numérique',
 
   params: {
     fc: float('f_c', {

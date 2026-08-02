@@ -7,6 +7,7 @@ export default {
   title: 'Régression polynomiale',
   subtitle: 'Moindres carrés et ridge : ajustement, sur-ajustement, régularisation',
   tags: ['moindres carrés', 'régression', 'polynôme', 'overfitting', 'ridge', 'régularisation'],
+  group: 'Régression et filtrage',
 
   params: {
     a0: float('a₀', { description: 'coefficient constant', min: -2, max: 2, step: 0.1, default: 0.5 }),

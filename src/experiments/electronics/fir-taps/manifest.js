@@ -7,6 +7,7 @@ export default {
   title: 'RIF à coefficients réglables',
   subtitle: 'Tapez les coefficients : impulsionnelle, sortie, spectre — les trois vues répondent',
   tags: ['numérique', 'RIF', 'FIR', 'moyenne glissante', 'convolution'],
+  group: 'Filtrage numérique',
 
   params: {
     b: coeffs('b', {

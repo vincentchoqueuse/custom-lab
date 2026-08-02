@@ -7,6 +7,7 @@ export default {
   title: "Réponse fréquentielle à l'oscillo",
   subtitle: 'Le Bode point par point : deux traces, un rapport, un déphasage',
   tags: ['analogique', 'Bode', 'oscilloscope', 'mesure', 'RC', 'résonance'],
+  group: 'Signaux analogiques',
 
   params: {
     system: select('système', {

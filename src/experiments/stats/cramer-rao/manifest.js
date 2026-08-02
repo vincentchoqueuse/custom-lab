@@ -7,6 +7,7 @@ export default {
   title: 'La borne de Cramér-Rao',
   subtitle: 'Un plancher sous toutes les variances — et qui le touche',
   tags: ['Cramér-Rao', 'information de Fisher', 'efficacité', 'estimateur'],
+  group: 'Estimateurs et performances',
 
   params: {
     mu: float('μ', { description: 'moyenne vraie', min: 0, max: 5, step: 0.1, default: 2 }),

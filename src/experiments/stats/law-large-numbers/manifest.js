@@ -8,6 +8,7 @@ export default {
   title: 'Loi des grands nombres',
   subtitle: 'Chaque trajectoire de x̄ₙ converge vers μ — à la vitesse 1/√n',
   tags: ['LGN', 'convergence', 'moyenne empirique', 'trajectoires'],
+  group: 'Lois et théorèmes',
 
   params: {
     law: select('loi', {

@@ -7,6 +7,7 @@ export default {
   title: 'Fenêtrage spectral',
   subtitle: 'Résolution, fuites et dynamique — ce que la fenêtre fait au spectre',
   tags: ['numérique', 'DFT', 'fenêtre', 'résolution', 'leakage'],
+  group: 'Analyse spectrale',
 
   params: {
     win: select('fenêtre', {

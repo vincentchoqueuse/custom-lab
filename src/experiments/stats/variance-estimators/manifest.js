@@ -7,6 +7,7 @@ export default {
   title: 'Biais et variance d\'un estimateur',
   subtitle: 'Deux estimateurs de σ² : diviser par N ou par N−1 ?',
   tags: ['estimateur', 'biais', 'variance', 'distribution d\'échantillonnage'],
+  group: 'Estimateurs et performances',
 
   params: {
     mu: float('μ', { description: 'moyenne vraie', min: -5, max: 5, step: 0.1, default: 0 }),

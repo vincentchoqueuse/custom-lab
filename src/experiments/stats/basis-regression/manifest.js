@@ -7,6 +7,7 @@ export default {
   title: 'Régression à fonctions de base',
   subtitle: 'Linéaire ne veut pas dire droite — mêmes moindres carrés, nouvelles formes',
   tags: ['fonctions de base', 'moindres carrés', 'RBF', 'noyau', 'train/test', 'sur-ajustement'],
+  group: 'Régression et filtrage',
 
   params: {
     basis: select('base', {

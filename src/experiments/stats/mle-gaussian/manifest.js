@@ -7,6 +7,7 @@ export default {
   title: 'Maximum de vraisemblance',
   subtitle: 'Estimer μ (et σ) à partir de N réalisations gaussiennes',
   tags: ['estimation', 'MLE', 'vraisemblance', 'gaussienne'],
+  group: 'Estimateurs et performances',
 
   params: {
     mu: float('μ', { description: 'moyenne vraie', min: 0, max: 10, step: 0.1, default: 5 }),

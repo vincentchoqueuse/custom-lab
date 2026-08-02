@@ -7,6 +7,7 @@ export default {
   title: "Le filtre à variable d'état (SVF)",
   subtitle: 'Un signal périodique sculpté — quatre filtres pour deux multiplications',
   tags: ['numérique', 'SVF', 'résonance', 'harmoniques', 'synthèse'],
+  group: 'Filtrage numérique',
 
   params: {
     source: select('source', {

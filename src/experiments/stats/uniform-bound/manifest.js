@@ -7,6 +7,7 @@ export default {
   title: 'Estimer la borne d\'une loi uniforme',
   subtitle: 'X ~ U[0, θ] : max, max+min ou 2x̄ — trois estimateurs de θ',
   tags: ['estimateur', 'biais', 'EQM', 'uniforme', 'statistique d\'ordre'],
+  group: 'Estimateurs et performances',
 
   params: {
     theta: float('θ', { description: 'borne droite vraie', min: 0.5, max: 10, step: 0.1, default: 5 }),
