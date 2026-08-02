@@ -4,8 +4,14 @@
   import { subjects } from '../core/registry.js';
   import { STR } from '../core/strings.js';
   import { writePref } from '../core/prefs.js';
+  import { PALETTES, pal, setDataPalette } from '../core/palette.svelte.js';
   import Icon from './Icon.svelte';
   import AppIcon from './AppIcon.svelte';
+
+  function toggleBold() {
+    app.ui.bold = !app.ui.bold;
+    writePref('bold', app.ui.bold ? '1' : '0');
+  }
 
   let collapsed = $state({});
 
@@ -53,6 +59,17 @@
   </button>
   <button
     class={cls}
+    class:on={app.ui.settings}
+    onclick={() => {
+      app.ui.settings = !app.ui.settings;
+      if (app.ui.settings && !app.ui.sidebar) toggleSidebar();
+    }}
+    title={STR.SETTINGS}
+  >
+    <Icon name="settings" size={15} />
+  </button>
+  <button
+    class={cls}
     class:on={app.ui.inspector}
     onclick={() => (app.ui.inspector = !app.ui.inspector)}
     title={STR.INSPECTOR}
@@ -95,6 +112,50 @@
         {/if}
       {/each}
     </nav>
+    {#if app.ui.settings}
+      <!-- cosmetic preferences panel (localStorage only — never in the URL) -->
+      <div class="settings-panel">
+        <div class="set-row">
+          <span class="set-label">{STR.THEME}</span>
+          <div class="set-chips">
+            <button
+              class:active={app.ui.theme === 'light'}
+              onclick={() => app.ui.theme !== 'light' && toggleTheme()}
+            >
+              light
+            </button>
+            <button
+              class:active={app.ui.theme === 'dark'}
+              onclick={() => app.ui.theme !== 'dark' && toggleTheme()}
+            >
+              dark
+            </button>
+          </div>
+        </div>
+        <div class="set-row">
+          <span class="set-label">{STR.DATA_PALETTE}</span>
+          <div class="set-chips">
+            {#each Object.entries(PALETTES) as [id, p] (id)}
+              <button class:active={pal.id === id} onclick={() => setDataPalette(id)}>
+                <span class="dots">
+                  {#each p.colors.slice(0, 3) as c (c)}
+                    <span class="dot" style="background: {c}"></span>
+                  {/each}
+                </span>
+                {p.label}
+              </button>
+            {/each}
+          </div>
+        </div>
+        <div class="set-row">
+          <span class="set-label">{STR.THICK_STROKES}</span>
+          <div class="set-chips">
+            <button class:active={!app.ui.bold} onclick={() => app.ui.bold && toggleBold()}>off</button>
+            <button class:active={app.ui.bold} onclick={() => !app.ui.bold && toggleBold()}>on</button>
+          </div>
+        </div>
+      </div>
+    {/if}
     <footer>
       {@render utils('')}
     </footer>

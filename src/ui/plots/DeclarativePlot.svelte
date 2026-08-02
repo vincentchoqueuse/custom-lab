@@ -4,6 +4,7 @@
   // scaling and binning only, never scientific computation) and composes the
   // generic SVG primitives.
   import { scaleLinear, scaleLog, bin } from '../../core/scales.js';
+  import { dataColor } from '../../core/palette.svelte.js';
   import { FRAME, strokeScale, typeScale } from './frame.js';
   import Axes from './Axes.svelte';
   import Legend from './Legend.svelte';
@@ -25,6 +26,20 @@
   function axisSpec(a) {
     return typeof a === 'string' ? { label: a, scale: 'linear' } : { scale: 'linear', ...(a ?? {}) };
   }
+
+  // the primitives' fallback colors, resolved here so the palette remap
+  // covers unspecified colors too
+  const KIND_DEFAULTS = {
+    density: '#D95319',
+    vline: '#EDB120',
+    hline: '#EDB120',
+  };
+
+  /** Spec with its (possibly defaulted) color remapped to the data palette. */
+  const paint = (s, kind) => ({
+    ...s,
+    color: dataColor(s.color ?? KIND_DEFAULTS[kind] ?? '#0072BD'),
+  });
 
   const xAxis = $derived(axisSpec(spec.axes?.x));
   const yAxis = $derived(axisSpec(spec.axes?.y));
@@ -190,21 +205,21 @@
     <Axes {xs} {ys} {xAxis} {yAxis} w={iw} h={ih} {k} {kt} />
     {#each layers as l, i (i)}
       {#if l.kind === 'histogram'}
-        <Histogram {xs} {ys} rects={l.rects} spec={l.s} />
+        <Histogram {xs} {ys} rects={l.rects} spec={paint(l.s, l.kind)} />
       {:else if l.kind === 'line'}
-        <Line {xs} {ys} pts={l.pts} spec={l.s} {k} />
+        <Line {xs} {ys} pts={l.pts} spec={paint(l.s, l.kind)} {k} />
       {:else if l.kind === 'density'}
-        <Density {xs} {ys} pts={l.pts} spec={l.s} {k} h={ih} />
+        <Density {xs} {ys} pts={l.pts} spec={paint(l.s, l.kind)} {k} h={ih} />
       {:else if l.kind === 'scatter'}
-        <Scatter {xs} {ys} pts={l.pts} spec={l.s} {k} />
+        <Scatter {xs} {ys} pts={l.pts} spec={paint(l.s, l.kind)} {k} />
       {:else if l.kind === 'bars'}
-        <Bars {xs} {ys} pts={l.pts} spec={l.s} h={ih} />
+        <Bars {xs} {ys} pts={l.pts} spec={paint(l.s, l.kind)} h={ih} />
       {:else if l.kind === 'band'}
-        <Band {xs} {ys} pts={l.pts} spec={l.s} />
+        <Band {xs} {ys} pts={l.pts} spec={paint(l.s, l.kind)} />
       {:else if l.kind === 'vline' && Number.isFinite(l.v)}
-        <VLine {xs} x={l.v} spec={l.s} h={ih} {k} {kt} />
+        <VLine {xs} x={l.v} spec={paint(l.s, l.kind)} h={ih} {k} {kt} />
       {:else if l.kind === 'hline' && Number.isFinite(l.v)}
-        <HLine {ys} y={l.v} spec={l.s} w={iw} {k} {kt} />
+        <HLine {ys} y={l.v} spec={paint(l.s, l.kind)} w={iw} {k} {kt} />
       {/if}
     {/each}
     <Legend entries={legend} {iw} {kt} />

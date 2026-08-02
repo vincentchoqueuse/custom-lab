@@ -80,6 +80,7 @@
     const sidebarPref = readPref('sidebar');
     app.ui.sidebar = sidebarPref !== null ? sidebarPref !== '0' : window.innerWidth > 900;
     app.ui.teacher = readPref('teacher') === '1';
+    app.ui.bold = readPref('bold') === '1';
   }
 
   async function togglePresentation() {

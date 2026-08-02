@@ -10,6 +10,7 @@
 <script>
   import { scaleLinear, linePath } from '../../../../core/scales.js';
   import { FRAME, strokeScale, typeScale } from '../../../../ui/plots/frame.js';
+  import { dataColor } from '../../../../core/palette.svelte.js';
   import Axes from '../../../../ui/plots/Axes.svelte';
   import Legend from '../../../../ui/plots/Legend.svelte';
 
@@ -19,8 +20,8 @@
   const k = $derived(strokeScale(pres));
   const kt = $derived(typeScale(pres));
 
-  const BLUE = '#0072BD'; // empirical
-  const ORANGE = '#D95319'; // theoretical
+  const BLUE = $derived(dataColor('#0072BD')); // empirical
+  const ORANGE = $derived(dataColor('#D95319')); // theoretical
 
   const discrete = $derived(obs.discrete.value === 1);
   const th = $derived(obs.theoreticalPdf.value);

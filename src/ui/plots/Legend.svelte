@@ -2,13 +2,14 @@
   // Legend chips (color swatch + label), top-right of the plot area. Shared
   // by DeclarativePlot (layers carrying a `label`) and custom views.
   import { FONT_UI } from './frame.js';
+  import { dataColor } from '../../core/palette.svelte.js';
 
   let { entries = [], iw, kt = 1 } = $props();
 </script>
 
 {#each entries as e, i (e.label)}
   <g transform="translate({iw - 8},{12 + i * 18 * kt})">
-    <rect x="-14" y="-4" width="14" height="5" rx="2" fill={e.color} />
+    <rect x="-14" y="-4" width="14" height="5" rx="2" fill={dataColor(e.color)} />
     <text
       x="-20"
       y="2"

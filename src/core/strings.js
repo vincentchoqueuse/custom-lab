@@ -35,4 +35,7 @@ export const STR = {
   CLOSE: 'Close',
   MASKED_HINT: 'Hidden parameter — use Reveal to unveil',
   COLLAPSE_SIDEBAR: 'Toggle sidebar',
+  SETTINGS: 'Settings',
+  DATA_PALETTE: 'Data palette',
+  THICK_STROKES: 'Thick plot strokes',
 };
