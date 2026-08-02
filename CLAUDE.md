@@ -147,7 +147,7 @@ in the course language; the chrome — Parameters, Draw, Presets, Search… — 
 `#171717` dark), ~260 px, collapsible (`⌘B`), rounded items, soft gray hover,
 active item in neutral gray (never a color accent). Top button: "Search
 experiments" (`⌘K`). Tree: subjects (small muted sentence-case labels,
-ChatGPT-style, collapsible with a hover-only chevron) → experiments.
+ChatGPT-style, collapsible, the +/− indicator always visible) → experiments.
 Footer: light/dark theme toggle for the central area, Teacher Mode button (🗒).
 
 **Clean header.** Breadcrumb `Subject / Experiment`. **Central preset selector**,

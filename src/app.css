@@ -260,7 +260,7 @@ kbd {
 
 .sidebar .subject-title .chev {
   display: inline-flex;
-  opacity: 0;
+  opacity: 0.55; /* always visible: the tree must say it can be folded */
   color: var(--muted-fg);
   transition: opacity var(--t);
 }
