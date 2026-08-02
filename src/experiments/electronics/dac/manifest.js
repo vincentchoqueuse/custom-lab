@@ -6,7 +6,7 @@ export default {
   id: 'dac',
   title: 'Le CNA : suréchantillonnage et reconstruction',
   subtitle: "Zéro-stuffing, filtre d'interpolation, escalier — et l'enveloppe en sinc",
-  tags: ['CNA', 'DAC', 'suréchantillonnage', 'interpolation', 'ZOH'],
+  tags: ['numérique', 'analogique', 'CNA', 'DAC', 'suréchantillonnage', 'interpolation', 'ZOH'],
 
   params: {
     f0: float('f₀', {

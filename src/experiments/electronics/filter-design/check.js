@@ -1,5 +1,6 @@
 import { compute, requiredOrder } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
+import { polyEvalComplex } from '../../../core/numeric.js';
 
 const SPEC = { fp: 1000, fstop: 2000, Amax: 1, Amin: 40, seed: 1 };
 
@@ -111,17 +112,8 @@ export const checks = [
       // evaluate numReal/denReal at s = j·2πf and compare with the response
       const { observables: o } = compute({ family: 'cheby2', ...SPEC });
       const evalDb = (num, den, w) => {
-        const ev = (p) => {
-          let re = 0;
-          let im = 0;
-          for (const c of p) {
-            const nr = -im * w + c;
-            im = re * w;
-            re = nr;
-          }
-          return Math.hypot(re, im);
-        };
-        return 20 * Math.log10(ev(num) / ev(den));
+        const mag = (p) => Math.hypot(...polyEvalComplex(p, 0, w));
+        return 20 * Math.log10(mag(num) / mag(den));
       };
       let worst = 0;
       for (let i = 0; i < o.response.x.length; i += 25) {

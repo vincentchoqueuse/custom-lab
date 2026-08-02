@@ -11,7 +11,7 @@
 // The spectrum is Hann-windowed, normalized by the coherent gain (an
 // unmodulated carrier reads 0 dB), and sliced around fc.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { fft } from '../../../core/numeric.js';
+import { fft, toDb, windowValue } from '../../../core/numeric.js';
 
 const FS = 8000; // sampling rate (Hz)
 const NS = 8192; // record length (power of two, T = 1.024 s)
@@ -56,7 +56,7 @@ export function compute({ mode, fm, ka, beta }) {
   const im = new Float64Array(NS);
   let sw = 0;
   for (let i = 0; i < NS; i++) {
-    const w = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / NS);
+    const w = windowValue('hann', i, NS);
     re[i] = x[i] * w;
     sw += w;
   }
@@ -75,7 +75,7 @@ export function compute({ mode, fm, ka, beta }) {
   const sy = new Float64Array(kHi - kLo + 1);
   for (let k = kLo; k <= kHi; k++) {
     sf[k - kLo] = k * binHz;
-    sy[k - kLo] = Math.max(DB_FLOOR, 20 * Math.log10(mag[k] / ref + 1e-300));
+    sy[k - kLo] = toDb(mag[k] / ref, DB_FLOOR);
   }
 
   // theoretical line comb (orange dots over the measured spectrum)
@@ -125,7 +125,7 @@ export function compute({ mode, fm, ka, beta }) {
     eL[i] = -env;
   }
 
-  const carrierDb = Math.max(DB_FLOOR, 20 * Math.log10(mag[kc] / ref + 1e-300));
+  const carrierDb = toDb(mag[kc] / ref, DB_FLOOR);
 
   const scalars = am
     ? {

@@ -321,3 +321,42 @@ export function fft(re, im) {
     }
   }
 }
+
+/**
+ * Amplitude → decibels with an optional display floor:
+ * 20·log10(a), clamped below at `floor` (exact zeros stay finite).
+ */
+export function toDb(a, floor = -Infinity) {
+  return Math.max(floor, 20 * Math.log10(a + 1e-300));
+}
+
+/**
+ * Canonical window sample (rect / hann / hamming / blackman).
+ * Periodic (DFT-even, divisor N — spectral analysis: exact ENBW/Parseval
+ * identities) by default; `symmetric` (divisor N−1 — FIR design: exact
+ * linear phase) on demand.
+ * @param {'rect'|'hann'|'hamming'|'blackman'} win
+ */
+export function windowValue(win, n, N, symmetric = false) {
+  if (win === 'rect') return 1;
+  const c = Math.cos((2 * Math.PI * n) / (symmetric ? N - 1 : N));
+  if (win === 'hann') return 0.5 - 0.5 * c;
+  if (win === 'hamming') return 0.54 - 0.46 * c;
+  const c2 = Math.cos((4 * Math.PI * n) / (symmetric ? N - 1 : N));
+  return 0.42 - 0.5 * c + 0.08 * c2; // blackman
+}
+
+/**
+ * Complex Horner evaluation of a real polynomial (descending powers) at
+ * the complex point re + j·im. Returns [Re, Im].
+ */
+export function polyEvalComplex(c, re, im) {
+  let ar = 0;
+  let ai = 0;
+  for (const v of c) {
+    const nr = ar * re - ai * im + v;
+    ai = ar * im + ai * re;
+    ar = nr;
+  }
+  return [ar, ai];
+}

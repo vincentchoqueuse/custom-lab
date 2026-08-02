@@ -6,7 +6,7 @@ export default {
   id: 'am-fm',
   title: 'Modulations AM et FM',
   subtitle: 'Bandes latérales, raies de Bessel et règle de Carson',
-  tags: ['AM', 'FM', 'Bessel', 'Carson', 'modulation'],
+  tags: ['analogique', 'AM', 'FM', 'Bessel', 'Carson', 'modulation'],
 
   params: {
     mode: select('mode', {

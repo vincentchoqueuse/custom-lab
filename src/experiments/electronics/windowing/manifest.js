@@ -6,7 +6,7 @@ export default {
   id: 'windowing',
   title: 'Fenêtrage spectral',
   subtitle: 'Résolution, fuites et dynamique — ce que la fenêtre fait au spectre',
-  tags: ['DFT', 'fenêtre', 'résolution', 'leakage'],
+  tags: ['numérique', 'DFT', 'fenêtre', 'résolution', 'leakage'],
 
   params: {
     win: select('fenêtre', {
