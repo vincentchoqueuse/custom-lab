@@ -38,7 +38,9 @@
     {#each subjects as subject (subject.id)}
       <button class="subject-title" onclick={() => toggleSubject(subject.id)}>
         <span>{subject.title}</span>
-        <span class="chev">{collapsed[subject.id] ? '+' : '−'}</span>
+        <span class="chev">
+          <Icon name={collapsed[subject.id] ? 'plus' : 'minus'} size={13} stroke={2.5} />
+        </span>
       </button>
       {#if !collapsed[subject.id]}
         {#each subject.experiments as exp (exp.key)}

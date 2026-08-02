@@ -211,11 +211,9 @@ kbd {
 }
 
 .sidebar .subject-title .chev {
+  display: inline-flex;
   opacity: 0;
   color: var(--muted-fg);
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1;
   transition: opacity var(--t);
 }
 
@@ -277,9 +275,9 @@ kbd {
 /* ---------- header ------------------------------------------------------- */
 
 .header {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 10px 18px;
   border-bottom: 1px solid var(--border);
@@ -361,8 +359,7 @@ kbd {
 .preset-picker .menu {
   position: absolute;
   top: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
+  right: 0;
   min-width: 300px;
   background: var(--card);
   border: 1px solid var(--border);
@@ -398,33 +395,6 @@ kbd {
   color: var(--muted-fg);
 }
 
-.url-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  color: var(--muted-fg);
-  border: 1px solid var(--border);
-  background: var(--background);
-  box-shadow: var(--shadow-sm);
-  border-radius: 8px;
-  padding: 7px 11px;
-  max-width: 260px;
-  white-space: nowrap;
-  overflow: hidden;
-  transition: background var(--t), color var(--t);
-}
-
-.url-chip .txt {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.url-chip:hover {
-  background: var(--accent);
-  color: var(--foreground);
-}
 
 /* ---------- workspace ---------------------------------------------------- */
 
@@ -1028,7 +998,7 @@ kbd {
   display: none;
 }
 
-.app.presentation .header .right .url-chip {
+.app.presentation .header .right .copy-btn {
   display: none;
 }
 
@@ -1069,11 +1039,4 @@ kbd {
     box-shadow: 8px 0 30px rgba(0, 0, 0, 0.25);
   }
 
-  .header {
-    grid-template-columns: auto 1fr auto;
-  }
-
-  .url-chip {
-    display: none;
-  }
 }
