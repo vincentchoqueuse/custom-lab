@@ -8,6 +8,7 @@
 -->
 <script>
   import { FRAME, FONT_UI, FONT_MONO, strokeScale, typeScale } from '../../../../ui/plots/frame.js';
+  import { dataColor } from '../../../../core/palette.svelte.js';
 
   let { observables: obs, params, pres = false } = $props();
 
@@ -94,7 +95,7 @@
             cx={cx + toPx(cloud.x[m])}
             cy={cy - toPx(cloud.y[m])}
             r={2 * k}
-            fill={COLORS[e]}
+            fill={dataColor(COLORS[e])}
             opacity="0.4"
           />
         {/each}
@@ -107,7 +108,7 @@
         font-family={FONT_UI}
         font-size={12.5 * kt}
         font-weight="600"
-        fill={COLORS[e]}
+        fill={dataColor(COLORS[e])}
       >
         {stats[e].name}
       </text>

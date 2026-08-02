@@ -9,6 +9,7 @@
 <script>
   import { scaleLinear, linePath } from '../../../../core/scales.js';
   import { FRAME, strokeScale, typeScale } from '../../../../ui/plots/frame.js';
+  import { dataColor } from '../../../../core/palette.svelte.js';
   import Axes from '../../../../ui/plots/Axes.svelte';
   import Legend from '../../../../ui/plots/Legend.svelte';
 
@@ -84,15 +85,15 @@
           cx={xs(px)}
           cy={ys(cloud.y[i])}
           r={2.2 * k}
-          fill="#0072BD"
+          fill={dataColor("#0072BD")}
           fill-opacity="0.4"
         />
       {/each}
 
-      <path d={pathOf('axisMajor')} stroke="#7E2F8E" stroke-width={1.8 * k} fill="none" />
+      <path d={pathOf('axisMajor')} stroke={dataColor("#7E2F8E")} stroke-width={1.8 * k} fill="none" />
       <path
         d={pathOf('axisMinor')}
-        stroke="#7E2F8E"
+        stroke={dataColor("#7E2F8E")}
         stroke-width={1.4 * k}
         stroke-dasharray="{4 * k} {4 * k}"
         fill="none"
@@ -100,15 +101,15 @@
       />
       <path
         d={pathOf('regLine')}
-        stroke="#77AC30"
+        stroke={dataColor("#77AC30")}
         stroke-width={2.2 * k}
         stroke-dasharray="{7 * k} {5 * k}"
         fill="none"
       />
 
-      <path d={pathOf('ellipse1', true)} stroke="#D95319" stroke-width={2 * k} fill="#D95319" fill-opacity="0.05" />
-      <path d={pathOf('ellipse2', true)} stroke="#D95319" stroke-width={1.7 * k} fill="none" opacity="0.8" />
-      <path d={pathOf('ellipse3', true)} stroke="#D95319" stroke-width={1.4 * k} fill="none" opacity="0.6" />
+      <path d={pathOf('ellipse1', true)} stroke={dataColor("#D95319")} stroke-width={2 * k} fill={dataColor("#D95319")} fill-opacity="0.05" />
+      <path d={pathOf('ellipse2', true)} stroke={dataColor("#D95319")} stroke-width={1.7 * k} fill="none" opacity="0.8" />
+      <path d={pathOf('ellipse3', true)} stroke={dataColor("#D95319")} stroke-width={1.4 * k} fill="none" opacity="0.6" />
     </g>
 
     <Legend entries={legend} {iw} {kt} />

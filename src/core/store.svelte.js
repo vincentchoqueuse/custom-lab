@@ -26,6 +26,8 @@ export const app = $state({
     presentation: false,
     palette: false,
     inspector: false,
+    settings: false,
+    bold: false, // permanent thick-strokes preference (projection without fullscreen)
   },
 });
 

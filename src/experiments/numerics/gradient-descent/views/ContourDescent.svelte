@@ -7,6 +7,7 @@
 <script>
   import { scaleLinear } from '../../../../core/scales.js';
   import { FRAME, strokeScale, typeScale } from '../../../../ui/plots/frame.js';
+  import { dataColor } from '../../../../core/palette.svelte.js';
   import Axes from '../../../../ui/plots/Axes.svelte';
   import Legend from '../../../../ui/plots/Legend.svelte';
 
@@ -89,13 +90,13 @@
       <path d={contourPath} stroke="var(--muted-fg)" stroke-width={0.9 * k} fill="none" opacity="0.45" />
 
       {#each TRAJS as t (t.key)}
-        <path d={polyline(t.key)} stroke={t.color} stroke-width={2 * k} fill="none" opacity="0.9" />
+        <path d={polyline(t.key)} stroke={dataColor(t.color)} stroke-width={2 * k} fill="none" opacity="0.9" />
         {#each { length: obs[t.key].value.x.length } as _, i (i)}
           <circle
             cx={xs(obs[t.key].value.x[i])}
             cy={ys(obs[t.key].value.y[i])}
             r={2.2 * k}
-            fill={t.color}
+            fill={dataColor(t.color)}
             opacity="0.75"
           />
         {/each}

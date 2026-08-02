@@ -14,14 +14,14 @@
   {#if viewDef.kind === 'custom'}
     {#await viewDef.load() then mod}
       {@const Custom = mod.default}
-      <Custom observables={obs} params={app.params} pres={app.ui.presentation} />
+      <Custom observables={obs} params={app.params} pres={app.ui.presentation || app.ui.bold} />
     {/await}
   {:else}
     <DeclarativePlot
       spec={viewDef.spec}
       {obs}
       params={app.params}
-      pres={app.ui.presentation}
+      pres={app.ui.presentation || app.ui.bold}
     />
   {/if}
 {/if}

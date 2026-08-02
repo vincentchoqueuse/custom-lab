@@ -8,6 +8,7 @@
 -->
 <script>
   import { scaleLinear } from '../../core/scales.js';
+  import { dataColor } from '../../core/palette.svelte.js';
   import { FRAME, FONT_MONO, strokeScale, typeScale } from './frame.js';
   import Axes from './Axes.svelte';
   import Legend from './Legend.svelte';
@@ -72,7 +73,7 @@
 
       {#each clouds as c, ci (ci)}
         {#each { length: Math.min(c.x.length, c.max ?? 3000) } as _, i (i)}
-          <circle cx={xs(c.x[i])} cy={ys(c.y[i])} r={(c.r ?? 1.7) * k} fill={c.color} opacity={c.opacity ?? 0.3} />
+          <circle cx={xs(c.x[i])} cy={ys(c.y[i])} r={(c.r ?? 1.7) * k} fill={dataColor(c.color)} opacity={c.opacity ?? 0.3} />
         {/each}
       {/each}
 
@@ -82,7 +83,7 @@
             cx={xs(markers.x[i])}
             cy={ys(markers.y[i])}
             r={4.2 * k}
-            fill={markerColor}
+            fill={dataColor(markerColor)}
             stroke="var(--background)"
             stroke-width={1.6 * k}
           />

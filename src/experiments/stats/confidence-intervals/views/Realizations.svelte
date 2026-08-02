@@ -9,6 +9,7 @@
 <script>
   import { scaleLinear } from '../../../../core/scales.js';
   import { FRAME, strokeScale, typeScale, FONT_MONO } from '../../../../ui/plots/frame.js';
+  import { dataColor } from '../../../../core/palette.svelte.js';
   import Axes from '../../../../ui/plots/Axes.svelte';
 
   let { observables, params, pres = false } = $props();
@@ -59,7 +60,7 @@
         x2={xs(it.hi)}
         y1={ys(m)}
         y2={ys(m)}
-        stroke={it.ok ? '#0072BD' : '#D95319'}
+        stroke={dataColor(it.ok ? '#0072BD' : '#D95319')}
         stroke-width={Math.max(1.4, Math.min(5, (ih / Math.max(intervals.length, 1)) * 0.45)) * k}
         stroke-linecap="round"
         opacity="0.9"
@@ -70,7 +71,7 @@
       x2={xs(mu)}
       y1="0"
       y2={ih}
-      stroke="#EDB120"
+      stroke={dataColor("#EDB120")}
       stroke-width={1.8 * k}
       stroke-dasharray="{5 * k} {4 * k}"
     />
@@ -78,7 +79,7 @@
       x={xs(mu) + 6}
       y={14 * kt}
       font-size={12 * kt}
-      fill="#EDB120"
+      fill={dataColor("#EDB120")}
       font-family={FONT_MONO}>μ</text
     >
   </g>
