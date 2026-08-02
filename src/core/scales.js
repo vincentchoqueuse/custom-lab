@@ -22,6 +22,7 @@ export const formatSI = d3format('~s');
  */
 export function formatValue(v, precision) {
   if (v == null || Number.isNaN(v)) return '—';
+  if (Array.isArray(v)) return v.map((x) => formatValue(x, precision)).join(', ');
   if (typeof v !== 'number') return String(v);
   if (!Number.isFinite(v)) return v > 0 ? '∞' : '−∞';
   if (precision != null) return v.toFixed(precision);

@@ -46,6 +46,14 @@ export function castParam(spec, str) {
       const opt = spec.options.find((o) => String(o.value) === str);
       return opt ? opt.value : undefined;
     }
+    case 'coeffs': {
+      const parts = String(str)
+        .split(',')
+        .map((s) => parseFloat(s));
+      if (parts.length === 0 || parts.length > (spec.maxLen ?? 8)) return undefined;
+      if (!parts.every((v) => Number.isFinite(v))) return undefined;
+      return parts;
+    }
     case 'readonly':
       return undefined;
     default: {
@@ -79,7 +87,16 @@ export function decodeQuery(query, manifest) {
 
 /** Trim float noise (0.30000000000000004 → 0.3) while staying exact enough. */
 function formatParam(v) {
+  if (Array.isArray(v)) return v.map(formatParam).join(',');
   return typeof v === 'number' ? String(parseFloat(v.toPrecision(8))) : String(v);
+}
+
+/** Value equality for minimal serialization (coeffs arrays compare by content). */
+function sameValue(a, b) {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length && a.every((v, i) => v === b[i]);
+  }
+  return a === b;
 }
 
 /**
@@ -94,7 +111,7 @@ export function encodeHash(expKey, o) {
   for (const [k, spec] of Object.entries(o.paramSpecs)) {
     if (spec.type === 'readonly') continue;
     const v = o.params[k];
-    if (v === undefined || v === o.base[k]) continue;
+    if (v === undefined || sameValue(v, o.base[k])) continue;
     parts.push(`${k}=${formatParam(v)}`);
   }
   if (o.view && o.view !== o.defaultView) parts.push(`view=${o.view}`);

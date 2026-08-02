@@ -75,6 +75,24 @@ export function log(name, opts) {
   return f;
 }
 
+/**
+ * Numeric list (e.g. transfer-function coefficients), edited as a
+ * comma-separated string, serialized as `k=1,2,1` in the URL (readable by
+ * construction). `default` is a non-empty array of finite numbers, at most
+ * `maxLen` (default 8) entries.
+ */
+export function coeffs(name, opts) {
+  const [n, o] = splitArgs(name, opts);
+  const f = { type: 'coeffs', maxLen: 8, name: n, ...o };
+  if (!Array.isArray(f.default) || f.default.length === 0)
+    throw new FieldError(`${label('coeffs', f)}: default must be a non-empty array`);
+  if (f.default.length > f.maxLen)
+    throw new FieldError(`${label('coeffs', f)}: default longer than maxLen (${f.maxLen})`);
+  if (!f.default.every((v) => Number.isFinite(v)))
+    throw new FieldError(`${label('coeffs', f)}: default must contain finite numbers`);
+  return f;
+}
+
 export function bool(name, opts) {
   const [n, o] = splitArgs(name, opts);
   const f = { type: 'bool', name: n, ...o };

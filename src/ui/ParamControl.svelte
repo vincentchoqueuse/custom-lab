@@ -51,6 +51,19 @@
     const v = castNum(e.target.value);
     if (v !== null) commit(v);
   }
+
+  function onCoeffs(e) {
+    const parts = e.target.value.split(',').map((s) => parseFloat(s));
+    if (
+      parts.length === 0 ||
+      parts.length > (spec.maxLen ?? 8) ||
+      !parts.every((v) => Number.isFinite(v))
+    ) {
+      e.target.value = value.join(', '); // invalid input: restore
+      return;
+    }
+    commit(parts);
+  }
 </script>
 
 <div class="param-control" title={spec.description ?? ''}>
@@ -95,6 +108,15 @@
     />
   {:else if spec.type === 'seed'}
     <input type="number" min={spec.min} step="1" value={value} onchange={onNumber} />
+  {:else if spec.type === 'coeffs'}
+    <input
+      type="text"
+      class="mono"
+      value={value.join(', ')}
+      onchange={onCoeffs}
+      spellcheck="false"
+      aria-label={spec.name}
+    />
   {:else if spec.type === 'bool'}
     <div class="choices">
       <button class:active={value === true} onclick={() => commit(true)}>true</button>
