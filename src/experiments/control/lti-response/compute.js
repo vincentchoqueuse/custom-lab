@@ -7,6 +7,7 @@
 // squares on a sin/cos basis) and compared to H(jω): the measured gain and
 // phase ARE |H| and arg H — the living definition of frequency response.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { rk4Step } from '../../../core/numeric.js';
 
 const T_END = 20;
 const H = 0.005;
@@ -41,12 +42,14 @@ export function compute({ num, den, input, f }) {
   const { n, a, C, D } = realize(num, den);
 
   // x' = A x + B u in controllable canonical form (companion A, B = e_1)
-  const deriv = (x, t, out) => {
+  const deriv = (x, t) => {
     let acc = -a[1] * x[0];
     for (let i = 1; i < n; i++) acc -= a[i + 1] * x[i];
     // x1' = −a1 x1 − … − an xn + u ; xi' = x_{i−1}
+    const out = new Array(n);
     out[0] = acc + u(t);
     for (let i = 1; i < n; i++) out[i] = x[i - 1];
+    return out;
   };
 
   const yOf = (x, t) => {
@@ -64,12 +67,7 @@ export function compute({ num, den, input, f }) {
   const es = new Float64Array(nk);
   const CLAMP = 1e9;
 
-  let x = new Float64Array(Math.max(n, 1));
-  const k1 = new Float64Array(n || 1);
-  const k2 = new Float64Array(n || 1);
-  const k3 = new Float64Array(n || 1);
-  const k4 = new Float64Array(n || 1);
-  const tmp = new Float64Array(n || 1);
+  let x = new Array(Math.max(n, 1)).fill(0);
   // steady-state sine fit accumulators (last 2/f seconds)
   const fitT0 = input === 'sine' ? T_END - 2 / f : Infinity;
   let sSin = 0;
@@ -97,16 +95,11 @@ export function compute({ num, den, input, f }) {
       if (n === 0 && i < steps) continue;
       if (i === steps) break;
     }
-    deriv(x, t, k1);
-    for (let j = 0; j < n; j++) tmp[j] = x[j] + (H / 2) * k1[j];
-    deriv(tmp, t + H / 2, k2);
-    for (let j = 0; j < n; j++) tmp[j] = x[j] + (H / 2) * k2[j];
-    deriv(tmp, t + H / 2, k3);
-    for (let j = 0; j < n; j++) tmp[j] = x[j] + H * k3[j];
-    deriv(tmp, t + H, k4);
-    for (let j = 0; j < n; j++) {
-      x[j] += (H / 6) * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j]);
-      if (!Number.isFinite(x[j]) || Math.abs(x[j]) > CLAMP) x[j] = Math.sign(x[j] || 1) * CLAMP;
+    if (n > 0) {
+      x = rk4Step(deriv, x, t, H);
+      for (let j = 0; j < n; j++) {
+        if (!Number.isFinite(x[j]) || Math.abs(x[j]) > CLAMP) x[j] = Math.sign(x[j] || 1) * CLAMP;
+      }
     }
   }
 

@@ -9,7 +9,7 @@
 // Hamming buys ≈ 2 dB over hard for free.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-import { normalCdf } from '../../../core/numeric.js';
+import { qfunc, dbToLin, pairsToSeries } from '../../../core/numeric.js';
 import {
   hamming74,
   repetition3,
@@ -22,7 +22,6 @@ const DB_GRID = Array.from({ length: 9 }, (_, i) => i); // 0…8 dB
 const BLOCKS_CURVE = 4000; // blocks per Monte Carlo point of the BER curve
 const SHOW_BLOCKS = 60; // blocks displayed in the frame view
 
-const Q = (x) => 1 - normalCdf(x);
 
 /**
  * @param {{code: string, ebn0Db: number, Nbits: number, seed: number}} params
@@ -39,7 +38,7 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
   // BPSK signs of every codeword, precomputed once
   const signs = table.map((c) => c.cw.map((b) => 1 - 2 * b));
 
-  const gb = 10 ** (ebn0Db / 10);
+  const gb = dbToLin(ebn0Db);
   const sigmaOf = (g) => Math.sqrt(1 / (2 * R * g));
 
   // one block on the all-zero codeword (linear code + ML → representative):
@@ -95,15 +94,15 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
   const fyS = new Float64Array(NF);
   for (let i = 0; i < NF; i++) {
     ft[i] = (8 * i) / (NF - 1);
-    const g = 10 ** (ft[i] / 10);
-    fyU[i] = Q(Math.sqrt(2 * g));
-    fyH[i] = berHardExact(code, enumr, Q(Math.sqrt(2 * R * g)));
+    const g = dbToLin(ft[i]);
+    fyU[i] = qfunc(Math.sqrt(2 * g));
+    fyH[i] = berHardExact(code, enumr, qfunc(Math.sqrt(2 * R * g)));
     let ub = 0;
     for (const { msg, cw } of table) {
       const w = cw.reduce((a, b) => a + b, 0);
       if (w === 0) continue;
       const wm = msg.reduce((a, b) => a + b, 0);
-      ub += (wm / k) * Q(Math.sqrt(2 * R * g * w));
+      ub += (wm / k) * qfunc(Math.sqrt(2 * R * g * w));
     }
     fyS[i] = ub;
   }
@@ -112,26 +111,16 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
   for (let g = 0; g < DB_GRID.length; g++) {
     mx[g] = DB_GRID[g];
     my[g] =
-      simulate(BLOCKS_CURVE, sigmaOf(10 ** (DB_GRID[g] / 10)), null).softErr /
+      simulate(BLOCKS_CURVE, sigmaOf(dbToLin(DB_GRID[g])), null).softErr /
       (BLOCKS_CURVE * k);
   }
 
-  const toSeries = (arr) => {
-    const m = arr.length / 2;
-    const x = new Float64Array(m);
-    const yy = new Float64Array(m);
-    for (let i = 0; i < m; i++) {
-      x[i] = arr[2 * i];
-      yy[i] = arr[2 * i + 1];
-    }
-    return { x, y: yy };
-  };
 
   return {
     observables: {
-      channelErrors: toSeries(keep.ch),
-      hardResidual: toSeries(keep.hard),
-      softResidual: toSeries(keep.soft),
+      channelErrors: pairsToSeries(keep.ch),
+      hardResidual: pairsToSeries(keep.hard),
+      softResidual: pairsToSeries(keep.soft),
       berUncodedTh: { x: ft, y: fyU },
       berHardTh: { x: ft, y: fyH },
       berSoftUb: { x: ft, y: fyS },
@@ -145,7 +134,7 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
         meta: { label: 'BER souple', precision: 5 },
       },
       pCh: {
-        value: Q(Math.sqrt(2 * R * gb)),
+        value: qfunc(Math.sqrt(2 * R * gb)),
         meta: { label: 'p canal', precision: 4 },
       },
     },

@@ -7,12 +7,11 @@
 // worst-case vertical eye opening (min gap between adjacent level clusters).
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
+import { sinc } from '../../../core/numeric.js';
 
 const OS = 16; // samples per symbol period (T = 1)
 const SPAN = 6; // raised-cosine truncation: ±SPAN symbol periods
 const SHOW = 20; // symbols shown in the waveform view
-
-const sinc = (x) => (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
 
 /** Raised-cosine pulse, unit T, including its two removable singularities. */
 function raisedCosine(t, alpha) {

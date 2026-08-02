@@ -10,14 +10,13 @@
 // and the message-error count is weighted by p^w(1−p)^(n−w).
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32 } from '../../../core/rng.js';
-import { normalCdf } from '../../../core/numeric.js';
+import { qfunc, dbToLin, pairsToSeries } from '../../../core/numeric.js';
 import { hamming74, repetition3, enumerateHard, berHardExact } from '../../../core/codes.js';
 
 const DB_GRID = Array.from({ length: 9 }, (_, i) => 1.5 * i); // 0…12 dB
 const BLOCKS_CURVE = 3000; // blocks per Monte Carlo point of the BER curve
 const SHOW_BLOCKS = 60; // blocks displayed in the frame view
 
-const Q = (x) => 1 - normalCdf(x);
 
 /**
  * @param {{code: string, ebn0Db: number, Nbits: number, seed: number}} params
@@ -30,8 +29,8 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
   const R = k / n;
   const enumr = enumerateHard(code);
 
-  const pOf = (gb, rate) => Q(Math.sqrt(2 * rate * gb));
-  const gb = 10 ** (ebn0Db / 10);
+  const pOf = (gb, rate) => qfunc(Math.sqrt(2 * rate * gb));
+  const gb = dbToLin(ebn0Db);
   const p = pOf(gb, R);
 
   // Monte Carlo on the equivalent BSC: linear code → send the zero codeword
@@ -74,7 +73,7 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
   const fyC = new Float64Array(NF);
   for (let i = 0; i < NF; i++) {
     ft[i] = (12 * i) / (NF - 1);
-    const g = 10 ** (ft[i] / 10);
+    const g = dbToLin(ft[i]);
     fyU[i] = pOf(g, 1);
     fyC[i] = berHardExact(code, enumr, pOf(g, R));
   }
@@ -83,24 +82,14 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
   for (let g = 0; g < DB_GRID.length; g++) {
     mx[g] = DB_GRID[g];
     my[g] =
-      simulate(BLOCKS_CURVE, pOf(10 ** (DB_GRID[g] / 10), R), null) / (BLOCKS_CURVE * k);
+      simulate(BLOCKS_CURVE, pOf(dbToLin(DB_GRID[g]), R), null) / (BLOCKS_CURVE * k);
   }
 
-  const toSeries = (arr) => {
-    const m = arr.length / 2;
-    const x = new Float64Array(m);
-    const y = new Float64Array(m);
-    for (let i = 0; i < m; i++) {
-      x[i] = arr[2 * i];
-      y[i] = arr[2 * i + 1];
-    }
-    return { x, y };
-  };
 
   return {
     observables: {
-      channelErrors: toSeries(keep.ch),
-      residualErrors: toSeries(keep.res),
+      channelErrors: pairsToSeries(keep.ch),
+      residualErrors: pairsToSeries(keep.res),
       berUncodedTh: { x: ft, y: fyU },
       berCodedTh: { x: ft, y: fyC },
       berCodedMc: { x: mx, y: my },

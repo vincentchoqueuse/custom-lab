@@ -11,29 +11,12 @@
 //   16-QAM: 1 − (1−p)²,  p = (3/2)·Q(√(γ/5))
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-import { normalCdf } from '../../../core/numeric.js';
+import { dbToLin, pairsToSeries } from '../../../core/numeric.js';
+import { constellation, serTheory } from '../../../core/modulation.js';
 
 const DB_GRID = Array.from({ length: 11 }, (_, i) => 2 * i); // 0…20 dB
 const N_CURVE = 6000; // symbols per Monte Carlo point of the SER curve
 
-const Q = (x) => 1 - normalCdf(x);
-
-/** Constellation points {x, y}, normalized to unit average energy. */
-function constellation(mod) {
-  if (mod === 'bpsk') return [{ x: -1, y: 0 }, { x: 1, y: 0 }];
-  if (mod === 'qpsk') {
-    const a = Math.SQRT1_2;
-    return [-a, a].flatMap((x) => [-a, a].map((y) => ({ x, y })));
-  }
-  if (mod === '8psk') {
-    return Array.from({ length: 8 }, (_, k) => ({
-      x: Math.cos((k * Math.PI) / 4),
-      y: Math.sin((k * Math.PI) / 4),
-    }));
-  }
-  const lv = [-3, -1, 1, 3].map((v) => v / Math.sqrt(10)); // 16-QAM
-  return lv.flatMap((x) => lv.map((y) => ({ x, y })));
-}
 
 /** Exact ML decision boundaries as segments (drawn by the custom view). */
 function boundaries(mod, ext) {
@@ -56,17 +39,6 @@ function boundaries(mod, ext) {
     segs.push({ x1: -ext, y1: v, x2: ext, y2: v });
   }
   return segs;
-}
-
-function serTheory(mod, snr) {
-  if (mod === 'bpsk') return Q(Math.sqrt(2 * snr));
-  if (mod === 'qpsk') {
-    const p = Q(Math.sqrt(snr));
-    return 2 * p - p * p;
-  }
-  if (mod === '8psk') return 2 * Q(Math.sqrt(2 * snr) * Math.sin(Math.PI / 8));
-  const p = 1.5 * Q(Math.sqrt(snr / 5));
-  return 1 - (1 - p) ** 2;
 }
 
 /** Simulate n symbols at linear SNR γ; returns the error count (+ clouds). */
@@ -101,7 +73,7 @@ export function compute({ mod, snrDb, N, seed }) {
   const rng = mulberry32(seed);
   const gauss = gaussFrom(rng);
   const pts = constellation(mod);
-  const snr = 10 ** (snrDb / 10);
+  const snr = dbToLin(snrDb);
 
   // main cloud at the pill's SNR
   const keep = { ok: [], err: [] };
@@ -112,30 +84,20 @@ export function compute({ mod, snrDb, N, seed }) {
   const fy = new Float64Array(81);
   for (let i = 0; i < 81; i++) {
     ft[i] = (20 * i) / 80;
-    fy[i] = serTheory(mod, 10 ** (ft[i] / 10));
+    fy[i] = serTheory(mod, dbToLin(ft[i]));
   }
   const mx = new Float64Array(DB_GRID.length);
   const my = new Float64Array(DB_GRID.length);
   for (let g = 0; g < DB_GRID.length; g++) {
     mx[g] = DB_GRID[g];
-    my[g] = simulate(pts, N_CURVE, 10 ** (DB_GRID[g] / 10), rng, gauss, null) / N_CURVE;
+    my[g] = simulate(pts, N_CURVE, dbToLin(DB_GRID[g]), rng, gauss, null) / N_CURVE;
   }
 
-  const toSeries = (arr) => {
-    const m = arr.length / 2;
-    const x = new Float64Array(m);
-    const y = new Float64Array(m);
-    for (let i = 0; i < m; i++) {
-      x[i] = arr[2 * i];
-      y[i] = arr[2 * i + 1];
-    }
-    return { x, y };
-  };
 
   return {
     observables: {
-      rxOk: toSeries(keep.ok),
-      rxErr: toSeries(keep.err),
+      rxOk: pairsToSeries(keep.ok),
+      rxErr: pairsToSeries(keep.err),
       idealPoints: {
         x: Float64Array.from(pts, (p) => p.x),
         y: Float64Array.from(pts, (p) => p.y),
