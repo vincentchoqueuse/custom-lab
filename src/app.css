@@ -269,14 +269,6 @@ kbd {
   opacity: 1;
 }
 
-/* touch screens have no hover: there, the indicator stays visible or the
-   affordance would never show at all */
-@media (hover: none) {
-  .sidebar .subject-title .chev {
-    opacity: 0.55;
-  }
-}
-
 .sidebar .exp-link {
   display: block;
   padding: 8px 10px;
