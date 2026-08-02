@@ -6,54 +6,13 @@
 // window. Exact identities used by check.js: Parseval through the
 // zero-padded DFT, and periodic-Hann ENBW = 1.5 bins.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { fft } from '../../../core/numeric.js';
 
 const FS = 1000; // sampling rate (Hz)
 const PHI2 = 1.0; // second-tone phase (rad) — avoids coherent addition
 const DB_FLOOR = -120;
 const KPAD = 16; // fixed padding for the window-kernel view
 const KBINS = 12; // kernel view span (bins of Fs/N)
-
-// Radix-2 FFT kept local: first spectral consumer in the catalog — promoted
-// to core/numeric.js at the second one (repo rule: a pattern repeated twice
-// becomes a generic).
-function fft(re, im) {
-  const n = re.length;
-  for (let i = 1, j = 0; i < n; i++) {
-    let bit = n >> 1;
-    for (; j & bit; bit >>= 1) j ^= bit;
-    j |= bit;
-    if (i < j) {
-      const tr = re[i];
-      re[i] = re[j];
-      re[j] = tr;
-      const ti = im[i];
-      im[i] = im[j];
-      im[j] = ti;
-    }
-  }
-  for (let len = 2; len <= n; len <<= 1) {
-    const ang = (-2 * Math.PI) / len;
-    const wr = Math.cos(ang);
-    const wi = Math.sin(ang);
-    for (let i = 0; i < n; i += len) {
-      let cr = 1;
-      let ci = 0;
-      for (let j = 0; j < len / 2; j++) {
-        const k = i + j;
-        const l = k + len / 2;
-        const tr = re[l] * cr - im[l] * ci;
-        const ti = re[l] * ci + im[l] * cr;
-        re[l] = re[k] - tr;
-        im[l] = im[k] - ti;
-        re[k] += tr;
-        im[k] += ti;
-        const ncr = cr * wr - ci * wi;
-        ci = cr * wi + ci * wr;
-        cr = ncr;
-      }
-    }
-  }
-}
 
 /** Periodic (DFT-even) window sample w[n], n in [0, N). */
 function windowValue(win, n, N) {
