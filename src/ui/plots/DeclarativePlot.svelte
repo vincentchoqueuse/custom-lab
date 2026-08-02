@@ -201,8 +201,18 @@
 </script>
 
 <svg class="plot-svg" viewBox="0 0 {W} {H}" role="img">
+  <defs>
+    <!-- data layers are clipped to the inner frame: with an explicit axis
+         domain (e.g. BER floors at 1e-5) curves would otherwise overflow
+         past the axes — custom views already clip, this brings the
+         declarative path in line -->
+    <clipPath id="dp-clip">
+      <rect x="0" y="0" width={iw} height={ih} />
+    </clipPath>
+  </defs>
   <g transform="translate({M.left},{M.top})">
     <Axes {xs} {ys} {xAxis} {yAxis} w={iw} h={ih} {k} {kt} />
+    <g clip-path="url(#dp-clip)">
     {#each layers as l, i (i)}
       {#if l.kind === 'histogram'}
         <Histogram {xs} {ys} rects={l.rects} spec={paint(l.s, l.kind)} />
@@ -222,6 +232,7 @@
         <HLine {ys} y={l.v} spec={paint(l.s, l.kind)} w={iw} {k} {kt} />
       {/if}
     {/each}
+    </g>
     <Legend entries={legend} {iw} {kt} />
   </g>
 </svg>
