@@ -204,10 +204,9 @@ export function compute({ family, n, fc, Amax, method }) {
       respAna: { x: rf, y: ra },
       warp: { x: wx, y: wy },
       warpIdent: { x: wx, y: wi },
-      polesX: zpx,
-      polesY: zpy,
-      zerosX: Float64Array.from(zZeros, (z) => z[0]),
-      zerosY: Float64Array.from(zZeros, (z) => z[1]),
+      // {x, y} series: the shape a declarative plane consumes
+      poles: { x: zpx, y: zpy },
+      zeros: { x: Float64Array.from(zZeros, (z) => z[0]), y: Float64Array.from(zZeros, (z) => z[1]) },
       bCoefs: b, // Inspector download (difference-equation b/a)
       aCoefs: a,
       hImp, // checks: impulse-invariance sampling identity

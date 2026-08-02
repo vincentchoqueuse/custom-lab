@@ -1,5 +1,5 @@
 import { compute, svfGain } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { standardChecks, maxGap } from '../../../core/checks.js';
 
 const FS = 8000;
 // f0 = 125 Hz = 64 bins of the 4096-point window: harmonics sit on bins
@@ -10,13 +10,12 @@ export const checks = [
     name: 'exact identity: H_lp(z = 1) = 1 whatever (fc, Q)',
     category: 'numeric',
     run() {
-      let worst = 0;
-      for (const fc of [100, 700, 1500]) {
-        for (const Q of [0.5, 5, 20]) {
-          const f1 = 2 * Math.sin((Math.PI * fc) / FS);
-          worst = Math.max(worst, Math.abs(svfGain('lp', 0, f1, 1 / Q) - 1));
-        }
-      }
+      const tunings = [100, 700, 1500].flatMap((fc) => [0.5, 5, 20].map((Q) => [fc, Q]));
+      const worst = maxGap(
+        tunings,
+        ([fc, Q]) => svfGain('lp', 0, 2 * Math.sin((Math.PI * fc) / FS), 1 / Q),
+        () => 1
+      );
       return { ok: worst < 1e-12, detail: `max|H_lp(0)−1|=${worst.toExponential(2)}` };
     },
   },
@@ -24,11 +23,9 @@ export const checks = [
     name: 'the notch zero sits exactly at fc (the reason f1 = 2·sin(π·fc/Fs))',
     category: 'numeric',
     run() {
-      let worst = 0;
-      for (const fc of [250, 800, 1400]) {
-        const f1 = 2 * Math.sin((Math.PI * fc) / FS);
-        worst = Math.max(worst, svfGain('notch', fc, f1, 1 / 5));
-      }
+      const worst = maxGap([250, 800, 1400], (fc) =>
+        svfGain('notch', fc, 2 * Math.sin((Math.PI * fc) / FS), 1 / 5)
+      );
       return { ok: worst < 1e-12, detail: `max|H_notch(fc)|=${worst.toExponential(2)}` };
     },
   },

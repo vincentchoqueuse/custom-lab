@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, custom, line, scatter } from '../../../core/views.js';
+import { view, plane, line, scatter } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -72,8 +72,15 @@ export default {
         },
       })
     ),
-    // CUSTOM view: equal-aspect I/Q plane — see views/OfdmConstellation.svelte
-    custom('constellation', 'Constellation', () => import('./views/OfdmConstellation.svelte')),
+    plane('constellation', 'Constellation', {
+      clouds: [
+        { source: 'rxRaw', color: '#7E2F8E', r: 1.5, opacity: 0.18, label: 'avant égalisation' },
+        { source: 'rxEq', color: '#0072BD', r: 1.7, opacity: 0.4, label: 'après ZF (1 coeff/porteuse)' },
+      ],
+      markers: { source: 'ideal', color: '#EDB120', label: 'QPSK idéale' },
+      minHalf: 1.6,
+      maxHalf: 2.5,
+    }),
     view(
       'ber',
       'Erreurs par porteuse',

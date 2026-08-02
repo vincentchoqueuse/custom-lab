@@ -1,5 +1,5 @@
 import { compute } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { standardChecks, maxGap, maxAbsDiff } from '../../../core/checks.js';
 import { toDb, polyEvalComplex } from '../../../core/numeric.js';
 
 const BASE = { family: 'butter', n: 4, fc: 1000, Amax: 1, method: 'bilinear', seed: 1 };
@@ -18,13 +18,14 @@ export const checks = [
     name: 'prewarped bilinear: |H(fc)| = −Amax exactly (butter and cheby1)',
     category: 'numeric',
     run() {
-      let worst = 0;
-      for (const family of ['butter', 'cheby1']) {
-        for (const fc of [500, 1000, 3000]) {
-          const { observables: o } = compute({ ...BASE, family, fc });
-          worst = Math.max(worst, Math.abs(levelAt(o, fc) - -1));
-        }
-      }
+      const cases = ['butter', 'cheby1'].flatMap((family) =>
+        [500, 1000, 3000].map((fc) => [family, fc])
+      );
+      const worst = maxGap(
+        cases,
+        ([family, fc]) => levelAt(compute({ ...BASE, family, fc }).observables, fc),
+        () => -1
+      );
       return { ok: worst < 1e-9, detail: `max|H(fc)+1dB|=${worst.toExponential(2)}` };
     },
   },
@@ -56,13 +57,13 @@ export const checks = [
     name: 'stability: every digital pole strictly inside the unit circle',
     category: 'numeric',
     run() {
-      let worst = 0;
-      for (const method of ['bilinear', 'naive', 'impulse']) {
-        for (const family of ['butter', 'cheby1']) {
-          const { observables: o } = compute({ ...BASE, family, method, n: 8, fc: 3500 });
-          worst = Math.max(worst, o.maxPole);
-        }
-      }
+      const cases = ['bilinear', 'naive', 'impulse'].flatMap((method) =>
+        ['butter', 'cheby1'].map((family) => [method, family])
+      );
+      const worst = maxGap(
+        cases,
+        ([method, family]) => compute({ ...BASE, family, method, n: 8, fc: 3500 }).observables.maxPole
+      );
       return { ok: worst < 1, detail: `max|z_pole|=${worst.toFixed(6)}` };
     },
   },
@@ -72,8 +73,7 @@ export const checks = [
     run() {
       // the defining identity, validating the whole partial-fraction assembly
       const { observables: o } = compute({ ...BASE, family: 'cheby1', n: 5, method: 'impulse' });
-      let worst = 0;
-      for (let m = 0; m < o.hImp.length; m++) worst = Math.max(worst, Math.abs(o.hImp[m] - o.hAna[m]));
+      const worst = maxAbsDiff(o.hImp, o.hAna);
       return { ok: worst < 1e-12, detail: `max|h[n]−T·h_a(nT)|=${worst.toExponential(2)}` };
     },
   },

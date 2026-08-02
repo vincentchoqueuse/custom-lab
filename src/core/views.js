@@ -88,6 +88,40 @@ export function view(id, title, spec) {
   return { id, title, kind: 'plot', spec, layout: 'plot' };
 }
 
+/**
+ * Declarative EQUAL-ASPECT plane (I/Q, poles, z-plane): the one view shape
+ * that a cartesian plot cannot express, since circles must stay circles.
+ * Everything is resolved against the observables by ui/plots/PlanePlot:
+ *   clouds:   [{source, color, r, opacity, max, label}]  point sets
+ *   markers:  {source, color, labels, label}             emphasized points
+ *   segments: an observable name or a literal [{x1,y1,x2,y2}]
+ *   circle:   {radius: number | p => n, color, label}    guide circle
+ *   minHalf/maxHalf: number or p => number               window bounds
+ *   axes:     {x, y} labels
+ * The legend is built from the labels, as in the cartesian plots.
+ */
+export function plane(id, title, spec = {}) {
+  const where = `plane '${id}'`;
+  if (typeof id !== 'string' || !id) throw new ViewError('plane: id is required');
+  if (typeof title !== 'string' || !title) throw new ViewError(`${where}: title is required`);
+  for (const c of spec.clouds ?? []) {
+    if (c === null || typeof c !== 'object' || typeof c.source !== 'string')
+      throw new ViewError(`${where}: each cloud needs a { source } observable name`);
+  }
+  if (spec.markers != null && typeof spec.markers.source !== 'string')
+    throw new ViewError(`${where}: markers needs a { source } observable name`);
+  if (spec.segments != null && typeof spec.segments !== 'string' && !Array.isArray(spec.segments))
+    throw new ViewError(`${where}: segments must be an observable name or a literal array`);
+  if (spec.circle != null && spec.circle.radius == null)
+    throw new ViewError(`${where}: circle needs a radius (number or p => number)`);
+  for (const k of ['minHalf', 'maxHalf']) {
+    const v = spec[k];
+    if (v != null && typeof v !== 'number' && typeof v !== 'function')
+      throw new ViewError(`${where}: ${k} must be a number or p => number`);
+  }
+  return { id, title, kind: 'plane', spec, layout: 'plot' };
+}
+
 /** Custom view — must be justified in a manifest comment (declarative first). */
 export function custom(id, title, loader) {
   if (typeof id !== 'string' || !id) throw new ViewError(`custom: id is required`);
@@ -106,6 +140,23 @@ export function custom(id, title, loader) {
  */
 export function crossCheckSources(manifest, observables, params) {
   for (const v of manifest.views) {
+    if (v.kind === 'plane') {
+      const names = [
+        ...(v.spec.clouds ?? []).map((c) => c.source),
+        v.spec.markers?.source,
+        v.spec.markers?.labels,
+        typeof v.spec.segments === 'string' ? v.spec.segments : null,
+      ].filter(Boolean);
+      for (const src of names) {
+        if (!(src in observables)) {
+          console.warn(
+            `[views] experiment '${manifest.id}', view '${v.id}': ` +
+              `source '${src}' matches no observable`
+          );
+        }
+      }
+      continue;
+    }
     if (v.kind !== 'plot') continue;
     for (const s of [v.spec, ...(v.spec.overlays ?? [])]) {
       const src = s.source;

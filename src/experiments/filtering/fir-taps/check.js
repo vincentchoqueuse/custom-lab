@@ -1,5 +1,5 @@
 import { compute, firGain } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { BENCH } from '../../../core/bench.js';
 
 const FS = BENCH.FS;
@@ -11,12 +11,12 @@ export const checks = [
     name: 'DC gain is exactly the sum of the taps',
     category: 'numeric',
     run() {
-      let worst = 0;
-      for (const b of [[0.25, 0.25, 0.25, 0.25], [1, -1], [0.5, 0, -0.5], [0, 0, 0, 1]]) {
-        const { observables: o } = compute({ ...BASE, b });
-        const sum = b.reduce((a, c) => a + c, 0);
-        worst = Math.max(worst, Math.abs(o.dcGain.value - sum), Math.abs(firGain(b, 0) - Math.abs(sum)));
-      }
+      const cases = [[0.25, 0.25, 0.25, 0.25], [1, -1], [0.5, 0, -0.5], [0, 0, 0, 1]];
+      const sum = (b) => b.reduce((a, c) => a + c, 0);
+      const worst = Math.max(
+        maxGap(cases, (b) => compute({ ...BASE, b }).observables.dcGain.value, sum),
+        maxGap(cases, (b) => firGain(b, 0), (b) => Math.abs(sum(b)))
+      );
       return { ok: worst < 1e-15, detail: `max|H(0)−Σb|=${worst.toExponential(2)}` };
     },
   },
@@ -25,11 +25,10 @@ export const checks = [
     category: 'numeric',
     run() {
       // Dirichlet zeros: Σ e^{−j2πkm/L} = 0 for m = 1…L−1
-      let worst = 0;
-      for (const L of [4, 8, 10]) {
+      const worst = maxGap([4, 8, 10], (L) => {
         const b = Array.from({ length: L }, () => 1 / L);
-        for (let m = 1; m < L; m++) worst = Math.max(worst, firGain(b, (m * FS) / L));
-      }
+        return maxGap(range(L - 1, (i) => i + 1), (m) => firGain(b, (m * FS) / L));
+      });
       return { ok: worst < 1e-14, detail: `max|H(k·Fs/L)|=${worst.toExponential(2)}` };
     },
   },
@@ -39,8 +38,7 @@ export const checks = [
     run() {
       const { observables: o } = compute({ ...BASE, b: [0, 0, 0, 1] });
       const x = compute({ ...BASE, b: [1] }).observables.yFull; // identity filter
-      let worst = 0;
-      for (let n = 3; n < o.yFull.length; n++) worst = Math.max(worst, Math.abs(o.yFull[n] - x[n - 3]));
+      const worst = maxGap(range(o.yFull.length - 3, (i) => i + 3), (n) => o.yFull[n], (n) => x[n - 3]);
       return { ok: worst === 0, detail: `max|y[n]−x[n−3]|=${worst}` };
     },
   },
@@ -48,8 +46,7 @@ export const checks = [
     name: 'the pure delay is all-pass: |H| = 1 at every frequency',
     category: 'numeric',
     run() {
-      let worst = 0;
-      for (let f = 0; f <= FS / 2; f += 37) worst = Math.max(worst, Math.abs(firGain([0, 0, 0, 1], f) - 1));
+      const worst = maxGap(range(109, (i) => i * 37), (f) => firGain([0, 0, 0, 1], f), () => 1);
       return { ok: worst < 1e-15, detail: `max||H|−1|=${worst.toExponential(2)}` };
     },
   },
@@ -57,11 +54,11 @@ export const checks = [
     name: 'the difference filter [1,−1] has |H| = 2·|sin(πf/Fs)| exactly',
     category: 'numeric',
     run() {
-      let worst = 0;
-      for (let f = 0; f <= FS / 2; f += 53) {
-        const th = 2 * Math.abs(Math.sin((Math.PI * f) / FS));
-        worst = Math.max(worst, Math.abs(firGain([1, -1], f) - th));
-      }
+      const worst = maxGap(
+        range(76, (i) => i * 53),
+        (f) => firGain([1, -1], f),
+        (f) => 2 * Math.abs(Math.sin((Math.PI * f) / FS))
+      );
       return { ok: worst < 1e-15, detail: `max gap=${worst.toExponential(2)}` };
     },
   },

@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, custom, line, scatter } from '../../../core/views.js';
+import { view, plane, line, scatter } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -54,7 +54,14 @@ export default {
     // circles must be circles) plus ML decision boundaries — no generic
     // 1D-oriented plot type fits. Same justification as GaussianPlane;
     // promotion candidate if a third equal-aspect view appears.
-    custom('iq', 'Plan I/Q', () => import('./views/IQPlane.svelte')),
+    plane('iq', 'Plan I/Q', {
+      clouds: [
+        { source: 'rxOk', color: '#0072BD', r: 1.7, opacity: 0.3, label: 'décidé juste' },
+        { source: 'rxErr', color: '#D95319', r: 2.4, opacity: 0.85, label: 'erreur' },
+      ],
+      markers: { source: 'idealPoints', color: '#EDB120', label: 'symboles émis' },
+      segments: 'boundaries',
+    }),
 
     // The SER curve: theory vs Monte Carlo, log probability axis.
     view(

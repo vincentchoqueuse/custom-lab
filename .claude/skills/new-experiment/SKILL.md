@@ -42,14 +42,19 @@ Node-safe, usable from compute.js AND check.js):
   `log` is MANDATORY for anything spanning orders of magnitude.
   `coeffs` = numeric list param (URL `?den=1,2,1`). `visibleIf: {p: v}`
   or `{p: [v1, v2]}`.
-- `core/views.js` — `view`, `custom`, `histogram, line, scatter, bars,
-  vline, hline, density, band`. Same factory works as main plot or overlay.
-  vline/hline sources: a param name, `p => fn(p)`, or a scalar observable.
+- `core/views.js` — `view`, `plane`, `custom`, `histogram, line, scatter,
+  bars, vline, hline, density, band`. Same factory works as main plot or
+  overlay. vline/hline sources: a param name, `p => fn(p)`, or a scalar
+  observable. `plane(id, title, {clouds, markers, segments, circle, axes,
+  minHalf, maxHalf})` covers every equal-aspect plane (I/Q, poles, z-plane)
+  declaratively — reach for a custom view only when it fits none of these.
 - `ui/plots/IQPlane.svelte` — generic EQUAL-ASPECT plane (props: clouds,
   markers, labels, segments, xLabel/yLabel, minHalf/maxHalf). Use it for any
   I/Q, pole-plane or 2D-cloud view via a thin custom-view binding.
 - `core/checks.js` — `standardChecks.determinism(compute, params, obsName)`
-  is mandatory in every check.js.
+  is mandatory in every check.js. Write identity checks with `maxGap(points,
+  f, g)` / `maxAbsDiff(a, b)` / `range(n, f)` rather than hand-rolled
+  accumulation loops: the check then reads as the identity itself.
 
 ## Compute rules and tricks
 

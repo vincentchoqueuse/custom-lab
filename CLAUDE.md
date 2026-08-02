@@ -284,7 +284,9 @@ registry at load time):
   factories: `view(id, title, plotSpec)`, `custom(id, title, loader)`, and one
   factory per graphic type — `histogram`, `line`, `scatter`, `bars`, `vline`,
   `hline`, `density`, `band`. The same factory works as main plot or as overlay,
-  by position. Style keys are **flat** (`color`, `dashed`, `width` — no nested
+  by position, plus `plane(id, title, spec)` for the one shape a cartesian
+  plot cannot express (equal-aspect I/Q, s- and z-planes: circles must stay
+  circles). Style keys are **flat** (`color`, `dashed`, `width` — no nested
   `style` object), consistent with the field factories. Factories validate at load
   time (known types, sane axes/scale/domain) and throw named errors; observable
   `source` names, unknowable at load time, are cross-checked against the first
@@ -292,7 +294,10 @@ registry at load time):
   immediately instead of rendering an empty plot.
 - **`core/checks.js`** provides `standardChecks` factories (e.g.
   `standardChecks.determinism(compute, params, observableName)`); the determinism
-  check is mandatory and scaffolded by default.
+  check is mandatory and scaffolded by default. It also provides the helpers
+  that make a check read like the identity it asserts rather than like a loop:
+  `maxGap(points, f, g)` (worst |f−g| over the points, or worst |f| with one
+  function), `maxAbsDiff(a, b)` and `range(n, f)`.
 
 ## Contract: manifest.js (full-schema reference)
 

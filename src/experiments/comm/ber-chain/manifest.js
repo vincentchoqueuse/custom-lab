@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, custom, line, scatter } from '../../../core/views.js';
+import { view, plane, line, scatter } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -64,9 +64,15 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
 
   views: [
-    // CUSTOM view: equal-aspect plane + per-symbol bit labels + error clouds
-    // split by bit cost; rendering delegated to the generic ui/plots/IQPlane.
-    custom('mapping', 'Constellation & bits', () => import('./views/BitMapping.svelte')),
+    // equal-aspect plane: per-symbol bit labels, error clouds split by bit cost
+    plane('mapping', 'Constellation & bits', {
+      clouds: [
+        { source: 'rxOk', color: '#0072BD', r: 1.6, opacity: 0.22, max: 2500, label: 'décidé juste' },
+        { source: 'rxErr1', color: '#EDB120', r: 2.4, opacity: 0.85, label: 'erreur à 1 bit' },
+        { source: 'rxErrMulti', color: '#D95319', r: 2.8, opacity: 0.95, label: 'erreur multi-bits' },
+      ],
+      markers: { source: 'idealPoints', color: 'var(--muted-fg)', labels: 'bitLabels' },
+    }),
 
     // The waterfall: Gray theory against Monte Carlo (with natural mapping,
     // the MC points detaching from the curve IS the lesson).

@@ -1,5 +1,24 @@
-// standardChecks factories for the numerical correctness harness (check.js).
-// The determinism check is mandatory for every experiment.
+// standardChecks factories for the numerical correctness harness (check.js),
+// plus the small helpers that let a check READ like the identity it asserts
+// instead of like a loop. The determinism check is mandatory for every
+// experiment.
+
+/** [f(0) … f(n−1)] — the points an identity is checked on. */
+export const range = (n, f = (i) => i) => Array.from({ length: n }, (_, i) => f(i));
+
+/**
+ * max |f(x) − g(x)| over `points` — the shape of nearly every numeric check
+ * in this repo: two expressions that must agree, and how far apart they get
+ * at worst. With one function, the max of |f| (a quantity that must vanish).
+ */
+export function maxGap(points, f, g = () => 0) {
+  let worst = 0;
+  for (const x of points) worst = Math.max(worst, Math.abs(f(x) - g(x)));
+  return worst;
+}
+
+/** max |a[i] − b[i]| over two equal-length numeric arrays. */
+export const maxAbsDiff = (a, b) => maxGap(range(a.length), (i) => a[i], (i) => b[i]);
 
 function numbersOf(raw) {
   const v = raw !== null && typeof raw === 'object' && 'value' in raw && !('x' in raw) ? raw.value : raw;

@@ -1,5 +1,5 @@
 import { float, log } from '../../../core/fields.js';
-import { view, custom, line, vline, hline } from '../../../core/views.js';
+import { view, plane, line, vline, hline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -62,9 +62,15 @@ export default {
       })
     ),
 
-    // CUSTOM view: equal-aspect pole plane (generic IQPlane) — the poles
-    // travel on the ω₀ circle as m varies, then split on the real axis.
-    custom('poles', 'Plan des pôles', () => import('./views/PolePlane.svelte')),
+    // equal-aspect plane: the poles travel on the ω₀ circle as m varies,
+    // then split on the real axis
+    plane('poles', 'Plan des pôles', {
+      markers: { source: 'poles', color: '#D95319', label: 'pôles' },
+      circle: { radius: (p) => p.w0, label: 'cercle |s| = ω₀' },
+      axes: { x: 'Re(s)', y: 'Im(s)' },
+      minHalf: (p) => Math.max(1.3 * p.w0, 1),
+      maxHalf: 60,
+    }),
 
     // |H(jω)| in log-log with the resonance when m < 1/√2
     view(
