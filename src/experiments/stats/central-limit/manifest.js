@@ -8,7 +8,6 @@ export default {
   title: 'Théorème central limite',
   subtitle: 'La moyenne de n tirages devient gaussienne — quelle que soit la loi',
   tags: ['TCL', 'CLT', 'convergence', 'gaussienne', 'moyenne'],
-  group: 'Lois et théorèmes',
 
   params: {
     law: select('loi', {

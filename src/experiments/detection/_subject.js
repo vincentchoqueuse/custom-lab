@@ -1,1 +1,1 @@
-export default { title: 'Détection', order: 2 };
+export default { title: 'Détection', order: 4 };

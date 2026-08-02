@@ -51,7 +51,7 @@ scaffolded by `npm run new:experiment`:
 - `check.js` — numerical correctness checks (`npm run check`)
 
 The core discovers experiments automatically; adding one never modifies the
-core. Reference example: `src/experiments/stats/confidence-intervals/`.
+core. Reference example: `src/experiments/estimation/confidence-intervals/`.
 
 ## License
 

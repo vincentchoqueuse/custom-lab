@@ -7,7 +7,6 @@ export default {
   title: 'Gaussienne à deux dimensions',
   subtitle: 'Corrélation, ellipses iso-densité, axes principaux et régression',
   tags: ['gaussienne', '2D', 'corrélation', 'covariance', 'ellipse', 'régression'],
-  group: 'Lois et théorèmes',
 
   params: {
     mux: float('μₓ', { description: 'moyenne de X', min: -3, max: 3, step: 0.1, default: 0 }),

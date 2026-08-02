@@ -7,7 +7,6 @@ export default {
   title: 'Catalogue de lois',
   subtitle: 'pdf/pmf et CDF : théorie contre réalisations',
   tags: ['probabilités', 'lois', 'histogramme', 'CDF', 'Poisson', 'gaussienne'],
-  group: 'Lois et théorèmes',
 
   params: {
     law: select('loi', {

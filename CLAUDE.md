@@ -395,7 +395,7 @@ reopened the night before class, and the file a colleague adapts to their own le
 while keeping manifest and compute untouched.
 
 ```js
-// experiments/stats/confidence-intervals/scenes.js
+// experiments/estimation/confidence-intervals/scenes.js
 // Auto-discovered by the registry. Defaults: view = first view, drawer = false.
 export default [
   {
@@ -705,19 +705,19 @@ export const checks = [
 │   │   ├── DrawerParams.svelte
 │   │   ├── Inspector.svelte      # developer panel (raw observables)
 │   │   └── plots/
-│   └── experiments/
-│       ├── stats/
-│       │   ├── _subject.js       # { title: 'Statistiques & Estimation', order: 1 }
+│   └── experiments/              # one directory per subject; the directory
+│       ├── estimation/           #   name IS the first URL segment, so a
+│       │   ├── _subject.js       #   subject stays small enough to be scanned
+│       │   │                     #   { title: 'Estimation', order: 2 }
 │       │   └── confidence-intervals/
 │       │       ├── manifest.js   # definition (stable)
 │       │       ├── scenes.js     # lecture script (edited before each class)
 │       │       ├── compute.js    # the science
 │       │       ├── check.js      # the harness
 │       │       └── views/        # custom views only
-│       ├── signal/
-│       │   └── sinusoid/         # canonical minimal experiment (see § above)
-│       ├── detection/
-│       └── comm/
+│       ├── stats/ estimation/ regression/ detection/
+│       ├── analog/ conversion/ spectral/ filtering/
+│       └── comm/ control/ numerics/
 └── tests/                        # optional — the main harness is check.js
 ```
 
@@ -750,7 +750,7 @@ export const checks = [
    Workspace (Tabs, ViewHost, PlotFrame, PromptBar with non-modal popovers and
    actions, TeacherBanner), generated DrawerParams (visibleIf, validate, derived,
    display), generic plots + overlays. Full validation on
-   `stats/confidence-intervals`.
+   `estimation/confidence-intervals`.
 2. **Trial by fire**: `detection/neyman-pearson` (`log` param for SNR,
    densities+threshold / ROC / Pd vs SNR) to stress-test and **lock the manifest
    schema**. No other experiment before this lock.
