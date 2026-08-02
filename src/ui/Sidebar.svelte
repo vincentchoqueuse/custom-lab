@@ -1,4 +1,5 @@
 <script>
+  import { untrack } from 'svelte';
   import { app, toggleSidebar } from '../core/store.svelte.js';
   import { subjects } from '../core/registry.js';
   import { STR } from '../core/strings.js';
@@ -7,6 +8,24 @@
   import AppIcon from './AppIcon.svelte';
 
   let collapsed = $state({});
+
+  // Only the active experiment's subject is unfolded by default (the tree
+  // gets lost otherwise); navigating into a folded subject unfolds it.
+  // Manual toggles are otherwise preserved (untrack: no loop on collapsed).
+  let prevKey;
+  $effect(() => {
+    const key = app.expKey;
+    if (!key || key === prevKey) return;
+    const subj = key.split('/')[0];
+    untrack(() => {
+      if (prevKey === undefined) {
+        for (const s of subjects) collapsed[s.id] = s.id !== subj;
+      } else if (collapsed[subj]) {
+        collapsed[subj] = false;
+      }
+      prevKey = key;
+    });
+  });
 
   function toggleSubject(id) {
     collapsed[id] = !collapsed[id];
