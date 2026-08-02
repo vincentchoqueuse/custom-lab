@@ -3,6 +3,7 @@
   // observables, computes layout (d3 bins/scales via core/scales.js — pixel
   // scaling and binning only, never scientific computation) and composes the
   // generic SVG primitives.
+  import { untrack } from 'svelte';
   import { scaleLinear, scaleLog, bin } from '../../core/scales.js';
   import { dataColor } from '../../core/palette.svelte.js';
   import { FRAME, strokeScale, typeScale } from './frame.js';
@@ -17,7 +18,7 @@
   import Density from './Density.svelte';
   import Band from './Band.svelte';
 
-  let { spec, obs, params, pres = false } = $props();
+  let { spec, obs, params, pres = false, lock = false } = $props();
 
   const { W, H, M, iw, ih } = FRAME;
   const k = $derived(strokeScale(pres));
@@ -104,7 +105,7 @@
     });
   });
 
-  const xDomain = $derived.by(() => {
+  const xDomainAuto = $derived.by(() => {
     if (Array.isArray(xAxis.domain)) return xAxis.domain;
     // a log scale cannot include 0: non-positive values are excluded from the
     // domain (they are unplottable on that axis anyway)
@@ -139,7 +140,7 @@
     return [lo, hi];
   });
 
-  const yDomain = $derived.by(() => {
+  const yDomainAuto = $derived.by(() => {
     if (Array.isArray(yAxis.domain)) return yAxis.domain;
     // a log scale cannot include 0: non-positive values are excluded, and
     // padding is multiplicative (additive padding would push lo below zero)
@@ -179,6 +180,21 @@
     const pad = (hi - lo) * 0.06;
     return [lo === 0 ? 0 : lo - pad, hi + pad];
   });
+
+  // Axis lock: the frame is pinned to the domains it had when the lock was
+  // switched on, so moving a parameter afterwards moves the CURVE and not the
+  // frame — without it the auto-scaling hides the very effect being shown.
+  let held = $state(null);
+  $effect(() => {
+    if (!lock) {
+      held = null;
+      return;
+    }
+    if (!held) held = { x: untrack(() => xDomainAuto), y: untrack(() => yDomainAuto) };
+  });
+
+  const xDomain = $derived(held?.x ?? xDomainAuto);
+  const yDomain = $derived(held?.y ?? yDomainAuto);
 
   function mkScale(axis, domain, range) {
     const s = axis.scale === 'log' ? scaleLog() : scaleLinear();

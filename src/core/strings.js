@@ -35,6 +35,8 @@ export const STR = {
   CLOSE: 'Close',
   MASKED_HINT: 'Hidden parameter — use Reveal to unveil',
   MORE_ACTIONS: 'More actions',
+  LOCK_AXES: 'Lock the axes (A) — the frame stays put while the curve moves',
+  AXES: 'Axes',
   COLLAPSE_SIDEBAR: 'Toggle sidebar',
   SETTINGS: 'Settings',
   QR_CODE: 'QR code',

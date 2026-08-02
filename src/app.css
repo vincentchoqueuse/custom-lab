@@ -759,6 +759,18 @@ kbd {
   color: #18181b;
 }
 
+/* the axis lock is a state, not a one-shot: it stays lit while engaged */
+.statline .export button.on {
+  background: #18181b;
+  color: #fafafa;
+}
+
+.statline .export button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* ---------- prompt bar --------------------------------------------------- */
 
 .promptbar {

@@ -22,6 +22,7 @@
       {obs}
       params={app.params}
       pres={app.ui.presentation || app.ui.bold}
+      lock={app.axisLock}
     />
   {/if}
 {/if}

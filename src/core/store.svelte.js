@@ -19,6 +19,10 @@ export const app = $state({
   // freeze-frame ghost: SVG snapshot markup, or null. Display state ONLY —
   // never serialized in the URL (not link-reproducible, by design).
   ghost: null,
+  // axis lock: while true, each declarative plot pins the domains it had when
+  // it was switched on, so moving a parameter moves the CURVE, not the frame.
+  // Display state ONLY — never in the URL, like the ghost.
+  axisLock: false,
   ui: {
     sidebar: true,
     theme: 'light',
@@ -145,6 +149,7 @@ function handleHash() {
   app.revealed = false;
   app.notice = '';
   app.ghost = null;
+  app.axisLock = false;
   app.result = { status: 'idle', observables: null, message: '' };
   syncUrl(false); // normalize whatever was typed by hand
 }
@@ -206,9 +211,14 @@ export function stepPreset(dir) {
   if (i !== j) applyPreset(m.presets[j].id);
 }
 
+export function toggleAxisLock() {
+  app.axisLock = !app.axisLock;
+}
+
 export function setView(id) {
   app.view = id;
   app.ghost = null; // a ghost from another view would be a misleading overlay
+  app.axisLock = false; // another view's frame means nothing here
   syncUrl(true);
 }
 
