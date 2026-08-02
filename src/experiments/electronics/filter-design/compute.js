@@ -14,6 +14,7 @@
 // at fp). Coefficients are exported both as the normalized prototype and
 // denormalized in rad/s — downloadable from the Inspector.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { polyEvalComplex } from '../../../core/numeric.js';
 
 const NPTS = 500; // response grid (log-spaced)
 const DB_FLOOR = -90;
@@ -103,18 +104,6 @@ function polyFromRoots(realRoots, pairs) {
   for (const r of realRoots) p = mul(p, [1, -r]);
   for (const [a, b] of pairs) p = mul(p, [1, -2 * a, a * a + b * b]);
   return Float64Array.from(p);
-}
-
-/** p(jΩ) → [re, im] (Horner, descending powers). */
-function evalPolyJw(p, w) {
-  let re = 0;
-  let im = 0;
-  for (const c of p) {
-    const nr = -im * w + c;
-    im = re * w;
-    re = nr;
-  }
-  return [re, im];
 }
 
 /* ---------- order formulas (shared with the manifest's validate) -------- */
@@ -249,8 +238,8 @@ export function compute({ family, fp, fstop, Amax, Amin }) {
 
   const { num, den } = d;
   const magDb = (W) => {
-    const [nr, ni] = evalPolyJw(num, W);
-    const [dr, di] = evalPolyJw(den, W);
+    const [nr, ni] = polyEvalComplex(num, 0, W);
+    const [dr, di] = polyEvalComplex(den, 0, W);
     const m = Math.hypot(nr, ni) / Math.hypot(dr, di);
     return Math.max(DB_FLOOR, 20 * Math.log10(m + 1e-300));
   };
@@ -278,8 +267,8 @@ export function compute({ family, fp, fstop, Amax, Amin }) {
   for (let i = 0; i < NG; i++) {
     const f = fMin + ((fTop - fMin) * i) / (NG - 1);
     gf[i] = f;
-    const [nr, ni] = evalPolyJw(num, f / fp);
-    const [dr, di] = evalPolyJw(den, f / fp);
+    const [nr, ni] = polyEvalComplex(num, 0, f / fp);
+    const [dr, di] = polyEvalComplex(den, 0, f / fp);
     phase[i] = Math.atan2(ni, nr) - Math.atan2(di, dr);
   }
   // unwrap, then τg = −dφ/dω (seconds → ms); ω = 2πf/(2πfp)·ωp ⇒ dω = 2π df

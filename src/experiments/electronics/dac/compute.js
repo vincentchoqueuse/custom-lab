@@ -12,7 +12,7 @@
 //     at nearly full level: the analog filter alone cannot save a DAC.
 // The "analog" signal is simulated on a dense grid at 64·Fs.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { fft, sinc } from '../../../core/numeric.js';
+import { fft, sinc, toDb, windowValue } from '../../../core/numeric.js';
 
 const FS = 8000; // base sample rate (Hz)
 const N0 = 160; // base samples simulated (20 ms)
@@ -102,7 +102,7 @@ export function compute({ f0, L, digFilter }) {
   const w0 = Math.round((nDense - NFFT) / 2);
   let sw = 0;
   for (let i = 0; i < NFFT; i++) {
-    const wv = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / NFFT);
+    const wv = windowValue('hann', i, NFFT);
     re[i] = a[w0 + i] * wv;
     sw += wv;
   }
@@ -117,8 +117,8 @@ export function compute({ f0, L, digFilter }) {
   for (let k = 0; k <= kMax; k++) {
     sf[k] = k * binHz;
     const m = Math.hypot(re[k], im[k]) / ref;
-    sy[k] = Math.max(DB_FLOOR, 20 * Math.log10(m + 1e-300));
-    env[k] = Math.max(DB_FLOOR, 20 * Math.log10(Math.abs(sinc(sf[k] / (L * FS))) + 1e-300));
+    sy[k] = toDb(m, DB_FLOOR);
+    env[k] = toDb(Math.abs(sinc(sf[k] / (L * FS))), DB_FLOOR);
   }
 
   /** Spectrum level (dB) at the bin nearest f. */

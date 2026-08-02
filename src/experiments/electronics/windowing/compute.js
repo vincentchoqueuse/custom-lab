@@ -6,22 +6,13 @@
 // window. Exact identities used by check.js: Parseval through the
 // zero-padded DFT, and periodic-Hann ENBW = 1.5 bins.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { fft } from '../../../core/numeric.js';
+import { fft, toDb as coreToDb, windowValue } from '../../../core/numeric.js';
 
 const FS = 1000; // sampling rate (Hz)
 const PHI2 = 1.0; // second-tone phase (rad) — avoids coherent addition
 const DB_FLOOR = -120;
 const KPAD = 16; // fixed padding for the window-kernel view
 const KBINS = 12; // kernel view span (bins of Fs/N)
-
-/** Periodic (DFT-even) window sample w[n], n in [0, N). */
-function windowValue(win, n, N) {
-  const c = Math.cos((2 * Math.PI * n) / N);
-  if (win === 'hann') return 0.5 - 0.5 * c;
-  if (win === 'hamming') return 0.54 - 0.46 * c;
-  if (win === 'blackman') return 0.42 - 0.5 * c + 0.08 * Math.cos((4 * Math.PI * n) / N);
-  return 1;
-}
 
 /** |FFT(x zero-padded to nfft)| — returns the magnitude of bins 0..nfft/2. */
 function magSpectrum(x, nfft) {
@@ -35,7 +26,7 @@ function magSpectrum(x, nfft) {
   return { mag, re, im };
 }
 
-const toDb = (m, ref) => Math.max(DB_FLOOR, 20 * Math.log10(m / ref + 1e-300));
+const toDb = (m, ref) => coreToDb(m / ref, DB_FLOOR);
 
 /**
  * @param {{N: number, pad: number, f1: number, df: number, a2: number,

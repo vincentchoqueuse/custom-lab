@@ -7,7 +7,7 @@
 // spectral slice at t = tcut feed the checks and the companion views.
 // Exact identity used by check.js: per-frame Parseval through the FFT.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { fft } from '../../../core/numeric.js';
+import { fft, toDb, windowValue } from '../../../core/numeric.js';
 
 const FS = 2000; // sampling rate (Hz)
 const T = 2; // duration (s)
@@ -43,9 +43,7 @@ export function compute({ source, f1, df, fm, N, win, tcut }) {
   for (let i = 0; i < NS; i++) x[i] = sourceValue(source, p, i / FS);
 
   const w = new Float64Array(N);
-  for (let n = 0; n < N; n++) {
-    w[n] = win === 'rect' ? 1 : 0.5 - 0.5 * Math.cos((2 * Math.PI * n) / N);
-  }
+  for (let n = 0; n < N; n++) w[n] = windowValue(win, n, N);
 
   const hop = Math.max(8, Math.round((NS - N) / COLS));
   const cols = Math.floor((NS - N) / hop) + 1;
@@ -91,7 +89,7 @@ export function compute({ source, f1, df, fm, N, win, tcut }) {
     let best = 0;
     for (let k = 0; k < rows; k++) {
       const m = mag[c * rows + k];
-      db[c * rows + k] = Math.max(DB_FLOOR, 20 * Math.log10(m / maxMag + 1e-300));
+      db[c * rows + k] = toDb(m / maxMag, DB_FLOOR);
       if (m > mag[c * rows + best]) best = k;
     }
     ridge[c] = best * binHz;

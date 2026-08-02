@@ -7,7 +7,7 @@
 // squares on a sin/cos basis) and compared to H(jω): the measured gain and
 // phase ARE |H| and arg H — the living definition of frequency response.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { rk4Step } from '../../../core/numeric.js';
+import { rk4Step, polyEvalComplex } from '../../../core/numeric.js';
 
 const T_END = 20;
 const H = 0.005;
@@ -104,25 +104,14 @@ export function compute({ num, den, input, f }) {
   }
 
   // theory H(jω) for the sine (complex polynomial evaluation)
-  const evalPoly = (c, re, im) => {
-    // Horner in the complex plane, descending powers
-    let ar = 0;
-    let ai = 0;
-    for (const v of c) {
-      const nr = ar * re - ai * im + v;
-      ai = ar * im + ai * re;
-      ar = nr;
-    }
-    return [ar, ai];
-  };
   let gainTh = NaN;
   let phaseTh = NaN;
   let gainMeas = NaN;
   let phaseMeas = NaN;
   if (input === 'sine') {
     const wg = 2 * Math.PI * f;
-    const [nr, ni] = evalPoly(num, 0, wg);
-    const [dr, di] = evalPoly(den, 0, wg);
+    const [nr, ni] = polyEvalComplex(num, 0, wg);
+    const [dr, di] = polyEvalComplex(den, 0, wg);
     const dm = dr * dr + di * di;
     const hr = (nr * dr + ni * di) / dm;
     const hi = (ni * dr - nr * di) / dm;
