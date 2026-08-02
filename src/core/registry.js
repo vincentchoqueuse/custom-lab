@@ -101,9 +101,18 @@ for (const [path, mod] of Object.entries(manifestModules)) {
   subjectMap.get(loc.subject).experiments.push(manifest);
 }
 
-/** Subjects sorted by order, each with its experiments (sidebar tree). */
+/**
+ * Subjects sorted by order, each with its experiments (sidebar tree).
+ * Inside a subject the manifests are ranked by their own `order` — the
+ * lecture progression, not the alphabet: a catalogue of demos read in the
+ * order the course meets them. An experiment that declares none lands at the
+ * end, alphabetically, so adding one still requires touching nothing else.
+ */
 export const subjects = [...subjectMap.values()].sort((a, b) => a.order - b.order);
-for (const s of subjects) s.experiments.sort((a, b) => a.title.localeCompare(b.title));
+for (const s of subjects)
+  s.experiments.sort(
+    (a, b) => (a.order ?? 99) - (b.order ?? 99) || a.title.localeCompare(b.title)
+  );
 
 /** @param {string} key — 'subject/experiment' */
 export function getExperiment(key) {
@@ -114,9 +123,9 @@ export function firstExperimentKey() {
   return subjects[0]?.experiments[0]?.key ?? null;
 }
 
-/** All experiments, flat (command palette). */
+/** All experiments, flat, in sidebar order (command palette). */
 export function allExperiments() {
-  return [...experimentMap.values()];
+  return subjects.flatMap((s) => s.experiments);
 }
 
 /** Manifest defaults — readonly params carry no value and are skipped. */

@@ -4,6 +4,7 @@ import { view, line, scatter, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'soft-decoding',
+  order: 5,
   title: 'Décodage souple contre décodage dur',
   subtitle: 'Ne jetez pas la confiance : ~2 dB gratuits, mêmes bits, même code',
   tags: ['décodage souple', 'ML', 'Hamming', 'borne de l\'union', 'gain de codage'],

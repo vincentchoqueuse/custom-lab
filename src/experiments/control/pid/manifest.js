@@ -4,6 +4,7 @@ import { view, line, hline, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'pid',
+  order: 3,
   title: 'Le PID, trois potards',
   subtitle: 'P pousse, I efface, D calme — et chacun a son prix',
   tags: ['PID', 'régulation', 'erreur statique', 'perturbation', 'boucle fermée'],

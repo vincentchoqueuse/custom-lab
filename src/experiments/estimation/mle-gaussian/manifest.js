@@ -4,6 +4,7 @@ import { view, line, scatter, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'mle-gaussian',
+  order: 4,
   title: 'Maximum de vraisemblance',
   subtitle: 'Estimer μ (et σ) à partir de N réalisations gaussiennes',
   tags: ['estimation', 'MLE', 'vraisemblance', 'gaussienne'],

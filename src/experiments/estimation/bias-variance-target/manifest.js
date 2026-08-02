@@ -4,6 +4,7 @@ import { view, custom, histogram, line, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'bias-variance-target',
+  order: 1,
   title: 'La cible : biais, variance, EQM',
   subtitle: 'Quatre estimateurs du centre — centré n\'est pas groupé, et l\'EQM tranche',
   tags: ['estimateur', 'biais', 'variance', 'EQM', 'rétrécissement'],

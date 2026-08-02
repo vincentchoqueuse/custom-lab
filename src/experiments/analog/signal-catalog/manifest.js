@@ -4,6 +4,7 @@ import { view, line, hline, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'signal-catalog',
+  order: 2,
   title: 'Catalogue de signaux',
   subtitle: 'Sept signaux, sept transformées de Fourier — amplitude, dB et phase',
   tags: ['analogique', 'Fourier', 'transformée', 'spectre', 'catalogue'],

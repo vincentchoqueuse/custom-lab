@@ -4,6 +4,7 @@ import { view, line, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'windowing',
+  order: 1,
   title: 'Fenêtrage spectral',
   subtitle: 'Résolution, fuites et dynamique — ce que la fenêtre fait au spectre',
   tags: ['numérique', 'DFT', 'fenêtre', 'résolution', 'leakage'],

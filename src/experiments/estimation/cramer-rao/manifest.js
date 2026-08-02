@@ -4,6 +4,7 @@ import { view, histogram, line, density, vline, hline } from '../../../core/view
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'cramer-rao',
+  order: 5,
   title: 'La borne de Cramér-Rao',
   subtitle: 'Un plancher sous toutes les variances — et qui le touche',
   tags: ['Cramér-Rao', 'information de Fisher', 'efficacité', 'estimateur'],

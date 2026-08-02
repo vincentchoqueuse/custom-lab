@@ -4,6 +4,7 @@ import { view, line, scatter, bars, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'dac',
+  order: 4,
   title: 'Le CNA : suréchantillonnage et reconstruction',
   subtitle: "Zero-stuffing, filtre d'interpolation, escalier — et l'enveloppe en sinc",
   tags: ['numérique', 'analogique', 'CNA', 'DAC', 'suréchantillonnage', 'interpolation', 'ZOH'],

@@ -4,6 +4,7 @@ import { view, line, scatter, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'bode-measurement',
+  order: 4,
   title: "Réponse fréquentielle à l'oscillo",
   subtitle: 'Le Bode point par point : deux traces, un rapport, un déphasage',
   tags: ['analogique', 'Bode', 'oscilloscope', 'mesure', 'RC', 'résonance'],

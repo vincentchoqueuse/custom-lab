@@ -4,6 +4,7 @@ import { view, plane, line, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'second-order',
+  order: 1,
   title: 'Réponse d\'un second ordre',
   subtitle: 'm et ω₀ racontent tout : temporel, pôles et fréquentiel du même système',
   tags: ['second ordre', 'amortissement', 'pôles', 'résonance', 'réponse indicielle'],

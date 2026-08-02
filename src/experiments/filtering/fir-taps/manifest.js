@@ -4,6 +4,7 @@ import { view, line, bars, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'fir-taps',
+  order: 1,
   title: 'RIF à coefficients réglables',
   subtitle: 'Tapez les coefficients : impulsionnelle, sortie, spectre — les trois vues répondent',
   tags: ['numérique', 'RIF', 'FIR', 'moyenne glissante', 'convolution'],

@@ -4,6 +4,7 @@ import { view, custom, line } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'gaussian-2d',
+  order: 3,
   title: 'Gaussienne à deux dimensions',
   subtitle: 'Corrélation, ellipses iso-densité, axes principaux et régression',
   tags: ['gaussienne', '2D', 'corrélation', 'covariance', 'ellipse', 'régression'],
