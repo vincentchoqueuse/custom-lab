@@ -14,13 +14,17 @@
 // harmonics of the simulated output must equal the input harmonics times
 // |H| — the check that ties the simulation to the algebra.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { fft, toDb, windowValue } from '../../../core/numeric.js';
+import { toDb } from '../../../core/numeric.js';
+import {
+  BENCH,
+  periodicSignal,
+  steadyTime,
+  steadySpectrumDb,
+  responseGrid,
+} from '../../../core/bench.js';
 
-const FS = 8000;
-const NFFT = 4096; // analysis window (bins of 1.953 Hz)
-const SKIP = 4096; // discarded transient (≫ 2Q/ωc at every setting)
+const { FS } = BENCH;
 const DB_FLOOR = -80;
-const F_SHOW = 3000; // spectrum display span (Hz)
 
 /** |H(e^{j2πf/Fs})| of one SVF output. */
 export function svfGain(output, f, f1, q1) {
@@ -64,12 +68,8 @@ export function compute({ source, f0, fc, Q, output }) {
   const f1 = 2 * Math.sin((Math.PI * fc) / FS);
   const q1 = 1 / Q;
 
-  const N = SKIP + NFFT;
-  const x = new Float64Array(N);
-  for (let n = 0; n < N; n++) {
-    const ph = (f0 * n) / FS - Math.floor((f0 * n) / FS);
-    x[n] = source === 'saw' ? 2 * ph - 1 : ph < 0.5 ? 1 : -1;
-  }
+  const x = periodicSignal(source, f0);
+  const N = x.length;
 
   // the Chamberlin loop, all four outputs recorded
   const outs = { lp: new Float64Array(N), bp: new Float64Array(N), hp: new Float64Array(N), notch: new Float64Array(N) };
@@ -86,55 +86,14 @@ export function compute({ source, f0, fc, Q, output }) {
   }
   const y = outs[output];
 
-  // time view: three periods, steady state
-  const nShow = Math.min(NFFT, Math.round((3 / f0) * FS));
-  const ts = new Float64Array(nShow);
-  const tIn = new Float64Array(nShow);
-  const tOut = new Float64Array(nShow);
-  for (let i = 0; i < nShow; i++) {
-    ts[i] = (i / FS) * 1000;
-    tIn[i] = x[SKIP + i];
-    tOut[i] = y[SKIP + i];
-  }
+  const tIn = steadyTime(x, f0);
+  const tOut = steadyTime(y, f0);
 
-  // spectra of the steady state (Hann), input and output on one reference
-  const spec = (sig) => {
-    const re = new Float64Array(NFFT);
-    const im = new Float64Array(NFFT);
-    let sw = 0;
-    for (let i = 0; i < NFFT; i++) {
-      const w = windowValue('hann', i, NFFT);
-      re[i] = sig[SKIP + i] * w;
-      sw += w;
-    }
-    fft(re, im);
-    const ref = sw / 2;
-    const kMax = Math.floor(F_SHOW / (FS / NFFT));
-    const out = new Float64Array(kMax + 1);
-    for (let k = 0; k <= kMax; k++) out[k] = toDb(Math.hypot(re[k], im[k]) / ref, DB_FLOOR);
-    return out;
-  };
-  const binHz = FS / NFFT;
-  const inDb = spec(x);
-  const outDb = spec(y);
-  const fAxis = Float64Array.from(inDb, (_, k) => k * binHz);
+  const specIn = steadySpectrumDb(x, DB_FLOOR);
+  const specOut = steadySpectrumDb(y, DB_FLOOR);
 
   // |H| curves: the selected output (spectrum overlay) and all four
-  const NRESP = 400;
-  const hf = new Float64Array(NRESP);
-  const mkResp = (o) => {
-    const v = new Float64Array(NRESP);
-    for (let i = 0; i < NRESP; i++) {
-      hf[i] = (F_SHOW * (i + 1)) / NRESP;
-      v[i] = toDb(svfGain(o, hf[i], f1, q1), DB_FLOOR);
-    }
-    return v;
-  };
-  const respSel = mkResp(output);
-  const respLp = mkResp('lp');
-  const respBp = mkResp('bp');
-  const respHp = mkResp('hp');
-  const respNotch = mkResp('notch');
+  const resp = (o) => responseGrid((f) => svfGain(o, f, f1, q1), DB_FLOOR, 400);
 
   // stability: poles of z² + a1·z + a2
   const a1 = f1 * f1 + f1 * q1 - 2;
@@ -150,15 +109,15 @@ export function compute({ source, f0, fc, Q, output }) {
 
   return {
     observables: {
-      tIn: { x: ts, y: tIn },
-      tOut: { x: ts, y: tOut },
-      specIn: { x: fAxis, y: inDb },
-      specOut: { x: fAxis, y: outDb },
-      respSel: { x: hf, y: respSel },
-      respLp: { x: hf, y: respLp },
-      respBp: { x: hf, y: respBp },
-      respHp: { x: hf, y: respHp },
-      respNotch: { x: hf, y: respNotch },
+      tIn,
+      tOut,
+      specIn,
+      specOut,
+      respSel: resp(output),
+      respLp: resp('lp'),
+      respBp: resp('bp'),
+      respHp: resp('hp'),
+      respNotch: resp('notch'),
       maxPole, // checks: stability
       f1, // checks
       gainFc: {
