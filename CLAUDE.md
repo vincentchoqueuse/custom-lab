@@ -184,6 +184,7 @@ Canonical table — any shortcut change happens HERE and nowhere else:
 | `P` | Open / hide the parameter Drawer | **P**arameters |
 | `R` | `randomizeSeed` action (draw again) | **R**andomize |
 | `F` | `freeze` action — freeze/unfreeze the plot for before/after comparison (phase 3) | **F**reeze |
+| `A` | Lock / unlock the plot axes (the frame stays put while the curve moves) | **A**xes |
 | `L` | **L**ecture Presentation Mode: **fullscreen** (Fullscreen API) + strokes ×1.6 + type ×1.3 + minimal chrome | **L**ecture |
 | `←` / `→` | Previous / next preset (the lecture script on keys) | — |
 | `Esc` | Exit fullscreen / clear freeze ghost / close popover or palette | — |
@@ -206,6 +207,12 @@ the browser Fullscreen API (native `Esc` exit).
   rendered SVG (grayed DOM clone under the plot), which works for any view —
   declarative or custom — without touching views or compute. The ghost is display
   state, NOT in the URL (not link-reproducible, by design).
+- **Axis lock** (`A`, or the Axes button on the plot card): each declarative
+  plot pins the domains it had when the lock was switched on, so moving a
+  parameter afterwards moves the CURVE and not the frame — auto-scaling
+  otherwise hides the very effect being demonstrated. Display state, NOT in the
+  URL (like the freeze ghost); cleared when the view or the experiment changes.
+  Custom views keep their own scales and ignore it.
 - **Export**: SVG (source of truth), PNG 2×, PNG copy to clipboard.
 
 ---

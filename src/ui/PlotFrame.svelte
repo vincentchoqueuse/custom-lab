@@ -2,7 +2,7 @@
   // The plot card: SVG view + statline (key scalar observables, computation
   // status) + export (SVG source of truth, PNG 2×, PNG to clipboard).
   import { onMount } from 'svelte';
-  import { app, registerGhostCapturer } from '../core/store.svelte.js';
+  import { app, registerGhostCapturer, toggleAxisLock } from '../core/store.svelte.js';
   import { STR } from '../core/strings.js';
   import { formatValue } from '../core/scales.js';
   import ViewHost from './ViewHost.svelte';
@@ -134,6 +134,9 @@
       <span class="status">{app.notice || app.result.message}</span>
     {/if}
     <span class="export">
+      <button class:on={app.axisLock} onclick={toggleAxisLock} title={STR.LOCK_AXES}>
+        <Icon name="lock" size={11} /> {STR.AXES}
+      </button>
       <button onclick={exportSvg} title="Export SVG">{STR.EXPORT_SVG}</button>
       <button onclick={exportPng} title="Export PNG 2×">{STR.EXPORT_PNG}</button>
       <button onclick={copyPng} title="Copy PNG to clipboard">{STR.COPY_PNG}</button>

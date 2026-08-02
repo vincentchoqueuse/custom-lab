@@ -8,7 +8,8 @@
     stepPreset,
     setDrawer,
     toggleSidebar,
-  } from './core/store.svelte.js';
+  toggleAxisLock,
+} from './core/store.svelte.js';
   import { schedule, onResult } from './core/worker-host.js';
   import { normalizeAll } from './core/observables.js';
   import { readPref } from './core/prefs.js';
@@ -132,6 +133,10 @@
       case 'f':
       case 'F':
         runAction('freeze');
+        break;
+      case 'a':
+      case 'A':
+        toggleAxisLock();
         break;
       case 'l':
       case 'L':
