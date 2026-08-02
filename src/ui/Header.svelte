@@ -4,7 +4,6 @@
     manifest,
     activeScene,
     applyPreset,
-    currentHash,
     toggleSidebar,
   } from '../core/store.svelte.js';
   import { subjects } from '../core/registry.js';
@@ -22,9 +21,6 @@
   let menuOpen = $state(false);
   let copied = $state(false);
   let pickerEl = $state(null);
-  // derived from app state (not location.hash): stays live through
-  // replaceState updates, which fire no hashchange event
-  const hash = $derived(m ? currentHash() : '#/');
 
   function pick(id) {
     applyPreset(id);
@@ -62,29 +58,27 @@
     </span>
   </div>
 
-  <div class="preset-picker" bind:this={pickerEl}>
-    {#if m?.presets.length}
-      <button onclick={() => (menuOpen = !menuOpen)} aria-haspopup="listbox">
-        <span>{scene?.title ?? STR.SCENE}</span>
-        <Icon name="chevron-down" size={14} />
-      </button>
-      {#if menuOpen}
-        <div class="menu" role="listbox">
-          {#each m.presets as p, i (p.id)}
-            <button class:active={p.id === app.preset} onclick={() => pick(p.id)}>
-              <span class="idx">{i + 1}</span>
-              <span>{p.title}</span>
-            </button>
-          {/each}
-        </div>
-      {/if}
-    {/if}
-  </div>
-
   <div class="right">
-    <button class="url-chip" onclick={copyUrl} title={STR.COPY_LINK}>
-      <Icon name={copied ? 'check' : 'link'} size={13} />
-      <span class="txt">{copied ? STR.COPIED : hash || '#/'}</span>
+    <div class="preset-picker" bind:this={pickerEl}>
+      {#if m?.presets.length}
+        <button onclick={() => (menuOpen = !menuOpen)} aria-haspopup="listbox">
+          <span>{scene?.title ?? STR.SCENE}</span>
+          <Icon name="chevron-down" size={14} />
+        </button>
+        {#if menuOpen}
+          <div class="menu" role="listbox">
+            {#each m.presets as p, i (p.id)}
+              <button class:active={p.id === app.preset} onclick={() => pick(p.id)}>
+                <span class="idx">{i + 1}</span>
+                <span>{p.title}</span>
+              </button>
+            {/each}
+          </div>
+        {/if}
+      {/if}
+    </div>
+    <button class="icon-btn copy-btn" onclick={copyUrl} title={STR.COPY_LINK}>
+      <Icon name={copied ? 'check' : 'link'} size={15} />
     </button>
     <a class="icon-btn" href={STR.REPO_URL} target="_blank" rel="noopener" title={STR.GITHUB}>
       <Icon name="github" size={15} />
