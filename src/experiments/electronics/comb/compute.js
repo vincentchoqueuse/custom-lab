@@ -12,13 +12,17 @@
 // (the flanger hollow). Same bench as the SVF experiment: a square or
 // sawtooth at f0, steady-state spectra, harmonics tied to |H| by check.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { fft, toDb, windowValue } from '../../../core/numeric.js';
+import { toDb } from '../../../core/numeric.js';
+import {
+  BENCH,
+  periodicSignal,
+  steadyTime,
+  steadySpectrumDb,
+  responseGrid,
+} from '../../../core/bench.js';
 
-const FS = 8000;
-const NFFT = 4096;
-const SKIP = 4096; // transient discard (g^(SKIP/D) ≪ 1 over the whole box)
+const { FS } = BENCH; // the bench discards g^(SKIP/D) ≪ 1 of transient
 const DB_FLOOR = -80;
-const F_SHOW = 3000;
 
 /** Closed-form |H(f)| of the comb. */
 export function combGain(structure, f, D, g) {
@@ -33,12 +37,8 @@ export function combGain(structure, f, D, g) {
  * @returns {{observables: Object}}
  */
 export function compute({ structure, D, g, source, f0 }) {
-  const N = SKIP + NFFT;
-  const x = new Float64Array(N);
-  for (let n = 0; n < N; n++) {
-    const ph = (f0 * n) / FS - Math.floor((f0 * n) / FS);
-    x[n] = source === 'saw' ? 2 * ph - 1 : ph < 0.5 ? 1 : -1;
-  }
+  const x = periodicSignal(source, f0);
+  const N = x.length;
 
   const y = new Float64Array(N);
   if (structure === 'ff') {
@@ -47,47 +47,14 @@ export function compute({ structure, D, g, source, f0 }) {
     for (let n = 0; n < N; n++) y[n] = x[n] + (n >= D ? g * y[n - D] : 0);
   }
 
-  // time view: three periods, steady state
-  const nShow = Math.min(NFFT, Math.round((3 / f0) * FS));
-  const ts = new Float64Array(nShow);
-  const tIn = new Float64Array(nShow);
-  const tOut = new Float64Array(nShow);
-  for (let i = 0; i < nShow; i++) {
-    ts[i] = (i / FS) * 1000;
-    tIn[i] = x[SKIP + i];
-    tOut[i] = y[SKIP + i];
-  }
+  const tIn = steadyTime(x, f0);
+  const tOut = steadyTime(y, f0);
 
-  // steady-state spectra (Hann), shared reference
-  const spec = (sig) => {
-    const re = new Float64Array(NFFT);
-    const im = new Float64Array(NFFT);
-    let sw = 0;
-    for (let i = 0; i < NFFT; i++) {
-      const w = windowValue('hann', i, NFFT);
-      re[i] = sig[SKIP + i] * w;
-      sw += w;
-    }
-    fft(re, im);
-    const ref = sw / 2;
-    const kMax = Math.floor(F_SHOW / (FS / NFFT));
-    const out = new Float64Array(kMax + 1);
-    for (let k = 0; k <= kMax; k++) out[k] = toDb(Math.hypot(re[k], im[k]) / ref, DB_FLOOR);
-    return out;
-  };
-  const binHz = FS / NFFT;
-  const inDb = spec(x);
-  const outDb = spec(y);
-  const fAxis = Float64Array.from(inDb, (_, k) => k * binHz);
+  const specIn = steadySpectrumDb(x, DB_FLOOR);
+  const specOut = steadySpectrumDb(y, DB_FLOOR);
 
-  // closed-form |H| overlay
-  const NRESP = 800; // dense: the teeth are sharp
-  const hf = new Float64Array(NRESP);
-  const hv = new Float64Array(NRESP);
-  for (let i = 0; i < NRESP; i++) {
-    hf[i] = (F_SHOW * (i + 1)) / NRESP;
-    hv[i] = toDb(combGain(structure, hf[i], D, g), DB_FLOOR);
-  }
+  // closed-form |H| overlay (dense: the teeth are sharp)
+  const resp = responseGrid((f) => combGain(structure, f, D, g), DB_FLOOR, 800);
 
   // impulse response: the echo train (first 5 echoes + margin)
   const nImp = Math.min(5 * D + 2, 900);
@@ -111,11 +78,11 @@ export function compute({ structure, D, g, source, f0 }) {
 
   return {
     observables: {
-      tIn: { x: ts, y: tIn },
-      tOut: { x: ts, y: tOut },
-      specIn: { x: fAxis, y: inDb },
-      specOut: { x: fAxis, y: outDb },
-      resp: { x: hf, y: hv },
+      tIn,
+      tOut,
+      specIn,
+      specOut,
+      resp,
       impulse: { x: hn, y: hVal },
       hImp: hVal, // raw echo train (checks: h[kD] = g^k exactly)
       maxPole: structure === 'ff' ? 0 : Math.abs(g) ** (1 / D), // checks
