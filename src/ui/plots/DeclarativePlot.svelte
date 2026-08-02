@@ -91,28 +91,33 @@
 
   const xDomain = $derived.by(() => {
     if (Array.isArray(xAxis.domain)) return xAxis.domain;
+    // a log scale cannot include 0: non-positive values are excluded from the
+    // domain (they are unplottable on that axis anyway)
+    const isLog = xAxis.scale === 'log';
+    const usable = (v) => Number.isFinite(v) && (!isLog || v > 0);
     let lo = Infinity;
     let hi = -Infinity;
     for (const l of layers) {
       if (l.kind === 'histogram') {
         for (const r of l.rects) {
-          lo = Math.min(lo, r.x0);
-          hi = Math.max(hi, r.x1);
+          if (usable(r.x0)) lo = Math.min(lo, r.x0);
+          if (usable(r.x1)) hi = Math.max(hi, r.x1);
         }
       } else if (l.pts) {
         for (const p of l.pts) {
-          if (Number.isFinite(p.x)) {
+          if (usable(p.x)) {
             lo = Math.min(lo, p.x);
             hi = Math.max(hi, p.x);
           }
         }
-      } else if (l.kind === 'vline' && Number.isFinite(l.v)) {
+      } else if (l.kind === 'vline' && usable(l.v)) {
         lo = Math.min(lo, l.v);
         hi = Math.max(hi, l.v);
       }
     }
-    if (!Number.isFinite(lo)) return [0, 1];
+    if (!Number.isFinite(lo)) return isLog ? [0.1, 10] : [0, 1];
     if (lo === hi) {
+      if (isLog) return [lo / 2, hi * 2];
       lo -= 1;
       hi += 1;
     }
@@ -121,37 +126,43 @@
 
   const yDomain = $derived.by(() => {
     if (Array.isArray(yAxis.domain)) return yAxis.domain;
+    // a log scale cannot include 0: non-positive values are excluded, and
+    // padding is multiplicative (additive padding would push lo below zero)
+    const isLog = yAxis.scale === 'log';
+    const usable = (v) => Number.isFinite(v) && (!isLog || v > 0);
     let lo = Infinity;
     let hi = -Infinity;
     for (const l of layers) {
       if (l.kind === 'histogram') {
-        lo = Math.min(lo, 0);
-        for (const r of l.rects) hi = Math.max(hi, r.d);
+        if (!isLog) lo = Math.min(lo, 0);
+        for (const r of l.rects) if (usable(r.d)) hi = Math.max(hi, r.d);
       } else if (l.kind === 'band') {
         for (const p of l.pts) {
-          lo = Math.min(lo, p.lo);
-          hi = Math.max(hi, p.hi);
+          if (usable(p.lo)) lo = Math.min(lo, p.lo);
+          if (usable(p.hi)) hi = Math.max(hi, p.hi);
         }
       } else if (l.pts) {
-        if (l.kind === 'bars') lo = Math.min(lo, 0);
+        if (l.kind === 'bars' && !isLog) lo = Math.min(lo, 0);
         for (const p of l.pts) {
-          if (Number.isFinite(p.y)) {
+          if (usable(p.y)) {
             lo = Math.min(lo, p.y);
             hi = Math.max(hi, p.y);
           }
         }
-      } else if (l.kind === 'hline' && Number.isFinite(l.v)) {
+      } else if (l.kind === 'hline' && usable(l.v)) {
         lo = Math.min(lo, l.v);
         hi = Math.max(hi, l.v);
       }
     }
-    if (!Number.isFinite(lo)) return [0, 1];
+    if (!Number.isFinite(lo)) return isLog ? [0.1, 10] : [0, 1];
     if (lo === hi) {
+      if (isLog) return [lo / 2, hi * 2];
       lo -= 1;
       hi += 1;
     }
+    if (isLog) return [lo / 1.15, hi * 1.15];
     const pad = (hi - lo) * 0.06;
-    return [lo === 0 && yAxis.scale !== 'log' ? 0 : lo - pad, hi + pad];
+    return [lo === 0 ? 0 : lo - pad, hi + pad];
   });
 
   function mkScale(axis, domain, range) {
