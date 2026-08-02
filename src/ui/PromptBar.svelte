@@ -31,6 +31,7 @@
   );
 
   let openKey = $state(null);
+  let moreOpen = $state(false); // mobile "⋯" menu (secondary actions + Parameters)
   let barEl = $state(null);
 
   function pillText(key) {
@@ -51,11 +52,22 @@
   }
 
   function onWindowPointerDown(e) {
-    if (openKey && barEl && !barEl.contains(e.target)) openKey = null;
+    if ((openKey || moreOpen) && barEl && !barEl.contains(e.target)) {
+      openKey = null;
+      moreOpen = false;
+    }
   }
 
   function onWindowKeydown(e) {
-    if (e.key === 'Escape' && openKey) openKey = null;
+    if (e.key === 'Escape' && (openKey || moreOpen)) {
+      openKey = null;
+      moreOpen = false;
+    }
+  }
+
+  function runFromMenu(id) {
+    moreOpen = false;
+    runAction(id);
   }
 </script>
 
@@ -82,7 +94,7 @@
       </span>
     {/each}
   </div>
-  <div class="actions">
+  <div class="actions actions-full">
     {#each allActions as a (a.id)}
       <button
         class="action-btn"
@@ -99,5 +111,57 @@
       <span>{STR.PARAMETERS}</span>
       <kbd>P</kbd>
     </button>
+  </div>
+  <!-- mobile: the primary action stays under the thumb, the rest folds into
+       a "⋯" menu (same non-modal, above-the-bar pattern as the popovers) -->
+  <div class="actions actions-compact">
+    {#if allActions.length > 0}
+      <button
+        class="action-btn icon-only"
+        onclick={() => runAction(allActions[0].id)}
+        title={allActions[0].label}
+        aria-label={allActions[0].label}
+      >
+        <Icon name={allActions[0].icon} size={16} />
+      </button>
+    {/if}
+    <span class="more-wrap">
+      <button
+        class="action-btn icon-only"
+        class:on={moreOpen}
+        onclick={() => (moreOpen = !moreOpen)}
+        title={STR.MORE_ACTIONS}
+        aria-label={STR.MORE_ACTIONS}
+        aria-expanded={moreOpen}
+      >
+        <Icon name="more-horizontal" size={16} />
+      </button>
+      {#if moreOpen}
+        <div class="more-menu" role="menu">
+          {#each allActions.slice(1) as a (a.id)}
+            <button
+              class="more-item"
+              class:on={a.id === 'freeze' && !!app.ghost}
+              role="menuitem"
+              onclick={() => runFromMenu(a.id)}
+            >
+              <Icon name={a.icon} size={15} />
+              <span>{a.label}</span>
+            </button>
+          {/each}
+          <button
+            class="more-item"
+            role="menuitem"
+            onclick={() => {
+              moreOpen = false;
+              setDrawer(!app.drawer);
+            }}
+          >
+            <Icon name="settings" size={15} />
+            <span>{STR.PARAMETERS}</span>
+          </button>
+        </div>
+      {/if}
+    </span>
   </div>
 </div>

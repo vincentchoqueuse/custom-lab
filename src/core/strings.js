@@ -34,6 +34,7 @@ export const STR = {
   DERIVED: 'Derived',
   CLOSE: 'Close',
   MASKED_HINT: 'Hidden parameter — use Reveal to unveil',
+  MORE_ACTIONS: 'More actions',
   COLLAPSE_SIDEBAR: 'Toggle sidebar',
   SETTINGS: 'Settings',
   QR_CODE: 'QR code',
