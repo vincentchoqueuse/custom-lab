@@ -6,7 +6,7 @@ export default {
   id: 'quantization',
   title: 'Quantification',
   subtitle: "L'escalier du CAN, son erreur, et la règle des 6 dB par bit",
-  tags: ['CAN', 'quantification', 'SNR', 'dither'],
+  tags: ['numérique', 'CAN', 'quantification', 'SNR', 'dither'],
 
   params: {
     b: int('b', { description: 'nombre de bits', min: 1, max: 12, default: 8, unit: 'bits' }),

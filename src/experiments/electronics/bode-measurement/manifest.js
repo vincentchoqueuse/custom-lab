@@ -6,7 +6,7 @@ export default {
   id: 'bode-measurement',
   title: "Réponse fréquentielle à l'oscillo",
   subtitle: 'Le Bode point par point : deux traces, un rapport, un déphasage',
-  tags: ['Bode', 'oscilloscope', 'mesure', 'RC', 'résonance'],
+  tags: ['analogique', 'Bode', 'oscilloscope', 'mesure', 'RC', 'résonance'],
 
   params: {
     system: select('système', {

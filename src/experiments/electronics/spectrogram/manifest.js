@@ -6,7 +6,7 @@ export default {
   id: 'spectrogram',
   title: 'Le spectrogramme',
   subtitle: 'Voir le temps ET la fréquence — au prix du compromis de Gabor',
-  tags: ['STFT', 'temps-fréquence', 'chirp', 'Gabor'],
+  tags: ['numérique', 'STFT', 'temps-fréquence', 'chirp', 'Gabor'],
 
   params: {
     source: select('source', {

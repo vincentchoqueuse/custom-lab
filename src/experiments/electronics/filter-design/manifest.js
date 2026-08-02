@@ -7,7 +7,7 @@ export default {
   id: 'filter-design',
   title: 'Design de filtres analogiques',
   subtitle: "Un gabarit, quatre familles — l'ordre est un résultat, pas un choix",
-  tags: ['filtre', 'Butterworth', 'Chebyshev', 'elliptique', 'gabarit'],
+  tags: ['analogique', 'filtre', 'Butterworth', 'Chebyshev', 'elliptique', 'gabarit'],
 
   params: {
     family: select('famille', {
