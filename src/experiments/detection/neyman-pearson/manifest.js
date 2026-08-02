@@ -66,8 +66,8 @@ export default {
       })
     ),
 
-    // ROC on a log P_FA axis: the low-false-alarm regime is where detection
-    // actually lives.
+    // Log-log ROC (radar convention): the low-P_FA regime is where detection
+    // actually lives, and the chance line P_D = P_FA stays the diagonal.
     view(
       'roc',
       'Courbe ROC',
@@ -81,7 +81,7 @@ export default {
         ],
         axes: {
           x: { label: 'P_FA', scale: 'log', domain: [1e-4, 1] },
-          y: { label: 'P_D', domain: [0, 1.02] },
+          y: { label: 'P_D', scale: 'log', domain: [1e-4, 1] },
         },
       })
     ),
