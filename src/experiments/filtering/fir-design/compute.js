@@ -87,8 +87,8 @@ export function compute({ fc, N, win }) {
       taps: { x: tapIdx, y: h },
       idealIR: { x: ix, y: iy },
       response: { x: rf, y: ry },
-      sqIn: { x: ts, y: xin },
-      sqOut: { x: ts, y: yout },
+      tIn: { x: ts, y: xin },
+      tOut: { x: ts, y: yout },
       hTaps: h, // raw taps (Inspector download, symmetry check)
       sidelobe: {
         value: sidelobe,

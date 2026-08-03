@@ -17,26 +17,30 @@ jette la pente.`,
   {
     id: 'sculpt',
     title: 'Scène 2 · Sculpter les harmoniques',
-    view: 'spectrum',
+    view: 'outputs',
     params: { source: 'square', f0: 110, fc: 500, Q: 2, output: 'lp' },
     visible: ['fc', 'output'],
-    notes: `Le carré est un peigne d'harmoniques impairs (violet). Le passe-bas
-les fait fondre au-delà de f_c : le peigne bleu ÉPOUSE la courbe |H| orange —
-la sortie, c'est l'entrée × le filtre, harmonique par harmonique (le harnais
-le vérifie à 1e-6). Basculer sur le temporel : le carré s'est arrondi.
-Descendre f_c sous 330 Hz : il ne reste que la fondamentale — un sinus.`,
+    notes: `Lire la courbe passe-bas : elle vaut 1 jusqu'à f_c puis s'effondre.
+Le carré d'entrée est un peigne d'harmoniques impairs à 110, 330, 550, 770 Hz ;
+chacun est MULTIPLIÉ par la valeur de la courbe à sa fréquence — c'est tout ce
+que fait un filtre, harmonique par harmonique (le harnais le vérifie à 1e-6).
+Faire l'exercice à voix haute : à f_c = 500 Hz, lesquels survivent ?
+Puis revenir au temporel pour voir le carré arrondi que ça donne. Descendre
+f_c sous 330 Hz : il ne reste que la fondamentale — un sinus.`,
   },
   {
     id: 'resonance',
     title: 'Scène 3 · La résonance chante',
-    view: 'spectrum',
+    view: 'outputs',
     params: { source: 'saw', f0: 110, fc: 550, Q: 12, output: 'lp' },
     visible: ['fc', 'Q'],
     notes: `Q = 12 : une bosse de +20 dB à f_c. L'harmonique qui passe dessous
 est PROJETÉ en avant — glisser f_c lentement de 300 à 1200 Hz : la bosse
 balaie les harmoniques un à un. C'est exactement le geste du filtre d'un
-synthétiseur (le « wah » : f_c qui bouge, rien d'autre). Vue temporelle :
-le ringing à f_c s'installe dans la forme d'onde.`,
+synthétiseur (le « wah » : f_c qui bouge, rien d'autre). Revenir au temporel :
+le ringing à f_c s'installe dans la forme d'onde, et l'impulsionnelle montre
+la même chose — une oscillation qui met d'autant plus longtemps à mourir que
+Q est grand.`,
   },
   {
     id: 'four',
@@ -53,12 +57,13 @@ règne sur les synthétiseurs depuis les années 80.`,
   {
     id: 'notch',
     title: 'Scène 5 · Le notch chirurgical',
-    view: 'spectrum',
+    view: 'outputs',
     params: { source: 'square', f0: 110, fc: 330, Q: 8, output: 'notch' },
     visible: ['fc', 'Q'],
-    notes: `f_c posé sur l'harmonique 3 (330 Hz) : il DISPARAÎT — le zéro du
-notch tombe exactement à f_c (propriété du choix f₁ = 2·sin(πf_c/Fs),
-vérifiée par le harnais). Vue temporelle : le carré est à peine altéré —
+    notes: `Courbe notch : une encoche qui plonge exactement à f_c (propriété du
+choix f₁ = 2·sin(πf_c/Fs), vérifiée par le harnais). Posée sur 330 Hz, elle
+tombe pile sur l'harmonique 3 du carré, qui DISPARAÎT.
+Vue temporelle : le carré est à peine altéré —
 un harmonique ne pèse presque rien dans la forme. Monter Q : l'encoche
 s'affine, les voisins respirent. C'est le filtre anti-50 Hz de tout
 instrument de mesure.`,

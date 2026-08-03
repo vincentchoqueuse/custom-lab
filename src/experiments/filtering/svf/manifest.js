@@ -1,5 +1,6 @@
 import { float, log, select } from '../../../core/fields.js';
-import { view, line, stem, vline } from '../../../core/views.js';
+import { view, line, vline } from '../../../core/views.js';
+import { timeView, impulseView } from '../../../core/filter-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -67,27 +68,11 @@ export default {
   ],
 
   views: [
-    view(
-      'time',
-      'Réponse temporelle',
-      line('tOut', {
-        width: 1.8,
-        label: 'sortie',
-        overlays: [line('tIn', { color: '#D95319', dashed: true, label: 'entrée' })],
-        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
-      })
-    ),
-    view(
-      'impulse',
-      'Réponse impulsionnelle',
-      stem('impulse', {
-        color: '#0072BD',
-        size: 2.2,
-        width: 1,
-        label: 'h[n] — sortie sélectionnée',
-        axes: { x: 'n', y: 'h[n]' },
-      })
-    ),
+    timeView(),
+    impulseView({ label: 'h[n] — sortie sélectionnée' }),
+
+    // hand-written: four transfer functions in one frame is this experiment's
+    // whole point, and no other filter experiment draws that
     view(
       'outputs',
       'Réponse fréquentielle',
@@ -102,23 +87,6 @@ export default {
         axes: {
           x: { label: 'f', unit: 'Hz' },
           y: { label: '|H|', unit: 'dB', domain: [-40, 30] },
-        },
-      })
-    ),
-    view(
-      'spectrum',
-      'Représentation spectrale',
-      line('specOut', {
-        width: 1.8,
-        label: 'sortie',
-        overlays: [
-          line('specIn', { color: '#7E2F8E', opacity: 0.45, label: 'entrée' }),
-          line('respSel', { color: '#D95319', dashed: true, label: '|H(f)|' }),
-          vline('fc', { color: '#EDB120', dashed: true, label: 'f_c' }),
-        ],
-        axes: {
-          x: { label: 'f', unit: 'Hz' },
-          y: { label: 'amplitude', unit: 'dB', domain: [-80, 30] },
         },
       })
     ),
