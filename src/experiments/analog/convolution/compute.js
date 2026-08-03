@@ -32,10 +32,10 @@
 // x, et ceux de h(t−τ) qui glissent avec t. Une quadrature aveugle sur une
 // grille régulière bave sur ces discontinuités : l'aire d'une porte de
 // largeur 1 y valait 1.0007, et le triangle s'écartait de 4·10⁻³ de sa forme
-// close. Découpée aux ruptures, la règle du point milieu est EXACTE sur
-// chaque morceau constant et d'ordre 2 sur les morceaux lisses — l'écart
-// tombe sous 10⁻¹⁰, et les vérifications ci-dessus deviennent des égalités
-// plutôt que des tolérances.
+// close. Découpée aux ruptures, avec Gauss à deux points par panneau — qui
+// n'évalue jamais SUR une discontinuité — porte * porte devient EXACTE et la
+// charge du RC tombe à 4·10⁻⁸. Les vérifications ci-dessus sont donc des
+// égalités, pas des tolérances.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { trapz } from '../../../core/numeric.js';
 
