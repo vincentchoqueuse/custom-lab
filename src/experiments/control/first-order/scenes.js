@@ -7,10 +7,12 @@ export default [
     view: 'step',
     visible: ['tau'],
     notes: `Le premier ordre pur : une exponentielle, un seul paramètre de forme.
-Faire les deux constructions graphiques du cours à voix haute :
- · à t = τ la sortie vaut 63 % de la valeur finale (les traits gris) ;
+Faire les trois lectures graphiques du cours à voix haute :
+ · à t = τ la sortie vaut 63 % de la valeur finale ;
+ · à t = 3τ elle en vaut 95 % — c'est le temps de réponse à 5 %, celui
+   qu'on annonce dans un cahier des charges (statline : 3τ à l'affichage) ;
  · la tangente à l'origine coupe la valeur finale exactement en t = τ.
-Bouger τ : la courbe s'étire, les deux repères la suivent.
+Bouger τ : la courbe s'étire, les quatre repères la suivent sans effort.
 Question : « et le gain K, ça change quoi à la vitesse ? » — rien du tout,
 c'est ce qui rend τ intéressant.`,
   },
@@ -61,7 +63,10 @@ troncature, vu depuis l'automatique.`,
     params: { K: 1, tau: 1, tz: 0.5 },
     view: 'step',
     visible: ['tz'],
-    notes: `Ajouter un zéro : la sortie ne part plus de zéro, elle SAUTE à K·τ_z/τ
+    notes: `Les repères 63 %/τ et 95 %/3τ ont disparu, et c'est voulu : ils ne
+valent que pour le premier ordre PUR. La tangente, elle, reste — son identité
+survit au zéro.
+Ajouter un zéro : la sortie ne part plus de zéro, elle SAUTE à K·τ_z/τ
 (valeur initiale dans la statline). Le numérateur dérive l'entrée, et une
 dérivée d'échelon, c'est une marche.
 Monter τ_z au-delà de τ : le saut dépasse la valeur finale, puis on redescend
