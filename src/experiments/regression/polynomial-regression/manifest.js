@@ -4,7 +4,7 @@ import { view, line, scatter, stem, vline, hline } from '../../../core/views.js'
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'polynomial-regression',
-  order: 1,
+  order: 2,
   title: 'Régression polynomiale',
   subtitle: 'Moindres carrés et ridge : ajustement, sur-ajustement, régularisation',
   tags: ['moindres carrés', 'régression', 'polynôme', 'overfitting', 'ridge', 'régularisation'],

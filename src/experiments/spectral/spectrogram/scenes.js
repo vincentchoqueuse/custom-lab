@@ -41,4 +41,19 @@ battement — des colonnes qui pulsent. Geler (F), passer N = 1024 (Δt = 512 ms
 bandes latérales à ±f_m. Aucune des deux images n'est fausse : c'est la même
 physique, projetée sur deux résolutions.`,
   },
+  {
+    id: 'fm',
+    title: 'Scène 5 · Deux crêtes qui se croisent',
+    params: { source: 'fm', f1: 900, fmod: 1, fdev: 150, N: 256, win: 'hann', tcut: 0.5 },
+    visible: ['fmod', 'fdev'],
+    notes: `Un chirp ET une sinusoïde dont la fréquence oscille lentement : une
+droite qui monte, une sinusoïde qui ondule autour de 500 Hz, et elles se
+croisent. Aucun spectre ne peut montrer ça — c'est exactement pour cette
+image que le spectrogramme existe.
+Monter f_mod : l'ondulation se resserre, puis se BROUILLE — la fréquence
+change trop vite pour la fenêtre. Descendre N à 64 : la crête FM redevient
+nette et la ligne du chirp s'épaissit. C'est Gabor, avec deux signaux qui
+demandent des réglages opposés dans la même image.
+Élargir Δ : l'excursion grandit jusqu'à toucher le chirp.`,
+  },
 ];

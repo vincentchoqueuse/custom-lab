@@ -1,9 +1,10 @@
 import { compute } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { standardChecks, maxGap } from '../../../core/checks.js';
 
 const FS = 2000;
 const T = 2;
-const BASE = { source: 'chirp', f1: 900, df: 15, fm: 8, N: 256, win: 'hann', tcut: 1, seed: 1 };
+const BASE = { source: 'chirp', f1: 900, df: 15, fm: 8, fmod: 1, fdev: 150,
+               N: 256, win: 'hann', tcut: 1, seed: 1 };
 
 /** Fold a frequency into the first Nyquist zone [0, Fs/2]. */
 const fold = (f) => {
@@ -108,6 +109,32 @@ export const checks = [
       const binHz = FS / 512;
       const okRange = f >= 300 - binHz && f <= 340 + binHz;
       return { ok: okRange, detail: `peak at ${f.toFixed(1)} Hz (tones 300/340)` };
+    },
+  },
+  {
+    name: 'FM : la crête suit F + Δ·sin(2π f_mod t), à un bin près',
+    category: 'numeric',
+    run() {
+      // The phase is integrated in closed form; the STFT is asked whether it
+      // agrees, at four instants covering a full modulation period. Only the
+      // 350…700 Hz band is searched — the chirp's own line lives elsewhere.
+      const fmod = 1;
+      const fdev = 150;
+      const binHz = FS / 256;
+      const gap = maxGap(
+        [0.25, 0.5, 0.75, 1],
+        (tcut) => {
+          const o = compute({ ...BASE, source: 'fm', fmod, fdev, tcut }).observables;
+          let best = 0;
+          for (let i = 0; i < o.slice.x.length; i++) {
+            const f = o.slice.x[i];
+            if (f > 350 && f < 700 && o.slice.y[i] > o.slice.y[best]) best = i;
+          }
+          return o.slice.x[best];
+        },
+        (tcut) => 500 + fdev * Math.sin(2 * Math.PI * fmod * tcut)
+      );
+      return { ok: gap <= binHz, detail: `écart max ${gap.toFixed(1)} Hz (bin = ${binHz.toFixed(1)} Hz)` };
     },
   },
   standardChecks.determinism(compute, BASE, 'slice'),
