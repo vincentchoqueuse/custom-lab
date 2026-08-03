@@ -98,14 +98,14 @@ export function compute({ mu, sigma, N, M, seed }) {
       effMean: { x: gx, y: effOf(v1) },
       effMedian: { x: gx, y: effOf(v2) },
       effMidrange: { x: gx, y: effOf(v3) },
-      crbValue: { value: crbPill, meta: { label: 'CRB = σ²/N', precision: 4 } },
+      crbValue: { value: crbPill, meta: { label: 'borne sur Var(μ̂) = σ²/N', precision: 4 } },
       effMeanS: {
         value: crbPill / variance(d1),
-        meta: { label: 'efficacité x̄', precision: 3 },
+        meta: { label: 'efficacité de x̄', precision: 3 },
       },
       effMedianS: {
         value: crbPill / variance(d2),
-        meta: { label: 'efficacité médiane', precision: 3 },
+        meta: { label: 'efficacité de la médiane', precision: 3 },
       },
     },
   };

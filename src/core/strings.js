@@ -30,6 +30,8 @@ export const STR = {
   COMPUTING: 'computing…',
   COMPUTE_ABORTED: '⚠ Computation aborted — values too large',
   COMPUTE_ERROR: '⚠ Computation error',
+  VIEW_LOAD_ERROR: '⚠ This view failed to load',
+  RETRY: 'Retry',
   SEED: 'Seed',
   DERIVED: 'Derived',
   CLOSE: 'Close',

@@ -4,12 +4,19 @@
   // PlanePlot; custom views are lazy-loaded components receiving
   // {observables, params, pres} — and nothing else (no compute access).
   import { app, manifest } from '../core/store.svelte.js';
+  import { STR } from '../core/strings.js';
   import DeclarativePlot from './plots/DeclarativePlot.svelte';
   import PlanePlot from './plots/PlanePlot.svelte';
 
   const m = $derived(manifest());
   const viewDef = $derived(m?.views.find((v) => v.id === app.view) ?? m?.views[0]);
   const obs = $derived(app.result.observables);
+
+  // A lazily-loaded view can fail to arrive (a chunk lost on a flaky wifi).
+  // Without a catch branch that failure is silent and the plot area stays
+  // blank for good; `attempt` re-enters the await, and `custom()` no longer
+  // caches a rejected promise, so retrying really does fetch again.
+  let attempt = $state(0);
 </script>
 
 {#if viewDef && obs}
@@ -21,10 +28,19 @@
       pres={app.ui.presentation || app.ui.bold}
     />
   {:else if viewDef.kind === 'custom'}
-    {#await viewDef.load() then mod}
-      {@const Custom = mod.default}
-      <Custom observables={obs} params={app.params} pres={app.ui.presentation || app.ui.bold} />
-    {/await}
+    {#key attempt}
+      {#await viewDef.load()}
+        <div class="plot-placeholder">{STR.COMPUTING}</div>
+      {:then mod}
+        {@const Custom = mod.default}
+        <Custom observables={obs} params={app.params} pres={app.ui.presentation || app.ui.bold} />
+      {:catch}
+        <div class="plot-placeholder">
+          {STR.VIEW_LOAD_ERROR}
+          <button class="retry" onclick={() => (attempt += 1)}>{STR.RETRY}</button>
+        </div>
+      {/await}
+    {/key}
   {:else}
     <DeclarativePlot
       spec={viewDef.spec}
@@ -35,3 +51,19 @@
     />
   {/if}
 {/if}
+
+<style>
+  .retry {
+    margin-left: 0.6rem;
+    padding: 0.15rem 0.6rem;
+    font: inherit;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .retry:hover {
+    background: var(--muted);
+  }
+</style>

@@ -16,6 +16,7 @@ export default {
         { value: 'chirp', label: 'chirp linéaire' },
         { value: 'tones', label: 'deux tons proches' },
         { value: 'am', label: 'AM (battement)' },
+        { value: 'fm', label: 'chirp + sinusoïde modulée en fréquence' },
       ],
       default: 'chirp',
     }),
@@ -46,7 +47,7 @@ export default {
       default: 900,
       unit: 'Hz',
       precision: 0,
-      visibleIf: { source: 'chirp' },
+      visibleIf: { source: ['chirp', 'fm'] },
     }),
     df: float('Δf', {
       description: 'écart entre les deux tons (300 Hz et 300 + Δf)',
@@ -68,6 +69,25 @@ export default {
       precision: 1,
       visibleIf: { source: 'am' },
     }),
+    fmod: float('f_mod', {
+      description: 'fréquence de la modulation de fréquence (lente)',
+      min: 0.2,
+      max: 5,
+      step: 0.1,
+      default: 1,
+      unit: 'Hz',
+      precision: 1,
+      visibleIf: { source: 'fm' },
+    }),
+    fdev: float('Δ', {
+      description: 'excursion en fréquence de la sinusoïde modulée',
+      min: 20,
+      max: 400,
+      step: 10,
+      default: 150,
+      unit: 'Hz',
+      visibleIf: { source: 'fm' },
+    }),
     tcut: float('t', {
       description: 'instant de la coupe spectrale et du zoom temporel',
       min: 0,
@@ -80,7 +100,7 @@ export default {
   },
 
   groups: [
-    { title: 'Signal', params: ['source', 'f1', 'df', 'fm'] },
+    { title: 'Signal', params: ['source', 'f1', 'df', 'fm', 'fmod', 'fdev'] },
     { title: 'Analyse', params: ['N', 'win', 'tcut'] },
   ],
 

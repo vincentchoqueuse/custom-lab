@@ -1,6 +1,8 @@
-// Short-time Fourier transform of three canonical sources — a linear chirp
+// Short-time Fourier transform of four canonical sources — a linear chirp
 // (whose end frequency may exceed Nyquist: the ridge folds), a pair of
-// close tones, and an AM signal. The window length N is THE parameter:
+// close tones, an AM signal, and a chirp SUMMED with a frequency-modulated
+// tone — a straight ridge and a sinusoidal one crossing in the same picture,
+// which is what a time-frequency map is for and what no spectrum can show. The window length N is THE parameter:
 //   Δf = Fs/N   and   Δt = N/Fs,   so   Δf · Δt = 1  (Gabor tradeoff)
 // The hop adapts to keep ~220 columns whatever N. The map is stored in dB
 // (0 = global max, floored at −80). The per-column ridge (argmax) and the
@@ -18,6 +20,7 @@ const F0 = 100; // chirp start frequency (Hz)
 const FA = 300; // first tone (Hz)
 const FC = 400; // AM carrier (Hz)
 const AM_DEPTH = 0.8;
+const F_FM = 500; // carrier of the frequency-modulated tone (Hz)
 const ZOOM = 0.05; // half-width of the time-view zoom around tcut (s)
 
 /** Instantaneous sample of each source (phase integrated in closed form). */
@@ -28,17 +31,28 @@ function sourceValue(source, p, t) {
   if (source === 'am') {
     return (1 + AM_DEPTH * Math.sin(2 * Math.PI * p.fm * t)) * Math.sin(2 * Math.PI * FC * t);
   }
+  const chirp = Math.sin(2 * Math.PI * (F0 * t + ((p.f1 - F0) * t * t) / (2 * T)));
+  if (source === 'fm') {
+    // f_inst(t) = F_FM + Δ·sin(2π f_m t) ⇒ the phase integrates in closed form
+    // to −(Δ/f_m)·cos(2π f_m t): the ridge is a sine of excursion ±Δ around
+    // F_FM, crossed by the chirp's straight line.
+    const beta = p.fdev / p.fmod; // modulation index
+    return (
+      0.9 * chirp +
+      Math.sin(2 * Math.PI * F_FM * t - beta * Math.cos(2 * Math.PI * p.fmod * t))
+    );
+  }
   // linear chirp: f(t) = F0 + (f1 − F0)·t/T, phase = 2π(F0·t + (f1−F0)t²/2T)
-  return Math.sin(2 * Math.PI * (F0 * t + ((p.f1 - F0) * t * t) / (2 * T)));
+  return chirp;
 }
 
 /**
- * @param {{source: string, f1: number, df: number, fm: number, N: number,
- *          win: string, tcut: number, seed: number}} params
+ * @param {{source: string, f1: number, df: number, fm: number, fdev: number,
+ *          fmod: number, N: number, win: string, tcut: number, seed: number}} params
  * @returns {{observables: Object}}
  */
-export function compute({ source, f1, df, fm, N, win, tcut }) {
-  const p = { f1, df, fm };
+export function compute({ source, f1, df, fm, fmod, fdev, N, win, tcut }) {
+  const p = { f1, df, fm, fmod, fdev };
   const x = new Float64Array(NS);
   for (let i = 0; i < NS; i++) x[i] = sourceValue(source, p, i / FS);
 

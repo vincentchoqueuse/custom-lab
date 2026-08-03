@@ -133,8 +133,20 @@ export function custom(id, title, loader) {
     throw new ViewError(`custom '${id}': title is required`);
   if (typeof loader !== 'function')
     throw new ViewError(`custom '${id}': loader must be () => import(…)`);
+  // The resolved module is cached, a FAILED load is not: a chunk that missed
+  // (flaky network on a lecture-hall wifi) must be retryable, otherwise the
+  // view stays blank until the page is reloaded.
   let cached = null;
-  return { id, title, kind: 'custom', load: () => (cached ??= loader()) };
+  return {
+    id,
+    title,
+    kind: 'custom',
+    load: () =>
+      (cached ??= loader().catch((err) => {
+        cached = null;
+        throw err;
+      })),
+  };
 }
 
 /**
