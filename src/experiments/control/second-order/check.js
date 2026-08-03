@@ -1,5 +1,5 @@
-import { compute } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { compute, stepValue, impulseValue } from './compute.js';
+import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
 const BASE = { K: 1, m: 0.3, w0: 2, seed: 42 };
 
@@ -76,6 +76,36 @@ export const checks = [
       let worst = 0;
       for (let i = 0; i < a.y.length; i++) worst = Math.max(worst, Math.abs(a.y[i] - b.y[i]));
       return { ok: worst < 1e-4, detail: `max|Δ|=${worst.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'h(t) est la dérivée de y(t), dans les trois régimes',
+    category: 'numeric',
+    run() {
+      // central difference on the step response against the closed-form
+      // impulse response — two independent derivations of the same system,
+      // checked on both sides of the critical damping
+      const dt = 1e-6;
+      const gap = maxGap([0.25, 1, 2.5], (m) =>
+        maxGap(
+          range(30, (i) => 0.05 + i * 0.12),
+          (t) => (stepValue(1.3, m, 2.2, t + dt) - stepValue(1.3, m, 2.2, t - dt)) / (2 * dt),
+          (t) => impulseValue(1.3, m, 2.2, t)
+        )
+      );
+      return { ok: gap < 1e-7, detail: `écart max ${gap.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'impulsionnelle : premier passage par zéro à T_d/2 (m < 1)',
+    category: 'numeric',
+    run() {
+      // h ∝ sin(ω_d t): the zeros are at multiples of π/ω_d, exactly
+      const gap = maxGap([0.1, 0.4, 0.7], (m) => {
+        const wd = 2.2 * Math.sqrt(1 - m * m);
+        return impulseValue(1, m, 2.2, Math.PI / wd);
+      });
+      return { ok: gap < 1e-15, detail: `|h(T_d/2)| max ${gap.toExponential(2)}` };
     },
   },
   standardChecks.determinism(compute, { ...BASE }, 'stepResponse'),

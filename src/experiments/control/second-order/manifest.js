@@ -4,7 +4,7 @@ import { view, plane, line, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'second-order',
-  order: 1,
+  order: 2,
   title: 'Réponse d\'un second ordre',
   subtitle: 'm et ω₀ racontent tout : temporel, pôles et fréquentiel du même système',
   tags: ['second ordre', 'amortissement', 'pôles', 'résonance', 'réponse indicielle'],
@@ -60,6 +60,27 @@ export default {
           hline((p) => 0.95 * p.K, { color: '#a1a1aa', width: 1, label: '±5%' }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 'y(t)' },
+      })
+    ),
+
+    // impulse response: the same two parameters, seen as a free oscillation
+    view(
+      'impulse',
+      'Réponse impulsionnelle',
+      line('impulseResponse', {
+        color: '#0072BD',
+        width: 2.5,
+        label: 'h(t)',
+        overlays: [
+          hline(() => 0, { color: '#a1a1aa', width: 1 }),
+          vline((p) => Math.PI / (p.w0 * Math.sqrt(Math.max(1 - p.m * p.m, 0))), {
+            color: '#EDB120',
+            dashed: true,
+            width: 1.4,
+            label: 'T_d/2',
+          }),
+        ],
+        axes: { x: { label: 't', unit: 's' }, y: 'h(t)' },
       })
     ),
 
