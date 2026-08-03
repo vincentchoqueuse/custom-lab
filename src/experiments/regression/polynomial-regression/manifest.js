@@ -1,5 +1,5 @@
 import { float, int, log } from '../../../core/fields.js';
-import { view, line, scatter, stem, vline, hline } from '../../../core/views.js';
+import { view, line, scatter, stem, vline, hline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -39,9 +39,8 @@ export default {
 
   views: [
     // Declarative only — true curve, noisy data, least-squares fit.
-    view(
+    figure(
       'fit',
-      'Ajustement',
       line('trueCurve', {
         width: 2.5,
         overlays: [

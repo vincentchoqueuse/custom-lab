@@ -1,5 +1,5 @@
 import { float, select } from '../../../core/fields.js';
-import { view, line, scatter } from '../../../core/views.js';
+import { view, line, scatter, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -48,9 +48,8 @@ export default {
   },
 
   views: [
-    view(
+    figure(
       'time',
-      'Temporel',
       line('sig', {
         overlays: [
           line('envUp', { color: '#D95319', dashed: true, label: 'enveloppe' }),
@@ -59,9 +58,8 @@ export default {
         axes: { x: { label: 't', unit: 's' }, y: 's(t)' },
       })
     ),
-    view(
+    figure(
       'spectrum',
-      'Spectre',
       line('spectrum', {
         label: 'mesuré',
         overlays: [scatter('theoryLines', { color: '#D95319', size: 3.5, label: 'théorie' })],

@@ -1,5 +1,5 @@
 import { float, log } from '../../../core/fields.js';
-import { view, line, vline, hline } from '../../../core/views.js';
+import { view, line, vline, hline, figure } from '../../../core/views.js';
 import { gainView, phaseView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
 
 const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
@@ -61,9 +61,8 @@ export default {
     // zero the curve no longer starts at 0, so they are hidden rather than
     // left on screen pointing at the wrong instants. The tangent stays, since
     // its identity survives τ_z.
-    view(
+    figure(
       'step',
-      'Réponse indicielle',
       line('stepResponse', {
         width: 2.5,
         label: 'y(t)',
@@ -90,9 +89,8 @@ export default {
     // Impulse response: the exponential, plus the Dirac the zero creates —
     // its weight is in the statline, since an arrow of infinite height is not
     // something a plot can honestly draw.
-    view(
+    figure(
       'impulse',
-      'Réponse impulsionnelle',
       line('impulseResponse', {
         color: '#0072BD',
         width: 2.5,

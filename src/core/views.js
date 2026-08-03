@@ -93,6 +93,28 @@ export function view(id, title, spec) {
 }
 
 /**
+ * A STANDARD figure (core/figures.js): the manifest NAMES the figure and the
+ * registry stamps its id and its title — the subject's title, since the same
+ * plot is honestly "Bode — gain" in automatique and "Réponse fréquentielle" in
+ * filtrage. `variant` picks another name from the figure's CLOSED list when an
+ * experiment needs one its subject does not default to. No free text, ever:
+ * a title you never type is a title you can never mistype.
+ */
+export function figure(key, spec, { variant } = {}) {
+  if (typeof key !== 'string' || !key) throw new ViewError('figure: key is required');
+  if (spec === null || typeof spec !== 'object' || !PLOT_TYPES.includes(spec.type))
+    throw new ViewError(`figure '${key}': spec must be built with a plot factory`);
+  return { figure: key, ...(variant ? { variant } : {}), kind: 'plot', spec, layout: 'plot' };
+}
+
+/** The same, for the equal-aspect plane (the pole map). */
+export function figurePlane(key, spec = {}, { variant } = {}) {
+  if (typeof key !== 'string' || !key) throw new ViewError('figurePlane: key is required');
+  const p = plane('__figure', 'x', spec); // reuse the plane spec validation
+  return { figure: key, ...(variant ? { variant } : {}), kind: 'plane', spec: p.spec, layout: 'plot' };
+}
+
+/**
  * Declarative EQUAL-ASPECT plane (I/Q, poles, z-plane): the one view shape
  * that a cartesian plot cannot express, since circles must stay circles.
  * Everything is resolved against the observables by ui/plots/PlanePlot:

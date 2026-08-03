@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, line, vline, hline } from '../../../core/views.js';
+import { view, line, vline, hline, figure } from '../../../core/views.js';
 import { timeView, impulseView } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
@@ -56,9 +56,8 @@ export default {
 
     // hand-written: this experiment reads its own |H| against a sidelobe
     // level, with no input/output spectra to compare
-    view(
-      'response',
-      'Réponse fréquentielle',
+    figure(
+      'gain',
       line('response', {
         width: 1.8,
         overlays: [

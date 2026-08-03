@@ -1,5 +1,5 @@
 import { float, log } from '../../../core/fields.js';
-import { view, line, scatter, vline } from '../../../core/views.js';
+import { view, line, scatter, vline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -40,9 +40,8 @@ export default {
 
   views: [
 
-    view(
-      'signal',
-      'Temporel',
+    figure(
+      'time',
       line('trueSignal', {
         width: 2,
         label: 'vrai',

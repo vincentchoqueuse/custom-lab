@@ -3,7 +3,7 @@ export default [
   {
     id: 'through',
     title: 'Scène 1 · Le signal entre, le signal sort',
-    view: 'signal',
+    view: 'response',
     params: { fc: 1000, N: 21, win: 'hann' },
     visible: ['fc'],
     notes: `Le filtre à l'œuvre, avant toute théorie : un signal entre, sa version
@@ -53,7 +53,7 @@ choisir où mettre ses décibels.`,
   {
     id: 'delay',
     title: 'Scène 5 · Propre, mais en retard',
-    view: 'signal',
+    view: 'response',
     params: { fc: 500, N: 81, win: 'hamming' },
     visible: ['N'],
     notes: `Le carré entre, une version lissée sort — décalée d'EXACTEMENT

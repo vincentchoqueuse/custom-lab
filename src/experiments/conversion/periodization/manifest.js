@@ -1,5 +1,5 @@
 import { float, select } from '../../../core/fields.js';
-import { view, line, scatter, vline, stem } from '../../../core/views.js';
+import { view, line, scatter, vline, stem, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -41,9 +41,8 @@ export default {
   },
 
   views: [
-    view(
+    figure(
       'time',
-      'Signal et échantillons',
       line('xt', {
         color: '#D95319',
         width: 2,

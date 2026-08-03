@@ -1,5 +1,5 @@
 import { int, float, bool } from '../../../core/fields.js';
-import { view, line, histogram, density, vline, hline } from '../../../core/views.js';
+import { view, line, histogram, density, vline, hline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -35,9 +35,8 @@ export default {
   },
 
   views: [
-    view(
+    figure(
       'time',
-      'Signal quantifié',
       line('quantT', {
         width: 1.5,
         label: 'quantifié',

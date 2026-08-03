@@ -277,6 +277,14 @@ registry at load time):
   reset. Actions live in the view bar (tabs line, flush right), as icon + shortcut.
 - **`groups`** absent → one flat group.
 - **`layout: 'plot'`** is implied when a view has a `plot` key.
+- **Standard figures are named once** in `core/figures.js`. A manifest declares
+  `figure('gain', …)` and never a title; the registry stamps the global id and
+  the subject's own name for it (`_subject.js` → `figures` for the variant,
+  `figureOrder` for the tab grammar). The rule the registry enforces at load
+  time, and `npm run check` repeats: **a canonical id carries the canonical
+  title, or the view takes an id of its own.** A pole map called "Plan des
+  pôles" while every other one says "Pôles et zéros" is a load-time error, not
+  a thing to notice in class.
 - **`order` ranks the experiment inside its subject** — the lecture progression, not
   the alphabet: the sidebar and the palette read a subject in the order the course
   meets its demos. Absent → the experiment lands at the end of its subject,
@@ -412,6 +420,18 @@ export default {
   //
   // RULE: declarative first. A custom view must be justified in a comment.
   // A custom pattern repeated twice becomes a generic type in ui/plots/.
+  //
+  // STANDARD FIGURES are declared, not retyped. A view that IS one of the
+  // catalogue's standard figures is built with the `figure` factory and NEVER
+  // states a title: the id comes from core/figures.js (global, so ?view=gain
+  // is the magnitude figure everywhere) and the title comes from the SUBJECT
+  // (_subject.js `figures`/`figureOrder`), because the same plot is honestly
+  // "Bode — gain" in automatique and "Réponse fréquentielle" in filtrage.
+  // The registry enforces it both ways at load time, and `npm run check`
+  // repeats the enforcement: a canonical id may not carry a hand-written
+  // title, and the standard figures must appear in the subject's order.
+  // An experiment whose figure is genuinely its own ("L'oscillo", "Diagramme
+  // de l'œil") declares an ordinary view with its own id and its own title.
   //
   // VIEW ORDER is a convention, not a detail — a listener who moves from one
   // experiment to the next must find the same tab in the same place:
@@ -740,6 +760,9 @@ export const checks = [
 │   │   ├── scales.js             # thin wrapper over d3-scale/array/shape/format
 │   │   ├── fields.js             # field factories (float, int, select…) + load-time validation
 │   │   ├── views.js              # view/plot/overlay factories + load-time validation
+│   │   ├── figures.js            # the catalogue's STANDARD FIGURES: global
+│   │   │                         #   ids, per-subject titles and order, and
+│   │   │                         #   the guard that makes drift impossible
 │   │   ├── response-views.js     # the FIGURES a response experiment draws,
 │   │   │                         #   shared across analog, digital and control:
 │   │   │                         #   gainView/phaseView (a Bode plot IS a

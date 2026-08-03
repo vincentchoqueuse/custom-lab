@@ -8,8 +8,13 @@
 //   - `groups` absent → one flat group
 //   - `scenes.js` auto-discovered and merged as `presets`; in a scene, `view`
 //     defaults to the first view, `drawer` to false, `masked`/`visible` to []
+//   - STANDARD FIGURES (core/figures.js) are resolved here: a view declared
+//     with the `figure` factory gets its global id and its SUBJECT's title,
+//     so the catalogue cannot drift into naming one plot two ways. The rule
+//     is enforced both ways — see normalizeViews.
 
 import { seedField } from './fields.js';
+import { normalizeViews } from './figures.js';
 
 export class RegistryError extends Error {
   constructor(message) {
@@ -77,6 +82,8 @@ for (const [path, mod] of Object.entries(manifestModules)) {
 
   const scenesPath = path.replace(/manifest\.js$/, 'scenes.js');
   const params = normalizeParams(src.params, loc.key);
+  const subjectMeta = subjectModules[`../experiments/${loc.subject}/_subject.js`]?.default ?? {};
+  const views = normalizeViews(src.views, subjectMeta, loc.key);
   const manifest = {
     subtitle: '',
     tags: [],
@@ -85,6 +92,7 @@ for (const [path, mod] of Object.entries(manifestModules)) {
     ...src,
     key: loc.key,
     subject: loc.subject,
+    views,
     params,
     actions: src.actions ?? DEFAULT_ACTIONS,
     groups:
@@ -95,11 +103,10 @@ for (const [path, mod] of Object.entries(manifestModules)) {
   experimentMap.set(loc.key, manifest);
 
   if (!subjectMap.has(loc.subject)) {
-    const meta = subjectModules[`../experiments/${loc.subject}/_subject.js`]?.default ?? {};
     subjectMap.set(loc.subject, {
       id: loc.subject,
-      title: meta.title ?? loc.subject,
-      order: meta.order ?? 99,
+      title: subjectMeta.title ?? loc.subject,
+      order: subjectMeta.order ?? 99,
       experiments: [],
     });
   }

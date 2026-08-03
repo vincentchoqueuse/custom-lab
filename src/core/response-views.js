@@ -21,7 +21,7 @@
 // digital-versus-analog comparison, a Nyquist locus — stays hand-written in
 // its manifest: forcing dissimilar figures through one mould would cost more
 // than it saves.
-import { view, plane, line, stem } from './views.js';
+import { view, figure, figurePlane, line, stem } from './views.js';
 
 /* ------------------------------------------------------------------ colours
    Named once so custom views can match the declarative ones. MATLAB palette,
@@ -64,11 +64,10 @@ function magnitudeAxis(y, yLabel, domain) {
 export function gainView(
   source,
   {
-    // 'gain' and 'phase', everywhere: the URL is part of the contract, and a
-    // link to the frequency view of one experiment should read the same as a
-    // link to the frequency view of the next
-    id = 'gain',
-    title = 'Réponse fréquentielle',
+    // the figure — its id and its per-subject title come from core/figures.js;
+    // `variant` picks another name from that figure's closed list
+    key = 'gain',
+    variant,
     x = OMEGA,
     y = 'dB',
     yLabel = '|H|',
@@ -79,16 +78,16 @@ export function gainView(
     overlays = [],
   } = {}
 ) {
-  return view(
-    id,
-    title,
+  return figure(
+    key,
     line(source, {
       color,
       width,
       label,
       overlays,
       axes: { x, y: magnitudeAxis(y, yLabel, domain) },
-    })
+    }),
+    { variant }
   );
 }
 
@@ -98,27 +97,18 @@ export function gainView(
  */
 export function phaseView(
   source,
-  {
-    id = 'phase',
-    title = 'Bode — phase',
-    x = OMEGA,
-    domain,
-    label = 'arg H(jω)',
-    color = PHASE_COLOR,
-    width = 2.4,
-    overlays = [],
-  } = {}
+  { key = 'phase', variant, x = OMEGA, domain, label = 'arg H(jω)', color = PHASE_COLOR, width = 2.4, overlays = [] } = {}
 ) {
-  return view(
-    id,
-    title,
+  return figure(
+    key,
     line(source, {
       color,
       width,
       label,
       overlays,
       axes: { x, y: { label: 'arg H', unit: '°', ...(domain ? { domain } : {}) } },
-    })
+    }),
+    { variant }
   );
 }
 
@@ -128,8 +118,6 @@ export function phaseView(
  * none — an absent cloud beats an empty legend entry.
  */
 export function polesView({
-  id = 'poles',
-  title = 'Pôles et zéros',
   poles = 'poles',
   zeros = 'zeros',
   poleLabel = 'pôles',
@@ -141,7 +129,7 @@ export function polesView({
   minHalf,
   maxHalf,
 } = {}) {
-  return plane(id, title, {
+  return figurePlane('poles', {
     markers: { source: poles, color: POLE_COLOR, label: poleLabel },
     ...(zeros
       ? { clouds: [{ source: zeros, color: ZERO_COLOR, r: 4.5, opacity: 1, label: zeroLabel }] }
@@ -158,10 +146,9 @@ export function polesView({
  * A periodic signal through the filter: output solid, input dashed.
  * The observable names are the bench's own (`tIn` / `tOut`).
  */
-export function timeView({ id = 'time', title = 'Réponse temporelle', overlays = [] } = {}) {
-  return view(
-    id,
-    title,
+export function timeView({ key = 'response', overlays = [] } = {}) {
+  return figure(
+    key,
     line('tOut', {
       width: 1.8,
       label: 'sortie',
@@ -175,16 +162,8 @@ export function timeView({ id = 'time', title = 'Réponse temporelle', overlays 
  * h[n] as a stem — the discrete-signal figure, never a continuous line.
  * `source` is the impulse-response observable, `y` its axis label.
  */
-export function impulseView({
-  id = 'impulse',
-  title = 'Réponse impulsionnelle',
-  source = 'impulse',
-  label,
-  y = 'h[n]',
-  x = 'n',
-  overlays = [],
-} = {}) {
-  return view(id, title, stem(source, { label, overlays, axes: { x, y } }));
+export function impulseView({ source = 'impulse', label, y = 'h[n]', x = 'n', overlays = [] } = {}) {
+  return figure('impulse', stem(source, { label, overlays, axes: { x, y } }));
 }
 
 /**
@@ -194,16 +173,9 @@ export function impulseView({
  * `overlays` carries whatever marker the experiment wants on top (its own
  * cut-off, its tooth spacing…), appended after the shared three.
  */
-export function spectrumView({
-  id = 'spectrum',
-  title = 'Réponse fréquentielle',
-  resp = 'resp',
-  domain = [-80, 30],
-  overlays = [],
-} = {}) {
+export function spectrumView({ key = 'gain', resp = 'resp', domain = [-80, 30], overlays = [] } = {}) {
   return gainView('specOut', {
-    id,
-    title,
+    key,
     x: HERTZ_LIN,
     yLabel: 'amplitude',
     domain,

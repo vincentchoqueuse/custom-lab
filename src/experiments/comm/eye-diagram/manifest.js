@@ -1,5 +1,5 @@
 import { float, int, log, select } from '../../../core/fields.js';
-import { view, line, histogram, scatter, vline, hline } from '../../../core/views.js';
+import { view, line, histogram, scatter, vline, hline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -72,9 +72,8 @@ export default {
     ),
 
     // where the slices come from: the waveform and its decision samples
-    view(
-      'waveform',
-      'Signal continu',
+    figure(
+      'time',
       line('waveform', {
         width: 1.8,
         label: 'signal reçu',
@@ -87,7 +86,7 @@ export default {
 
     // the vertical cut at the sampling instant: clusters around the levels
     view(
-      'sampling',
+      'at-sample',
       'À l\'instant d\'échantillonnage',
       histogram('sampleValues', {
         color: '#0072BD',

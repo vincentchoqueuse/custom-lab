@@ -6,8 +6,14 @@
 
   let { xs, ys, xAxis = {}, yAxis = {}, w, h, k = 1, kt = 1 } = $props();
 
-  const xTicks = $derived(xs.ticks ? xs.ticks(6) : []);
-  const yTicks = $derived(ys.ticks ? ys.ticks(5) : []);
+  // A tick whose pixel position is not a number is not drawn. This is not
+  // paranoia: for one frame during an experiment or scene swap a scale can be
+  // built from a domain that does not exist yet, and an SVG attribute of
+  // "NaN" is an error the browser logs — never something a lecture should
+  // produce on the console.
+  const placeable = (scale, t) => Number.isFinite(scale(t));
+  const xTicks = $derived((xs.ticks ? xs.ticks(6) : []).filter((t) => placeable(xs, t)));
+  const yTicks = $derived((ys.ticks ? ys.ticks(5) : []).filter((t) => placeable(ys, t)));
   const xFmt = $derived(xAxis.format ? format(xAxis.format) : xs.tickFormat(6));
   const yFmt = $derived(yAxis.format ? format(yAxis.format) : ys.tickFormat(5));
 

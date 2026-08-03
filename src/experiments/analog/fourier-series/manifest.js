@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, line, stem, vline } from '../../../core/views.js';
+import { view, line, stem, vline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -62,9 +62,8 @@ export default {
 
   views: [
     // The reconstruction converging onto the ideal signal — Gibbs included.
-    view(
+    figure(
       'time',
-      'Reconstruction',
       line('ideal', {
         width: 2,
         label: 'signal',
@@ -77,9 +76,8 @@ export default {
 
     // The amplitude spectrum of the kept harmonics, and the envelope they
     // sample — a sinc for the pulse train, a 1/n or 1/n² hyperbola otherwise.
-    view(
+    figure(
       'spectrum',
-      'Spectre',
       stem('spectrum', {
         color: '#0072BD',
         opacity: 0.85,

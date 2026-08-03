@@ -64,6 +64,7 @@
       ? Math.max(Math.abs(x0), Math.abs(x1), Math.abs(y0), Math.abs(y1))
       : Math.max((x1 - x0) / 2, (y1 - y0) / 2);
     const h = Math.min(Math.max(reach, minHalf) * 1.06, maxHalf);
+    if (!(h > 0)) return { halfX: minHalf, halfY: minHalf, cx: 0, cy: 0 }; // never a NaN frame
     const scale = Math.min(iw, ih) / (2 * h); // px per data unit, both axes
     return { halfX: iw / scale / 2, halfY: ih / scale / 2, cx, cy };
   });

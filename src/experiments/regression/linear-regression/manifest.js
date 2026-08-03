@@ -1,5 +1,5 @@
 import { float, int } from '../../../core/fields.js';
-import { view, line, scatter, histogram, density, hline, vline } from '../../../core/views.js';
+import { view, line, scatter, histogram, density, hline, vline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -51,9 +51,8 @@ export default {
     // The data first, with the quantity actually minimised drawn on it: the
     // vertical residual segments. One NaN-separated series does the whole
     // bundle, so no custom view is needed.
-    view(
+    figure(
       'fit',
-      'Nuage et droite',
       scatter('points', {
         color: '#7E2F8E',
         size: 3.8,
@@ -89,7 +88,7 @@ export default {
 
     // What the slope is worth: 400 repeated experiments against σ/√Sxx.
     view(
-      'sampling',
+      'slope-law',
       'Loi de la pente â',
       histogram('slopes', {
         color: '#0072BD',

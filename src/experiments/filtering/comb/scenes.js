@@ -3,7 +3,7 @@ export default [
   {
     id: 'through',
     title: 'Scène 1 · Le signal entre, les échos sortent',
-    view: 'time',
+    view: 'response',
     params: { structure: 'fb', D: 40, g: 0.9, source: 'square', f0: 110 },
     visible: ['D', 'g'],
     notes: `Le filtre récursif le plus simple qui soit : la sortie se rajoute à
@@ -18,7 +18,7 @@ Les deux onglets suivants montrent que si — un peigne, dents à Fs/D.`,
   {
     id: 'teeth',
     title: 'Scène 2 · L\'écho fait un peigne',
-    view: 'spectrum',
+    view: 'gain',
     params: { structure: 'fb', D: 40, g: 0.9, source: 'square', f0: 110 },
     visible: ['D', 'g'],
     notes: `Le spectre devient un peigne : des RÉSONANCES à k·Fs/D = k·200 Hz, très
@@ -47,7 +47,7 @@ Teaser : pincez le récursif avec du bruit et vous avez une corde de guitare
   {
     id: 'align',
     title: 'Scène 4 · Dents sur harmoniques',
-    view: 'spectrum',
+    view: 'gain',
     params: { structure: 'fb', D: 32, g: 0.8, source: 'square', f0: 250 },
     visible: ['D', 'g'],
     notes: `f₀ = 250 Hz et Fs/D = 250 Hz : CHAQUE harmonique est assis sur une
@@ -59,7 +59,7 @@ le filtre n'a pas changé ? »`,
   {
     id: 'sign',
     title: 'Scène 5 · Le peigne complémentaire',
-    view: 'spectrum',
+    view: 'gain',
     params: { structure: 'fb', D: 40, g: 0.9, source: 'saw', f0: 110 },
     visible: ['g'],
     notes: `Glisser g de +0.9 à −0.9 : résonances et creux S'ÉCHANGENT — les

@@ -1,5 +1,5 @@
 import { float, log } from '../../../core/fields.js';
-import { view, line, vline, hline } from '../../../core/views.js';
+import { view, line, vline, hline, figure } from '../../../core/views.js';
 import { gainView, phaseView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
 
 const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
@@ -49,9 +49,8 @@ export default {
 
   views: [
     // step response with the exponential envelope and the ±5% band
-    view(
+    figure(
       'step',
-      'Réponse indicielle',
       line('stepResponse', {
         width: 2.5,
         label: 'y(t)',
@@ -67,9 +66,8 @@ export default {
     ),
 
     // impulse response: the same two parameters, seen as a free oscillation
-    view(
+    figure(
       'impulse',
-      'Réponse impulsionnelle',
       line('impulseResponse', {
         color: '#0072BD',
         width: 2.5,

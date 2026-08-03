@@ -2,10 +2,17 @@
 // npm run check — walks every experiments/**/check.js, runs the checks and
 // prints a ✓/✗ table grouped by category, with per-check execution time
 // (performance-regression detection with no dedicated benchmark infra).
+//
+// It also runs the CATALOGUE checks first: the standard-figure vocabulary
+// (core/figures.js) and the scene → view references. Those two are what the
+// registry enforces at load time; running them here means a rename that
+// breaks the catalogue fails in the harness, before the browser and long
+// before a lecture hall.
 
-import { readdirSync } from 'node:fs';
+import { readdirSync, existsSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { normalizeViews } from '../src/core/figures.js';
 
 const ROOT = resolve(process.cwd(), 'src/experiments');
 
@@ -26,6 +33,68 @@ const red = (s) => `\x1b[31m${s}\x1b[0m`;
 
 let pass = 0;
 let fail = 0;
+
+/* ------------------------------------------------------------- catalogue --
+   The vocabulary and the scene references, replayed exactly as the registry
+   does it — but outside Vite, so `npm run check` catches them too. */
+async function checkCatalogue() {
+  console.log(bold('catalogue'));
+  console.log(`  ${dim('vocabulary')}`);
+  let figuresOk = true;
+  let scenesOk = true;
+  let nViews = 0;
+  let nScenes = 0;
+  for (const sub of readdirSync(ROOT, { withFileTypes: true })) {
+    if (!sub.isDirectory()) continue;
+    const dir = join(ROOT, sub.name);
+    const subjectFile = join(dir, '_subject.js');
+    const subject = existsSync(subjectFile)
+      ? (await import(pathToFileURL(subjectFile).href)).default
+      : {};
+    for (const exp of readdirSync(dir, { withFileTypes: true })) {
+      const mf = join(dir, exp.name, 'manifest.js');
+      if (!exp.isDirectory() || !existsSync(mf)) continue;
+      const key = `${sub.name}/${exp.name}`;
+      let ids;
+      try {
+        const views = normalizeViews(
+          (await import(pathToFileURL(mf).href)).default.views,
+          subject,
+          key
+        );
+        ids = new Set(views.map((v) => v.id));
+        nViews += views.length;
+      } catch (err) {
+        figuresOk = false;
+        console.log(`    ${red('✗')} ${err.message}`);
+        continue;
+      }
+      const sf = join(dir, exp.name, 'scenes.js');
+      if (!existsSync(sf)) continue;
+      for (const sc of (await import(pathToFileURL(sf).href)).default ?? []) {
+        nScenes++;
+        if (sc.view && !ids.has(sc.view)) {
+          scenesOk = false;
+          console.log(
+            `    ${red('✗')} ${key}: scene '${sc.id}' opens on view '${sc.view}', ` +
+              `which does not exist (${[...ids].join(', ')})`
+          );
+        }
+      }
+    }
+  }
+  if (figuresOk)
+    console.log(`    ${green('✓')} standard figures: id, title and order  ${dim(`(${nViews} views)`)}`);
+  console.log(`  ${dim('scenes')}`);
+  if (scenesOk)
+    console.log(`    ${green('✓')} every scene opens on a view that exists  ${dim(`(${nScenes} scenes)`)}`);
+  figuresOk ? pass++ : fail++;
+  scenesOk ? pass++ : fail++;
+  console.log('');
+}
+
+await checkCatalogue();
+
 const files = findChecks(ROOT);
 
 if (files.length === 0) {

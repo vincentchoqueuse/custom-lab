@@ -38,7 +38,7 @@ chapitre optimisation (descente de gradient).`,
     id: 'reconstruit',
     title: 'Scène 4 · Le signal reconstruit',
     params: { f: 5, sigma: 0.5, step: 0.05 },
-    view: 'signal',
+    view: 'time',
     visible: ['sigma', 'f'],
     notes: `La sinusoïde orange (fréquence f̂) recolle aux points violets.
 Marteler R : le bruit change, f̂ bouge à peine — l'estimation de fréquence

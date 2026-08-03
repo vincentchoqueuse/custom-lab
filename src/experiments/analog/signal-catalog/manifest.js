@@ -1,5 +1,5 @@
 import { float, select } from '../../../core/fields.js';
-import { view, line, hline, vline } from '../../../core/views.js';
+import { view, line, hline, vline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -66,9 +66,8 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
-    view(
+    figure(
       'time',
-      'Signal',
       line('xt', {
         width: 2,
         axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
@@ -77,9 +76,8 @@ export default {
 
     // Amplitude spectrum with the −3 dB level and the two half-width markers:
     // the width of the main lobe is the observable lesson.
-    view(
+    figure(
       'spectrum',
-      'Spectre',
       line('mag', {
         width: 2.2,
         label: '|X(f)|',
@@ -108,9 +106,8 @@ export default {
     ),
 
     // Where the delay lives. |X| is untouched; the phase takes a −2πt₀ slope.
-    view(
+    figure(
       'phase',
-      'Phase',
       line('phase', {
         color: '#D95319',
         width: 2,

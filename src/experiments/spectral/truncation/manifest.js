@@ -1,5 +1,5 @@
 import { float, log, select } from '../../../core/fields.js';
-import { view, line, vline } from '../../../core/views.js';
+import { view, line, vline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -94,9 +94,8 @@ export default {
 
   views: [
     // THE figure: what is kept, what is thrown away, and the gate between.
-    view(
+    figure(
       'time',
-      'La troncature',
       line('xFull', {
         color: '#a1a1aa',
         width: 1,
@@ -111,9 +110,8 @@ export default {
     ),
 
     // The consequence: a line of zero width becomes a lobe of width ≈ 1/T.
-    view(
+    figure(
       'spectrum',
-      'Spectre du signal tronqué',
       line('spectrum', {
         width: 2,
         overlays: [vline('f0', { color: '#EDB120', dashed: true, label: 'f₀' })],
