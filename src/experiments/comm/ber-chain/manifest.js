@@ -6,7 +6,7 @@ export default {
   id: 'ber-chain',
   order: 2,
   random: true,
-  title: 'La chaîne BER complète',
+  title: 'Chaîne BER complète',
   subtitle: 'Bits, codage de Gray, Eb/N₀ : la comparaison honnête des modulations',
   tags: ['BER', 'Gray', 'Eb/N0', 'mapping', 'chaîne de transmission'],
 

@@ -32,7 +32,14 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { fft, toDb } from '../../../core/numeric.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-import { covariance, hermitianEig, musicPseudo, rootMusic, esprit } from '../_lib/subspace.js';
+import {
+  covariance,
+  hermitianEig,
+  musicPseudo,
+  rootMusic,
+  esprit,
+  lsAmplitudes,
+} from '../_lib/subspace.js';
 
 const FS = 1000; // Hz
 const F1 = 200; // première raie (Hz)
@@ -49,10 +56,10 @@ const SPAN_MIN = 15; // Hz — plancher, pour que le lobe reste lisible
 
 /**
  * @param {{N: number, M: number, d: number, sources: number, df: number,
- *          snr: number, seed: number}} params
+ *          snr: number, estimator: string, seed: number}} params
  * @returns {{observables: Object}}
  */
-export function compute({ N, M, d, sources, df, snr, seed }) {
+export function compute({ N, M, d, sources, df, snr, estimator, seed }) {
   const gauss = gaussFrom(mulberry32(seed));
 
   // L'écart est exprimé en unités de la LIMITE DE FOURIER Fs/N : c'est le
@@ -156,6 +163,48 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
     y: Float64Array.from(hz, () => y),
   });
 
+  /* ---------- le MODÈLE complet : fréquences + amplitudes + bruit -------- */
+  // Les méthodes à sous-espace rendent des FRÉQUENCES et rien d'autre. Tant
+  // qu'on s'arrête là, on sait où sont les raies sans savoir ce qu'elles
+  // valent — on ne peut donc ni reconstruire le signal, ni dire si le modèle
+  // explique ce qu'on a mesuré. Les fréquences une fois connues, le modèle
+  // devient LINÉAIRE en ses amplitudes, et un moindres carrés d × d les rend.
+  const chosen = estimator === 'root' ? rm : es;
+  const ls = lsAmplitudes(xr, xi, chosen);
+
+  // Deux estimations INDÉPENDANTES de la variance du bruit, qui doivent
+  // tomber d'accord : le résidu du modèle ‖x − Va‖²/N, et la moyenne du
+  // plateau des valeurs propres. Deux chemins qui concordent valent mieux
+  // qu'un chemin qu'on croit sur parole — le harnais vérifie l'accord.
+  let plateau = 0;
+  let nPlateau = 0;
+  for (let k = dEff; k < Meff; k++) {
+    plateau += eig.values[k];
+    nPlateau++;
+  }
+  plateau = nPlateau ? plateau / nPlateau : NaN;
+
+  const dbP = (v) => (v > 0 ? 10 * Math.log10(v) : DB_FLOOR);
+  const MODEL_FLOOR = -60; // plancher de la vue « spectre estimé »
+
+  // les raies estimées, en spectre de raies (stem) : une raie EST discrète,
+  // et un trait continu prétendrait qu'il se passe quelque chose entre elles
+  const linesEst = {
+    x: Float64Array.from(chosen, (f) => f * FS),
+    y: Float64Array.from(ls.power, (p) => Math.max(dbP(p), MODEL_FLOOR)),
+  };
+  // la vérité : chaque source a l'amplitude 1, donc la puissance 0 dB
+  const linesTrue = {
+    x: Float64Array.from(freqs),
+    y: Float64Array.from(freqs, () => 0),
+  };
+  // pire écart d'amplitude, en dB, sur les raies appariées
+  let ampErr = 0;
+  for (let k = 0; k < chosen.length; k++) {
+    const near = Math.min(...freqs.map((f) => Math.abs(chosen[k] * FS - f)));
+    if (near < 5) ampErr = Math.max(ampErr, Math.abs(dbP(ls.power[k])));
+  }
+
   /** plus grande erreur d'appariement, en Hz, entre estimations et vérité */
   const worstErr = (hz) => {
     if (hz.length === 0) return NaN;
@@ -202,6 +251,29 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
       errEsprit: {
         value: worstErr(esHz),
         meta: { label: 'erreur ESPRIT', unit: 'Hz', precision: 3 },
+      },
+      // le modèle estimé
+      linesEst,
+      linesTrue,
+      nsLs: dbP(ls.noise), // hline : bruit estimé par le résidu du modèle
+      nsEigen: dbP(plateau), // hline : bruit estimé par le plateau propre
+      nsTrue: dbP(2 * sigma * sigma), // hline : le vrai niveau
+      modelFloor: MODEL_FLOOR,
+      noiseLs: {
+        value: dbP(ls.noise),
+        meta: { label: 'bruit estimé (résidu)', unit: 'dB', precision: 2 },
+      },
+      noiseEigen: {
+        value: dbP(plateau),
+        meta: { label: 'bruit estimé (valeurs propres)', unit: 'dB', precision: 2 },
+      },
+      noiseRef: {
+        value: dbP(2 * sigma * sigma),
+        meta: { label: 'bruit vrai', unit: 'dB', precision: 2 },
+      },
+      ampErr: {
+        value: ampErr,
+        meta: { label: 'erreur d’amplitude (MC)', unit: 'dB', precision: 2 },
       },
       model: {
         value:

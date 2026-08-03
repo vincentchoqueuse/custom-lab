@@ -6,7 +6,7 @@ export default {
   id: 'periodogram',
   order: 3,
   random: true, // du bruit gaussien : l'expérience tire, donc elle a un seed
-  title: 'Le périodogramme',
+  title: 'Périodogramme',
   subtitle: 'Estimer un spectre dans du bruit — et pourquoi allonger le signal ne suffit pas',
   tags: ['DSP', 'périodogramme', 'Welch', 'Bartlett', 'consistance', 'bruit'],
 

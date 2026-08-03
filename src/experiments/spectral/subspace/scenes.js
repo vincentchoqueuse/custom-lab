@@ -100,5 +100,42 @@ non — il a l'air d'un résultat. Et c'est pourquoi on ne choisit pas d
 au jugé : revenir à l'onglet des valeurs propres et montrer que c'est
 LÀ, et seulement là, qu'on pouvait le lire.`,
   },
+  {
+    id: 'model',
+    title: 'Scène 5 · Le modèle complet',
+    view: 'model',
+    params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2, estimator: 'esprit' },
+    visible: ['snr', 'estimator'],
+    notes: `Les méthodes à sous-espace rendent des FRÉQUENCES et rien d'autre.
+On sait donc où sont les raies, et pas ce qu'elles valent — on ne peut ni
+reconstruire le signal, ni dire si le modèle explique la mesure.
+
+Une fois les fréquences connues, le modèle devient LINÉAIRE en ses
+amplitudes : x ≈ Σ a_k·e^{j2πf_k n}. Un moindres carrés 2×2 rend les a_k,
+et ce qu'il reste — le résidu — EST l'estimation de la variance du bruit.
+
+Ce que l'écran montre alors :
+  les traits bleus  = les raies estimées, à leur amplitude estimée
+  les points jaunes = la vérité (amplitude 1, donc 0 dB)
+  les trois lignes  = trois estimations du niveau de bruit, dont DEUX
+                      indépendantes — le résidu du modèle, et la moyenne
+                      du plateau des valeurs propres.
+
+En régime nominal les trois se confondent, et c'est le résultat : deux
+chemins de calcul qui ne partagent rien tombent sur le même nombre, et ce
+nombre est le vrai. Le modèle explique la mesure.
+
+Puis casser, et regarder les lignes SE SÉPARER — c'est ce qui rend cette
+vue utile plutôt que décorative :
+  SNR à 6 dB → une raie fantôme apparaît loin des vraies, et le résidu
+    remonte AU-DESSUS du niveau réel : il contient maintenant ce que le
+    modèle n'explique pas.
+  d = 1     → une source est absorbée dans le résidu, qui explose.
+  d = 4     → deux raies inventées, à des amplitudes ridicules — la
+    statline chiffre l'écart.
+
+Basculer estimateur entre ESPRIT et root-MUSIC : à SNR correct, les deux
+donnent le même modèle. C'est en descendant qu'ils divergent.`,
+  },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

@@ -575,3 +575,92 @@ export function eigComplexSmall(mr, mi, n) {
   }
   return polyRootsComplex(cr, ci);
 }
+
+/**
+ * Amplitudes complexes au sens des MOINDRES CARRÉS, aux fréquences données.
+ *
+ * Une fois les fréquences connues, le modèle devient LINÉAIRE en ses
+ * amplitudes : x ≈ V a, avec V[n][k] = e^{j2πf_k n}. Les équations normales
+ * (VᴴV) a = Vᴴx sont un système d × d — d étant le nombre de sources, deux
+ * ou trois en cours — donc l'élimination de Gauss complexe déjà écrite pour
+ * ESPRIT suffit, sans rien de nouveau.
+ *
+ * C'est ce qui ferme la boucle : les méthodes à sous-espace rendent des
+ * FRÉQUENCES et rien d'autre. Sans cette étape on sait où sont les raies et
+ * pas ce qu'elles valent, et on ne peut donc ni reconstruire le signal, ni
+ * dire si le modèle explique ce qu'on a mesuré.
+ *
+ * La puissance résiduelle ‖x − Va‖²/N est rendue avec : c'est l'estimation
+ * de la variance du bruit qui découle du modèle, indépendante de celle que
+ * donne le plateau des valeurs propres. Les deux doivent tomber d'accord, et
+ * le harnais le vérifie — deux chemins qui concordent valent mieux qu'un
+ * chemin qu'on croit sur parole.
+ *
+ * @param {Float64Array} xr, xi  l'enregistrement complexe
+ * @param {Float64Array} freqs   fréquences normalisées (cycles/échantillon)
+ * @returns {{re: Float64Array, im: Float64Array, power: Float64Array,
+ *            noise: number, residual: number}}
+ */
+export function lsAmplitudes(xr, xi, freqs) {
+  const N = xr.length;
+  const d = freqs.length;
+  if (d === 0) return { re: new Float64Array(0), im: new Float64Array(0), power: new Float64Array(0), noise: NaN, residual: NaN };
+
+  // VᴴV (d×d) et Vᴴx (d), formés sans jamais matérialiser V (N×d)
+  const Ar = new Float64Array(d * d);
+  const Ai = new Float64Array(d * d);
+  const br = new Float64Array(d * d); // colonne 0 = Vᴴx, le reste à zéro
+  const bi = new Float64Array(d * d);
+  for (let p = 0; p < d; p++) {
+    for (let q = 0; q < d; q++) {
+      let sr = 0;
+      let si = 0;
+      const dw = 2 * Math.PI * (freqs[q] - freqs[p]);
+      for (let n = 0; n < N; n++) {
+        sr += Math.cos(dw * n);
+        si += Math.sin(dw * n);
+      }
+      Ar[p * d + q] = sr;
+      Ai[p * d + q] = si;
+    }
+    let sr = 0;
+    let si = 0;
+    const w = 2 * Math.PI * freqs[p];
+    for (let n = 0; n < N; n++) {
+      const c = Math.cos(w * n);
+      const s = Math.sin(w * n);
+      // conj(e^{jwn}) · x[n]
+      sr += c * xr[n] + s * xi[n];
+      si += c * xi[n] - s * xr[n];
+    }
+    br[p * d] = sr;
+    bi[p * d] = si;
+  }
+  const sol = solveComplex(Ar, Ai, br, bi, d);
+  const ar = new Float64Array(d);
+  const ai = new Float64Array(d);
+  const power = new Float64Array(d);
+  for (let k = 0; k < d; k++) {
+    ar[k] = sol.re[k * d];
+    ai[k] = sol.im[k * d];
+    power[k] = ar[k] * ar[k] + ai[k] * ai[k];
+  }
+
+  // résidu : ce que le modèle n'explique pas
+  let res = 0;
+  for (let n = 0; n < N; n++) {
+    let mr = 0;
+    let mi = 0;
+    for (let k = 0; k < d; k++) {
+      const w = 2 * Math.PI * freqs[k] * n;
+      const c = Math.cos(w);
+      const s = Math.sin(w);
+      mr += ar[k] * c - ai[k] * s;
+      mi += ar[k] * s + ai[k] * c;
+    }
+    const er = xr[n] - mr;
+    const ei = xi[n] - mi;
+    res += er * er + ei * ei;
+  }
+  return { re: ar, im: ai, power, noise: res / N, residual: res };
+}

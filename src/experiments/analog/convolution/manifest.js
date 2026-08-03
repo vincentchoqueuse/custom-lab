@@ -5,8 +5,8 @@ import { at, GUIDE_COLOR } from '../../../core/response-views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'convolution',
-  order: 2,
-  title: 'La convolution, décomposée',
+  order: 3,
+  title: 'Convolution, décomposée',
   subtitle: 'Retourner, glisser, intégrer — et le curseur t fait le reste',
   tags: [
     'convolution',
