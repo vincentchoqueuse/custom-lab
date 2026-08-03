@@ -4,7 +4,7 @@ import { view, line, stem, vline, figure } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'fourier-series',
-  order: 4,
+  order: 5,
   title: 'Séries de Fourier',
   subtitle:
     'Reconstruire un signal harmonique par harmonique — enveloppe, Gibbs et rapport cyclique',
