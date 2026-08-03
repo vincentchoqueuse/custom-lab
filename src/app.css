@@ -664,21 +664,37 @@ kbd {
   min-width: 0;
 }
 
+/* The ghost that gives the picker its width: same font and same box as the
+   select, laid out in flow but invisible. The select is absolutely placed
+   over it, so the control is exactly as wide as the title it displays. */
+.tabs-sizer,
 .tabs-select select {
-  appearance: none;
-  width: 100%;
-  /* a <select> is sized by its LONGEST option and will not shrink below it
-     unless this is set — the same trap as the header, one line lower */
-  min-width: 0;
   padding: 8px 32px 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--muted);
-  color: var(--foreground);
+  border: 1px solid transparent;
   font: inherit;
   font-size: 13.5px;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tabs-sizer {
+  visibility: hidden;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.tabs-select select {
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-width: 0;
+  border-color: var(--border);
+  border-radius: 10px;
+  background: var(--muted);
+  color: var(--foreground);
 }
 
 .tabs-select svg {
@@ -1284,14 +1300,23 @@ kbd {
     display: none;
   }
 
-  /* basis 0, not auto: with `auto` the select asks for the width of its
-     LONGEST option — "Ce que ça coûte à la boucle" claimed the whole bar and
-     pushed the actions onto a second line. With basis 0 it takes what is
-     left once the actions have their size, and truncates. */
+  /* Sized by its own content — which, thanks to the ghost, is the CURRENT
+     title and not the longest one. `1 1 0` filled the whole bar (212 px to
+     show a word needing 140); basis `auto` on the longest option overflowed
+     it. Shrink stays at 1 so a long title yields to the actions instead of
+     pushing them onto a second line. */
   .tabs-select {
     display: flex;
-    flex: 1 1 0;
+    flex: 0 1 auto;
     min-width: 0;
+  }
+
+  /* nowrap, or the shrink above never happens: a flex container wraps on
+     the items' BASE sizes, before shrinking is considered. "Ce que ça coûte
+     à la boucle" (214 px) plus the actions came to 344 px in a 342 px bar,
+     so the line broke instead of the title yielding. */
+  .viewbar {
+    flex-wrap: nowrap;
   }
 
   .actionbar {
