@@ -6,6 +6,7 @@
   import { untrack } from 'svelte';
   import { scaleLinear, scaleLog, bin } from '../../core/scales.js';
   import { dataColor } from '../../core/palette.svelte.js';
+  import { app } from '../../core/store.svelte.js';
   import { FRAME, strokeScale, typeScale } from './frame.js';
   import Axes from './Axes.svelte';
   import Legend from './Legend.svelte';
@@ -227,6 +228,13 @@
   // current params do not have — it is not advertised, same rule as a
   // non-finite vline.
   const DEFAULT_COLORS = { density: '#D95319' };
+  // Les couches éteintes depuis la légende ne sont pas rendues du tout —
+  // pas juste transparentes. C'est ce qui fait que l'export SVG et le
+  // fantôme du gel emportent EXACTEMENT ce que la salle voit, puisque tous
+  // deux clonent le DOM. Seules les couches étiquetées sont concernées :
+  // une couche sans libellé n'a pas de pastille, donc rien à cliquer.
+  const shown = $derived(layers.filter((l) => !l.s.label || !app.hidden.includes(l.s.label)));
+
   const legend = $derived(
     layers
       .filter((l) => l.s.label && l.kind !== 'vline' && l.kind !== 'hline' && l.kind !== 'none')
@@ -248,7 +256,7 @@
   <g transform="translate({M.left},{M.top})">
     <Axes {xs} {ys} {xAxis} {yAxis} w={iw} h={ih} {k} {kt} />
     <g clip-path="url(#dp-clip)">
-    {#each layers as l, i (i)}
+    {#each shown as l, i (i)}
       {#if l.kind === 'histogram'}
         <Histogram {xs} {ys} rects={l.rects} spec={paint(l.s, l.kind)} />
       {:else if l.kind === 'line'}

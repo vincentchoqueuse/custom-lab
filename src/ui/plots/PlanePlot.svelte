@@ -5,6 +5,7 @@
   // The declarative counterpart of DeclarativePlot for the one shape a
   // cartesian plot cannot express — no scientific computation here either.
   import IQPlane from './IQPlane.svelte';
+  import { app } from '../../core/store.svelte.js';
 
   let { spec, obs, params, pres = false } = $props();
 
@@ -34,7 +35,11 @@
   /** A p => number radius may return NaN: the circle then has no meaning for
    *  the current params and is simply not drawn, legend included — the same
    *  rule vline/hline follow in the cartesian plots. */
-  const circleR = $derived(num(spec.circle?.radius) ?? (spec.circle ? 1 : NaN));
+  // un cercle éteint devient un rayon non fini, que IQPlane ne dessine déjà
+  // pas — le chemin d'extinction existait donc déjà, il suffit de l'emprunter
+  const circleR = $derived(
+    off(spec.circle?.label) ? NaN : (num(spec.circle?.radius) ?? (spec.circle ? 1 : NaN))
+  );
 
   const clouds = $derived.by(() => {
     const out = [];
@@ -47,6 +52,7 @@
       });
     }
     for (const c of spec.clouds ?? []) {
+      if (off(c.label)) continue;
       const v = val(c.source);
       if (drawn(v))
         out.push({ x: v.x, y: v.y, color: c.color, r: c.r, opacity: c.opacity, max: c.max });
@@ -60,8 +66,16 @@
    *  legend — an entry pointing at nothing is worse than no entry. */
   const drawn = (v) => v?.x?.length > 0;
 
+  /** Éteinte depuis la légende ? Le plan doit obéir au même clic que le
+   *  tracé cartésien : une pastille cliquable qui ne masque rien serait un
+   *  bouton menteur, et c'est pire que pas de bouton du tout. */
+  const off = (label) => !!label && app.hidden.includes(label);
+
   const curves = $derived.by(() =>
-    (spec.curves ?? []).map((c) => ({ ...c, ...(val(c.source) ?? {}) })).filter(drawn)
+    (spec.curves ?? [])
+      .filter((c) => !off(c.label))
+      .map((c) => ({ ...c, ...(val(c.source) ?? {}) }))
+      .filter(drawn)
   );
 
   const segments = $derived(
@@ -88,7 +102,7 @@
   {clouds}
   {curves}
   symmetric={spec.symmetric !== false}
-  markers={spec.markers ? val(spec.markers.source) : null}
+  markers={spec.markers && !off(spec.markers.label) ? val(spec.markers.source) : null}
   markerColor={spec.markers?.color ?? '#EDB120'}
   labels={spec.markers?.labels ? val(spec.markers.labels) : null}
   {segments}

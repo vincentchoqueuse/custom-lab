@@ -23,6 +23,12 @@ export const app = $state({
   // it was switched on, so moving a parameter moves the CURVE, not the frame.
   // Display state ONLY — never in the URL, like the ghost.
   axisLock: false,
+  // séries masquées par un clic sur leur pastille de légende. Un tableau de
+  // LIBELLÉS, parce que c'est ce que la légende affiche et donc ce sur quoi
+  // l'utilisateur clique. Display state ONLY — comme le fantôme et le
+  // verrou d'axes : montrer une courbe seule est un geste de démonstration,
+  // pas un état à retrouver dans un lien.
+  hidden: [],
   ui: {
     sidebar: true,
     theme: 'light',
@@ -150,6 +156,7 @@ function handleHash() {
   app.notice = '';
   app.ghost = null;
   app.axisLock = scene?.lock ?? false;
+  app.hidden = [];
   app.result = { status: 'idle', observables: null, message: '' };
   syncUrl(false); // normalize whatever was typed by hand
 }
@@ -198,6 +205,7 @@ export function applyPreset(id, push = true) {
   app.view = scene.view;
   app.drawer = scene.drawer;
   app.axisLock = scene.lock; // display state, like the ghost — never in the URL
+  app.hidden = [];
   app.revealed = false;
   app.notice = '';
   syncUrl(push);
@@ -216,10 +224,30 @@ export function toggleAxisLock() {
   app.axisLock = !app.axisLock;
 }
 
+/**
+ * Masquer / réafficher une série depuis sa pastille de légende.
+ *
+ * Par LIBELLÉ et non par index : deux courbes portant le même nom sont la
+ * même grandeur, et les éteindre ensemble est ce qu'on veut. C'est aussi ce
+ * qui rend le geste stable quand une couche disparaît parce que les
+ * paramètres courants ne la produisent pas.
+ */
+export function toggleSeries(label) {
+  app.hidden = app.hidden.includes(label)
+    ? app.hidden.filter((l) => l !== label)
+    : [...app.hidden, label];
+}
+
+/** Tout réafficher — appelé quand la vue change, et par Échap. */
+export function showAllSeries() {
+  if (app.hidden.length) app.hidden = [];
+}
+
 export function setView(id) {
   app.view = id;
   app.ghost = null; // a ghost from another view would be a misleading overlay
   app.axisLock = false; // another view's frame means nothing here
+  app.hidden = []; // les libellés d'une autre vue n'ont rien à masquer ici
   syncUrl(true);
 }
 

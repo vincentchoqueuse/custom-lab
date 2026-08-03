@@ -216,7 +216,7 @@ Canonical table — any shortcut change happens HERE and nowhere else:
 | `A` | Lock / unlock the plot axes (the frame stays put while the curve moves) | **A**xes |
 | `L` | **L**ecture Presentation Mode: **fullscreen** (Fullscreen API) + strokes ×1.6 + type ×1.3 + minimal chrome | **L**ecture |
 | `←` / `→` | Previous / next preset (the lecture script on keys) | — |
-| `Esc` | Exit fullscreen / clear freeze ghost / close popover or palette | — |
+| `Esc` | Exit fullscreen / clear freeze ghost / close popover or palette / show hidden series | — |
 
 Rules: single-letter shortcuts are inert while a text field has focus; fullscreen uses
 the browser Fullscreen API (native `Esc` exit).
@@ -236,6 +236,14 @@ the browser Fullscreen API (native `Esc` exit).
   rendered SVG (grayed DOM clone under the plot), which works for any view —
   declarative or custom — without touching views or compute. The ghost is display
   state, NOT in the URL (not link-reproducible, by design).
+- **Legend toggle**: clicking a legend chip hides or shows that series
+  (keyboard: focus the chip, `Enter`). On a view that stacks three
+  estimators, "look at this one alone" is the gesture a hand makes in front
+  of the screen and that nothing else replaces. The hidden layer is not
+  rendered at all rather than made transparent, so the SVG export and the
+  freeze ghost — both DOM clones — carry exactly what the room sees. Display
+  state, NOT in the URL (like the ghost and the axis lock); cleared when the
+  view or the experiment changes, and by `Esc` once nothing else is open.
 - **Axis lock** (`A`, or the Axes button on the plot card): each declarative
   plot pins the domains it had when the lock was switched on, so moving a
   parameter afterwards moves the CURVE and not the frame — auto-scaling

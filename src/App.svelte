@@ -8,8 +8,9 @@
     stepPreset,
     setDrawer,
     toggleSidebar,
-  toggleAxisLock,
-} from './core/store.svelte.js';
+    toggleAxisLock,
+    showAllSeries,
+  } from './core/store.svelte.js';
   import { schedule, onResult } from './core/worker-host.js';
   import { normalizeAll } from './core/observables.js';
   import { readPref } from './core/prefs.js';
@@ -153,6 +154,10 @@
         if (app.ui.palette) app.ui.palette = false;
         else if (app.ui.inspector) app.ui.inspector = false;
         else if (app.ghost) app.ghost = null; // clear the freeze ghost
+        // en dernier, et seulement si rien d'autre n'attendait d'être
+        // fermé : Échap rend l'écran à son état simple, donc il rallume
+        // les courbes éteintes depuis la légende
+        else showAllSeries();
         break;
     }
   }
