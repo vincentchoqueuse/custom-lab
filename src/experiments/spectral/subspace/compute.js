@@ -40,6 +40,8 @@ import {
   esprit,
   lsAmplitudes,
 } from '../_lib/subspace.js';
+// le cadrage figé, partagé avec le manifeste (frame.js)
+import { F_LO, F_HI, F_HI_FAR } from './frame.js';
 
 const FS = 1000; // Hz
 const F1 = 200; // première raie (Hz)
@@ -47,12 +49,6 @@ const F3 = 330; // troisième raie, franchement à l'écart (Hz)
 const NFFT = 4096; // grille du périodogramme de référence
 const NGRID = 1500; // grille du pseudo-spectre
 const DB_FLOOR = -80;
-// La fenêtre de lecture suit la LIMITE DE FOURIER plutôt qu'un nombre de
-// hertz fixe : à N = 1024 les deux raies sont quatre fois plus proches
-// qu'à N = 256, et un cadrage figé les aurait écrasées l'une sur l'autre
-// exactement là où l'expérience demande de les distinguer.
-const SPAN_BINS = 8; // demi-largeur, en limites de Fourier
-const SPAN_MIN = 15; // Hz — plancher, pour que le lobe reste lisible
 
 /**
  * @param {{N: number, M: number, d: number, sources: number, df: number,
@@ -90,9 +86,8 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
   pr.set(xr.subarray(0, Math.min(N, NFFT)));
   pi.set(xi.subarray(0, Math.min(N, NFFT)));
   fft(pr, pi);
-  const span = Math.max(SPAN_BINS * fourier, SPAN_MIN);
-  const fLo = F1 - span;
-  const fHi = (sources === 3 ? F3 : f2) + span;
+  const fLo = F_LO;
+  const fHi = sources === 3 ? F_HI_FAR : F_HI;
   const pf = [];
   const py = [];
   let pMax = 0;
@@ -227,6 +222,28 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
     return worst;
   };
 
+  /**
+   * L'erreur QUE L'APPARIEMENT NE VOIT PAS : pour chaque estimation, la
+   * distance à la vraie fréquence la plus proche. `worstErr` regarde si
+   * chaque vraie raie a été trouvée ; celle-ci regarde si une fréquence a
+   * été INVENTÉE, ce qui est le mode de panne d'un d trop grand.
+   *
+   * Elle a remplacé une preuve visuelle : le cadrage étant maintenant figé,
+   * une raie fantôme à 840 Hz sort du cadre au lieu de l'étirer. Un chiffre
+   * qui reste au centième de hertz tant que le modèle est juste et saute à
+   * plusieurs centaines dès qu'il ne l'est plus dit la même chose, et le
+   * dit même quand la salle ne regarde pas au bon endroit.
+   */
+  const strayHz = (hz) => {
+    let worst = 0;
+    for (const g of hz) {
+      let best = Infinity;
+      for (const f of freqs) best = Math.min(best, Math.abs(g - f));
+      worst = Math.max(worst, best);
+    }
+    return hz.length ? worst : NaN;
+  };
+
   return {
     observables: {
       periodogram: { x: Float64Array.from(pf), y: Float64Array.from(py) },
@@ -261,6 +278,14 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
       errEsprit: {
         value: worstErr(esHz),
         meta: { label: 'erreur ESPRIT', unit: 'Hz', precision: 3 },
+      },
+      strayRoot: {
+        value: strayHz(rmHz),
+        meta: { label: 'invention root-MUSIC', unit: 'Hz', precision: 2 },
+      },
+      strayEsprit: {
+        value: strayHz(esHz),
+        meta: { label: 'invention ESPRIT', unit: 'Hz', precision: 2 },
       },
       // les trois spectres, même forme : raies + niveau de bruit
       linesTrue,

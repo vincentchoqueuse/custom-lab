@@ -90,15 +90,19 @@ Puis casser le modèle dans les deux sens, en faisant prédire AVANT.
            ne bouge presque pas ; les ondulations parasites restent
            cinquante décibels plus bas. Balayé, MUSIC est INDULGENT à
            une surestimation de d.
-           Mais regarder les POINTS : root-MUSIC et ESPRIT rendent
-           exactement d valeurs, donc cinq. Deux d'entre elles tombent
-           là où il n'y a rien — mesuré à 443 et 839 Hz. Les tracer
-           n'était pas un ornement : c'est ce qui rend l'erreur visible.
+           Mais COMPTER les points : root-MUSIC et ESPRIT rendent
+           exactement d valeurs, donc cinq, et il n'y en a que trois à
+           l'écran. Les deux autres sont à 444 et 840 Hz — hors du
+           cadre, qui ne bouge pas. La statline les chiffre :
+           « invention root-MUSIC = 509.7 Hz », c'est-à-dire la plus
+           grande distance entre une estimation et la vraie raie la
+           plus proche. À d juste elle vaut 0.1 Hz ; à d = 4, 113.8.
 
 La leçon pratique est là : un pic bas se remarque, un CHIFFRE inventé
-non — il a l'air d'un résultat. Et c'est pourquoi on ne choisit pas d
-au jugé : revenir à l'onglet des valeurs propres et montrer que c'est
-LÀ, et seulement là, qu'on pouvait le lire.`,
+non — il a l'air d'un résultat, et il ne se voit même pas s'il tombe
+hors du cadre. Et c'est pourquoi on ne choisit pas d au jugé : revenir
+à l'onglet des valeurs propres et montrer que c'est LÀ, et seulement
+là, qu'on pouvait le lire.`,
   },
   {
     id: 'model',
@@ -130,12 +134,17 @@ confus veut dire ici « tout va bien », ce qui est rare et qu'il faut dire
 
 Puis casser, et regarder les spectres SE SÉPARER — c'est ce qui rend cette
 vue utile plutôt que décorative :
-  SNR à 6 dB → une raie fantôme apparaît loin des vraies, et la ligne de
-    bruit correspondante remonte AU-DESSUS du vrai niveau : le résidu
-    contient maintenant ce que le modèle n'explique pas.
+  SNR à 6 dB → ESPRIT invente une raie à 441 Hz — hors du cadre, qui est
+    figé sur la zone utile : à l'écran il ne reste qu'UNE raie violette
+    au lieu de deux, et la ligne de bruit correspondante remonte
+    AU-DESSUS du vrai niveau. Le résidu contient maintenant ce que le
+    modèle n'explique pas, et la statline dit où est passée l'autre.
   d = 1     → une source entière tombe dans le résidu, qui explose (de
     −30 dB à +1.4 dB, mesuré).
-  d = 4     → deux raies inventées, à des amplitudes ridicules.
+  d = 4     → deux raies inventées, à 444 et 840 Hz : elles sortent du
+    cadre et ne se voient PAS. Seule la statline les dénonce
+    (« invention root-MUSIC = 637.7 Hz »). C'est le mode de panne le
+    plus dangereux, parce qu'il est silencieux.
 
 Le point à faire dire : on n'a PAS eu besoin de connaître la vérité pour
 voir que le modèle était faux. La ligne de bruit qui remonte suffit — et

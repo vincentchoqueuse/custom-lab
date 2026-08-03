@@ -1,5 +1,13 @@
 import { float, int, select } from '../../../core/fields.js';
 import { view, figure, line, scatter, stem, vline, hline } from '../../../core/views.js';
+import { fWindow } from './frame.js';
+
+/** L'axe des fréquences, FIGÉ, et le même sur les trois vues qui en portent
+ *  un : le périodogramme, le spectre estimé et le pseudo-spectre se lisent
+ *  l'un après l'autre, et un cadre qui bouge d'un onglet à l'autre — ou
+ *  quand N change — fait croire à un déplacement des raies. Les bornes
+ *  viennent de frame.js, partagées avec la grille de calcul. */
+const F_AXIS = { label: 'f', unit: 'Hz', domain: fWindow };
 
 /** Les fréquences vraies, en verticales — les mêmes sur les trois vues,
  *  déclarées une fois pour qu'elles ne puissent pas diverger. */
@@ -103,7 +111,7 @@ export default {
         width: 2,
         label: 'périodogramme',
         overlays: TRUTH,
-        axes: { x: { label: 'f', unit: 'Hz' }, y: { label: '|X(f)|', unit: 'dB' } },
+        axes: { x: F_AXIS, y: { label: '|X(f)|', unit: 'dB' } },
       })
     ),
 
@@ -162,10 +170,7 @@ export default {
           hline('nsRoot', { color: '#D95319', dashed: true, width: 1.6, label: 'root-MUSIC' }),
           hline('nsEsprit', { color: '#7E2F8E', dashed: true, width: 1.6, label: 'ESPRIT' }),
         ],
-        axes: {
-          x: { label: 'f', unit: 'Hz' },
-          y: { label: 'puissance', unit: 'dB', domain: [-60, 8] },
-        },
+        axes: { x: F_AXIS, y: { label: 'puissance', unit: 'dB', domain: [-60, 8] } },
       })
     ),
 
@@ -184,7 +189,7 @@ export default {
           scatter('rootMusicMarks', { color: '#D95319', size: 10, label: 'root-MUSIC' }),
           scatter('espritMarks', { color: '#7E2F8E', size: 10, label: 'ESPRIT' }),
         ],
-        axes: { x: { label: 'f', unit: 'Hz' }, y: { label: 'pseudo-spectre', unit: 'dB' } },
+        axes: { x: F_AXIS, y: { label: 'pseudo-spectre', unit: 'dB' } },
       })
     ),
   ],
