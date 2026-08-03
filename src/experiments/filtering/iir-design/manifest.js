@@ -1,5 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, plane, line, stem, vline } from '../../../core/views.js';
+import { view, plane, line, vline } from '../../../core/views.js';
+import { timeView, impulseView } from '../../../core/filter-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -72,28 +73,8 @@ export default {
   ],
 
   views: [
-    view(
-      'time',
-      'Réponse temporelle',
-      line('tOut', {
-        width: 1.8,
-        label: 'sortie',
-        overlays: [line('tIn', { color: '#D95319', dashed: true, label: 'entrée' })],
-        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
-      })
-    ),
-
-    view(
-      'impulse',
-      'Réponse impulsionnelle',
-      stem('impulseDig', {
-        color: '#0072BD',
-        size: 2.4,
-        width: 1.1,
-        label: 'h[n] du filtre numérique',
-        axes: { x: 'n', y: 'h[n]' },
-      })
-    ),
+    timeView(),
+    impulseView({ source: 'impulseDig', label: 'h[n] du filtre numérique' }),
 
     view(
       'response',

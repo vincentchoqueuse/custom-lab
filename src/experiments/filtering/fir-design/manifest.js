@@ -1,5 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, line, stem, vline, hline } from '../../../core/views.js';
+import { view, line, vline, hline } from '../../../core/views.js';
+import { timeView, impulseView } from '../../../core/filter-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -43,28 +44,18 @@ export default {
   },
 
   views: [
-    view(
-      'signal',
-      'Réponse temporelle',
-      line('sqIn', {
-        label: 'entrée (carré 100 Hz)',
-        overlays: [line('sqOut', { color: '#D95319', width: 2, label: 'sortie filtrée' })],
-        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
-      })
-    ),
-    view(
-      'impulse',
-      'Réponse impulsionnelle',
-      stem('taps', {
-        label: 'h[n] (N coefficients)',
-        overlays: [
-          line('idealIR', { color: '#D95319', dashed: true, label: 'sinc idéal (infini)' }),
-          vline((p) => (p.N - 1) / 2, { color: '#EDB120', dashed: true, label: '(N−1)/2' }),
-        ],
-        axes: { x: 'n', y: 'h[n]' },
-      })
-    ),
+    timeView({ id: 'signal' }),
+    impulseView({
+      source: 'taps',
+      label: 'h[n] (N coefficients)',
+      overlays: [
+        line('idealIR', { color: '#D95319', dashed: true, label: 'sinc idéal (infini)' }),
+        vline((p) => (p.N - 1) / 2, { color: '#EDB120', dashed: true, label: '(N−1)/2' }),
+      ],
+    }),
 
+    // hand-written: this experiment reads its own |H| against a sidelobe
+    // level, with no input/output spectra to compare
     view(
       'response',
       'Réponse fréquentielle',

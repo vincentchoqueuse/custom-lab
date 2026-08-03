@@ -1,5 +1,6 @@
 import { coeffs, float, select } from '../../../core/fields.js';
-import { view, line, stem, vline } from '../../../core/views.js';
+import { vline } from '../../../core/views.js';
+import { timeView, impulseView, spectrumView } from '../../../core/filter-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -36,44 +37,16 @@ export default {
   },
 
   views: [
-    view(
-      'time',
-      'Réponse temporelle',
-      line('tOut', {
-        width: 1.8,
-        label: 'sortie',
-        overlays: [line('tIn', { color: '#D95319', dashed: true, label: 'entrée' })],
-        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
-      })
-    ),
-    view(
-      'impulse',
-      'Réponse impulsionnelle',
-      stem('taps', {
-        axes: { x: 'k', y: 'b[k] = h[k]' },
-      })
-    ),
-
-    view(
-      'spectrum',
-      'Réponse fréquentielle',
-      line('specOut', {
-        width: 1.8,
-        label: 'sortie',
-        overlays: [
-          line('specIn', { color: '#7E2F8E', opacity: 0.45, label: 'entrée' }),
-          line('resp', { color: '#D95319', dashed: true, label: '|H(f)|' }),
-          vline((p) => 8000 / p.b.length, {
-            color: '#EDB120',
-            dashed: true,
-            label: 'Fs/L',
-          }),
-        ],
-        axes: {
-          x: { label: 'f', unit: 'Hz' },
-          y: { label: 'amplitude', unit: 'dB', domain: [-60, 20] },
-        },
-      })
-    ),
+    timeView(),
+    impulseView({ source: 'taps', x: 'k', y: 'b[k] = h[k]' }),
+    spectrumView({
+      overlays: [
+        vline((p) => 8000 / p.b.length, {
+          color: '#EDB120',
+          dashed: true,
+          label: 'Fs/L',
+        }),
+      ],
+    }),
   ],
 };

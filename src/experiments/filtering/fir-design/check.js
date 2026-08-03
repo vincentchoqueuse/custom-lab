@@ -65,8 +65,8 @@ export const checks = [
       // "flat top" survives — the robust delay statement is the argmax of
       // the input/output cross-correlation, which must land on M exactly
       const { observables: o } = compute({ fc: 500, N: 81, win: 'hamming', seed: 1 });
-      const xin = o.sqIn.y;
-      const yout = o.sqOut.y;
+      const xin = o.tIn.y;
+      const yout = o.tOut.y;
       let best = 0;
       let bestC = -Infinity;
       for (let d = 0; d <= 80; d++) {
