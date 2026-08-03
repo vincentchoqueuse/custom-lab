@@ -1,4 +1,4 @@
-import { compute, transfer, naturalW } from './compute.js';
+import { compute, transfer, naturalW, phaseOf, w180Of, modAt180, TAU_RATIO } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
 const BASE = { sys: 'first', K: 1, tau: 1, w0: 1, m: 0.3, wc: 1, seed: 42 };
@@ -12,24 +12,34 @@ export const checks = [
       // The whole point of the experiment, as an identity: the Nyquist point,
       // the Bode pair and the Black point must be three readings of one H(jω).
       let worst = 0;
-      for (const p of [{}, { sys: 'second', m: 0.3 }, { sys: 'second', m: 1.4 }]) {
+      for (const p of [
+        {},
+        { sys: 'second', m: 0.3 },
+        { sys: 'second', m: 1.4 },
+        { sys: 'openloop' },
+        { sys: 'openloop', K: 9 },
+      ]) {
         const o = obs(p);
+        // the open loop's Nyquist locus is cut outside the reading disc, so
+        // the identity is asserted on the points that ARE drawn
+        const drawn = range(o.gain.x.length).filter((i) => Number.isFinite(o.locus.x[i]));
         worst = Math.max(
           worst,
           maxGap(
-            range(o.gain.x.length),
+            drawn,
             (i) => Math.hypot(o.locus.x[i], o.locus.y[i]),
             (i) => 10 ** (o.gain.y[i] / 20)
           ),
           // Black IS the Bode pair, axes exchanged
           maxGap(range(o.gain.x.length), (i) => o.black.x[i], (i) => o.phase.y[i]),
           maxGap(range(o.gain.x.length), (i) => o.black.y[i], (i) => o.gain.y[i]),
-          // and the phase is the argument of the Nyquist point
-          maxGap(
-            range(o.gain.x.length),
-            (i) => (Math.atan2(o.locus.y[i], o.locus.x[i]) * 180) / Math.PI,
-            (i) => o.phase.y[i]
-          )
+          // and the phase is the argument of the Nyquist point — modulo 360°,
+          // because the plotted phase is CONTINUOUS (it runs to −270° on the
+          // open loop) while atan2 folds into (−180°, 180°]
+          maxGap(drawn, (i) => {
+            const a = (Math.atan2(o.locus.y[i], o.locus.x[i]) * 180) / Math.PI - o.phase.y[i];
+            return (((a + 180) % 360) + 360) % 360;
+          }, () => 180)
         );
       }
       return { ok: worst < 1e-12, detail: `écart max ${worst.toExponential(2)}` };
@@ -151,5 +161,172 @@ export const checks = [
       return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
     },
   },
+  {
+    name: 'boucle ouverte : ω₁₈₀ et la marge de gain en forme close',
+    category: 'numeric',
+    run() {
+      // arctan(τ₁ω) + arctan(τ₂ω) = 90° ⟺ ω = 1/√(τ₁τ₂) = √5/τ, and there
+      // |H| collapses to K·τ₁τ₂/(τ₁+τ₂) = Kτ/6. Both are independent checks of
+      // the same algebra: the phase must actually BE −180° there.
+      const gap = maxGap(
+        [
+          { tau: 0.2, K: 0.5 },
+          { tau: 1, K: 1 },
+          { tau: 1, K: 9 },
+          { tau: 3.5, K: 22 },
+        ],
+        ({ tau, K }) => {
+          const o = obs({ sys: 'openloop', tau, K });
+          const w = w180Of(tau);
+          return Math.max(
+            Math.abs(o.w180Out.value - w),
+            Math.abs(o.w180Out.value - Math.sqrt(TAU_RATIO) / tau),
+            Math.abs(phaseOf('openloop', w, { tau }) + 180),
+            Math.abs(Math.hypot(...transfer('openloop', w, { K, tau })) - modAt180(K, tau)),
+            Math.abs(o.gainMargin.value + 20 * Math.log10((K * tau) / 6))
+          );
+        }
+      );
+      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'boucle ouverte : la marge de phase se lit bien à |H| = 1',
+    category: 'numeric',
+    run() {
+      // ω à 0 dB has no closed form (it is bisected); what CAN be asserted is
+      // that |H| is exactly 1 there, and that the margin is the gap the phase
+      // curve leaves to −180° at that very pulsation.
+      const gap = maxGap(
+        [
+          { tau: 0.2, K: 0.5 },
+          { tau: 1, K: 1 },
+          { tau: 1, K: 9 },
+          { tau: 3.5, K: 22 },
+        ],
+        ({ tau, K }) => {
+          const o = obs({ sys: 'openloop', tau, K });
+          const wco = o.wcoOut.value;
+          return Math.max(
+            Math.abs(Math.hypot(...transfer('openloop', wco, { K, tau })) - 1),
+            Math.abs(o.phaseMargin.value - (180 + phaseOf('openloop', wco, { tau })))
+          );
+        }
+      );
+      return { ok: gap < 1e-11, detail: `écart max ${gap.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'boucle ouverte : les deux marges s\'annulent ENSEMBLE à K = 6/τ',
+    category: 'numeric',
+    run() {
+      // the scene's punchline, as an identity: at K critique the locus passes
+      // exactly through −1, so ω à 0 dB = ω à −180° and both margins are zero
+      const gap = maxGap([0.15, 0.6, 1, 4], (tau) => {
+        const kc = (TAU_RATIO + 1) / tau;
+        const o = obs({ sys: 'openloop', tau, K: kc });
+        return Math.max(
+          Math.abs(o.kCrit.value - kc),
+          Math.abs(o.kCrit.value - 6 / tau),
+          Math.abs(o.gainMargin.value),
+          Math.abs(o.phaseMargin.value),
+          Math.abs(o.wcoOut.value - o.w180Out.value)
+        );
+      });
+      // and the sign flips on the right side of K critique
+      const below = obs({ sys: 'openloop', tau: 1, K: 5.9 });
+      const above = obs({ sys: 'openloop', tau: 1, K: 6.1 });
+      const signs =
+        below.gainMargin.value > 0 &&
+        below.phaseMargin.value > 0 &&
+        above.gainMargin.value < 0 &&
+        above.phaseMargin.value < 0;
+      return {
+        ok: gap < 1e-9 && signs,
+        detail: `écart max ${gap.toExponential(2)}, marges positives sous K_crit et négatives au-dessus`,
+      };
+    },
+  },
+  {
+    name: 'ω₁₈₀ ne dépend pas de K — seul le lieu grandit',
+    category: 'numeric',
+    run() {
+      // The whole Nyquist criterion in one line: K is a homothety of centre
+      // origin — H_K(jω) = K·H_1(jω) at EVERY ω, so the phase is untouched and
+      // ω à −180° with it; only the distance to the fixed −1 point changes.
+      // Compared at equal ω, not index by index: the plotted grid is framed by
+      // gain, so it slides when K does.
+      const tau = 0.8;
+      const wc = 1.3;
+      const ref = obs({ sys: 'openloop', tau, K: 1, wc });
+      const ws = range(40).map((i) => 0.01 * 10 ** (i / 10));
+      const gap = maxGap([0.3, 2, 7, 25], (K) => {
+        const o = obs({ sys: 'openloop', tau, K, wc });
+        const homothety = maxGap(
+          ws,
+          (w) => Math.hypot(...transfer('openloop', w, { K, tau })),
+          (w) => K * Math.hypot(...transfer('openloop', w, { K: 1, tau }))
+        );
+        return Math.max(
+          Math.abs(o.w180Out.value - ref.w180Out.value),
+          Math.abs(o.cPhase.value - ref.cPhase.value), // the phase ignores K
+          Math.abs(o.cMod.value - K * ref.cMod.value), // the modulus scales by K
+          homothety
+        );
+      });
+      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'premier et second ordre : pas de marges (la phase ne coupe jamais −180°)',
+    category: 'numeric',
+    run() {
+      // the reason the open loop had to be added at all: a stable first or
+      // second order has infinite margins, so the −1 point is decorative
+      const none = [{ sys: 'first' }, { sys: 'second', m: 0.3 }, { sys: 'second', m: 1.4 }].every(
+        (p) => {
+          const o = obs(p);
+          return (
+            Number.isNaN(o.phaseMargin.value) &&
+            Number.isNaN(o.gainMargin.value) &&
+            Number.isNaN(o.kCrit.value) &&
+            o.phase.y.every((v) => v > -180 - 1e-9)
+          );
+        }
+      );
+      return { ok: none, detail: 'marges NaN et phase ≥ −180° pour les ordres 1 et 2' };
+    },
+  },
+  {
+    name: 'boucle ouverte : la fenêtre tracée est bornée en gain et en module',
+    category: 'numeric',
+    run() {
+      // the framing IS a numerical property: the grid ends at exactly +30 and
+      // −40 dB, and the Nyquist locus is cut at |H| = 3 — no point beyond,
+      // every point below kept, so the −1 point never gets pushed off frame
+      let worstEnds = 0;
+      let cut = true;
+      for (const { tau, K } of [
+        { tau: 0.2, K: 0.5 },
+        { tau: 1, K: 1 },
+        { tau: 1, K: 9 },
+        { tau: 3.5, K: 22 },
+      ]) {
+        const o = obs({ sys: 'openloop', tau, K });
+        const n = o.gain.y.length - 1;
+        worstEnds = Math.max(worstEnds, Math.abs(o.gain.y[0] - 30), Math.abs(o.gain.y[n] + 40));
+        for (let i = 0; i <= n; i++) {
+          const mod = 10 ** (o.gain.y[i] / 20);
+          const drawn = Number.isFinite(o.locus.x[i]);
+          if (drawn !== mod <= 3) cut = false;
+        }
+      }
+      return {
+        ok: worstEnds < 1e-9 && cut,
+        detail: `bornes ±${worstEnds.toExponential(2)} dB, coupure exactement à |H| = 3`,
+      };
+    },
+  },
   standardChecks.determinism(compute, { ...BASE, sys: 'second' }, 'locus'),
+  standardChecks.determinism(compute, { ...BASE, sys: 'openloop' }, 'gain'),
 ];

@@ -62,5 +62,49 @@ plus de maximum, et le tiroir l'affiche.
 La question qui reste : « le temporel, lui, dépasse dès m < 1 — pourquoi deux
 seuils différents ? » (à traiter avec l'expérience Réponse d'un second ordre).`,
   },
+  {
+    id: 'margins',
+    title: 'Scène 5 · Les marges, lues sur les trois diagrammes',
+    params: { sys: 'openloop', K: 1, tau: 1, wc: 0.78 },
+    view: 'gain',
+    visible: ['K', 'wc'],
+    notes: `Enfin un système où le point −1 sert à quelque chose. Un premier ou
+un second ordre stables ont des marges INFINIES : leur phase n'atteint jamais
+−180°. La boucle ouverte K/(jω(1+jωτ)(1+jωτ/5)), elle, y arrive à une
+pulsation finie, et les deux marges existent.
+Deux traits verticaux sont tracés sur les deux Bode :
+ · violet ω à 0 dB = 0.78 rad/s — c'est LÀ qu'on lit la marge de phase, sur
+   le diagramme de phase : l'écart jusqu'à −180°, ici 43.2° ;
+ · orange ω à −180° = 2.24 rad/s — c'est LÀ qu'on lit la marge de gain, sur
+   le diagramme de gain : l'écart jusqu'à 0 dB, ici 15.6 dB.
+Deux traits, deux écarts, deux nombres — et la statline les affiche.
+Puis passer à Nyquist, où les deux mêmes nombres sont deux constructions :
+ · marge de gain : la courbe coupe l'axe réel négatif en −1/6 ≈ −0.167 ; il
+   reste un facteur 6 avant d'atteindre −1, et 20·log₁₀(6) = 15.6 dB ;
+ · marge de phase : là où la courbe sort du cercle unité (tracé), l'angle qui
+   reste jusqu'à la demi-droite −180°, soit 43.2°.
+Et sur Black : la marge de phase est l'écart HORIZONTAL au point critique, la
+marge de gain l'écart VERTICAL. Le point critique est le même partout, les
+marges aussi — seuls les axes ont tourné.`,
+  },
+  {
+    id: 'unstable',
+    title: 'Scène 6 · Monter K jusqu\'à faire diverger la boucle',
+    params: { sys: 'openloop', K: 1, tau: 1, wc: 2.24 },
+    view: 'nyquist',
+    visible: ['K'],
+    notes: `Une seule commande : K. Geler (F) à K = 1, puis monter.
+Poser la question AVANT : « qu'est-ce qui bouge quand j'augmente K ? »
+Réponse à obtenir : le lieu GRANDIT (homothétie de centre origine), le point
+−1 ne bouge pas — c'est toute l'idée du critère de Nyquist.
+ω à −180° = √5/τ ne dépend PAS de K : le lieu coupe toujours l'axe réel au
+même endroit sur la courbe, mais de plus en plus loin de l'origine.
+Faire monter K jusqu'à 6 : le lieu passe EXACTEMENT par −1, les deux marges
+tombent à zéro en même temps (statline), le tiroir affiche « instable ».
+K_crit = (τ₁+τ₂)/(τ₁τ₂) = 6/τ, exact, vérifié par le harnais.
+Au-delà, les marges deviennent négatives : la boucle fermée diverge. Le faire
+constater sur Black aussi — la courbe passe à gauche du point critique.
+Dernier geste : redescendre τ à 0.5 et faire prédire K_crit avant de le lire.`,
+  },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

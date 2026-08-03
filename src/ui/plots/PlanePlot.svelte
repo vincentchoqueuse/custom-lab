@@ -22,11 +22,16 @@
     return { x, y };
   };
 
+  /** A p => number radius may return NaN: the circle then has no meaning for
+   *  the current params and is simply not drawn, legend included — the same
+   *  rule vline/hline follow in the cartesian plots. */
+  const circleR = $derived(num(spec.circle?.radius) ?? (spec.circle ? 1 : NaN));
+
   const clouds = $derived.by(() => {
     const out = [];
-    if (spec.circle) {
+    if (Number.isFinite(circleR)) {
       out.push({
-        ...circlePoints(num(spec.circle.radius) ?? 1),
+        ...circlePoints(circleR),
         color: spec.circle.color ?? 'var(--muted-fg)',
         r: 0.9,
         opacity: 0.45,
@@ -58,7 +63,7 @@
       ...(spec.clouds ?? [])
         .filter((c) => c.label)
         .map((c) => ({ label: c.label, color: c.color })),
-      ...(spec.circle?.label
+      ...(spec.circle?.label && Number.isFinite(circleR)
         ? [{ label: spec.circle.label, color: spec.circle.color ?? '#a1a1aa' }]
         : []),
     ]

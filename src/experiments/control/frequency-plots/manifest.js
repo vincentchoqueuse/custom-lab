@@ -1,5 +1,16 @@
 import { float, log, select } from '../../../core/fields.js';
 import { view, plane, line, scatter, vline, hline } from '../../../core/views.js';
+import { gainView, phaseView, GUIDE_COLOR } from '../../../core/response-views.js';
+
+/** The three verticals both Bode halves carry: the cursor, and the two
+ *  pulsations the margins are read at. Declared once, so the two figures can
+ *  never drift apart. */
+const MARKS = [
+  vline((p) => p.wc, { color: '#EDB120', width: 2, label: 'ω_c' }),
+  vline('wco', { color: '#0072BD', dashed: true, width: 1.6, label: 'ω à 0 dB' }),
+  vline('w180', { color: '#D95319', dashed: true, width: 1.6, label: 'ω à −180°' }),
+];
+const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -7,7 +18,17 @@ export default {
   order: 3,
   title: 'Bode, Nyquist, Black',
   subtitle: 'Trois diagrammes, un seul H(jω) — et un curseur pour les relier',
-  tags: ['Bode', 'Nyquist', 'Black', 'Nichols', 'résonance', 'lieu de transfert'],
+  tags: [
+    'Bode',
+    'Nyquist',
+    'Black',
+    'Nichols',
+    'résonance',
+    'lieu de transfert',
+    'marge de gain',
+    'marge de phase',
+    'stabilité',
+  ],
 
   params: {
     sys: select('système', {
@@ -15,6 +36,7 @@ export default {
       options: [
         { value: 'first', label: 'premier ordre K/(1+jωτ)' },
         { value: 'second', label: 'second ordre Kω₀²/(ω₀²−ω²+2jmω₀ω)' },
+        { value: 'openloop', label: 'boucle ouverte K/(jω(1+jωτ)(1+jωτ/5))' },
       ],
       default: 'first',
     }),
@@ -26,15 +48,23 @@ export default {
       unit: 'rad/s',
       precision: 2,
     }),
-    K: float('K', { description: 'gain statique', min: 0.2, max: 3, step: 0.05, default: 1 }),
+    // log, and up to 30: the open-loop scene has to CROSS K critique = 6/τ,
+    // which a linear 0.2…3 slider could never reach
+    K: log('K', {
+      description: 'gain — statique, ou gain de boucle',
+      min: 0.1,
+      max: 30,
+      default: 1,
+      precision: 2,
+    }),
     tau: log('τ', {
-      description: 'constante de temps',
+      description: 'constante de temps (τ₂ = τ/5 en boucle ouverte)',
       min: 0.05,
       max: 5,
       default: 1,
       unit: 's',
       precision: 2,
-      visibleIf: { sys: 'first' },
+      visibleIf: { sys: ['first', 'openloop'] },
     }),
     w0: log('ω₀', {
       description: 'pulsation propre',
@@ -61,11 +91,25 @@ export default {
     resonance: {
       label: 'résonance ?',
       calc: (p) =>
-        p.sys !== 'second'
+        p.sys === 'first'
           ? 'non (premier ordre)'
-          : p.m < Math.SQRT1_2
-            ? `oui : m = ${p.m} < 0.707`
-            : `non : m = ${p.m} ≥ 0.707`,
+          : p.sys === 'openloop'
+            ? 'sans objet (boucle ouverte)'
+            : p.m < Math.SQRT1_2
+              ? `oui : m = ${p.m} < 0.707`
+              : `non : m = ${p.m} ≥ 0.707`,
+    },
+    // The number the open-loop scene is built around: (τ₁+τ₂)/(τ₁τ₂) = 6/τ.
+    // Below it both marges sont positives, au-dessus la boucle fermée diverge.
+    stability: {
+      label: 'boucle fermée',
+      calc: (p) => {
+        if (p.sys !== 'openloop') return 'sans objet (pas de boucle)';
+        const kc = 6 / p.tau;
+        return p.K < kc
+          ? `stable : K = ${(+p.K).toFixed(2)} < K_crit = ${kc.toFixed(2)}`
+          : `instable : K = ${(+p.K).toFixed(2)} ≥ K_crit = ${kc.toFixed(2)}`;
+      },
     },
   },
 
@@ -77,50 +121,48 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
-    // Bode, split in two as the subject does — and the cursor's vline is the
-    // same pulsation the other three views mark as a point.
-    view(
-      'gain',
-      'Bode — gain',
-      line('gain', {
-        width: 2.4,
-        label: '|H(jω)|',
-        overlays: [
-          vline((p) => p.wc, { color: '#EDB120', width: 2, label: 'ω_c' }),
-          vline('wr', { color: '#D95319', dashed: true, width: 1.6, label: 'ω_r' }),
-          hline(() => -3, { color: '#a1a1aa', width: 1, dashed: true, label: '−3 dB' }),
-        ],
-        axes: {
-          x: { label: 'ω', unit: 'rad/s', scale: 'log' },
-          y: { label: '|H|', unit: 'dB' },
-        },
-      })
-    ),
+    // Bode, split in two as the subject does — gainView/phaseView are the
+    // catalogue's shared frequency figures, so this Bode plot IS the analog
+    // filter's réponse fréquentielle with another abscissa.
+    // The three verticals are the SAME on both halves: the cursor, and the
+    // two margin readings. A margin is a GAP on a plot, not a number in a
+    // statline, so both ends of each gap have to be drawn. Every reference is
+    // NaN when it means nothing for the current system, and a non-finite
+    // vline/hline is simply not drawn.
+    gainView('gain', {
+      id: 'gain',
+      title: 'Bode — gain',
+      overlays: [
+        ...MARKS,
+        vline('wr', { color: '#D95319', dashed: true, width: 1.6, label: 'ω_r' }),
+        hline((p) => (p.sys === 'openloop' ? NaN : -3), { ...GUIDE, label: '−3 dB' }),
+        hline((p) => (p.sys === 'openloop' ? 0 : NaN), { ...GUIDE, label: '0 dB' }),
+      ],
+    }),
 
-    view(
-      'phase',
-      'Bode — phase',
-      line('phase', {
-        color: '#77AC30',
-        width: 2.4,
-        label: 'arg H(jω)',
-        overlays: [
-          vline((p) => p.wc, { color: '#EDB120', width: 2, label: 'ω_c' }),
-          hline(() => -90, { color: '#a1a1aa', width: 1, dashed: true, label: '−90°' }),
-        ],
-        axes: {
-          x: { label: 'ω', unit: 'rad/s', scale: 'log' },
-          y: { label: 'phase', unit: '°' },
-        },
-      })
-    ),
+    phaseView('phase', {
+      overlays: [
+        ...MARKS,
+        hline((p) => (p.sys === 'openloop' ? NaN : -90), { ...GUIDE, label: '−90°' }),
+        hline((p) => (p.sys === 'openloop' ? -180 : NaN), { ...GUIDE, label: '−180°' }),
+      ],
+    }),
 
     // Nyquist needs equal aspect — a half-circle must LOOK like a half-circle,
-    // which is exactly what the plane view exists for.
+    // which is exactly what the plane view exists for. Hand-written rather
+    // than through polesView: a locus is not a pole map.
     plane('nyquist', 'Nyquist', {
       curves: [{ source: 'locus', color: '#0072BD', width: 2.4, label: 'lieu H(jω)' }],
-      clouds: [{ source: 'critical', color: '#a1a1aa', r: 4, opacity: 1, label: 'point −1' }],
+      clouds: [{ source: 'critical', color: GUIDE_COLOR, r: 4, opacity: 1, label: 'point −1' }],
       markers: { source: 'cursorPt', color: '#EDB120', label: 'H(jω_c)' },
+      // the unit circle is the phase-margin construction: it only means
+      // something for the open loop, so its radius is NaN elsewhere and the
+      // circle (legend included) is simply not drawn
+      circle: {
+        radius: (p) => (p.sys === 'openloop' ? 1 : NaN),
+        color: GUIDE_COLOR,
+        label: 'cercle unité',
+      },
       axes: { x: 'Re H(jω)', y: 'Im H(jω)' },
       // the locus sits under the real axis: framing it on the origin would
       // waste the whole upper half of the plot
@@ -139,9 +181,9 @@ export default {
         label: 'lieu de Black',
         overlays: [
           scatter('cursorBlack', { color: '#EDB120', size: 7, label: 'ω_c' }),
-          scatter('criticalBlack', { color: '#a1a1aa', size: 6, label: 'point critique' }),
-          hline(() => 0, { color: '#a1a1aa', width: 1 }),
-          vline(() => -180, { color: '#a1a1aa', width: 1, dashed: true, label: '−180°' }),
+          scatter('criticalBlack', { color: GUIDE_COLOR, size: 6, label: 'point critique' }),
+          hline(() => 0, { color: GUIDE_COLOR, width: 1 }),
+          vline(() => -180, { ...GUIDE, label: '−180°' }),
         ],
         axes: {
           x: { label: 'arg H', unit: '°' },
