@@ -7,7 +7,7 @@ const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'pid',
-  order: 6,
+  order: 7,
   title: 'Le PID, trois potards',
   subtitle: 'P pousse, I efface, D calme — et chacun a son prix',
   tags: ['PID', 'régulation', 'erreur statique', 'perturbation', 'boucle fermée'],
