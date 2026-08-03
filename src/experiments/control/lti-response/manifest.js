@@ -1,6 +1,7 @@
 import { float, select, coeffs } from '../../../core/fields.js';
-import { view, line, hline, vline, scatter, figure } from '../../../core/views.js';
-import { gainView, phaseView, GUIDE, GUIDE_COLOR } from '../../../core/response-views.js';
+import { line, hline, vline, scatter, figure } from '../../../core/views.js';
+import { gainView, phaseView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
+import { naturalPulsation } from '../_lib/bode.js';
 
 /** The measured point and the pulsation it was measured at — the same two
  *  overlays on both halves of the Bode plot, declared once. */
@@ -12,7 +13,7 @@ const MEASURED = (source, label) => [
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'lti-response',
-  order: 7,
+  order: 3,
   title: 'Réponse d\'un système LTI quelconque',
   subtitle: 'Tapez num et den, choisissez l\'entrée — échelon, rampe ou sinusoïde',
   tags: ['LTI', 'fonction de transfert', 'échelon', 'rampe', 'régime permanent'],
@@ -88,18 +89,47 @@ export default {
       })
     ),
 
-    // tracking error: constant, vanishing or growing — the system's "type"
-    view(
-      'tracking',
-      'Erreur de poursuite',
-      line('trackError', {
-        color: '#D95319',
-        width: 2.2,
-        label: 'e(t) = u − y',
-        overlays: [hline(() => 0, { color: '#a1a1aa', width: 1, dashed: true })],
-        axes: { x: { label: 't', unit: 's' }, y: 'e(t)' },
+    // Impulse response — the same tab, in the same place, as in Réponse d'un
+    // premier ordre and Réponse d'un second ordre: a listener who arrives at
+    // "un système quelconque" after those two finds the five readings they
+    // already know, on a transfer function they typed in themselves.
+    // A bi-proper system (deg num = deg den) also carries a Dirac at t = 0;
+    // its weight is in the statline, since an arrow of infinite height is
+    // not something a plot can honestly draw.
+    figure(
+      'impulse',
+      line('impulseResponse', {
+        color: '#0072BD',
+        width: 2.5,
+        label: 'h(t) — partie continue',
+        overlays: [
+          vline((p) => (p.num.length === p.den.length ? 0 : NaN), {
+            color: '#D95319',
+            width: 2,
+            label: 'Dirac',
+          }),
+          hline(() => 0, { color: GUIDE_COLOR, width: 1 }),
+        ],
+        axes: { x: { label: 't', unit: 's' }, y: 'h(t)' },
       })
     ),
+
+    // Poles and zeros of whatever was typed in — the roots are found
+    // numerically (_lib/lti.js, Durand–Kerner) because the coefficients are
+    // free. This is the view that ANSWERS the two above: a root crossing
+    // into the right half-plane is the divergence, seen before it is
+    // simulated. The frame follows the characteristic pulsation read off the
+    // denominator, so a system typed with any coefficients arrives framed.
+    polesView({
+      poleLabel: 'pôles de den(s)',
+      zeroLabel: 'zéros de num(s)',
+      minHalf: (p) => {
+        const wn = naturalPulsation(p.den);
+        return Number.isFinite(wn) && wn > 0 ? 1.6 * wn : 2;
+      },
+      maxHalf: 60,
+    }),
+
     // The Bode pair — same builders, same titles, same order as everywhere
     // else in the subject. It is more than uniformity here: the experiment
     // CLAIMS that the gain and phase fitted on the steady-state sine ARE

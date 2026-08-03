@@ -9,6 +9,7 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { rk4Step, polyEvalComplex } from '../../../core/numeric.js';
 import { bodeSweep, bodeObservables, naturalPulsation, polyTransfer } from '../_lib/bode.js';
+import { polyRoots } from '../_lib/lti.js';
 
 const T_END = 20;
 const H = 0.005;
@@ -42,16 +43,19 @@ export function compute({ num, den, input, f }) {
   const u = inputOf(input, f);
   const { n, a, C, D } = realize(num, den);
 
-  // x' = A x + B u in controllable canonical form (companion A, B = e_1)
-  const deriv = (x, t) => {
+  // x' = A x + B u in controllable canonical form (companion A, B = e_1).
+  // Parameterised by the input source, because the impulse response below is
+  // this same field driven by nothing at all.
+  const derivWith = (src) => (x, t) => {
     let acc = -a[1] * x[0];
     for (let i = 1; i < n; i++) acc -= a[i + 1] * x[i];
     // x1' = −a1 x1 − … − an xn + u ; xi' = x_{i−1}
     const out = new Array(n);
-    out[0] = acc + u(t);
+    out[0] = acc + src(t);
     for (let i = 1; i < n; i++) out[i] = x[i - 1];
     return out;
   };
+  const deriv = derivWith(u);
 
   const yOf = (x, t) => {
     let y = D * u(t);
@@ -104,6 +108,47 @@ export function compute({ num, den, input, f }) {
     }
   }
 
+  /* ---------- impulse response: the same system, released from x(0) = B --- */
+  // A Dirac at t = 0 pushes B into the state and then leaves the system
+  // alone, so for t > 0 the impulse response IS the free response from
+  // x(0) = B = e₁. Nothing has to be approximated by a tall thin pulse: the
+  // result is as exact as the integrator, on the same grid as everything
+  // else. What a plot cannot honestly draw — the D·δ(t) a bi-proper system
+  // carries at the origin — is reported as a number instead.
+  const hs = new Float64Array(nk);
+  if (n > 0) {
+    const derivFree = derivWith(() => 0);
+    let xh = new Array(n).fill(0);
+    xh[0] = 1;
+    let wh = 0;
+    for (let i = 0; i <= steps; i++) {
+      const t = i * H;
+      if (i % KEEP === 0) {
+        let y = 0;
+        for (let j = 0; j < n; j++) y += C[j] * xh[j];
+        hs[wh++] = y;
+      }
+      if (i === steps) break;
+      xh = rk4Step(derivFree, xh, t, H);
+      for (let j = 0; j < n; j++) {
+        if (!Number.isFinite(xh[j]) || Math.abs(xh[j]) > CLAMP) xh[j] = Math.sign(xh[j] || 1) * CLAMP;
+      }
+    }
+  }
+
+  /* ---------- poles and zeros of the typed-in transfer function ---------- */
+  // The roots ARE the system: where they sit decides the shape of the two
+  // time responses above and the two Bode curves below. Right half-plane =
+  // divergence, and the plot says so before the simulation has to.
+  const poles = polyRoots(den);
+  const zeros = polyRoots(num);
+  const plane = (roots) => ({
+    x: Float64Array.from(roots, (r) => r[0]),
+    y: Float64Array.from(roots, (r) => r[1]),
+  });
+  const maxRe = poles.length ? Math.max(...poles.map((r) => r[0])) : -Infinity;
+  const verdict = maxRe > 1e-9 ? 'instable' : maxRe < -1e-9 ? 'stable' : 'marginalement stable';
+
   // theory H(jω) for the sine (complex polynomial evaluation)
   let gainTh = NaN;
   let phaseTh = NaN;
@@ -151,9 +196,23 @@ export function compute({ num, den, input, f }) {
       wMeas, // vline: the pulsation the sine is actually exciting
       inputSignal: { x: ts, y: us },
       output: { x: ts, y: ys },
+      impulseResponse: { x: ts, y: hs },
+      poles: plane(poles),
+      zeros: plane(zeros),
+      // the ramp lag still has its number, read off the last sample; the view
+      // it used to have its own tab for is now the gap between u(t) and y(t)
+      // on the response plot, which is where it was always visible anyway
       trackError: { x: ts, y: es },
       finalValue: { value: ys[nk - 1], meta: { label: 'y(20 s)', precision: 3 } },
       dcGain: { value: dc, meta: { label: 'gain statique', precision: 3 } },
+      stability: { value: verdict, meta: { label: 'pôles' } },
+      // Only a bi-proper system (deg num = deg den) carries a Dirac at the
+      // origin. Reporting "poids du Dirac = 0.000" on every strictly proper
+      // system would be a reading that means nothing, on every view: the
+      // observable simply does not exist unless there is a Dirac.
+      ...(D !== 0
+        ? { diracWeight: { value: D, meta: { label: 'poids du Dirac en t = 0', precision: 3 } } }
+        : {}),
       gainMeas: { value: gainMeas, meta: { label: 'gain mesuré', precision: 3 } },
       gainTh: { value: gainTh, meta: { label: '|H(jω)|', precision: 3 } },
       phaseMeas: { value: phaseMeas, meta: { label: 'phase mesurée', unit: '°', precision: 1 } },
