@@ -1,5 +1,5 @@
 import { float, select } from '../../../core/fields.js';
-import { view, line, scatter, vline } from '../../../core/views.js';
+import { view, line, scatter, vline, stem } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -49,7 +49,7 @@ export default {
         width: 2,
         label: 'x(t)',
         overlays: [
-          scatter('samples', { color: '#0072BD', size: 3.4, opacity: 0.95, label: 'x(nTe)' }),
+          stem('samples', { color: '#0072BD', size: 2.8, opacity: 0.95, label: 'x(nTe)' }),
         ],
         axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
       })

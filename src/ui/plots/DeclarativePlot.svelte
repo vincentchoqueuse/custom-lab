@@ -13,6 +13,7 @@
   import Line from './Line.svelte';
   import Scatter from './Scatter.svelte';
   import Bars from './Bars.svelte';
+  import Stem from './Stem.svelte';
   import VLine from './VLine.svelte';
   import HLine from './HLine.svelte';
   import Density from './Density.svelte';
@@ -86,6 +87,7 @@
         case 'density':
         case 'scatter':
         case 'bars':
+        case 'stem':
           return { s, kind: s.type, pts: seriesPoints(obs?.[s.source]) };
         case 'band': {
           const v = obs?.[s.source]?.value ?? {};
@@ -158,7 +160,8 @@
           if (usable(p.hi)) hi = Math.max(hi, p.hi);
         }
       } else if (l.pts) {
-        if (l.kind === 'bars' && !isLog) lo = Math.min(lo, 0);
+        // bars and stems are drawn from a baseline: the frame must show it
+        if ((l.kind === 'bars' || l.kind === 'stem') && !isLog) lo = Math.min(lo, 0);
         for (const p of l.pts) {
           if (usable(p.y)) {
             lo = Math.min(lo, p.y);
@@ -240,6 +243,8 @@
         <Scatter {xs} {ys} pts={l.pts} spec={paint(l.s, l.kind)} {k} />
       {:else if l.kind === 'bars'}
         <Bars {xs} {ys} pts={l.pts} spec={paint(l.s, l.kind)} h={ih} />
+      {:else if l.kind === 'stem'}
+        <Stem {xs} {ys} pts={l.pts} spec={paint(l.s, l.kind)} h={ih} {k} />
       {:else if l.kind === 'band'}
         <Band {xs} {ys} pts={l.pts} spec={paint(l.s, l.kind)} />
       {:else if l.kind === 'vline' && Number.isFinite(l.v)}

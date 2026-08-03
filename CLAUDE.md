@@ -289,7 +289,7 @@ registry at load time):
   resetDefaults require it); every other key is optional.
 - **Views are declared with factories** from `core/views.js`, mirroring the field
   factories: `view(id, title, plotSpec)`, `custom(id, title, loader)`, and one
-  factory per graphic type — `histogram`, `line`, `scatter`, `bars`, `vline`,
+  factory per graphic type — `histogram`, `line`, `scatter`, `bars`, `stem`, `vline`,
   `hline`, `density`, `band`. The same factory works as main plot or as overlay,
   by position, plus `plane(id, title, spec)` for the one shape a cartesian
   plot cannot express (equal-aspect I/Q, s- and z-planes: circles must stay
@@ -387,8 +387,8 @@ export default {
   ],
   // Factories: view(id, title, plotSpec) / custom(id, title, loader).
   // Plot & overlay factories (same factory, main or overlay by position):
-  // histogram, line, scatter, bars, vline, hline, density, band — first arg is
-  // the observable source (or a param name / p => fn for vline/hline), flat
+  // histogram, line, scatter, bars, stem, vline, hline, density, band — first
+  // arg is the observable source (or a param name / p => fn for vline/hline), flat
   // style keys (color, dashed, width, opacity, label).
   //
   // Axes: string shorthand = label with linear scale. Object form for anything
@@ -482,7 +482,10 @@ Format: `#/{subject}/{experiment}?param1=…&view=…&drawer=0&preset=scene-2`
 
 ## Generic graphic components
 
-Shared SVG primitives: `Axes`, `Histogram`, `Line`, `Scatter`, `Bars` + overlays
+Shared SVG primitives: `Axes`, `Histogram`, `Line`, `Scatter`, `Bars`, `Stem`
+(stalk + marker from a baseline — the discrete-signal plot: sampled signals,
+filter coefficients, impulse responses, line spectra; never a continuous line,
+which would claim values between the samples) + overlays
 `VLine`, `HLine`, `Density`, `Band`. All accept ready-made observables and style
 options; none computes anything scientific. `ViewHost` interprets
 `{layout, plot, overlays}` and composes these primitives.

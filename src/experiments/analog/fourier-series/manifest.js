@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, line, bars, vline } from '../../../core/views.js';
+import { view, line, stem, vline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -80,7 +80,7 @@ export default {
     view(
       'spectrum',
       'Spectre',
-      bars('spectrum', {
+      stem('spectrum', {
         color: '#0072BD',
         opacity: 0.85,
         overlays: [

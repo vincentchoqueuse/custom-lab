@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, line, bars, vline, hline } from '../../../core/views.js';
+import { view, line, stem, vline, hline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -46,7 +46,7 @@ export default {
     view(
       'impulse',
       'Réponse impulsionnelle',
-      bars('taps', {
+      stem('taps', {
         label: 'h[n] (N coefficients)',
         overlays: [
           line('idealIR', { color: '#D95319', dashed: true, label: 'sinc idéal (infini)' }),
