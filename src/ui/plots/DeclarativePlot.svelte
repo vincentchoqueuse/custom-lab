@@ -217,11 +217,14 @@
   const ys = $derived(mkScale(yAxis, yDomain, [ih, 0]));
 
   // data layers carrying a `label` get a legend chip (vline/hline draw their
-  // own inline labels)
+  // own inline labels). A layer that resolved to NO point is a layer the
+  // current params do not have — it is not advertised, same rule as a
+  // non-finite vline.
   const DEFAULT_COLORS = { density: '#D95319' };
   const legend = $derived(
     layers
       .filter((l) => l.s.label && l.kind !== 'vline' && l.kind !== 'hline' && l.kind !== 'none')
+      .filter((l) => !l.pts || l.pts.length > 0)
       .map((l) => ({ label: l.s.label, color: l.s.color ?? DEFAULT_COLORS[l.kind] ?? '#0072BD' }))
   );
 </script>

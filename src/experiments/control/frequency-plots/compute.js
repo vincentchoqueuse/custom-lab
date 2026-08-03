@@ -95,6 +95,134 @@ export const w180Of = (tau) => Math.sqrt(TAU_RATIO) / tau; // = 1/√(τ₁τ₂
 /** |H(jω₁₈₀)| = K·τ₁τ₂/(τ₁+τ₂) — the algebra collapses exactly. */
 export const modAt180 = (K, tau) => (K * tau) / (TAU_RATIO + 1);
 
+/* ============================ the abaque ==================================
+ * Both diagrams answer a question about the CLOSED loop while drawing the
+ * OPEN one, and the bridge is the same curve family drawn two ways:
+ *   |T| = |H/(1+H)| = M
+ * On Nyquist that locus is a circle (Hall): centre −M²/(M²−1) on the real
+ * axis, radius M/|M²−1|; M = 1 degenerates into the line Re = −1/2, the
+ * perpendicular bisector of 0 and −1.
+ * On Black it is the Nichols contour, obtained by solving the same identity
+ * for the open-loop modulus at a given open-loop phase φ:
+ *   r²(1−M²) − 2M² r cos φ − M² = 0
+ *   ⇒ r = [M² cos φ ± M√(1 − M² sin²φ)] / (1 − M²)
+ * which exists only where |sin φ| ≤ 1/M — hence the closed contours around
+ * −180° for M > 1 and the open curves below for M < 1.
+ * The pedagogical payoff: the highest contour the open-loop locus TOUCHES is
+ * the closed-loop resonance. It is drawn highlighted, and its value is in
+ * the statline, so the tangency is read rather than asserted.
+ */
+const ISO_DB = [-12, -6, -3, -1, 0, 1, 3, 6, 12];
+const HALL_DB = ISO_DB.filter((db) => db >= 0);
+// On Nyquist only the M ≥ 1 circles are drawn: those are the ones that
+// enclose −1, which is where a resonance is read. The attenuation circles
+// (M < 1) sit in the right half-plane, far from anything the scene asks
+// about, and would only crowd the disc.
+const ISO_CLIP_DB = 26; // the abaque is drawn where the Black diagram lives
+const PHI_LO = -270;
+const PHI_HI = -90;
+const N_PHI = 361;
+
+/** Open-loop moduli sitting on |H/(1+H)| = M at open-loop phase φ (degrees). */
+export function isoModulus(M, phiDeg) {
+  const c = Math.cos((phiDeg * Math.PI) / 180);
+  const s = Math.sin((phiDeg * Math.PI) / 180);
+  if (Math.abs(M - 1) < 1e-12) return c < 0 ? [-1 / (2 * c)] : []; // the bisector
+  const disc = 1 - M * M * s * s;
+  if (disc < 0) return [];
+  const root = M * Math.sqrt(disc);
+  const den = 1 - M * M;
+  return [(M * M * c + root) / den, (M * M * c - root) / den].filter((r) => r > 0);
+}
+
+/** NaN-separated polylines: one Nichols contour per level, in (φ°, dB). */
+function nicholsAbaque(levelsDb) {
+  const x = [];
+  const y = [];
+  for (const db of levelsDb) {
+    const M = 10 ** (db / 20);
+    const lo = [];
+    const hi = [];
+    for (let i = 0; i < N_PHI; i++) {
+      const phi = PHI_LO + ((PHI_HI - PHI_LO) * i) / (N_PHI - 1);
+      const rs = isoModulus(M, phi);
+      if (rs.length) lo.push([phi, rs[0]]);
+      if (rs.length === 2) hi.push([phi, rs[1]]);
+    }
+    // two branches → a closed contour, walked out along one and back the other
+    const pts = [...lo, ...hi.reverse()];
+    if (hi.length && pts.length) pts.push(pts[0]);
+    for (const [phi, r] of pts) {
+      const db2 = toDb(r);
+      const inside = Math.abs(db2) <= ISO_CLIP_DB;
+      x.push(inside ? phi : NaN);
+      y.push(inside ? db2 : NaN);
+    }
+    x.push(NaN);
+    y.push(NaN);
+  }
+  return { x: Float64Array.from(x), y: Float64Array.from(y) };
+}
+
+/** The same family on the complex plane: Hall circles, cut at the disc edge. */
+function hallAbaque(levelsDb, rMax) {
+  const x = [];
+  const y = [];
+  const push = (px, py) => {
+    const inside = Math.hypot(px, py) <= rMax;
+    x.push(inside ? px : NaN);
+    y.push(inside ? py : NaN);
+  };
+  for (const db of levelsDb) {
+    const M = 10 ** (db / 20);
+    if (Math.abs(M - 1) < 1e-12) {
+      for (let i = 0; i < 121; i++) push(-0.5, -rMax + (2 * rMax * i) / 120);
+    } else {
+      const cx = -(M * M) / (M * M - 1);
+      const r = M / Math.abs(M * M - 1);
+      for (let i = 0; i <= 240; i++) {
+        const a = (2 * Math.PI * i) / 240;
+        push(cx + r * Math.cos(a), r * Math.sin(a));
+      }
+    }
+    x.push(NaN);
+    y.push(NaN);
+  }
+  return { x: Float64Array.from(x), y: Float64Array.from(y) };
+}
+
+/** max |H/(1+H)| over the plotted band: the closed-loop resonance peak. */
+function closedPeak(sys, params, wLo, wHi) {
+  const closed = (w) => {
+    const [re, im] = transfer(sys, w, params);
+    return Math.hypot(re, im) / Math.hypot(1 + re, im);
+  };
+  const N = 4000;
+  const ratio = wHi / wLo;
+  let best = 0;
+  let iBest = 0;
+  for (let i = 0; i <= N; i++) {
+    const v = closed(wLo * ratio ** (i / N));
+    if (v > best) {
+      best = v;
+      iBest = i;
+    }
+  }
+  // ternary refinement in log ω around the coarse argmax
+  let a = Math.max(0, iBest - 1) / N;
+  let b = Math.min(N, iBest + 1) / N;
+  for (let k = 0; k < 80; k++) {
+    const m1 = a + (b - a) / 3;
+    const m2 = b - (b - a) / 3;
+    if (closed(wLo * ratio ** m1) < closed(wLo * ratio ** m2)) a = m1;
+    else b = m2;
+  }
+  const w = wLo * ratio ** ((a + b) / 2);
+  return { M: Math.max(best, closed(w)), w };
+}
+
+const EMPTY = { x: new Float64Array(0), y: new Float64Array(0) };
+
 /**
  * The pulsation where |H| reaches `target`, by bisection — the open loop's
  * modulus is strictly decreasing, so the bracket is unambiguous. 60 geometric
@@ -183,6 +311,15 @@ export function compute(params) {
   if (open && Number.isFinite(wco)) phaseMargin = 180 + phaseOf(sys, wco, params);
   const kCrit = open ? (TAU_RATIO + 1) / params.tau : NaN;
 
+  /* ---------- the abaque: reading the CLOSED loop off the open one -------- */
+  // A closed-loop resonance only means something while the closed loop is
+  // STABLE. At K ≥ K_crit the locus reaches or encircles −1 and |T| no longer
+  // describes a resonance — the peak is dropped rather than printed as a
+  // large number that reads like physics. The margins already tell that story.
+  const stable = open && K < kCrit;
+  const peak = stable ? closedPeak(sys, params, wLo, wHi) : null;
+  const peakDb = peak ? toDb(peak.M) : NaN;
+
   return {
     observables: {
       gain: { x: w, y: gainDb },
@@ -223,6 +360,20 @@ export function compute(params) {
       wcoOut: { value: wco, meta: { label: 'ω à 0 dB', unit: 'rad/s', precision: 2 } },
       w180Out: { value: w180, meta: { label: 'ω à −180°', unit: 'rad/s', precision: 2 } },
       kCrit: { value: kCrit, meta: { label: 'K critique', precision: 2 } },
+      // the abaque, drawn only for the open loop: an empty series is a layer
+      // the current params do not have, and is not advertised in the legend
+      isoGain: open ? nicholsAbaque(ISO_DB) : EMPTY,
+      isoPeak: peak ? nicholsAbaque([peakDb]) : EMPTY,
+      hallGain: open ? hallAbaque(HALL_DB, NY_MAX) : EMPTY,
+      hallPeak: peak ? hallAbaque([peakDb], NY_MAX) : EMPTY,
+      mrClosed: {
+        value: peakDb,
+        meta: { label: 'résonance en boucle fermée', unit: 'dB', precision: 2 },
+      },
+      wrClosed: {
+        value: peak ? peak.w : NaN,
+        meta: { label: 'ω de résonance BF', unit: 'rad/s', precision: 2 },
+      },
     },
   };
 }
