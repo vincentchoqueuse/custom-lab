@@ -56,10 +56,10 @@ const SPAN_MIN = 15; // Hz — plancher, pour que le lobe reste lisible
 
 /**
  * @param {{N: number, M: number, d: number, sources: number, df: number,
- *          snr: number, estimator: string, seed: number}} params
+ *          snr: number, seed: number}} params
  * @returns {{observables: Object}}
  */
-export function compute({ N, M, d, sources, df, snr, estimator, seed }) {
+export function compute({ N, M, d, sources, df, snr, seed }) {
   const gauss = gaussFrom(mulberry32(seed));
 
   // L'écart est exprimé en unités de la LIMITE DE FOURIER Fs/N : c'est le
@@ -169,8 +169,12 @@ export function compute({ N, M, d, sources, df, snr, estimator, seed }) {
   // valent — on ne peut donc ni reconstruire le signal, ni dire si le modèle
   // explique ce qu'on a mesuré. Les fréquences une fois connues, le modèle
   // devient LINÉAIRE en ses amplitudes, et un moindres carrés d × d les rend.
-  const chosen = estimator === 'root' ? rm : es;
-  const ls = lsAmplitudes(xr, xi, chosen);
+  // Les DEUX estimateurs, pas un choisi : la vue les montre côte à côte
+  // avec la vérité, dans la même représentation, et c'est cette identité de
+  // forme qui permet de les comparer d'un regard plutôt que de traduire
+  // mentalement d'un dessin à l'autre.
+  const lsRoot = lsAmplitudes(xr, xi, rm);
+  const lsEsprit = lsAmplitudes(xr, xi, es);
 
   // Deux estimations INDÉPENDANTES de la variance du bruit, qui doivent
   // tomber d'accord : le résidu du modèle ‖x − Va‖²/N, et la moyenne du
@@ -187,23 +191,29 @@ export function compute({ N, M, d, sources, df, snr, estimator, seed }) {
   const dbP = (v) => (v > 0 ? 10 * Math.log10(v) : DB_FLOOR);
   const MODEL_FLOOR = -60; // plancher de la vue « spectre estimé »
 
-  // les raies estimées, en spectre de raies (stem) : une raie EST discrète,
-  // et un trait continu prétendrait qu'il se passe quelque chose entre elles
-  const linesEst = {
-    x: Float64Array.from(chosen, (f) => f * FS),
-    y: Float64Array.from(ls.power, (p) => Math.max(dbP(p), MODEL_FLOOR)),
+  // TROIS spectres, tous dans la MÊME représentation : des raies (stem) pour
+  // les sinusoïdes, une ligne pour le niveau de bruit. Un spectre de raies
+  // est discret — un trait continu prétendrait qu'il se passe quelque chose
+  // entre elles — et donner à la vérité la forme des estimations est ce qui
+  // permet de les comparer d'un regard. Quand tout va bien les trois se
+  // confondent : c'est le résultat, pas un défaut de lisibilité.
+  const lineSpec = (hz, power) => ({
+    x: Float64Array.from(hz),
+    y: Float64Array.from(power, (pw) => Math.max(dbP(pw), MODEL_FLOOR)),
+  });
+  const linesTrue = lineSpec(freqs, freqs.map(() => 1)); // amplitude 1 → 0 dB
+  const linesRoot = lineSpec(Array.from(rm, (f) => f * FS), lsRoot.power);
+  const linesEsprit = lineSpec(Array.from(es, (f) => f * FS), lsEsprit.power);
+
+  /** pire écart d'amplitude, en dB, sur les raies effectivement appariées */
+  const ampErrOf = (hz, power) => {
+    let worst = 0;
+    for (let k = 0; k < hz.length; k++) {
+      const near = Math.min(...freqs.map((f) => Math.abs(hz[k] * FS - f)));
+      if (near < 5) worst = Math.max(worst, Math.abs(dbP(power[k])));
+    }
+    return worst;
   };
-  // la vérité : chaque source a l'amplitude 1, donc la puissance 0 dB
-  const linesTrue = {
-    x: Float64Array.from(freqs),
-    y: Float64Array.from(freqs, () => 0),
-  };
-  // pire écart d'amplitude, en dB, sur les raies appariées
-  let ampErr = 0;
-  for (let k = 0; k < chosen.length; k++) {
-    const near = Math.min(...freqs.map((f) => Math.abs(chosen[k] * FS - f)));
-    if (near < 5) ampErr = Math.max(ampErr, Math.abs(dbP(ls.power[k])));
-  }
 
   /** plus grande erreur d'appariement, en Hz, entre estimations et vérité */
   const worstErr = (hz) => {
@@ -252,28 +262,37 @@ export function compute({ N, M, d, sources, df, snr, estimator, seed }) {
         value: worstErr(esHz),
         meta: { label: 'erreur ESPRIT', unit: 'Hz', precision: 3 },
       },
-      // le modèle estimé
-      linesEst,
+      // les trois spectres, même forme : raies + niveau de bruit
       linesTrue,
-      nsLs: dbP(ls.noise), // hline : bruit estimé par le résidu du modèle
-      nsEigen: dbP(plateau), // hline : bruit estimé par le plateau propre
-      nsTrue: dbP(2 * sigma * sigma), // hline : le vrai niveau
+      linesRoot,
+      linesEsprit,
+      nsTrue: dbP(2 * sigma * sigma),
+      nsRoot: dbP(lsRoot.noise),
+      nsEsprit: dbP(lsEsprit.noise),
       modelFloor: MODEL_FLOOR,
-      noiseLs: {
-        value: dbP(ls.noise),
-        meta: { label: 'bruit estimé (résidu)', unit: 'dB', precision: 2 },
+      noiseRoot: {
+        value: dbP(lsRoot.noise),
+        meta: { label: 'bruit — root-MUSIC', unit: 'dB', precision: 2 },
+      },
+      noiseEsprit: {
+        value: dbP(lsEsprit.noise),
+        meta: { label: 'bruit — ESPRIT', unit: 'dB', precision: 2 },
       },
       noiseEigen: {
         value: dbP(plateau),
-        meta: { label: 'bruit estimé (valeurs propres)', unit: 'dB', precision: 2 },
+        meta: { label: 'bruit — valeurs propres', unit: 'dB', precision: 2 },
       },
       noiseRef: {
         value: dbP(2 * sigma * sigma),
         meta: { label: 'bruit vrai', unit: 'dB', precision: 2 },
       },
-      ampErr: {
-        value: ampErr,
-        meta: { label: 'erreur d’amplitude (MC)', unit: 'dB', precision: 2 },
+      ampErrRoot: {
+        value: ampErrOf(rm, lsRoot.power),
+        meta: { label: 'erreur d’amplitude — root-MUSIC', unit: 'dB', precision: 2 },
+      },
+      ampErrEsprit: {
+        value: ampErrOf(es, lsEsprit.power),
+        meta: { label: 'erreur d’amplitude — ESPRIT', unit: 'dB', precision: 2 },
       },
       model: {
         value:

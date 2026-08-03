@@ -137,6 +137,28 @@ function checkRandomness() {
   }
 }
 
+/**
+ * Tout axe déclaratif porte un nom.
+ *
+ * Un axe sans libellé reste GRADUÉ : il se lit donc comme s'il mesurait
+ * quelque chose, et le lecteur cherche un sens qui n'existe pas. C'est
+ * arrivé une fois — l'ordonnée d'une vue portait un décalage aléatoire, mis
+ * là pour étaler les points, et personne ne pouvait le deviner. La règle est
+ * plus forte que « nommer les axes » : si on ne peut pas nommer un axe,
+ * c'est qu'il ne faut pas le tracer.
+ */
+function checkAxisLabels(manifest, key, bad) {
+  const text = (a) => (typeof a === 'string' ? a : (a?.label ?? ''));
+  for (const v of manifest.views ?? []) {
+    const ax = v.spec?.axes ?? v.plot?.axes;
+    if (!ax) continue;
+    for (const k of ['x', 'y']) {
+      if (!text(ax[k]).trim())
+        bad.push(`${key}, vue '${v.title ?? v.figure ?? v.id}' : axe ${k} sans nom`);
+    }
+  }
+}
+
 async function checkCatalogue() {
   console.log(bold('catalogue'));
   checkLayering();
@@ -144,6 +166,7 @@ async function checkCatalogue() {
   console.log(`  ${dim('vocabulary')}`);
   let figuresOk = true;
   let scenesOk = true;
+  const axisBad = [];
   let nViews = 0;
   let nScenes = 0;
   for (const sub of readdirSync(ROOT, { withFileTypes: true })) {
@@ -168,6 +191,7 @@ async function checkCatalogue() {
         console.log(`    ${red('✗')} ${err.message}`);
         continue;
       }
+      checkAxisLabels(manifest, key, axisBad);
       const sf = join(dir, exp.name, 'scenes.js');
       if (!existsSync(sf)) continue;
       const scenes = (await import(pathToFileURL(sf).href)).default ?? [];
@@ -184,6 +208,14 @@ async function checkCatalogue() {
   }
   if (figuresOk)
     console.log(`    ${green('✓')} standard figures: id, title and order  ${dim(`(${nViews} views)`)}`);
+  console.log(`  ${dim('axes')}`);
+  if (axisBad.length) {
+    for (const b of axisBad) console.log(`    ${red('✗')} ${b}`);
+    fail++;
+  } else {
+    console.log(`    ${green('✓')} tout axe déclaratif porte un nom`);
+    pass++;
+  }
   console.log(`  ${dim('scenes')}`);
   if (scenesOk)
     console.log(

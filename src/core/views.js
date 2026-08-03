@@ -33,6 +33,12 @@ function validateAxis(axis, where) {
     throw new ViewError(`${where}: axis must be a string label or an object`);
   if (axis.scale != null && axis.scale !== 'linear' && axis.scale !== 'log')
     throw new ViewError(`${where}: axis scale must be 'linear' or 'log' (got '${axis.scale}')`);
+  // Un axe peut légitimement ne rien mesurer — le rug d'un échantillon est
+  // posé sur une ligne dont la hauteur n'a pas de sens. Le graduer laisserait
+  // croire le contraire : `ticks: false` supprime les repères et ne garde que
+  // le nom, qui dit alors ce que l'axe PORTE et non ce qu'il mesure.
+  if (axis.ticks != null && axis.ticks !== false)
+    throw new ViewError(`${where}: axis ticks accepts only false (hide them)`);
   if (axis.domain != null) {
     if (!Array.isArray(axis.domain) || axis.domain.length !== 2)
       throw new ViewError(`${where}: axis domain must be [min, max]`);

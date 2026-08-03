@@ -46,14 +46,6 @@ export default {
       max: 8,
       default: 2,
     }),
-    estimator: select('estimateur', {
-      description: 'fréquences dont part le modèle des moindres carrés',
-      options: [
-        { value: 'esprit', label: 'ESPRIT' },
-        { value: 'root', label: 'root-MUSIC' },
-      ],
-      default: 'esprit',
-    }),
     sources: select('sources', {
       description: 'nombre de raies réellement présentes',
       options: [
@@ -98,7 +90,7 @@ export default {
 
   groups: [
     { title: 'Signal', params: ['sources', 'df', 'snr', 'N'] },
-    { title: 'Modèle', params: ['d', 'M', 'estimator'] },
+    { title: 'Modèle', params: ['d', 'M'] },
   ],
 
   views: [
@@ -142,29 +134,33 @@ export default {
     // reste. C'est cette vue qui dit si le modèle EXPLIQUE la mesure, et
     // pas seulement s'il a trouvé des raies au bon endroit.
     //
-    // Un spectre de RAIES, donc un stem : une raie est discrète, et un trait
-    // continu prétendrait qu'il se passe quelque chose entre elles. Les deux
-    // estimations de bruit sont tracées séparément parce qu'elles viennent
-    // de deux calculs indépendants — les voir se superposer, ou non, est le
-    // diagnostic.
+    // TROIS spectres dans la MÊME représentation — des raies pour les
+    // sinusoïdes, une ligne pour le niveau de bruit — parce que c'est cette
+    // identité de forme qui permet de les comparer d'un regard au lieu de
+    // traduire mentalement d'un dessin à l'autre. Les couleurs sont celles
+    // du pseudo-spectre : orange root-MUSIC, violet ESPRIT, jaune la vérité,
+    // d'une vue à l'autre sans réapprentissage.
+    //
+    // En régime nominal les trois se confondent, et c'est LE résultat, pas
+    // un défaut de lisibilité. Ils se séparent exactement quand le modèle
+    // cesse d'expliquer la mesure.
     view(
       'model',
       'Spectre estimé',
-      stem('linesEst', {
-        color: '#0072BD',
-        size: 5,
+      stem('linesTrue', {
+        color: '#EDB120',
+        size: 7,
         baseline: -60,
-        label: 'raies estimées (MC)',
+        label: 'vérité',
         overlays: [
-          scatter('linesTrue', { color: '#EDB120', size: 11, label: 'vérité' }),
-          // Trois traits, et le CAS NOMINAL est qu'ils se confondent : c'est
-          // le résultat, pas un défaut d'affichage. Les libellés sont donc
-          // courts, parce qu'ils se chevauchent quand tout va bien et se
-          // séparent exactement quand quelque chose ne va pas — SNR trop
-          // bas, ou d faux. La statline donne les trois nombres.
-          hline('nsLs', { color: '#D95319', dashed: true, width: 1.8, label: 'résidu' }),
-          hline('nsEigen', { color: '#7E2F8E', dashed: true, width: 1.8, label: 'v. propres' }),
-          hline('nsTrue', { color: '#77AC30', width: 1.4, label: 'vrai' }),
+          stem('linesRoot', { color: '#D95319', size: 4.5, baseline: -60, label: 'root-MUSIC' }),
+          stem('linesEsprit', { color: '#7E2F8E', size: 4.5, baseline: -60, label: 'ESPRIT' }),
+          // une ligne de bruit par spectre, dans sa couleur : le modèle
+          // complet d'un estimateur, ce sont SES raies ET son niveau de
+          // fond, et les deux se lisent ensemble ou pas du tout
+          hline('nsTrue', { color: '#EDB120', width: 1.6, label: 'vérité' }),
+          hline('nsRoot', { color: '#D95319', dashed: true, width: 1.6, label: 'root-MUSIC' }),
+          hline('nsEsprit', { color: '#7E2F8E', dashed: true, width: 1.6, label: 'ESPRIT' }),
         ],
         axes: {
           x: { label: 'f', unit: 'Hz' },

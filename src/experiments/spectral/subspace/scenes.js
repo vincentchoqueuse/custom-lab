@@ -104,8 +104,8 @@ LÀ, et seulement là, qu'on pouvait le lire.`,
     id: 'model',
     title: 'Scène 5 · Le modèle complet',
     view: 'model',
-    params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2, estimator: 'esprit' },
-    visible: ['snr', 'estimator'],
+    params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2 },
+    visible: ['snr', 'd'],
     notes: `Les méthodes à sous-espace rendent des FRÉQUENCES et rien d'autre.
 On sait donc où sont les raies, et pas ce qu'elles valent — on ne peut ni
 reconstruire le signal, ni dire si le modèle explique la mesure.
@@ -114,28 +114,32 @@ Une fois les fréquences connues, le modèle devient LINÉAIRE en ses
 amplitudes : x ≈ Σ a_k·e^{j2πf_k n}. Un moindres carrés 2×2 rend les a_k,
 et ce qu'il reste — le résidu — EST l'estimation de la variance du bruit.
 
-Ce que l'écran montre alors :
-  les traits bleus  = les raies estimées, à leur amplitude estimée
-  les points jaunes = la vérité (amplitude 1, donc 0 dB)
-  les trois lignes  = trois estimations du niveau de bruit, dont DEUX
-                      indépendantes — le résidu du modèle, et la moyenne
-                      du plateau des valeurs propres.
+TROIS spectres sont tracés, dans exactement la MÊME forme : des raies pour
+les sinusoïdes, une ligne pour le niveau de bruit.
+    jaune   la vérité (amplitude 1, donc 0 dB)
+    orange  root-MUSIC
+    violet  ESPRIT
+Ce sont les couleurs du pseudo-spectre, pour ne rien avoir à réapprendre
+d'une vue à l'autre.
 
-En régime nominal les trois se confondent, et c'est le résultat : deux
-chemins de calcul qui ne partagent rien tombent sur le même nombre, et ce
-nombre est le vrai. Le modèle explique la mesure.
+En régime nominal les trois se confondent, et c'est LE résultat : deux
+estimateurs qui ne partagent pas leur calcul, plus la vérité, tombent au
+même endroit ET au même niveau. Le modèle explique la mesure. Un tracé
+confus veut dire ici « tout va bien », ce qui est rare et qu'il faut dire
+à la salle.
 
-Puis casser, et regarder les lignes SE SÉPARER — c'est ce qui rend cette
+Puis casser, et regarder les spectres SE SÉPARER — c'est ce qui rend cette
 vue utile plutôt que décorative :
-  SNR à 6 dB → une raie fantôme apparaît loin des vraies, et le résidu
-    remonte AU-DESSUS du niveau réel : il contient maintenant ce que le
-    modèle n'explique pas.
-  d = 1     → une source est absorbée dans le résidu, qui explose.
-  d = 4     → deux raies inventées, à des amplitudes ridicules — la
-    statline chiffre l'écart.
+  SNR à 6 dB → une raie fantôme apparaît loin des vraies, et la ligne de
+    bruit correspondante remonte AU-DESSUS du vrai niveau : le résidu
+    contient maintenant ce que le modèle n'explique pas.
+  d = 1     → une source entière tombe dans le résidu, qui explose (de
+    −30 dB à +1.4 dB, mesuré).
+  d = 4     → deux raies inventées, à des amplitudes ridicules.
 
-Basculer estimateur entre ESPRIT et root-MUSIC : à SNR correct, les deux
-donnent le même modèle. C'est en descendant qu'ils divergent.`,
+Le point à faire dire : on n'a PAS eu besoin de connaître la vérité pour
+voir que le modèle était faux. La ligne de bruit qui remonte suffit — et
+c'est exactement la situation d'un vrai signal, où le jaune n'existe pas.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

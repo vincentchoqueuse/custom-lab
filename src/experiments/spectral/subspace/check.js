@@ -11,7 +11,7 @@ import {
 } from '../_lib/subspace.js';
 
 const FS = 1000;
-const BASE = { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2, estimator: 'esprit', seed: 34 };
+const BASE = { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2, seed: 34 };
 
 /** Un enregistrement de d exponentielles complexes, sans bruit. */
 const tones = (N, freqs) => {
@@ -335,10 +335,15 @@ export const checks = [
       const bad = [];
       for (const snr of [40, 25, 10]) {
         const { observables: o } = compute({ ...BASE, snr });
-        const gapPair = Math.abs(o.noiseLs.value - o.noiseEigen.value);
-        const gapTrue = Math.abs(o.noiseLs.value - o.noiseRef.value);
-        if (gapPair > 1.5 || gapTrue > 1.5)
-          bad.push(`SNR ${snr} : résidu ${o.noiseLs.value.toFixed(2)}, v.p. ${o.noiseEigen.value.toFixed(2)}, vrai ${o.noiseRef.value.toFixed(2)} dB`);
+        // les DEUX résidus (un par estimateur) et le plateau, contre la vérité
+        for (const [name, v] of [
+          ['root-MUSIC', o.noiseRoot.value],
+          ['ESPRIT', o.noiseEsprit.value],
+          ['valeurs propres', o.noiseEigen.value],
+        ]) {
+          if (Math.abs(v - o.noiseRef.value) > 1.5)
+            bad.push(`SNR ${snr}, ${name} : ${v.toFixed(2)} vs vrai ${o.noiseRef.value.toFixed(2)} dB`);
+        }
       }
       return {
         ok: bad.length === 0,
@@ -358,11 +363,12 @@ export const checks = [
       const bad3 = compute({ ...BASE, sources: 3, d: 1, snr: 30 }).observables;
       return {
         ok:
-          Math.abs(ok3.noiseLs.value - ok3.noiseRef.value) < 1.5 &&
-          bad3.noiseLs.value > ok3.noiseRef.value + 6,
+          Math.abs(ok3.noiseEsprit.value - ok3.noiseRef.value) < 1.5 &&
+          bad3.noiseEsprit.value > ok3.noiseRef.value + 6 &&
+          bad3.noiseRoot.value > ok3.noiseRef.value + 6,
         detail:
-          `d juste : ${ok3.noiseLs.value.toFixed(2)} dB (vrai ${ok3.noiseRef.value.toFixed(2)}) · ` +
-          `d = 1 : ${bad3.noiseLs.value.toFixed(2)} dB`,
+          `d juste : ${ok3.noiseEsprit.value.toFixed(2)} dB (vrai ${ok3.noiseRef.value.toFixed(2)}) · ` +
+          `d = 1 : ESPRIT ${bad3.noiseEsprit.value.toFixed(2)}, root-MUSIC ${bad3.noiseRoot.value.toFixed(2)} dB`,
       };
     },
   },
