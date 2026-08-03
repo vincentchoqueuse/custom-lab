@@ -47,7 +47,7 @@ Revenir sur l'onglet indicielle pour associer position du pôle et allure.`,
     id: 'bode',
     title: 'Scène 4 · Le même système, vu en fréquence',
     params: { K: 1, tau: 1, tz: 0 },
-    view: 'freq',
+    view: 'gain',
     visible: ['tau'],
     lock: true,
     notes: `Axes figés : bouger τ fait glisser la cassure sans que le cadre bouge.

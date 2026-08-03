@@ -9,6 +9,7 @@ import {
   TAU_RATIO,
 } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
+import { bodeSweep } from '../../../core/bode.js';
 
 const BASE = { sys: 'first', K: 1, tau: 1, w0: 1, m: 0.3, wc: 1, seed: 42 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;
@@ -437,6 +438,41 @@ export const checks = [
         ok: fixed && unstable && grows,
         detail: `M_r = ${peaks.map((v) => v.toFixed(1)).join(' → ')} dB de K = 1 à 5.9`,
       };
+    },
+  },
+  {
+    name: 'le dépliage de core/bode.js retrouve la phase en forme close',
+    category: 'numeric',
+    run() {
+      // This experiment computes its phase in CLOSED FORM, because it can.
+      // Every other system in the subject goes through core/bode.js, which
+      // unwraps atan2 instead — the only option for a typed-in polynomial or
+      // a PID loop. Here both answers exist, so they are compared: the shared
+      // module is validated against the one system with an exact phase,
+      // including the open loop that runs past −180° where a naive atan2
+      // would fold.
+      const gap = maxGap(
+        [
+          { sys: 'first', tau: 0.7 },
+          { sys: 'second', m: 0.2, w0: 3 },
+          { sys: 'second', m: 1.6, w0: 3 },
+          { sys: 'openloop', tau: 1, K: 1 },
+          { sys: 'openloop', tau: 0.3, K: 12 },
+        ],
+        (p) => {
+          const q = { ...BASE, ...p };
+          const swept = bodeSweep((w) => transfer(q.sys, w, q), {
+            center: q.sys === 'second' ? q.w0 : 1 / q.tau,
+            decades: 3,
+          });
+          return maxGap(
+            range(swept.w.length),
+            (i) => swept.phaseDeg[i],
+            (i) => phaseOf(q.sys, swept.w[i], q)
+          );
+        }
+      );
+      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
     },
   },
   standardChecks.determinism(compute, { ...BASE, sys: 'second' }, 'locus'),

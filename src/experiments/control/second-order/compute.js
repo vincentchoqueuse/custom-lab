@@ -14,6 +14,9 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 
 const NG = 800; // time samples
+import { bodeSweep, bodeObservables } from '../../../core/bode.js';
+import { toDb } from '../../../core/numeric.js';
+
 const NW = 61; // frequency grid: ±1.5 decades around ω₀ (center = ω₀ exact)
 const EPS = 1e-6;
 
@@ -102,13 +105,21 @@ export function compute({ K, m, w0 }) {
   // (the |s| = ω₀ guide circle is drawn by the plane view, not computed here)
 
   // |H(jω)| on a log grid centered exactly on ω₀
-  const fw = new Float64Array(NW);
-  const fh = new Float64Array(NW);
-  for (let i = 0; i < NW; i++) {
-    const u = 10 ** (-1.5 + (3 * i) / (NW - 1));
-    fw[i] = u * w0;
-    fh[i] = K / Math.sqrt((1 - u * u) ** 2 + (2 * m * u) ** 2);
-  }
+  // H(jω) = Kω₀²/(ω₀²−ω² + 2jmω₀ω), swept by core/bode.js — the same grid,
+  // the same dB and the same unwrapped phase as everywhere else in the
+  // subject. The phase is the half the experiment was missing: it passes
+  // through −90° at ω₀ whatever m, and ends at −180°, which is exactly what
+  // makes a second order able to destabilise a loop and a first order not.
+  const bode = bodeSweep(
+    (w) => {
+      const re = w0 * w0 - w * w;
+      const im = 2 * m * w0 * w;
+      const d = re * re + im * im;
+      const n = K * w0 * w0;
+      return [(n * re) / d, (-n * im) / d];
+    },
+    { center: w0, decades: 1.5, n: NW }
+  );
   const resonant = m < Math.SQRT1_2 - EPS;
   const wr = resonant ? w0 * Math.sqrt(1 - 2 * m * m) : NaN;
   const Mr = resonant ? K / (2 * m * Math.sqrt(1 - m * m)) : NaN;
@@ -120,7 +131,8 @@ export function compute({ K, m, w0 }) {
       envHi: { x: t, y: eHi },
       envLo: { x: t, y: eLo },
       poles: { x: Float64Array.from(px), y: Float64Array.from(py) },
-      freqResponse: { x: fw, y: fh },
+      ...bodeObservables(bode),
+      gainK: toDb(K), // hline: the static gain, in the plot's own dB unit
       wr,
       overshoot: {
         value: overshoot,

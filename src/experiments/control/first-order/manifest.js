@@ -122,7 +122,7 @@ export default {
     // zero produces instead of a roll-off. Same builder as the Bode plot of
     // Bode, Nyquist, Black and as the analog filter's response: one figure.
     gainView('gain', {
-      y: 'log',
+      title: 'Bode — gain',
       overlays: [
         vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c = 1/τ' }),
         hline('gain3dB', { ...GUIDE, label: '−3 dB' }),
@@ -131,7 +131,6 @@ export default {
 
     // The phase, where the non-minimum-phase zero shows its true cost.
     phaseView('phase', {
-      title: 'Phase',
       overlays: [
         vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c' }),
         hline(() => -45, { ...GUIDE, label: '−45°' }),

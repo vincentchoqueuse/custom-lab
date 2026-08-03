@@ -418,6 +418,10 @@ export default {
   //   signal experiment: temporal FIRST, then the spectrum, then the extras
   //   filter experiment: the signal in and out FIRST, then the impulse
   //     response, then the frequency response, then the extras
+  //   control experiment: the temporal responses FIRST, then the poles,
+  //     then `Bode — gain` and `Bode — phase` under those exact titles and
+  //     under the ids `gain` and `phase` — every system in automatique is
+  //     read the same way, and the same URL points at the same figure
   // An experiment whose subject IS another representation (spectrogram, eye
   // diagram, I/Q plane) leads with it and says so in a comment. A scene that
   // must open elsewhere declares its `view` — the tab order is the catalogue's
@@ -742,6 +746,10 @@ export const checks = [
 │   │   │                         #   réponse fréquentielle with another
 │   │   │                         #   abscissa), polesView, timeView,
 │   │   │                         #   impulseView, spectrumView
+│   │   ├── bode.js               # the frequency sweep every LTI experiment
+│   │   │                         #   needs: log grid, dB, UNWRAPPED phase,
+│   │   │                         #   and the grid centre read off the
+│   │   │                         #   denominator coefficients
 │   │   ├── bench.js              # the shared digital-filter test bench
 │   │   ├── checks.js             # standardChecks factories (determinism…)
 │   │   ├── strings.js            # all core UI strings (English constants)

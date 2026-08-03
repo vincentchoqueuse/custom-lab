@@ -29,7 +29,7 @@ l'échelle de temps, m est la FORME. Deux nombres, toute la dynamique.`,
     id: 'resonance',
     title: 'La résonance — et l\'identification',
     params: { K: 1, m: 0.2, w0: 2 },
-    view: 'freq',
+    view: 'gain',
     visible: ['m'],
     notes: `m < 0.707 : |H| bosse à ωr = ω₀√(1−2m²) avec Mr = K/(2m√(1−m²)) —
 à m = 0.2, Mr ≈ 2.55, soit +8 dB au-dessus de K. Monter m : la bosse

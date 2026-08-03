@@ -130,7 +130,6 @@ export default {
     // NaN when it means nothing for the current system, and a non-finite
     // vline/hline is simply not drawn.
     gainView('gain', {
-      id: 'gain',
       title: 'Bode — gain',
       overlays: [
         ...MARKS,

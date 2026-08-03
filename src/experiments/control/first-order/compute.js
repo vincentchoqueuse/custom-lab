@@ -17,6 +17,8 @@
 // One exact identity survives all three, and it is the reason the tangent is
 // drawn: the initial tangent always crosses the final value at t = τ exactly.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { bodeSweep, bodeObservables } from '../../../core/bode.js';
+import { toDb } from '../../../core/numeric.js';
 
 const NG = 800; // time samples
 const NW = 121; // frequency grid: ±2.5 decades around 1/τ
@@ -71,17 +73,19 @@ export function compute({ K, tau, tz }) {
   const zx = hasZero ? Float64Array.from([-1 / tz]) : new Float64Array(0);
   const zy = hasZero ? Float64Array.from([0]) : new Float64Array(0);
 
-  /* ---------- frequency: gain and phase ----------------------------------- */
+  /* ---------- frequency: the shared Bode sweep ----------------------------- */
+  // H(jω) = K(1 + jωτ_z)/(1 + jωτ), evaluated by core/bode.js — the same
+  // sweep, the same dB and the same unwrapped phase as every other system in
+  // the subject.
   const wc = 1 / tau;
-  const fw = new Float64Array(NW);
-  const fg = new Float64Array(NW);
-  const fp = new Float64Array(NW);
-  for (let i = 0; i < NW; i++) {
-    const w = wc * 10 ** (-2.5 + (5 * i) / (NW - 1));
-    fw[i] = w;
-    fg[i] = (K * Math.hypot(1, w * tz)) / Math.hypot(1, w * tau);
-    fp[i] = ((Math.atan(w * tz) - Math.atan(w * tau)) * 180) / Math.PI;
-  }
+  const bode = bodeSweep((w) => {
+    const nr = K;
+    const ni = K * w * tz;
+    const dr = 1;
+    const di = w * tau;
+    const d = dr * dr + di * di;
+    return [(nr * dr + ni * di) / d, (ni * dr - nr * di) / d];
+  }, { center: wc, decades: 2.5, n: NW });
 
   return {
     observables: {
@@ -90,10 +94,10 @@ export function compute({ K, tau, tz }) {
       impulseResponse: { x: t, y: h },
       poles: { x: px, y: py },
       zeros: { x: zx, y: zy },
-      gain: { x: fw, y: fg },
-      phase: { x: fw, y: fp },
+      ...bodeObservables(bode),
       wc, // vline: the cut-off 1/τ
-      gain3dB: (K * Math.hypot(1, tz / tau)) / Math.SQRT2, // hline at −3 dB
+      // −3 dB below the static gain: an hline in the SAME dB unit as the plot
+      gain3dB: toDb((K * Math.hypot(1, tz / tau)) / Math.SQRT2),
       initial: { value: y0, meta: { label: 'valeur initiale y(0⁺)', precision: 3 } },
       t5: { value: t5, meta: { label: 'temps de réponse à 5 %', unit: 's', precision: 3 } },
       undershoot: {

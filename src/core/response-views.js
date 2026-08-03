@@ -64,7 +64,10 @@ function magnitudeAxis(y, yLabel, domain) {
 export function gainView(
   source,
   {
-    id = 'freq',
+    // 'gain' and 'phase', everywhere: the URL is part of the contract, and a
+    // link to the frequency view of one experiment should read the same as a
+    // link to the frequency view of the next
+    id = 'gain',
     title = 'Réponse fréquentielle',
     x = OMEGA,
     y = 'dB',

@@ -1,6 +1,6 @@
 import { float, log } from '../../../core/fields.js';
 import { view, line, vline, hline } from '../../../core/views.js';
-import { gainView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
+import { gainView, phaseView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
 
 const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 
@@ -99,14 +99,23 @@ export default {
       maxHalf: 60,
     }),
 
-    // |H(jω)| in log-log with the resonance when m < 1/√2 — the catalogue's
-    // shared frequency figure, same as the first order and the Bode plots
-    gainView('freqResponse', {
-      y: 'log',
+    // The Bode pair, titled and ordered as everywhere else in the subject.
+    // The resonance shows on the gain when m < 1/√2; the phase always
+    // crosses −90° at ω₀ and ends at −180°.
+    gainView('gain', {
+      title: 'Bode — gain',
       overlays: [
         vline((p) => p.w0, { color: '#EDB120', dashed: true, width: 1.8, label: 'ω₀' }),
         vline('wr', { color: '#D95319', dashed: true, width: 1.6, label: 'ωr' }),
-        hline((p) => p.K, { ...GUIDE, label: 'K' }),
+        hline('gainK', { ...GUIDE, label: 'K' }),
+      ],
+    }),
+
+    phaseView('phase', {
+      overlays: [
+        vline((p) => p.w0, { color: '#EDB120', dashed: true, width: 1.8, label: 'ω₀' }),
+        hline(() => -90, { ...GUIDE, label: '−90°' }),
+        hline(() => -180, { ...GUIDE, label: '−180°' }),
       ],
     }),
   ],

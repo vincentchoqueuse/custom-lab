@@ -1,5 +1,8 @@
 import { float } from '../../../core/fields.js';
 import { view, line, hline, vline } from '../../../core/views.js';
+import { gainView, phaseView, GUIDE_COLOR } from '../../../core/response-views.js';
+
+const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -63,5 +66,21 @@ export default {
         axes: { x: { label: 't', unit: 's' }, y: 'u(t)' },
       })
     ),
+
+    // The SAME loop, in frequency: L(jω) = C(jω)·G(jω), the open loop the
+    // three sliders actually shape. Titled and ordered as everywhere else in
+    // the subject. What to make the students see: Ki lifts the low-frequency
+    // gain to infinity and pins the phase at −90° (that IS "no static
+    // error"), Kp slides the whole gain curve up, and Kd lifts the phase back
+    // near the crossover — which is why a loop that oscillates in the time
+    // view is a loop whose phase margin has been eaten in this one.
+    gainView('gain', {
+      title: 'Bode — gain',
+      overlays: [hline('zeroDb', { ...GUIDE, label: '0 dB' })],
+    }),
+
+    phaseView('phase', {
+      overlays: [hline(() => -180, { ...GUIDE, label: '−180°' })],
+    }),
   ],
 };
