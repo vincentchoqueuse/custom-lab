@@ -12,8 +12,12 @@
   // "NaN" is an error the browser logs — never something a lecture should
   // produce on the console.
   const placeable = (scale, t) => Number.isFinite(scale(t));
-  const xTicks = $derived((xs.ticks ? xs.ticks(6) : []).filter((t) => placeable(xs, t)));
-  const yTicks = $derived((ys.ticks ? ys.ticks(5) : []).filter((t) => placeable(ys, t)));
+  const xTicks = $derived(
+    xAxis?.ticks === false ? [] : (xs.ticks ? xs.ticks(6) : []).filter((t) => placeable(xs, t))
+  );
+  const yTicks = $derived(
+    yAxis?.ticks === false ? [] : (ys.ticks ? ys.ticks(5) : []).filter((t) => placeable(ys, t))
+  );
   const xFmt = $derived(xAxis.format ? format(xAxis.format) : xs.tickFormat(6));
   const yFmt = $derived(yAxis.format ? format(yAxis.format) : ys.tickFormat(5));
 

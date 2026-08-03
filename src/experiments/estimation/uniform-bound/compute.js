@@ -76,13 +76,17 @@ export function compute({ theta, N, M, seed }) {
     rTh3[g] = theta / Math.sqrt(3 * n);
   }
 
-  // vertical jitter so the displayed sample reads as a scattered rug
-  const jitter = new Float64Array(N);
-  for (let i = 0; i < N; i++) jitter[i] = 0.1 + 0.8 * rng();
+  // L'ordonnée de cette vue ne mesure RIEN : les points sont posés sur une
+  // seule ligne, à mi-hauteur, et c'est l'abscisse seule qui porte
+  // l'information. C'était déjà le cas avant, mais avec un décalage vertical
+  // ALÉATOIRE qui laissait croire à une seconde dimension. Une hauteur
+  // constante le dit franchement, et l'axe est nommé par ce qu'il porte —
+  // l'échantillon — plutôt que par une grandeur qui n'existe pas.
+  const rugY = new Float64Array(N).fill(0.5);
 
   return {
     observables: {
-      samplePoints: { x: sample, y: jitter },
+      samplePoints: { x: sample, y: rugY },
       // rep-0 point estimates (vline sources; no meta → kept off the statline)
       est1: t1[0],
       est2: t2[0],

@@ -46,14 +46,17 @@ export default {
       scatter('samplePoints', {
         color: '#0072BD',
         size: 4,
-        opacity: 0.7,
+        opacity: 0.75,
+        label: 'échantillon',
         overlays: [
           vline('est1', { color: '#D95319', width: 2, label: 'max' }),
           vline('est2', { color: '#77AC30', width: 2, label: 'max+min' }),
           vline('est3', { color: '#7E2F8E', width: 2, label: '2x̄' }),
           vline((p) => p.theta, { color: '#EDB120', dashed: true, width: 2, label: 'θ' }),
         ],
-        axes: { x: 'x', y: '' },
+        // l'ordonnée ne mesure rien : les points sont sur une seule ligne,
+        // et la graduer laisserait chercher un sens qui n'existe pas
+        axes: { x: 'x', y: { label: 'échantillon', domain: [0, 1], ticks: false } },
       })
     ),
 
