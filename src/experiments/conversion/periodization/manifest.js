@@ -41,6 +41,19 @@ export default {
   },
 
   views: [
+    view(
+      'time',
+      'Signal et échantillons',
+      line('xt', {
+        color: '#D95319',
+        width: 2,
+        label: 'x(t)',
+        overlays: [
+          scatter('samples', { color: '#0072BD', size: 3.4, opacity: 0.95, label: 'x(nTe)' }),
+        ],
+        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
+      })
+    ),
     // THE view: the copies, their sum, and what the samples actually know
     view(
       'periodize',
@@ -56,19 +69,6 @@ export default {
           vline('feHalfNeg', { color: '#EDB120', dashed: true }),
         ],
         axes: { x: { label: 'f', unit: 'Hz' }, y: '|X|' },
-      })
-    ),
-    view(
-      'time',
-      'Signal et échantillons',
-      line('xt', {
-        color: '#D95319',
-        width: 2,
-        label: 'x(t)',
-        overlays: [
-          scatter('samples', { color: '#0072BD', size: 3.4, opacity: 0.95, label: 'x(nTe)' }),
-        ],
-        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
       })
     ),
     view(

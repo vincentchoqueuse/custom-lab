@@ -149,7 +149,7 @@ function handleHash() {
   app.revealed = false;
   app.notice = '';
   app.ghost = null;
-  app.axisLock = false;
+  app.axisLock = scene?.lock ?? false;
   app.result = { status: 'idle', observables: null, message: '' };
   syncUrl(false); // normalize whatever was typed by hand
 }
@@ -197,6 +197,7 @@ export function applyPreset(id, push = true) {
   app.params = sceneBase(m, scene);
   app.view = scene.view;
   app.drawer = scene.drawer;
+  app.axisLock = scene.lock; // display state, like the ghost — never in the URL
   app.revealed = false;
   app.notice = '';
   syncUrl(push);

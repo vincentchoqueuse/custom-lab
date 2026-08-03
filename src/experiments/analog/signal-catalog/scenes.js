@@ -32,7 +32,9 @@ Réponse attendue fausse : "elle double". Elle est DIVISÉE par deux.`,
     params: { signal: 'rect', T: 15, t0: 0 },
     view: 'spectrum',
     visible: ['T'],
-    notes: `Verrouiller les axes (A) puis geler (F) à T = 15 ms, et descendre à 2 ms :
+    lock: true,
+    notes: `Les axes arrivent déjà figés : le cadre ne bougera plus, seule la
+courbe bouge. Geler (F) à T = 15 ms, puis descendre à 2 ms :
 le lobe s'ouvre sous les yeux, le fantôme gris reste étroit.
 Le produit T·B₃ affiché ne bouge pas d'un chiffre — c'est le théorème
 de changement d'échelle, pas une coïncidence.`,

@@ -212,7 +212,9 @@ the browser Fullscreen API (native `Esc` exit).
   parameter afterwards moves the CURVE and not the frame — auto-scaling
   otherwise hides the very effect being demonstrated. Display state, NOT in the
   URL (like the freeze ghost); cleared when the view or the experiment changes.
-  Custom views keep their own scales and ignore it.
+  A scene may declare `lock: true` to arrive with the frame already pinned —
+  scene state, still never in the URL. Custom views keep their own scales and
+  ignore it.
 - **Export**: SVG (source of truth), PNG 2×, PNG copy to clipboard.
 
 ---
@@ -271,7 +273,7 @@ registry at load time):
   `_subject.js` carries the same key for the subjects themselves.
 - **`scenes.js` is auto-discovered** by the registry (same glob as manifests) and
   merged as `presets`. In a scene: `view` defaults to the first view, `drawer` to
-  `false`, `masked` to `[]`.
+  `false`, `masked` to `[]`, `lock` to `false`.
 - **`story`** absent → reserved extension point (state-machine lead noted in phase 5).
 - **Params are declared with field factories** from `core/fields.js` (Django-style):
   `float`, `int`, `bool`, `select`, `log`, `readonly`. Factories return the plain
