@@ -1,8 +1,22 @@
 // Auto-discovered by the registry. Defaults: view = first view, drawer = false.
 export default [
   {
+    id: 'shapes',
+    title: 'Scène 1 · Les sept signaux, dans le temps',
+    params: { signal: 'rect', T: 5, t0: 0 },
+    view: 'time',
+    visible: ['signal', 'T'],
+    notes: `Parcourir le catalogue avant de parler de spectre : dérouler les sept
+formes et les faire trier à voix haute. Trois familles apparaissent :
+celles qui s'arrêtent (porte, triangle), celles qui décroissent sans
+jamais s'annuler (gaussienne, exponentielles), celle qui traîne (sinc).
+Question à poser AVANT de passer à l'onglet Spectre :
+« laquelle a le spectre le plus étroit, à votre avis ? »
+T règle la durée de toutes : le lien durée ↔ largeur se joue là.`,
+  },
+  {
     id: 'gate',
-    title: 'Scène 1 · La porte et le sinus cardinal',
+    title: 'Scène 2 · La porte et le sinus cardinal',
     params: { signal: 'rect', T: 5, t0: 0 },
     view: 'spectrum',
     visible: ['T'],
@@ -14,7 +28,7 @@ Réponse attendue fausse : "elle double". Elle est DIVISÉE par deux.`,
   },
   {
     id: 'scaling',
-    title: 'Scène 2 · Comprimer dans le temps, étaler en fréquence',
+    title: 'Scène 3 · Comprimer dans le temps, étaler en fréquence',
     params: { signal: 'rect', T: 15, t0: 0 },
     view: 'spectrum',
     visible: ['T'],
@@ -25,7 +39,7 @@ de changement d'échelle, pas une coïncidence.`,
   },
   {
     id: 'gauss',
-    title: 'Scène 3 · La gaussienne, point fixe de Fourier',
+    title: 'Scène 4 · La gaussienne, point fixe de Fourier',
     params: { signal: 'gauss', T: 5, t0: 0 },
     view: 'spectrum',
     visible: ['signal', 'T'],
@@ -36,7 +50,7 @@ Enchaîner sur l'onglet dB : la gaussienne plonge, la porte traîne.`,
   },
   {
     id: 'delay',
-    title: 'Scène 4 · Le retard ne se voit que dans la phase',
+    title: 'Scène 5 · Le retard ne se voit que dans la phase',
     params: { signal: 'rect', T: 5, t0: 0 },
     view: 'phase',
     visible: ['t0'],
@@ -48,7 +62,7 @@ Morale : un spectre d'amplitude seul ne sait pas dire QUAND.`,
   },
   {
     id: 'sidelobes',
-    title: 'Scène 5 · Les lobes secondaires, en dB',
+    title: 'Scène 6 · Les lobes secondaires, en dB',
     params: { signal: 'rect', T: 5, t0: 0 },
     view: 'db',
     visible: ['signal'],
@@ -59,7 +73,7 @@ Faire le lien avec l'expérience « Fenêtrage spectral ».`,
   },
   {
     id: 'rf',
-    title: 'Scène 6 · Moduler, c’est déplacer le spectre',
+    title: 'Scène 7 · Moduler, c’est déplacer le spectre',
     params: { signal: 'rf', T: 5, f0: 600, t0: 0 },
     view: 'spectrum',
     visible: ['f0', 'T'],
