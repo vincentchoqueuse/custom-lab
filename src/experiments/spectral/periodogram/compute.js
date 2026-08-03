@@ -194,6 +194,79 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
   }
   const order = ks.map((_, i) => i).sort((i, j) => ks[i] - ks[j]);
 
+  /* ---------- le découpage, dessiné ------------------------------------- */
+  // Les fenêtres elles-mêmes, posées là où elles tombent. Plusieurs tracés
+  // dans une seule série, séparés par des NaN : le tracé générique casse le
+  // chemin sur un NaN, donc pas de vue sur mesure pour un plat de
+  // spaghettis.
+  //
+  // Et surtout LA SOMME des fenêtres décalées, qui raconte les quatre cas
+  // d'un seul coup d'œil et explique tout le reste de l'expérience :
+  //
+  //   rect  disjoint   somme = 1 partout    chaque échantillon compté une fois
+  //   Hann  disjoint   somme ondule 0…1     les BORDS des segments sont
+  //                                          quasiment jetés — c'est
+  //                                          l'information que le
+  //                                          recouvrement va récupérer
+  //   Hann  50 %       somme = 1 partout    reconstruction parfaite (COLA) :
+  //                                          poids total 1 pour tous, et des
+  //                                          segments presque indépendants
+  //   rect  50 %       somme = 2 partout    chaque échantillon compté DEUX
+  //                                          fois, sans atténuation : d'où les
+  //                                          segments corrélés et les 20 %
+  //                                          de variance que Welch perd
+  //                                          avec une fenêtre rectangulaire
+  const SHOW = 6; // segments dessinés — au-delà, le dessin ne dit plus rien
+  const shown = Math.min(SHOW, est.segments);
+  const zoomEnd = Math.min(N, (shown - 1) * seg.hop + seg.L);
+  const wShape = new Float64Array(seg.L);
+  for (let n = 0; n < seg.L; n++) wShape[n] = windowValue(win, n, seg.L);
+
+  const wx = [];
+  const wy = [];
+  for (let s = 0; s < shown; s++) {
+    const start = s * seg.hop;
+    for (let n = 0; n < seg.L; n++) {
+      wx.push((start + n) / FS);
+      wy.push(wShape[n]);
+    }
+    wx.push(NaN); // sépare ce segment du suivant
+    wy.push(NaN);
+  }
+
+  // la somme, sur TOUS les segments, restreinte à la fenêtre dessinée
+  const sum = new Float64Array(zoomEnd);
+  for (let s = 0; s < est.segments; s++) {
+    const start = s * seg.hop;
+    if (start >= zoomEnd) break;
+    for (let n = 0; n < seg.L; n++) {
+      const i = start + n;
+      if (i < zoomEnd) sum[i] += wShape[n];
+    }
+  }
+  const sx = new Float64Array(zoomEnd);
+  for (let i = 0; i < zoomEnd; i++) sx[i] = i / FS;
+  // le régime INTÉRIEUR : le premier et le dernier segment n'ont pas de
+  // voisin d'un côté, leur bord n'est donc pas censé être compensé
+  let wMin = Infinity;
+  let wMax = -Infinity;
+  for (let i = seg.L; i < zoomEnd - seg.L; i++) {
+    wMin = Math.min(wMin, sum[i]);
+    wMax = Math.max(wMax, sum[i]);
+  }
+  const flat = Number.isFinite(wMin) && wMax - wMin < 1e-9;
+
+  // le signal, réduit à la même plage et remis à l'échelle des fenêtres :
+  // il est là pour le contexte, pas pour être lu en ordonnée
+  const zx = new Float64Array(zoomEnd);
+  const zy = new Float64Array(zoomEnd);
+  let amp = 1e-12;
+  for (let i = 0; i < zoomEnd; i++) amp = Math.max(amp, Math.abs(x[i]));
+  for (let i = 0; i < zoomEnd; i++) {
+    zx[i] = i / FS;
+    zy[i] = x[i] / amp;
+  }
+
   return {
     observables: {
       signal: { x: t, y: x },
@@ -209,6 +282,19 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
       fluctTheory: {
         x: Float64Array.from(order, (i) => ks[i]),
         y: Float64Array.from(order, (i) => theory[i]),
+      },
+      // le découpage
+      segWindows: { x: Float64Array.from(wx), y: Float64Array.from(wy) },
+      windowSum: { x: sx, y: sum },
+      zoomSignal: { x: zx, y: zy },
+      shownSegments: shown,
+      coverage: {
+        value: flat
+          ? wMin > 1.5
+            ? `plate à ${wMin.toFixed(2)} — chaque échantillon compté deux fois`
+            : 'plate à 1 — recouvrement parfait, chaque échantillon pèse 1'
+          : `ondule de ${wMin.toFixed(2)} à ${wMax.toFixed(2)} — les bords des segments sont sous-pondérés`,
+        meta: { label: 'somme des fenêtres' },
       },
       segments: { value: est.segments, meta: { label: 'segments moyennés K' } },
       fRes: {

@@ -114,6 +114,40 @@ export default {
       })
     ),
 
+    // Le découpage lui-même, en vue séparée : les fenêtres posées là où
+    // elles tombent, et LEUR SOMME. C'est la vue qui explique pourquoi les
+    // deux autres donnent ce qu'elles donnent, et elle se lit en quatre
+    // cas — rect/disjoint plate à 1, Hann/disjoint qui ondule jusqu'à 0
+    // (les bords sont jetés), Hann/50 % plate à 1 (COLA, reconstruction
+    // parfaite), rect/50 % plate à 2 (tout compté deux fois, d'où des
+    // segments corrélés). Elle porte donc, à elle seule, la raison d'être
+    // de la fenêtre de Welch.
+    view(
+      'segments',
+      'Découpage et recouvrement',
+      line('windowSum', {
+        color: '#D95319',
+        width: 2.6,
+        label: 'somme des fenêtres',
+        overlays: [
+          // estompé, et volontairement : il est là pour rappeler qu'on
+          // découpe QUELQUE CHOSE, pas pour être lu en ordonnée. À pleine
+          // opacité il écrasait les fenêtres, qui sont le sujet.
+          line('zoomSignal', {
+            color: '#a1a1aa',
+            width: 0.8,
+            opacity: 0.3,
+            label: 'signal (échelle libre)',
+          }),
+          // une seule série, segments séparés par des NaN : le tracé
+          // générique casse le chemin, donc pas de vue sur mesure
+          line('segWindows', { color: '#0072BD', width: 1.6, label: 'fenêtres' }),
+          hline(() => 1, { color: '#a1a1aa', width: 1, dashed: true, label: '1' }),
+        ],
+        axes: { x: { label: 't', unit: 's' }, y: 'poids' },
+      })
+    ),
+
     // LA vue. Le périodogramme brut reste en gris derrière l'estimateur
     // choisi : « regardez l'herbe, et regardez ce que Welch en fait » ne se
     // dit qu'en voyant les deux en même temps.

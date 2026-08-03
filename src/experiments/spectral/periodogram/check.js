@@ -142,7 +142,7 @@ export const checks = [
     category: 'numeric',
     run() {
       // Le point K = 1 de la courbe et le nombre affiché doivent être le
-      // MÊME calcul : la scène 4 affirme à voix haute que le périodogramme
+      // MÊME calcul : la scène 5 affirme à voix haute que le périodogramme
       // brut est le cas dégénéré de Welch, et c'est vérifiable.
       const { observables: o } = compute({ ...BASE, method: 'raw' });
       const i = 0; // le premier point du balayage EST le périodogramme brut
@@ -232,6 +232,46 @@ export const checks = [
         (a2) => a2
       );
       return { ok: worst < 0.05, detail: `écart max ${worst.toFixed(4)} dB sur A₂ = −5…−50 dB` };
+    },
+  },
+  {
+    name: 'la somme des fenêtres raconte les quatre cas, exactement',
+    category: 'numeric',
+    run() {
+      // La vue « Découpage et recouvrement » repose entièrement sur cette
+      // somme, et chacun des quatre cas est une identité EXACTE, pas une
+      // tendance : c'est ce qui permet de l'affirmer devant une salle.
+      //   rect  disjoint  → 1 partout
+      //   rect  50 %      → 2 partout (chaque échantillon compté deux fois)
+      //   Hann  50 %      → 1 partout (COLA : reconstruction parfaite)
+      //   Hann  disjoint  → descend à ~0 entre les segments (bords jetés)
+      const cases = [
+        { method: 'bartlett', win: 'rect', min: 1, max: 1 },
+        { method: 'welch', win: 'rect', min: 2, max: 2 },
+        { method: 'welch', win: 'hann', min: 1, max: 1 },
+      ];
+      const bad = [];
+      for (const c of cases) {
+        const { observables: o } = compute({ ...BASE, method: c.method, win: c.win, N: 4096, L: 256 });
+        // régime intérieur seulement : les bords extrêmes n'ont pas de voisin
+        let lo = Infinity;
+        let hi = -Infinity;
+        for (let i = 256; i < o.windowSum.y.length - 256; i++) {
+          lo = Math.min(lo, o.windowSum.y[i]);
+          hi = Math.max(hi, o.windowSum.y[i]);
+        }
+        if (Math.abs(lo - c.min) > 1e-12 || Math.abs(hi - c.max) > 1e-12)
+          bad.push(`${c.method}/${c.win}: [${lo.toFixed(6)}, ${hi.toFixed(6)}] ≠ [${c.min}, ${c.max}]`);
+      }
+      // et le cas qui MOTIVE le recouvrement : Hann disjoint jette les bords
+      const { observables: h } = compute({ ...BASE, method: 'bartlett', win: 'hann', N: 4096, L: 256 });
+      let lo = Infinity;
+      for (let i = 256; i < h.windowSum.y.length - 256; i++) lo = Math.min(lo, h.windowSum.y[i]);
+      if (lo > 1e-9) bad.push(`bartlett/hann: creux à ${lo.toFixed(6)}, attendu ~0`);
+      return {
+        ok: bad.length === 0,
+        detail: bad.length ? bad.join(' · ') : 'rect/disjoint=1, rect/50 %=2, Hann/50 %=1, Hann/disjoint→0 (exact)',
+      };
     },
   },
   standardChecks.determinism(compute, BASE, 'psd'),
