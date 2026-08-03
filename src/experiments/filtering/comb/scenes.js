@@ -1,8 +1,21 @@
 // Lecture script — auto-discovered by the registry.
 export default [
   {
+    id: 'through',
+    title: 'Scène 1 · Le signal entre, l\'écho sort',
+    view: 'time',
+    params: { structure: 'ff', D: 40, g: 0.9, source: 'square', f0: 110 },
+    visible: ['D', 'g'],
+    notes: `Le filtre le plus simple à comprendre dans le temps : la sortie, c'est
+l'entrée PLUS elle-même retardée de D échantillons. Bouger D et regarder la
+copie glisser ; bouger g et la regarder pâlir.
+Question à poser AVANT de passer en fréquence : « un simple écho, ça s'entend
+comment sur un spectre ? » Réponse attendue : « ça ne change rien ».
+Les deux onglets suivants montrent que si — un peigne, dents à Fs/D.`,
+  },
+  {
     id: 'teeth',
-    title: 'Scène 1 · Un écho fait un peigne',
+    title: 'Scène 2 · Un écho fait un peigne',
     view: 'spectrum',
     params: { structure: 'ff', D: 40, g: 0.9, source: 'square', f0: 110 },
     visible: ['D', 'g'],
@@ -14,7 +27,7 @@ lisible du cours.`,
   },
   {
     id: 'echo',
-    title: "Scène 2 · L'écho récursif",
+    title: "Scène 3 · L'écho récursif",
     view: 'impulse',
     params: { structure: 'ff', D: 40, g: 0.7, source: 'square', f0: 110 },
     visible: ['structure', 'g'],
@@ -26,7 +39,7 @@ filtre avec du bruit et vous avez une corde de guitare (Karplus-Strong).`,
   },
   {
     id: 'align',
-    title: 'Scène 3 · Dents sur harmoniques',
+    title: 'Scène 4 · Dents sur harmoniques',
     view: 'spectrum',
     params: { structure: 'fb', D: 32, g: 0.8, source: 'square', f0: 250 },
     visible: ['D', 'g'],
@@ -38,7 +51,7 @@ le filtre n'a pas changé ? »`,
   },
   {
     id: 'sign',
-    title: 'Scène 4 · Le peigne complémentaire',
+    title: 'Scène 5 · Le peigne complémentaire',
     view: 'spectrum',
     params: { structure: 'ff', D: 40, g: 0.9, source: 'saw', f0: 110 },
     visible: ['g'],

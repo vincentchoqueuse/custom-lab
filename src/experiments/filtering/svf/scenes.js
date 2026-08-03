@@ -1,8 +1,22 @@
 // Lecture script — auto-discovered by the registry.
 export default [
   {
+    id: 'through',
+    title: 'Scène 1 · Le signal entre, le signal sort',
+    view: 'time',
+    params: { source: 'square', f0: 110, fc: 500, Q: 2, output: 'lp' },
+    visible: ['fc', 'output'],
+    notes: `Deux multiplications par échantillon, et le carré s'arrondit. Bouger f_c
+et regarder la sortie changer de forme en direct ; changer de sortie (passe-bas,
+passe-haut, passe-bande, notch) sans rien recalculer d'autre — c'est TOUT
+l'intérêt de la structure à variables d'état.
+Question à poser avant de changer d'onglet : « quelle sortie donne un signal
+qui ressemble encore à un carré ? » Le passe-haut : il garde les angles et
+jette la pente.`,
+  },
+  {
     id: 'sculpt',
-    title: 'Scène 1 · Sculpter les harmoniques',
+    title: 'Scène 2 · Sculpter les harmoniques',
     view: 'spectrum',
     params: { source: 'square', f0: 110, fc: 500, Q: 2, output: 'lp' },
     visible: ['fc', 'output'],
@@ -14,7 +28,7 @@ Descendre f_c sous 330 Hz : il ne reste que la fondamentale — un sinus.`,
   },
   {
     id: 'resonance',
-    title: 'Scène 2 · La résonance chante',
+    title: 'Scène 3 · La résonance chante',
     view: 'spectrum',
     params: { source: 'saw', f0: 110, fc: 550, Q: 12, output: 'lp' },
     visible: ['fc', 'Q'],
@@ -26,7 +40,7 @@ le ringing à f_c s'installe dans la forme d'onde.`,
   },
   {
     id: 'four',
-    title: 'Scène 3 · Quatre filtres pour deux multiplications',
+    title: 'Scène 4 · Quatre filtres pour deux multiplications',
     view: 'outputs',
     params: { source: 'square', f0: 110, fc: 600, Q: 2, output: 'lp' },
     visible: ['Q', 'fc'],
@@ -38,7 +52,7 @@ règne sur les synthétiseurs depuis les années 80.`,
   },
   {
     id: 'notch',
-    title: 'Scène 4 · Le notch chirurgical',
+    title: 'Scène 5 · Le notch chirurgical',
     view: 'spectrum',
     params: { source: 'square', f0: 110, fc: 330, Q: 8, output: 'notch' },
     visible: ['fc', 'Q'],

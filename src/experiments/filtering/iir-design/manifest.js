@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, plane, line, vline } from '../../../core/views.js';
+import { view, plane, line, stem, vline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -37,6 +37,23 @@ export default {
       unit: 'Hz',
       precision: 0,
     }),
+    source: select('signal', {
+      description: 'signal envoyé dans le filtre',
+      options: [
+        { value: 'square', label: 'carré' },
+        { value: 'saw', label: 'dent de scie' },
+      ],
+      default: 'square',
+    }),
+    f0: float('f₀', {
+      description: 'fondamentale du signal d\'entrée',
+      min: 50,
+      max: 800,
+      step: 10,
+      default: 200,
+      unit: 'Hz',
+      precision: 0,
+    }),
     Amax: float('A_max', {
       description: 'ondulation / niveau définissant la coupure',
       min: 0.1,
@@ -51,12 +68,36 @@ export default {
   groups: [
     { title: 'Prototype analogique', params: ['family', 'n', 'Amax'] },
     { title: 'Discrétisation', params: ['method', 'fc'] },
+    { title: 'Signal de test', params: ['source', 'f0'] },
   ],
 
   views: [
     view(
+      'time',
+      'Réponse temporelle',
+      line('tOut', {
+        width: 1.8,
+        label: 'sortie',
+        overlays: [line('tIn', { color: '#D95319', dashed: true, label: 'entrée' })],
+        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
+      })
+    ),
+
+    view(
+      'impulse',
+      'Réponse impulsionnelle',
+      stem('impulseDig', {
+        color: '#0072BD',
+        size: 2.4,
+        width: 1.1,
+        label: 'h[n] du filtre numérique',
+        axes: { x: 'n', y: 'h[n]' },
+      })
+    ),
+
+    view(
       'response',
-      'Numérique vs analogique',
+      'Réponse fréquentielle',
       line('respDig', {
         width: 2,
         label: 'numérique',
@@ -70,7 +111,7 @@ export default {
         },
       })
     ),
-    plane('zplane', 'Le plan z', {
+    plane('zplane', 'Pôles et zéros', {
       clouds: [{ source: 'zeros', color: '#0072BD', r: 4, opacity: 0.95, label: 'zéros' }],
       markers: { source: 'poles', color: '#D95319', label: 'pôles' },
       circle: { radius: 1, label: 'cercle unité (stabilité)' },
@@ -84,7 +125,7 @@ export default {
     }),
     view(
       'warp',
-      'Le warping',
+      'Warping fréquentiel',
       line('warp', {
         width: 2,
         label: 'warping Ω(f) = 2Fs·tan(πf/Fs)',

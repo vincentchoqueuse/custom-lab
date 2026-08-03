@@ -1,8 +1,22 @@
 // Lecture script — auto-discovered by the registry.
 export default [
   {
+    id: 'through',
+    title: 'Scène 1 · Le signal entre, le signal sort',
+    view: 'signal',
+    params: { fc: 1000, N: 21, win: 'hann' },
+    visible: ['fc'],
+    notes: `Le filtre à l'œuvre, avant toute théorie : un signal entre, sa version
+filtrée sort — et sort EN RETARD, décalé de (N−1)/2 échantillons. Ce retard
+n'est pas un défaut de réglage, il est la contrepartie de la causalité, et la
+scène 5 le mesure.
+Question à poser : « où est passé le contenu au-dessus de f_c ? »
+Bouger f_c et regarder la sortie se lisser. Les onglets suivants montrent
+d'où vient ce comportement : les coefficients, puis la réponse fréquentielle.`,
+  },
+  {
     id: 'truncate',
-    title: "Scène 1 · Tronquer l'infini",
+    title: "Scène 2 · Tronquer l'infini",
     view: 'impulse',
     params: { fc: 1000, N: 21, win: 'rect' },
     visible: ['N'],
@@ -14,7 +28,7 @@ Question : « que coûte chaque coefficient de plus ? » (une multiplication par
   },
   {
     id: 'gibbs',
-    title: 'Scène 2 · Gibbs ne cède pas',
+    title: 'Scène 3 · Gibbs ne cède pas',
     view: 'response',
     params: { fc: 1000, N: 21, win: 'rect' },
     visible: ['N'],
@@ -26,7 +40,7 @@ de méthode.`,
   },
   {
     id: 'windows',
-    title: 'Scène 3 · La fenêtre achète des décibels',
+    title: 'Scène 4 · La fenêtre achète des décibels',
     view: 'response',
     params: { fc: 1000, N: 45, win: 'rect' },
     visible: ['win', 'N'],
@@ -38,7 +52,7 @@ choisir où mettre ses décibels.`,
   },
   {
     id: 'delay',
-    title: 'Scène 4 · Propre, mais en retard',
+    title: 'Scène 5 · Propre, mais en retard',
     view: 'signal',
     params: { fc: 500, N: 81, win: 'hamming' },
     visible: ['N'],

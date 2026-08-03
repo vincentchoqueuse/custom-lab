@@ -37,7 +37,7 @@ export default {
   views: [
     view(
       'time',
-      'Temporel',
+      'Réponse temporelle',
       line('tOut', {
         width: 1.8,
         label: 'sortie',
@@ -55,7 +55,7 @@ export default {
 
     view(
       'spectrum',
-      'Fréquentiel',
+      'Réponse fréquentielle',
       line('specOut', {
         width: 1.8,
         label: 'sortie',

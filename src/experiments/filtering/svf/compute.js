@@ -86,6 +86,24 @@ export function compute({ source, f0, fc, Q, output }) {
   }
   const y = outs[output];
 
+  // Impulse response of the SELECTED output, through the very same loop —
+  // a unit impulse instead of the periodic signal, from a rested state.
+  const NIMP = 128;
+  const hn = new Float64Array(NIMP);
+  const hv = new Float64Array(NIMP);
+  {
+    let l = 0;
+    let b2 = 0;
+    for (let n = 0; n < NIMP; n++) {
+      const xn = n === 0 ? 1 : 0;
+      l += f1 * b2;
+      const h = xn - l - q1 * b2;
+      b2 += f1 * h;
+      hn[n] = n;
+      hv[n] = output === 'lp' ? l : output === 'hp' ? h : output === 'bp' ? b2 : h + l;
+    }
+  }
+
   const tIn = steadyTime(x, f0);
   const tOut = steadyTime(y, f0);
 
@@ -110,6 +128,7 @@ export function compute({ source, f0, fc, Q, output }) {
   return {
     observables: {
       tIn,
+      impulse: { x: hn, y: hv },
       tOut,
       specIn,
       specOut,

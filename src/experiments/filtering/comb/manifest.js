@@ -59,7 +59,7 @@ export default {
   views: [
     view(
       'time',
-      'Temporel',
+      'Réponse temporelle',
       line('tOut', {
         width: 1.8,
         label: 'sortie',
@@ -70,14 +70,14 @@ export default {
 
     view(
       'impulse',
-      "L'écho",
+      'Réponse impulsionnelle',
       stem('impulse', {
         axes: { x: 'n', y: 'h[n]' },
       })
     ),
     view(
       'spectrum',
-      'Fréquentiel',
+      'Réponse fréquentielle',
       line('specOut', {
         width: 1.8,
         label: 'sortie',
