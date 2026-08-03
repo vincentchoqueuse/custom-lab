@@ -39,6 +39,12 @@
     return out;
   });
 
+  const curves = $derived.by(() =>
+    (spec.curves ?? [])
+      .map((c) => ({ ...c, ...(val(c.source) ?? {}) }))
+      .filter((c) => c.x)
+  );
+
   const segments = $derived(
     typeof spec.segments === 'string' ? (val(spec.segments) ?? []) : (spec.segments ?? [])
   );
@@ -46,6 +52,9 @@
   const legend = $derived(
     [
       ...(spec.markers?.label ? [{ label: spec.markers.label, color: spec.markers.color }] : []),
+      ...(spec.curves ?? [])
+        .filter((c) => c.label)
+        .map((c) => ({ label: c.label, color: c.color })),
       ...(spec.clouds ?? [])
         .filter((c) => c.label)
         .map((c) => ({ label: c.label, color: c.color })),
@@ -58,6 +67,8 @@
 
 <IQPlane
   {clouds}
+  {curves}
+  symmetric={spec.symmetric !== false}
   markers={spec.markers ? val(spec.markers.source) : null}
   markerColor={spec.markers?.color ?? '#EDB120'}
   labels={spec.markers?.labels ? val(spec.markers.labels) : null}

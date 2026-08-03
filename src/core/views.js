@@ -96,11 +96,14 @@ export function view(id, title, spec) {
  * Declarative EQUAL-ASPECT plane (I/Q, poles, z-plane): the one view shape
  * that a cartesian plot cannot express, since circles must stay circles.
  * Everything is resolved against the observables by ui/plots/PlanePlot:
+ *   curves:   [{source, color, width, dashed, label}]   polylines
  *   clouds:   [{source, color, r, opacity, max, label}]  point sets
  *   markers:  {source, color, labels, label}             emphasized points
  *   segments: an observable name or a literal [{x1,y1,x2,y2}]
  *   circle:   {radius: number | p => n, color, label}    guide circle
  *   minHalf/maxHalf: number or p => number               window bounds
+ *   symmetric: false                                     frame the data,
+ *     not the origin (a Nyquist locus lives under the real axis)
  *   axes:     {x, y} labels
  * The legend is built from the labels, as in the cartesian plots.
  */
@@ -111,6 +114,10 @@ export function plane(id, title, spec = {}) {
   for (const c of spec.clouds ?? []) {
     if (c === null || typeof c !== 'object' || typeof c.source !== 'string')
       throw new ViewError(`${where}: each cloud needs a { source } observable name`);
+  }
+  for (const c of spec.curves ?? []) {
+    if (c === null || typeof c !== 'object' || typeof c.source !== 'string')
+      throw new ViewError(`${where}: each curve needs a { source } observable name`);
   }
   if (spec.markers != null && typeof spec.markers.source !== 'string')
     throw new ViewError(`${where}: markers needs a { source } observable name`);
@@ -159,6 +166,7 @@ export function crossCheckSources(manifest, observables, params) {
     if (v.kind === 'plane') {
       const names = [
         ...(v.spec.clouds ?? []).map((c) => c.source),
+        ...(v.spec.curves ?? []).map((c) => c.source),
         v.spec.markers?.source,
         v.spec.markers?.labels,
         typeof v.spec.segments === 'string' ? v.spec.segments : null,
