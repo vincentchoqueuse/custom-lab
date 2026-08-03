@@ -399,6 +399,15 @@ kbd {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  flex: 0 1 auto;
+}
+
+/* The sidebar toggle is the one control that must NEVER shrink: it is how a
+   phone gets back to the catalogue. It was being crushed to 0 px wide,
+   because `.right` had no min-width and therefore refused to shrink at all,
+   so the whole overflow landed on `.left`. */
+.header .side-open {
+  flex: 0 0 auto;
 }
 
 .header .crumb {
@@ -418,6 +427,15 @@ kbd {
   align-items: center;
   gap: 8px;
   justify-content: flex-end;
+  /* shrinkable, and the scene picker inside is what yields — the icon
+     buttons keep their size, the long title gets the ellipsis */
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.header .right > .icon-btn,
+.header .right > a {
+  flex: 0 0 auto;
 }
 
 .icon-btn {
@@ -646,18 +664,37 @@ kbd {
   min-width: 0;
 }
 
+/* The ghost that gives the picker its width: same font and same box as the
+   select, laid out in flow but invisible. The select is absolutely placed
+   over it, so the control is exactly as wide as the title it displays. */
+.tabs-sizer,
 .tabs-select select {
-  appearance: none;
-  width: 100%;
   padding: 8px 32px 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--muted);
-  color: var(--foreground);
+  border: 1px solid transparent;
   font: inherit;
   font-size: 13.5px;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tabs-sizer {
+  visibility: hidden;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.tabs-select select {
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-width: 0;
+  border-color: var(--border);
+  border-radius: 10px;
+  background: var(--muted);
+  color: var(--foreground);
 }
 
 .tabs-select svg {
@@ -1263,29 +1300,53 @@ kbd {
     display: none;
   }
 
+  /* Sized by its own content — which, thanks to the ghost, is the CURRENT
+     title and not the longest one. `1 1 0` filled the whole bar (212 px to
+     show a word needing 140); basis `auto` on the longest option overflowed
+     it. Shrink stays at 1 so a long title yields to the actions instead of
+     pushing them onto a second line. */
   .tabs-select {
     display: flex;
-    flex: 1 1 auto;
-    max-width: 60%;
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  /* nowrap, or the shrink above never happens: a flex container wraps on
+     the items' BASE sizes, before shrinking is considered. "Ce que ça coûte
+     à la boucle" (214 px) plus the actions came to 344 px in a 342 px bar,
+     so the line broke instead of the title yielding. */
+  .viewbar {
+    flex-wrap: nowrap;
+  }
+
+  .actionbar {
+    flex: 0 0 auto;
   }
 
   /* Same problem, worse: a scene is titled "Scène 1 · La forme compagne :
      x = (y, ẏ)" and the picker was wrapping it onto four lines, eating a
      third of the screen before the plot got any. One line, ellipsis, and the
      full title is still one tap away in the menu. */
-  /* bounded, so the ellipsis does the work: left unbounded the picker simply
-     pushed the link, QR and fullscreen buttons off the right edge instead of
-     wrapping — one overflow traded for another */
+  /* The picker is the only elastic thing in the header: it takes what is
+     left once the toggle and the four icon buttons have their size, and the
+     ellipsis does the rest. A fixed vw cap was the wrong tool — it works at
+     390 px and overflows at 320. */
   .preset-picker {
     min-width: 0;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
   }
 
   .preset-picker > button {
     width: 100%;
-    max-width: 46vw;
     min-width: 0;
     padding: 8px 10px;
+  }
+
+  /* "Automatique / Boucler un second ordre" truncated to "A.." tells nobody
+     anything, and it was costing the toggle its room. The sidebar and the
+     plot already say where you are. */
+  .header .crumb {
+    display: none;
   }
 
   .preset-picker > button span {

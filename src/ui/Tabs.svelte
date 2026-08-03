@@ -18,6 +18,8 @@
   import { STR } from '../core/strings.js';
 
   const m = $derived(manifest());
+  // the title the picker is CURRENTLY showing — see the sizer below
+  const current = $derived(m.views.find((v) => v.id === app.view) ?? m.views[0]);
 </script>
 
 <div class="tabs" role="tablist">
@@ -34,6 +36,12 @@
 </div>
 
 <div class="tabs-select">
+  <!-- A <select> is sized by its LONGEST option, never by the one it shows:
+       "Signal temporel" was rendered in a box wide enough for "Ce que ça
+       coûte à la boucle", so the picker ate the bar and the actions got the
+       scraps. This ghost carries the CURRENT title and gives the control its
+       width; the select is laid over it. Ellipsis when the room runs out. -->
+  <span class="tabs-sizer" aria-hidden="true">{current?.title ?? ''}</span>
   <select
     aria-label={STR.VIEW_PICKER}
     value={app.view}
