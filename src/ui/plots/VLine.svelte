@@ -1,6 +1,8 @@
 <script>
   // Vertical reference line (param, scalar observable, or p => fn).
-  import { FONT_MONO } from './frame.js';
+  // Son nom est porté par la légende, comme celui de toute autre couche :
+  // écrit au sommet du trait, il devenait illisible dès que deux repères
+  // tombaient au même endroit.
 
   let { xs, x, spec = {}, h, k = 1, kt = 1 } = $props();
 
@@ -22,14 +24,5 @@
     stroke-dasharray={spec.dashed ? `${5 * k} ${4 * k}` : null}
     opacity={spec.opacity ?? 1}
   />
-  {#if spec.label}
-    <text
-      x={xs(x) + 6}
-      y={14 * kt}
-      font-size={12 * kt}
-      fill={color}
-      font-family={FONT_MONO}>{spec.label}</text
-    >
-  {/if}
 </g>
 {/if}

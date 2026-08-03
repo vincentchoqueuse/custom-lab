@@ -29,6 +29,25 @@
   };
 </script>
 
+{#if entries.length}
+  <!-- Un fond, parce que la légende est POSÉE SUR le tracé : depuis que les
+       lignes de repère y portent leur nom, elle en compte plus, et un nom
+       qui traverse une courbe de la même couleur ne se lit plus depuis le
+       fond de la salle. Le cadre du graphe est clair par contrat
+       (lisibilité au vidéoprojecteur), donc un blanc translucide y tient
+       dans les deux thèmes. -->
+  {@const bw = Math.max(...entries.map((e) => e.label.length * 6.6 * kt)) + 34}
+  <rect
+    x={iw - 4 - bw}
+    y={2 * kt}
+    width={bw}
+    height={(entries.length - 1) * 18 * kt + 18 * kt}
+    rx={4}
+    fill="#ffffff"
+    opacity="0.72"
+  />
+{/if}
+
 {#each entries as e, i (e.label)}
   {@const off = app.hidden.includes(e.label)}
   {@const w = Math.max(60, e.label.length * 6.6 * kt)}
@@ -46,17 +65,33 @@
     <!-- cible de clic généreuse : la pastille seule fait 14 px de large et
          serait invisable depuis un pupitre, a fortiori au doigt -->
     <rect x={-w - 8} y={-11 * kt} width={w + 8} height={16 * kt} fill="transparent" />
-    <rect
-      x="-14"
-      y="-4"
-      width="14"
-      height="5"
-      rx="2"
-      fill={off ? 'none' : dataColor(e.color)}
-      stroke={dataColor(e.color)}
-      stroke-width={off ? 1.2 : 0}
-      opacity={off ? 0.6 : 1}
-    />
+    {#if e.dashed}
+      <!-- une pastille tiretée pour une couche tiretée : c'est ce qui
+           distingue la théorie de la mesure quand les deux portent la
+           même couleur -->
+      <line
+        x1="-14"
+        x2="0"
+        y1="-1.5"
+        y2="-1.5"
+        stroke={dataColor(e.color)}
+        stroke-width="2.4"
+        stroke-dasharray="4 3"
+        opacity={off ? 0.45 : 1}
+      />
+    {:else}
+      <rect
+        x="-14"
+        y="-4"
+        width="14"
+        height="5"
+        rx="2"
+        fill={off ? 'none' : dataColor(e.color)}
+        stroke={dataColor(e.color)}
+        stroke-width={off ? 1.2 : 0}
+        opacity={off ? 0.6 : 1}
+      />
+    {/if}
     <text
       x="-20"
       y="2"
