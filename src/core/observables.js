@@ -4,11 +4,16 @@
 
 /**
  * @param {*} value
- * @returns {'scalar'|'vector'|'series'|'records'|'unknown'}
+ * @returns {'scalar'|'text'|'vector'|'series'|'records'|'unknown'}
  */
 export function inferType(value) {
   if (value == null) return 'unknown';
   if (typeof value === 'number') return 'scalar';
+  // A named quantity is not always a number: a regime ("plein recouvrement"),
+  // a verdict, the names of the two state components. They belong in the
+  // statline like any other reading — and were silently dropped as 'unknown'
+  // until an experiment noticed one of them never appeared.
+  if (typeof value === 'string') return 'text';
   if (ArrayBuffer.isView(value)) return 'vector';
   if (Array.isArray(value)) {
     if (value.length && typeof value[0] === 'object' && value[0] !== null) return 'records';

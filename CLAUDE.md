@@ -62,9 +62,10 @@ graphic components       — generic (Histogram, Line, Scatter…), reused every
 ## Observables
 
 Every displayable quantity is a named observable produced by `compute()`. Its type is
-**inferred by default** (`Float64Array` → vector, `number` → scalar, `{x, y}` →
-series, `[{...}]` → records); an optional `meta` field resolves ambiguities and adds
-richness (unit, label, precision). Export, inspector and overlays rely on these types
+**inferred by default** (`Float64Array` → vector, `number` → scalar, `string` → text,
+`{x, y}` → series, `[{...}]` → records); an optional `meta` field resolves ambiguities
+and adds richness (unit, label, precision). A `text` observable is a reading like any
+other — a regime name, a verdict — and shows in the statline beside the numbers. Export, inspector and overlays rely on these types
 — without imposing ceremony on the simple case.
 
 ## Scenes (presets)

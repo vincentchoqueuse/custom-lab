@@ -21,13 +21,17 @@
 
   const obs = $derived(app.result.observables);
   const status = $derived(app.result.status);
+  // scalars AND text: a regime name is a reading like any other
   const scalars = $derived(
     obs
-      ? Object.entries(obs).filter(([, o]) => o.type === 'scalar' && o.meta?.label)
+      ? Object.entries(obs).filter(
+          ([, o]) => (o.type === 'scalar' || o.type === 'text') && o.meta?.label
+        )
       : []
   );
 
   function statText([, o]) {
+    if (o.type === 'text') return `${o.meta.label} : ${o.value}`;
     const unit = o.meta.unit ? ` ${o.meta.unit}` : '';
     return `${o.meta.label} = ${formatValue(o.value, o.meta.precision)}${unit}`;
   }

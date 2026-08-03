@@ -6,5 +6,5 @@
 export default {
   title: 'Signaux analogiques',
   order: 5,
-  figureOrder: ['time', 'gain', 'poles', 'spectrum', 'phase'],
+  figureOrder: ['time', 'response', 'gain', 'poles', 'spectrum', 'phase'],
 };

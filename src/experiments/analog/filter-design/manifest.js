@@ -6,7 +6,7 @@ import { requiredOrder } from './compute.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'filter-design',
-  order: 5,
+  order: 6,
   title: 'Design de filtres analogiques',
   subtitle: "Un gabarit, quatre familles — l'ordre est un résultat, pas un choix",
   tags: ['analogique', 'filtre', 'Butterworth', 'Chebyshev', 'elliptique', 'gabarit'],
