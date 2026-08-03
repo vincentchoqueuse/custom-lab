@@ -1,5 +1,6 @@
-import { compute } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { compute, theoreticalSidelobe, windowSpectrum } from './compute.js';
+import { standardChecks, maxGap } from '../../../core/checks.js';
+import { windowValue } from '../../../core/numeric.js';
 
 const BASE = { N: 256, pad: 4, f1: 200, df: 15, a2: -20, win: 'rect', seed: 1 };
 
@@ -65,4 +66,71 @@ export const checks = [
     },
   },
   standardChecks.determinism(compute, BASE, 'spectrum'),
+  {
+    name: 'lobes secondaires : la théorie calculée recoupe la littérature',
+    category: 'numeric',
+    run() {
+      // Les quatre chiffres du cours (Harris 1978), retrouvés par le calcul
+      // en forme close et non recopiés dans compute.js. À N = 1024 la
+      // fenêtre est assez longue pour que la valeur asymptotique soit
+      // atteinte, donc la comparaison est légitime à 0.02 dB.
+      const lit = { rect: -13.26, hann: -31.47, hamming: -42.68, blackman: -58.11 };
+      const worst = maxGap(
+        Object.keys(lit),
+        (win) => theoreticalSidelobe(win, 1024).db,
+        (win) => lit[win]
+      );
+      const got = Object.keys(lit)
+        .map((w) => `${w} ${theoreticalSidelobe(w, 1024).db.toFixed(2)}`)
+        .join(', ');
+      return { ok: worst < 0.02, detail: `${got} — écart max ${worst.toFixed(3)} dB` };
+    },
+  },
+  {
+    name: 'la forme close vaut la somme directe (1e-14)',
+    category: 'numeric',
+    run() {
+      // La forme close n'est pas une approximation : c'est la même TFtd,
+      // réarrangée en noyaux de Dirichlet décalés. Si elle dérivait, la
+      // « théorie » affichée serait une fiction — donc on l'épingle contre
+      // la définition, sur les quatre fenêtres et trois longueurs.
+      let worst = 0;
+      for (const win of ['rect', 'hann', 'hamming', 'blackman']) {
+        for (const N of [64, 256, 1024]) {
+          const w = Float64Array.from({ length: N }, (_, n) => windowValue(win, n, N));
+          for (let b = 0; b <= 12; b += 0.25) {
+            let re = 0;
+            let im = 0;
+            for (let n = 0; n < N; n++) {
+              const th = (2 * Math.PI * b * n) / N;
+              re += w[n] * Math.cos(th);
+              im -= w[n] * Math.sin(th);
+            }
+            worst = Math.max(worst, Math.abs(windowSpectrum(win, N, b) - Math.hypot(re, im)) / N);
+          }
+        }
+      }
+      return { ok: worst < 1e-14, detail: `max|Δ|/N = ${worst.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'le tracé lit le bon lobe : sous la théorie, et de moins en moins',
+    category: 'numeric',
+    run() {
+      // La grille du tracé (16× de bourrage) ne tombe pas sur le sommet du
+      // lobe : la lecture est donc TOUJOURS sous la théorie, et l'écart se
+      // resserre quand la fenêtre s'allonge. Une lecture AU-DESSUS
+      // signalerait un bug de normalisation ou de recherche du lobe.
+      const bad = [];
+      for (const win of ['rect', 'hann', 'hamming', 'blackman']) {
+        const gaps = [64, 256, 1024].map((N) => {
+          const { observables: o } = compute({ ...BASE, win, N });
+          return o.sidelobeGap.value;
+        });
+        if (gaps.some((g) => g > 1e-9)) bad.push(`${win}: lu au-dessus de la théorie (${gaps.map((g) => g.toFixed(3))})`);
+        if (Math.abs(gaps[2]) > 0.35) bad.push(`${win}: écart ${gaps[2].toFixed(3)} dB encore grand à N=1024`);
+      }
+      return { ok: bad.length === 0, detail: bad.length ? bad.join(' · ') : 'lu ≤ théorie sur les 4 fenêtres, resserré à N = 1024' };
+    },
+  },
 ];

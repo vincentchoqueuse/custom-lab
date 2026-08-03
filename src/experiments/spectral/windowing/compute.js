@@ -14,6 +14,102 @@ const DB_FLOOR = -120;
 const KPAD = 16; // fixed padding for the window-kernel view
 const KBINS = 12; // kernel view span (bins of Fs/N)
 
+/* ------------------------------------------------------------------------ */
+/* La THÉORIE des lobes secondaires — calculée, jamais tabulée               */
+/* ------------------------------------------------------------------------ */
+//
+// La hauteur du plus haut lobe secondaire est LE chiffre du cours : −13 dB
+// pour la rectangulaire, −31 pour Hann, −43 pour Hamming, −58 pour
+// Blackman. On peut l'écrire au tableau ; on peut aussi le calculer et le
+// confronter à ce que l'écran montre, ce qui est l'objet de l'instrument.
+//
+// Les quatre fenêtres sont des SOMMES DE COSINUS, w[n] = Σ c_m cos(2πmn/N),
+// et la TFtd d'un cosinus fenêtré est un noyau de Dirichlet décalé :
+//
+//   W(b) = Σ_m (c_m/2)·[D(b−m) + D(b+m)],  D(u) = A(u)·e^{−jπu(N−1)/N}
+//   A(u) = sin(πu)/sin(πu/N),  A(0) = N
+//
+// avec b la fréquence EN BINS de Fs/N. La forme close vaut ce que vaut la
+// somme directe (vérifié à 1e-16 sur les quatre fenêtres et N = 64…1024),
+// mais elle coûte trois termes au lieu de N — ce qui compte, parce que le
+// maximum est cherché par balayage puis raffiné, et qu'un curseur se
+// déplace à 30 Hz.
+//
+// Le résultat DÉPEND DE N, et c'est une honnêteté que la table cache : les
+// −42.7 dB de Hamming sont la limite N → ∞, et à N = 64 la fenêtre est
+// trop courte pour les atteindre (−42.4). La théorie affichée est celle de
+// la fenêtre réellement employée, pas d'une fenêtre idéale.
+const WINDOW_COS = Object.freeze({
+  rect: [1],
+  hann: [0.5, -0.5],
+  hamming: [0.54, -0.46],
+  blackman: [0.42, -0.5, 0.08],
+});
+
+const dirichletAmp = (u, N) => {
+  if (Math.abs(u) < 1e-12) return N;
+  const d = Math.sin((Math.PI * u) / N);
+  return Math.abs(d) < 1e-15 ? N : Math.sin(Math.PI * u) / d;
+};
+
+/** |W(b)| de la fenêtre, b en bins de Fs/N — TFtd exacte, en forme close. */
+export function windowSpectrum(win, N, b) {
+  const c = WINDOW_COS[win];
+  let re = 0;
+  let im = 0;
+  for (let m = 0; m < c.length; m++) {
+    const shifts = m === 0 ? [b] : [b - m, b + m];
+    const gain = m === 0 ? c[0] : c[m] / 2;
+    for (const u of shifts) {
+      const g = gain * dirichletAmp(u, N);
+      const ph = (-Math.PI * u * (N - 1)) / N;
+      re += g * Math.cos(ph);
+      im += g * Math.sin(ph);
+    }
+  }
+  return Math.hypot(re, im);
+}
+
+/**
+ * Hauteur théorique du plus haut lobe secondaire, en dB sous le lobe
+ * principal, et sa position en bins. Balayage au 1/64 de bin au-delà du
+ * premier zéro, puis section dorée sur le sommet trouvé : la valeur ne
+ * dépend donc pas du pas de balayage, contrairement à ce que lit l'écran.
+ */
+export function theoreticalSidelobe(win, N, span = 16) {
+  const w0 = windowSpectrum(win, N, 0);
+  const step = 1 / 64;
+  // sortir du lobe principal : jusqu'au premier minimum
+  let prev = w0;
+  let edge = step;
+  for (let b = step; b < span; b += step) {
+    const v = windowSpectrum(win, N, b);
+    if (v > prev) break;
+    prev = v;
+    edge = b;
+  }
+  let best = 0;
+  let bestB = edge;
+  for (let b = edge; b < span; b += step) {
+    const v = windowSpectrum(win, N, b);
+    if (v > best) {
+      best = v;
+      bestB = b;
+    }
+  }
+  let lo = bestB - step;
+  let hi = bestB + step;
+  const R = (Math.sqrt(5) - 1) / 2;
+  for (let i = 0; i < 60; i++) {
+    const c1 = hi - R * (hi - lo);
+    const c2 = lo + R * (hi - lo);
+    if (windowSpectrum(win, N, c1) > windowSpectrum(win, N, c2)) hi = c2;
+    else lo = c1;
+  }
+  const b = (lo + hi) / 2;
+  return { db: 20 * Math.log10(windowSpectrum(win, N, b) / w0), bin: b };
+}
+
 /** |FFT(x zero-padded to nfft)| — returns the magnitude of bins 0..nfft/2. */
 function magSpectrum(x, nfft) {
   const re = new Float64Array(nfft);
@@ -99,6 +195,12 @@ export function compute({ N, pad, f1, df, a2, win }) {
   let sidelobe = DB_FLOOR;
   for (let k = edge; k <= kMax; k++) sidelobe = Math.max(sidelobe, ky[k]);
 
+  // ce que la théorie dit du même chiffre, pour la fenêtre RÉELLEMENT
+  // employée — et l'écart avec ce que le tracé montre, qui est celui du pas
+  // de discrétisation : à 16× de bourrage le sommet du lobe n'est pas
+  // échantillonné, la mesure passe donc légèrement EN DESSOUS de la théorie
+  const th = theoreticalSidelobe(win, N);
+
   const enbw = (N * sw2) / (sw * sw);
 
   // windowed signal + envelope (time view)
@@ -125,7 +227,21 @@ export function compute({ N, pad, f1, df, a2, win }) {
       enbw: { value: enbw, meta: { label: 'ENBW', unit: 'bins', precision: 3 } },
       sidelobe: {
         value: sidelobe,
-        meta: { label: 'lobes secondaires', unit: 'dB', precision: 1 },
+        meta: { label: 'lobes secondaires (lu)', unit: 'dB', precision: 2 },
+      },
+      sidelobeTheory: {
+        value: th.db,
+        meta: { label: 'théorie', unit: 'dB', precision: 2 },
+      },
+      sidelobeTheoryLine: th.db, // hline sur la vue du noyau
+      sidelobeBinLine: th.bin, // vline : où la théorie place ce sommet
+      sidelobeBin: {
+        value: th.bin,
+        meta: { label: 'à', unit: 'bins', precision: 3 },
+      },
+      sidelobeGap: {
+        value: sidelobe - th.db,
+        meta: { label: 'écart lu − théorie', unit: 'dB', precision: 2 },
       },
       binWidth: {
         value: FS / N,
