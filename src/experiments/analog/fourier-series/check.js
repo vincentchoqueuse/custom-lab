@@ -1,7 +1,20 @@
-import { compute } from './compute.js';
-import { standardChecks } from '../../../core/checks.js';
+import { compute, coefficients, meanOf, idealValue } from './compute.js';
+import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
-const BASE = { wave: 'square', N: 10, A: 1, seed: 42 };
+const BASE = { wave: 'square', N: 10, A: 1, alpha: 0.25, seed: 42 };
+
+/** aₙ = 2∫₀¹ x(t)cos(2πnt)dt, by Simpson over the pulse's exact support. */
+function pulseCosineByQuadrature(A, alpha, n, steps = 20000) {
+  const a = -alpha / 2;
+  const b = alpha / 2;
+  const h = (b - a) / steps;
+  let s = 0;
+  for (let i = 0; i <= steps; i++) {
+    const w = i === 0 || i === steps ? 1 : i % 2 ? 4 : 2;
+    s += w * A * Math.cos(2 * Math.PI * n * (a + i * h));
+  }
+  return (2 * s * h) / 3;
+}
 
 export const checks = [
   {
@@ -66,5 +79,97 @@ export const checks = [
       return { ok, detail: `slope square=${sq.toFixed(2)}, triangle=${tr.toFixed(2)}` };
     },
   },
+  {
+    name: 'train d\'impulsions : aₙ = 2Aα·sinc(nα), par quadrature',
+    category: 'numeric',
+    run() {
+      // the coefficient the experiment draws, confronted with the integral it
+      // is supposed to be — Simpson over the exact support, so it is exact
+      const gap = maxGap(
+        range(24, (i) => i + 1),
+        (n) => coefficients('pulse', 1.3, 0.31, n).a,
+        (n) => pulseCosineByQuadrature(1.3, 0.31, n)
+      );
+      return { ok: gap < 1e-12, detail: `max|Δaₙ|=${gap.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'zéros de l\'enveloppe : aₙ = 0 exactement aux rangs k/α',
+    category: 'numeric',
+    run() {
+      // α = 1/8 ⇒ the ranks 8, 16, 24… are missing from the spectrum
+      const gap = maxGap(
+        range(6, (i) => 8 * (i + 1)),
+        (n) => coefficients('pulse', 1, 0.125, n).a
+      );
+      return { ok: gap < 1e-15, detail: `max|a_{k/α}|=${gap.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'α = 1/2 : rangs pairs nuls, impairs à la moitié du carré',
+    category: 'numeric',
+    run() {
+      // the pulse swings A where the ±A square swings 2A: exactly half
+      const even = maxGap(range(15, (i) => 2 * (i + 1)), (n) => coefficients('pulse', 1, 0.5, n).a);
+      const odd = maxGap(
+        range(15, (i) => 2 * i + 1),
+        (n) => Math.abs(coefficients('pulse', 1, 0.5, n).a),
+        (n) => coefficients('square', 1, 0.5, n).b / 2
+      );
+      return {
+        ok: even < 1e-15 && odd < 1e-15,
+        detail: `pairs ${even.toExponential(1)}, impairs ${odd.toExponential(1)}`,
+      };
+    },
+  },
+  {
+    name: 'Parseval sur le train d\'impulsions : a₀² + Σaₙ²/2 = A²α',
+    category: 'numeric',
+    run() {
+      const A = 1;
+      const alpha = 0.25;
+      let p = meanOf('pulse', A, alpha) ** 2;
+      for (let n = 1; n <= 200000; n++) p += coefficients('pulse', A, alpha, n).a ** 2 / 2;
+      const rel = Math.abs(p - A * A * alpha) / (A * A * alpha);
+      return { ok: rel < 1e-5, detail: `écart relatif ${rel.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'valeur moyenne du train d\'impulsions = Aα (moyenne temporelle)',
+    category: 'numeric',
+    run() {
+      // independent route: average the drawn signal over its two periods
+      const { observables: o } = compute({ ...BASE, wave: 'pulse', alpha: 0.4, A: 1.5 });
+      const mean = o.ideal.y.reduce((s, v) => s + v, 0) / o.ideal.y.length;
+      const err = Math.abs(mean - o.dc.value);
+      return { ok: err < 5e-3, detail: `moyenne=${mean.toFixed(4)}, a₀=${o.dc.value.toFixed(4)}` };
+    },
+  },
+  {
+    name: 'Gibbs : la constante ne dépend pas de la forme (carré et impulsions)',
+    category: 'numeric',
+    run() {
+      const sq = compute({ ...BASE, N: 60 }).observables.overshoot.value;
+      const pu = compute({ ...BASE, wave: 'pulse', alpha: 0.4, N: 60 }).observables.overshoot.value;
+      return {
+        ok: Math.abs(sq - 8.95) < 1 && Math.abs(pu - 8.95) < 1,
+        detail: `carré ${sq.toFixed(2)} %, impulsions ${pu.toFixed(2)} %`,
+      };
+    },
+  },
+  {
+    name: 'le signal tracé est bien un créneau de rapport cyclique α',
+    category: 'numeric',
+    run() {
+      // fraction of the period spent at A, over a fine grid
+      const alpha = 0.31;
+      const n = 200001;
+      let hi = 0;
+      for (let i = 0; i < n; i++) hi += idealValue('pulse', 1, alpha, (i + 0.5) / n) === 1 ? 1 : 0;
+      const duty = hi / n;
+      return { ok: Math.abs(duty - alpha) < 1e-4, detail: `mesuré ${duty.toFixed(5)} vs ${alpha}` };
+    },
+  },
   standardChecks.determinism(compute, { ...BASE }, 'reconstruction'),
+  standardChecks.determinism(compute, { ...BASE, wave: 'pulse' }, 'spectrum'),
 ];

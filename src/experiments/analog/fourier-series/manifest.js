@@ -6,8 +6,9 @@ export default {
   id: 'fourier-series',
   order: 1,
   title: 'Séries de Fourier',
-  subtitle: 'Reconstruire un signal harmonique par harmonique — et le phénomène de Gibbs',
-  tags: ['analogique', 'Fourier', 'harmoniques', 'spectre', 'Gibbs'],
+  subtitle:
+    'Reconstruire un signal harmonique par harmonique — enveloppe, Gibbs et rapport cyclique',
+  tags: ['analogique', 'Fourier', 'harmoniques', 'spectre', 'Gibbs', 'train d\'impulsions'],
 
   params: {
     wave: select('signal', {
@@ -16,20 +17,44 @@ export default {
         { value: 'square', label: 'carré' },
         { value: 'triangle', label: 'triangle' },
         { value: 'sawtooth', label: 'dent de scie' },
+        { value: 'pulse', label: 'train d\'impulsions' },
       ],
       default: 'square',
     }),
     N: int('N', { description: 'nombre d\'harmoniques conservées', min: 1, max: 60, default: 5 }),
     A: float('A', { description: 'amplitude', min: 0.2, max: 2, step: 0.05, default: 1 }),
+    alpha: float('α', {
+      description: 'rapport cyclique du train d\'impulsions',
+      min: 0.05,
+      max: 0.95,
+      step: 0.01,
+      default: 0.25,
+      precision: 2,
+      visibleIf: { wave: 'pulse' },
+    }),
     // no seed here: injected by the core (unused: fully deterministic signal)
   },
 
   derived: {
-    fondamental: { label: 'harmoniques paires', calc: (p) => (p.wave === 'sawtooth' ? 'présentes' : 'nulles (symétrie)') },
+    fondamental: {
+      label: 'harmoniques paires',
+      calc: (p) =>
+        p.wave === 'sawtooth'
+          ? 'présentes'
+          : p.wave !== 'pulse'
+            ? 'nulles (symétrie)'
+            : p.alpha === 0.5
+              ? 'nulles (α = 1/2 : c\'est un carré)'
+              : 'présentes',
+    },
+    zeroEnveloppe: {
+      label: 'zéros de l\'enveloppe',
+      calc: (p) => (p.wave === 'pulse' ? `n = k/α = ${(1 / p.alpha).toFixed(1)} ; …` : '—'),
+    },
   },
 
   groups: [
-    { title: 'Signal', params: ['wave', 'A'] },
+    { title: 'Signal', params: ['wave', 'A', 'alpha'] },
     { title: 'Troncature', params: ['N'] },
   ],
 
@@ -50,14 +75,18 @@ export default {
       })
     ),
 
-    // The amplitude spectrum of the kept harmonics.
+    // The amplitude spectrum of the kept harmonics, and the envelope they
+    // sample — a sinc for the pulse train, a 1/n or 1/n² hyperbola otherwise.
     view(
       'spectrum',
       'Spectre',
       bars('spectrum', {
         color: '#0072BD',
         opacity: 0.85,
-        axes: { x: 'n (rang de l\'harmonique)', y: '|bₙ|' },
+        overlays: [
+          line('envelope', { color: '#D95319', width: 2, label: 'enveloppe' }),
+        ],
+        axes: { x: 'n (rang de l\'harmonique)', y: 'amplitude de l\'harmonique' },
       })
     ),
 
