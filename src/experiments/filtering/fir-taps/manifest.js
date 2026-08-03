@@ -5,8 +5,9 @@ import { view, line, stem, vline } from '../../../core/views.js';
 export default {
   id: 'fir-taps',
   order: 1,
-  title: 'RIF à coefficients réglables',
-  subtitle: 'Tapez les coefficients : impulsionnelle, sortie, spectre — les trois vues répondent',
+  title: 'Filtre RIF',
+  subtitle:
+    "Tapez les coefficients : la réponse temporelle, l'impulsionnelle et la fréquentielle suivent",
   tags: ['numérique', 'RIF', 'FIR', 'moyenne glissante', 'convolution'],
 
   params: {

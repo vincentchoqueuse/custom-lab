@@ -4,8 +4,8 @@ import { view, line, stem, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'svf',
-  order: 5,
-  title: "Le filtre à variable d'état (SVF)",
+  order: 3,
+  title: "Filtre IIR à variable d'état",
   subtitle: 'Un signal périodique sculpté — quatre filtres pour deux multiplications',
   tags: ['numérique', 'SVF', 'résonance', 'harmoniques', 'synthèse'],
 
