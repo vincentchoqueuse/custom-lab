@@ -54,6 +54,8 @@ function normalizeScenes(raw, manifest, key) {
       notes: '',
       view: firstView,
       drawer: false,
+      lock: false, // pin the axes on arrival: for the scenes whose whole point
+      //              is that the CURVE moves and the frame does not
       ...s,
     };
   });
