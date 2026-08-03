@@ -35,7 +35,7 @@ export default {
     { title: 'Échantillonnage répété', params: ['N', 'M'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // One concrete sample: the data rug and where the three candidates land.

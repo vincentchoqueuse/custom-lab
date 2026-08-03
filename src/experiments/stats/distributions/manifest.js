@@ -43,7 +43,7 @@ export default {
     { title: 'Paramètres de la loi', params: ['a', 'b', 'mu', 'sigma', 'lambda', 'p', 'n'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // CUSTOM view — justification: the pdf panel switches representation with

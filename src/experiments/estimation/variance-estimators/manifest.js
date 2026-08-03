@@ -33,7 +33,7 @@ export default {
     { title: 'Échantillonnage répété', params: ['N', 'M'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // An estimator IS a random variable: its sampling distribution, M times.

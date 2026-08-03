@@ -77,8 +77,9 @@ the preset list IS the lecture script.
 
 An action is a named operation exposed by the core or an experiment
 (`randomizeSeed`, `resetDefaults`, `revealHidden`, `freeze`, `exportSvg`,
-`exportPng`…). The Prompt Bar renders the actions declared in the manifest; keyboard
-shortcuts bind to them. Adding an action never requires touching the UI.
+`exportPng`…). The view bar renders the actions declared in the manifest, as icon +
+shortcut flush right on the tabs line; keyboard shortcuts bind to them. Adding an
+action never requires touching the UI.
 
 ## Engine capabilities (anti-regression checklist)
 
@@ -89,7 +90,7 @@ An experiment can:
 - ✓ be replayed identically (seed in the URL)
 - ✓ be driven by URL (full state in the hash)
 - ✓ be driven by keyboard (lecture-ready shortcuts)
-- ✓ expose actions in the Prompt Bar
+- ✓ expose actions in the view bar
 - ✓ be numerically verified (`check.js`)
 - ✓ be exported (SVG, PNG, clipboard)
 - ✓ be inspected (raw observables, developer panel)
@@ -114,7 +115,7 @@ Claude.ai):
 - **The plot is the answer**: the central area is devoted to the chart card, with
   zero distraction.
 - **The Prompt Bar**: the scene's 2–4 priority parameters are editable pills at the
-  bottom — where a chatbot puts its input box — next to the actions.
+  bottom — where a chatbot puts its input box, and nothing else there.
 - **Preset as model picker**: lecture scenes are selected from a central dropdown in
   the header, like choosing `GPT-4o / Claude` in a chatbot.
 - **Progressive disclosure**: ultra-clean screen by default; the full parameter
@@ -128,13 +129,13 @@ Claude.ai):
 ├──────────────────────────────────────────────────────────────────────────┤
 │ 🗒 [Teacher Mode banner — current scene notes, when enabled]             │
 ├──────────────────────────────────────────────────────────────────────────┤
-│  [Tabs: Realizations | Distribution of x̄ | Coverage vs N]               │
+│  [Realizations | Distribution of x̄ | Coverage vs N]     [🎲 R][❄ F][⚙ P] │
 │                                                                          │
 │                       [ MAIN PLOT CARD ]                                 │
 │                                                                          │
 │            statline: coverage = 0.948 · half-width ±0.72                 │
 ├──────────────────────────────────────────────────────────────────────────┤
-│  [ 🎛 N = 30 ] [ 🎛 1−α = 0.95 ]         [ 🎲 Draw (R) ] [ ⚙ Parameters (P) ] │
+│  [ 🎛 N = 30 ] [ 🎛 1−α = 0.95 ]                                          │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -159,11 +160,19 @@ in the URL). Light-background PlotFrame (projector legibility), pure SVG renderi
 statline of key observables, export. Minimal tabs when the experiment has several
 views.
 
-**Prompt Bar (bottom bar).** Fixed at the bottom, inspired by LLM input bars. Pills =
-the active preset's `visible` params. Clicking a pill opens a **NON-modal popover**
-(slider/toggle) above it — the popover stays open while dragging and **the plot
-remains fully visible**: the look→adjust→look loop is never interrupted. Right of the
-pills: the manifest's actions (including `🎲 Draw`).
+**View bar (tabs line).** The representations on the left when the experiment has
+several, and flush right the instrument's actions — `randomizeSeed`, `freeze`, the
+Parameters toggle, `revealHidden` when a pill is masked. **Icon + shortcut only**:
+the icon is read at a glance from the back of the room and the letter is what the
+hand presses; the words were the widest part and said the least. Full labels live in
+the tooltip and the aria-label. On a phone the shortcut hint disappears, the icons
+stay.
+
+**Prompt Bar (bottom bar).** Fixed at the bottom, inspired by LLM input bars, and
+holding ONLY the pills = the active preset's `visible` params. Clicking a pill opens
+a **NON-modal popover** (slider/toggle) above it — the popover stays open while
+dragging and **the plot remains fully visible**: the look→adjust→look loop is never
+interrupted. A scene with no visible pill shows no bar at all.
 
 **Parameter drawer (right slide-in).** Hidden by default, slides in (~300 px),
 generated from the schema (groups, visibleIf, validate, derived, display). Contains
@@ -263,7 +272,9 @@ registry at load time):
 - **`seed` is injected** into every schema (`type: 'seed'`, default 42). Determinism
   is a contract requirement, not an experiment choice — impossible to forget.
 - **`type: 'float'`** is the implicit param type.
-- **`actions`** defaults to `['randomizeSeed', 'freeze', 'resetDefaults']`.
+- **`actions`** defaults to `['randomizeSeed', 'freeze']`. `resetDefaults` stays in
+  the registry for a manifest that wants it: in a lecture the scene picker IS the
+  reset. Actions live in the view bar (tabs line, flush right), as icon + shortcut.
 - **`groups`** absent → one flat group.
 - **`layout: 'plot'`** is implied when a view has a `plot` key.
 - **`order` ranks the experiment inside its subject** — the lecture progression, not

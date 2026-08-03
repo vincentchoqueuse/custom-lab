@@ -53,7 +53,7 @@ export default {
     { title: 'Moyennage', params: ['n', 'M'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // Fully declarative: binned density of the M means (edges aligned on the

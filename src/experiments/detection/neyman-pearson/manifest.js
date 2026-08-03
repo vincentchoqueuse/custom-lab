@@ -46,7 +46,7 @@ export default {
     { title: 'Monte Carlo', params: ['M'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // The two densities of the test statistic, the NP threshold and the two

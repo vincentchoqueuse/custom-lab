@@ -4,7 +4,7 @@
 // of the core contract:
 //   - `seed` param injected into every schema
 //   - `type: 'float'` implicit param type, `name` defaults to the param key
-//   - `actions` defaults to ['randomizeSeed', 'freeze', 'resetDefaults']
+//   - `actions` defaults to ['randomizeSeed', 'freeze']
 //   - `groups` absent → one flat group
 //   - `scenes.js` auto-discovered and merged as `presets`; in a scene, `view`
 //     defaults to the first view, `drawer` to false, `masked`/`visible` to []
@@ -18,7 +18,10 @@ export class RegistryError extends Error {
   }
 }
 
-const DEFAULT_ACTIONS = ['randomizeSeed', 'freeze', 'resetDefaults'];
+// resetDefaults stays in the action registry (a manifest may still declare
+// it) but is out of the default toolbar: in a lecture the scene picker is
+// the reset, and the button only crowded the three that matter.
+const DEFAULT_ACTIONS = ['randomizeSeed', 'freeze'];
 
 const manifestModules = import.meta.glob('../experiments/*/*/manifest.js', { eager: true });
 const sceneModules = import.meta.glob('../experiments/*/*/scenes.js', { eager: true });

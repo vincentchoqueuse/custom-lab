@@ -47,7 +47,7 @@ export default {
     { title: 'Simulation', params: ['N'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // Fully declarative: the two theoretical densities with their means.

@@ -33,7 +33,7 @@ export default {
     { title: 'Échantillonnage', params: ['fe'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // continuous truth, its samples, and what the samples let us rebuild

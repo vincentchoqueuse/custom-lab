@@ -57,7 +57,7 @@ export default {
     { title: 'Données', params: ['target', 'N', 'sigma'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     view(

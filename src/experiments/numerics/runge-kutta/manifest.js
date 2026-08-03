@@ -48,7 +48,7 @@ export default {
     { title: 'Intégration', params: ['h'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // the three methods at the SAME step against the exact solution

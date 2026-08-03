@@ -33,7 +33,7 @@ export default {
     { title: 'Simulation', params: ['N'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // CUSTOM view — justification: a 2D plane with an enforced EQUAL-ASPECT

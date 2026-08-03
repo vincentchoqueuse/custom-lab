@@ -47,7 +47,7 @@ export default {
     { title: 'Algorithmes', params: ['alpha', 'beta', 'N'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // CUSTOM view: iso-contours + the three iterate trajectories, equal aspect.

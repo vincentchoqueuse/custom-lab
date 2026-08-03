@@ -50,7 +50,7 @@ export default {
     { title: 'Canal', params: ['ebn0Db', 'Nbits'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // frames as columns: channel errors, and what survives the decoder

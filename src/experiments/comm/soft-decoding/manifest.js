@@ -42,7 +42,7 @@ export default {
     { title: 'Canal', params: ['ebn0Db', 'Nbits'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // same frames, same noise, two decoders: where hard fails and soft holds
