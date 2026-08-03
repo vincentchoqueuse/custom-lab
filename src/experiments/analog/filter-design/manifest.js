@@ -76,8 +76,6 @@ export default {
     // |H| on a log hertz axis — the shared frequency figure, with this
     // experiment's own gabarit bands laid over it.
     gainView('response', {
-      id: 'response',
-      title: 'Réponse et gabarit',
       x: HERTZ,
       yLabel: '|H(jf)|',
       domain: [-90, 5],

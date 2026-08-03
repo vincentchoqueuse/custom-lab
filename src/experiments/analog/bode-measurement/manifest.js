@@ -86,8 +86,7 @@ export default {
     // Black. What the experiment adds is its own: the measured points over
     // the theory, and the vline on the pulsation currently being swept.
     gainView('gainTheory', {
-      id: 'gain',
-      title: 'Bode — gain',
+      variant: 'bode',
       x: HERTZ,
       domain: [-65, 30],
       label: 'théorie',
@@ -99,6 +98,7 @@ export default {
       ],
     }),
     phaseView('phaseTheory', {
+      variant: 'bode',
       x: HERTZ,
       domain: [-190, 10],
       label: 'théorie',

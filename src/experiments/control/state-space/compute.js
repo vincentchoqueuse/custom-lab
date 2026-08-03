@@ -35,7 +35,10 @@
 // être accusé si les trois courbes divergent — elles ne divergent pas.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { bodeSweep } from '../../../core/bode.js';
-import { stepValue, impulseValue } from '../second-order/compute.js';
+import {
+  secondOrderStep as stepValue,
+  secondOrderImpulse as impulseValue,
+} from '../../../core/lti.js';
 
 const NT = 700;
 const NW = 361;

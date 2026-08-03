@@ -1,8 +1,6 @@
 import { float } from '../../../core/fields.js';
 import { view, line, hline, vline } from '../../../core/views.js';
-import { gainView, phaseView, GUIDE_COLOR } from '../../../core/response-views.js';
-
-const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
+import { at, gainView, phaseView, GUIDE, GUIDE_COLOR } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -75,12 +73,11 @@ export default {
     // near the crossover — which is why a loop that oscillates in the time
     // view is a loop whose phase margin has been eaten in this one.
     gainView('gain', {
-      title: 'Bode — gain',
       overlays: [hline('zeroDb', { ...GUIDE, label: '0 dB' })],
     }),
 
     phaseView('phase', {
-      overlays: [hline(() => -180, { ...GUIDE, label: '−180°' })],
+      overlays: [at(-180, '−180°')],
     }),
   ],
 };

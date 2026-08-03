@@ -1,8 +1,7 @@
 import { float, log } from '../../../core/fields.js';
 import { view, figure, line, scatter, vline, hline } from '../../../core/views.js';
-import { gainView, phaseView, GUIDE_COLOR } from '../../../core/response-views.js';
+import { at, gainView, phaseView, GUIDE, GUIDE_COLOR } from '../../../core/response-views.js';
 
-const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 const CLOSED = '#D95319'; // la boucle fermée, partout la même couleur
 
 /** @type {import('../../../core/types').ExperimentManifest} */
@@ -94,7 +93,7 @@ export default {
       overlays: [
         line('gainClosed', { color: CLOSED, width: 2.4, label: 'boucle fermée' }),
         vline('wrOut', { color: '#EDB120', dashed: true, width: 1.6, label: 'ω_r' }),
-        hline(() => 0, { ...GUIDE, label: '0 dB' }),
+        at(0, '0 dB'),
       ],
     }),
 
@@ -102,8 +101,8 @@ export default {
       label: 'boucle ouverte arg L(jω)',
       overlays: [
         line('phaseClosed', { color: CLOSED, width: 2.4, label: 'boucle fermée' }),
-        hline(() => -90, { ...GUIDE, label: '−90°' }),
-        hline(() => -180, { ...GUIDE, label: '−180°' }),
+        at(-90, '−90°'),
+        at(-180, '−180°'),
       ],
     }),
 

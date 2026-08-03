@@ -93,10 +93,13 @@ export const FIGURE_BY_ID = Object.freeze(
  * @param {object} subjectFigures the subject's `figures` map from _subject.js,
  *                                {figureKey: variantName}
  */
-export function resolveFigure(key, subject = {}, where = '') {
+export function resolveFigure(key, subject = {}, where = '', own) {
   const f = FIGURES[key];
   if (!f) throw new FigureError(`${where}: '${key}' is not a standard figure`);
-  const variant = subject.figures?.[key] ?? 'default';
+  // the view's own variant wins over the subject's default: one experiment of
+  // the analog subject IS a Bode plot and says so, without any of them being
+  // able to invent a name — the list is closed either way.
+  const variant = own ?? subject.figures?.[key] ?? 'default';
   const title = f.titles[variant];
   if (!title)
     throw new FigureError(
@@ -139,7 +142,8 @@ export function normalizeViews(views, subject, key) {
     const { id, title, rank } = resolveFigure(
       v.figure,
       subject,
-      `experiment '${key}', view '${v.figure}'`
+      `experiment '${key}', view '${v.figure}'`,
+      v.variant
     );
     return { ...v, id, title, rank };
   });

@@ -92,7 +92,6 @@ export default {
       })
     ),
     polesView({
-      id: 'zplane',
       variable: 'z',
       circle: { radius: 1, label: 'cercle unité (stabilité)' },
       segments: [

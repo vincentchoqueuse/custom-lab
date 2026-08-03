@@ -13,6 +13,7 @@ import { readdirSync, existsSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { normalizeViews } from '../src/core/figures.js';
+import { validateScene } from '../src/core/scenes.js';
 
 const ROOT = resolve(process.cwd(), 'src/experiments');
 
@@ -55,14 +56,11 @@ async function checkCatalogue() {
       const mf = join(dir, exp.name, 'manifest.js');
       if (!exp.isDirectory() || !existsSync(mf)) continue;
       const key = `${sub.name}/${exp.name}`;
-      let ids;
+      let views;
+      let manifest;
       try {
-        const views = normalizeViews(
-          (await import(pathToFileURL(mf).href)).default.views,
-          subject,
-          key
-        );
-        ids = new Set(views.map((v) => v.id));
+        manifest = (await import(pathToFileURL(mf).href)).default;
+        views = normalizeViews(manifest.views, subject, key);
         nViews += views.length;
       } catch (err) {
         figuresOk = false;
@@ -71,14 +69,14 @@ async function checkCatalogue() {
       }
       const sf = join(dir, exp.name, 'scenes.js');
       if (!existsSync(sf)) continue;
-      for (const sc of (await import(pathToFileURL(sf).href)).default ?? []) {
+      const scenes = (await import(pathToFileURL(sf).href)).default ?? [];
+      for (const [i, sc] of scenes.entries()) {
         nScenes++;
-        if (sc.view && !ids.has(sc.view)) {
+        try {
+          validateScene(sc, i, { views, params: manifest.params }, key);
+        } catch (err) {
           scenesOk = false;
-          console.log(
-            `    ${red('✗')} ${key}: scene '${sc.id}' opens on view '${sc.view}', ` +
-              `which does not exist (${[...ids].join(', ')})`
-          );
+          console.log(`    ${red('✗')} ${err.message}`);
         }
       }
     }
@@ -87,7 +85,9 @@ async function checkCatalogue() {
     console.log(`    ${green('✓')} standard figures: id, title and order  ${dim(`(${nViews} views)`)}`);
   console.log(`  ${dim('scenes')}`);
   if (scenesOk)
-    console.log(`    ${green('✓')} every scene opens on a view that exists  ${dim(`(${nScenes} scenes)`)}`);
+    console.log(
+      `    ${green('✓')} keys, types, view and param references  ${dim(`(${nScenes} scenes)`)}`
+    );
   figuresOk ? pass++ : fail++;
   scenesOk ? pass++ : fail++;
   console.log('');

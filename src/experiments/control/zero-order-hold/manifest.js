@@ -1,8 +1,7 @@
 import { log } from '../../../core/fields.js';
 import { view, figure, line, scatter, vline, hline } from '../../../core/views.js';
-import { gainView, phaseView, GUIDE_COLOR } from '../../../core/response-views.js';
+import { at, gainView, phaseView, GUIDE, GUIDE_COLOR } from '../../../core/response-views.js';
 
-const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 /** Les deux pulsations repères, identiques sur les deux moitiés du Bode. */
 const MARKS = [
   vline('wNyquist', { color: '#EDB120', dashed: true, width: 1.6, label: 'Fe/2' }),
@@ -115,7 +114,7 @@ export default {
       overlays: [
         ...MARKS,
         hline('phaseNyquist', { ...GUIDE, label: '−90° à Fe/2' }),
-        hline(() => -180, { ...GUIDE, label: '−180° à Fe' }),
+        at(-180, '−180° à Fe'),
       ],
     }),
 
@@ -132,8 +131,8 @@ export default {
         label: 'marge perdue',
         overlays: [
           scatter('lostPoint', { color: '#EDB120', size: 9, label: 'Fe choisie' }),
-          hline(() => 10, { ...GUIDE, label: '10°' }),
-          hline(() => 45, { ...GUIDE, label: '45°' }),
+          at(10, '10°'),
+          at(45, '45°'),
         ],
         axes: {
           x: { label: 'Fe', unit: 'Hz', scale: 'log' },

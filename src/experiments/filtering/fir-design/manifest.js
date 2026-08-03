@@ -44,7 +44,7 @@ export default {
   },
 
   views: [
-    timeView({ id: 'signal' }),
+    timeView(),
     impulseView({
       source: 'taps',
       label: 'h[n] (N coefficients)',

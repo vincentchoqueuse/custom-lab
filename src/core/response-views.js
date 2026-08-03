@@ -21,7 +21,7 @@
 // digital-versus-analog comparison, a Nyquist locus — stays hand-written in
 // its manifest: forcing dissimilar figures through one mould would cost more
 // than it saves.
-import { view, figure, figurePlane, line, stem } from './views.js';
+import { view, figure, figurePlane, line, stem, hline, ViewError } from './views.js';
 
 /* ------------------------------------------------------------------ colours
    Named once so custom views can match the declarative ones. MATLAB palette,
@@ -35,6 +35,19 @@ export const POLE_COLOR = '#D95319';
 export const ZERO_COLOR = '#0072BD';
 export const GUIDE_COLOR = '#a1a1aa'; // chrome-grey construction lines
 
+/** Le style d'un trait de construction — copié dans sept manifestes avant
+ *  d'atterrir ici. Un repère ne porte jamais de donnée : il est fin, gris et
+ *  pointillé, partout, pour ne pas se disputer l'attention avec la courbe. */
+export const GUIDE = Object.freeze({ color: GUIDE_COLOR, width: 1, dashed: true });
+
+/** Un repère horizontal à une valeur FIXE : `at(-180, '−180°')`. Les trois
+ *  quarts des hlines du catalogue sont de cette forme. */
+export const at = (value, label) => hline(() => value, { ...GUIDE, label });
+
+/** Le même, mais qui n'existe que pour certains paramètres : la valeur est
+ *  NaN ailleurs, et un repère non fini n'est pas tracé. */
+export const atIf = (fn, label) => hline(fn, { ...GUIDE, label });
+
 /* ------------------------------------------------------- frequency abscissa
    The three abscissae the catalogue actually uses. Passing one of these,
    instead of retyping the axis object, is what keeps `ω` reading `ω` and `f`
@@ -43,6 +56,20 @@ export const OMEGA = { label: 'ω', unit: 'rad/s', scale: 'log' };
 export const HERTZ = { label: 'f', unit: 'Hz', scale: 'log' };
 /** Linear hertz: a sampled spectrum is read up to f_s/2, not over decades. */
 export const HERTZ_LIN = { label: 'f', unit: 'Hz' };
+
+/**
+ * Les options d'un builder sont une liste FERMÉE. Sans ça, une clé morte —
+ * un `title:` laissé après un renommage, un `id:` qui ne veut plus rien dire —
+ * est silencieusement ignorée, et le manifeste continue d'affirmer quelque
+ * chose que le code ne fait plus. C'est arrivé dans neuf manifestes d'un
+ * coup, dont un qui portait encore `title: 'Plan des pôles'` alors que ce nom
+ * était précisément ce qu'on venait de supprimer du catalogue.
+ */
+function checkOpts(opts, allowed, where) {
+  for (const k of Object.keys(opts ?? {}))
+    if (!allowed.includes(k))
+      throw new ViewError(`${where}: unknown option '${k}' (known: ${allowed.join(', ')})`);
+}
 
 /** dB or decades — the two ways a magnitude is drawn, as one option. */
 function magnitudeAxis(y, yLabel, domain) {
@@ -61,9 +88,11 @@ function magnitudeAxis(y, yLabel, domain) {
  *   y       'dB' (default) | 'log' (decades) | a full axis object
  *   domain  [min, max] on the ordinate, when the figure needs a fixed frame
  */
-export function gainView(
-  source,
-  {
+const GAIN_OPTS = ['key', 'variant', 'x', 'y', 'yLabel', 'domain', 'label', 'color', 'width', 'overlays'];
+
+export function gainView(source, opts = {}) {
+  checkOpts(opts, GAIN_OPTS, 'gainView');
+  const {
     // the figure — its id and its per-subject title come from core/figures.js;
     // `variant` picks another name from that figure's closed list
     key = 'gain',
@@ -76,8 +105,7 @@ export function gainView(
     color = GAIN_COLOR,
     width = 2.4,
     overlays = [],
-  } = {}
-) {
+  } = opts;
   return figure(
     key,
     line(source, {
@@ -95,10 +123,20 @@ export function gainView(
  * arg H against the same abscissa — the other half of a Bode plot, and the
  * half an experiment may legitimately not have.
  */
-export function phaseView(
-  source,
-  { key = 'phase', variant, x = OMEGA, domain, label = 'arg H(jω)', color = PHASE_COLOR, width = 2.4, overlays = [] } = {}
-) {
+const PHASE_OPTS = ['key', 'variant', 'x', 'domain', 'label', 'color', 'width', 'overlays'];
+
+export function phaseView(source, opts = {}) {
+  checkOpts(opts, PHASE_OPTS, 'phaseView');
+  const {
+    key = 'phase',
+    variant,
+    x = OMEGA,
+    domain,
+    label = 'arg H(jω)',
+    color = PHASE_COLOR,
+    width = 2.4,
+    overlays = [],
+  } = opts;
   return figure(
     key,
     line(source, {
@@ -117,18 +155,22 @@ export function phaseView(
  * cloud, on the s-plane or the z-plane. `zeros: null` for a system that has
  * none — an absent cloud beats an empty legend entry.
  */
-export function polesView({
-  poles = 'poles',
-  zeros = 'zeros',
-  poleLabel = 'pôles',
-  zeroLabel = 'zéros',
-  variable = 's',
-  axes,
-  circle,
-  segments,
-  minHalf,
-  maxHalf,
-} = {}) {
+const POLES_OPTS = ['poles', 'zeros', 'poleLabel', 'zeroLabel', 'variable', 'axes', 'circle', 'segments', 'minHalf', 'maxHalf'];
+
+export function polesView(opts = {}) {
+  checkOpts(opts, POLES_OPTS, 'polesView');
+  const {
+    poles = 'poles',
+    zeros = 'zeros',
+    poleLabel = 'pôles',
+    zeroLabel = 'zéros',
+    variable = 's',
+    axes,
+    circle,
+    segments,
+    minHalf,
+    maxHalf,
+  } = opts;
   return figurePlane('poles', {
     markers: { source: poles, color: POLE_COLOR, label: poleLabel },
     ...(zeros
@@ -146,7 +188,9 @@ export function polesView({
  * A periodic signal through the filter: output solid, input dashed.
  * The observable names are the bench's own (`tIn` / `tOut`).
  */
-export function timeView({ key = 'response', overlays = [] } = {}) {
+export function timeView(opts = {}) {
+  checkOpts(opts, ['key', 'overlays'], 'timeView');
+  const { key = 'response', overlays = [] } = opts;
   return figure(
     key,
     line('tOut', {
@@ -162,7 +206,9 @@ export function timeView({ key = 'response', overlays = [] } = {}) {
  * h[n] as a stem — the discrete-signal figure, never a continuous line.
  * `source` is the impulse-response observable, `y` its axis label.
  */
-export function impulseView({ source = 'impulse', label, y = 'h[n]', x = 'n', overlays = [] } = {}) {
+export function impulseView(opts = {}) {
+  checkOpts(opts, ['source', 'label', 'y', 'x', 'overlays'], 'impulseView');
+  const { source = 'impulse', label, y = 'h[n]', x = 'n', overlays = [] } = opts;
   return figure('impulse', stem(source, { label, overlays, axes: { x, y } }));
 }
 
@@ -173,7 +219,9 @@ export function impulseView({ source = 'impulse', label, y = 'h[n]', x = 'n', ov
  * `overlays` carries whatever marker the experiment wants on top (its own
  * cut-off, its tooth spacing…), appended after the shared three.
  */
-export function spectrumView({ key = 'gain', resp = 'resp', domain = [-80, 30], overlays = [] } = {}) {
+export function spectrumView(opts = {}) {
+  checkOpts(opts, ['key', 'resp', 'domain', 'overlays'], 'spectrumView');
+  const { key = 'gain', resp = 'resp', domain = [-80, 30], overlays = [] } = opts;
   return gainView('specOut', {
     key,
     x: HERTZ_LIN,

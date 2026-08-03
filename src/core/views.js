@@ -110,29 +110,15 @@ export function figure(key, spec, { variant } = {}) {
 /** The same, for the equal-aspect plane (the pole map). */
 export function figurePlane(key, spec = {}, { variant } = {}) {
   if (typeof key !== 'string' || !key) throw new ViewError('figurePlane: key is required');
-  const p = plane('__figure', 'x', spec); // reuse the plane spec validation
-  return { figure: key, ...(variant ? { variant } : {}), kind: 'plane', spec: p.spec, layout: 'plot' };
+  validatePlaneSpec(spec, `figurePlane '${key}'`);
+  return { figure: key, ...(variant ? { variant } : {}), kind: 'plane', spec, layout: 'plot' };
 }
 
-/**
- * Declarative EQUAL-ASPECT plane (I/Q, poles, z-plane): the one view shape
- * that a cartesian plot cannot express, since circles must stay circles.
- * Everything is resolved against the observables by ui/plots/PlanePlot:
- *   curves:   [{source, color, width, dashed, label}]   polylines
- *   clouds:   [{source, color, r, opacity, max, label}]  point sets
- *   markers:  {source, color, labels, label}             emphasized points
- *   segments: an observable name or a literal [{x1,y1,x2,y2}]
- *   circle:   {radius: number | p => n, color, label}    guide circle
- *   minHalf/maxHalf: number or p => number               window bounds
- *   symmetric: false                                     frame the data,
- *     not the origin (a Nyquist locus lives under the real axis)
- *   axes:     {x, y} labels
- * The legend is built from the labels, as in the cartesian plots.
- */
-export function plane(id, title, spec = {}) {
-  const where = `plane '${id}'`;
-  if (typeof id !== 'string' || !id) throw new ViewError('plane: id is required');
-  if (typeof title !== 'string' || !title) throw new ViewError(`${where}: title is required`);
+
+/** The spec half of a plane, checked on its own so `plane` and `figurePlane`
+ *  share one validation instead of one of them faking a view to borrow the
+ *  other's. */
+function validatePlaneSpec(spec, where) {
   for (const c of spec.clouds ?? []) {
     if (c === null || typeof c !== 'object' || typeof c.source !== 'string')
       throw new ViewError(`${where}: each cloud needs a { source } observable name`);
@@ -152,6 +138,27 @@ export function plane(id, title, spec = {}) {
     if (v != null && typeof v !== 'number' && typeof v !== 'function')
       throw new ViewError(`${where}: ${k} must be a number or p => number`);
   }
+}
+
+/**
+ * Declarative EQUAL-ASPECT plane (I/Q, poles, z-plane): the one view shape
+ * that a cartesian plot cannot express, since circles must stay circles.
+ * Everything is resolved against the observables by ui/plots/PlanePlot:
+ *   curves:   [{source, color, width, dashed, label}]   polylines
+ *   clouds:   [{source, color, r, opacity, max, label}]  point sets
+ *   markers:  {source, color, labels, label}             emphasized points
+ *   segments: an observable name or a literal [{x1,y1,x2,y2}]
+ *   circle:   {radius: number | p => n, color, label}    guide circle
+ *   minHalf/maxHalf: number or p => number               window bounds
+ *   symmetric: false                                     frame the data,
+ *     not the origin (a Nyquist locus lives under the real axis)
+ *   axes:     {x, y} labels
+ * The legend is built from the labels, as in the cartesian plots.
+ */
+export function plane(id, title, spec = {}) {
+  if (typeof id !== 'string' || !id) throw new ViewError('plane: id is required');
+  if (typeof title !== 'string' || !title) throw new ViewError(`plane '${id}': title is required`);
+  validatePlaneSpec(spec, `plane '${id}'`);
   return { id, title, kind: 'plane', spec, layout: 'plot' };
 }
 

@@ -1,8 +1,7 @@
 import { float, select, coeffs } from '../../../core/fields.js';
 import { view, line, hline, vline, scatter, figure } from '../../../core/views.js';
-import { gainView, phaseView, GUIDE_COLOR } from '../../../core/response-views.js';
+import { gainView, phaseView, GUIDE, GUIDE_COLOR } from '../../../core/response-views.js';
 
-const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 /** The measured point and the pulsation it was measured at — the same two
  *  overlays on both halves of the Bode plot, declared once. */
 const MEASURED = (source, label) => [
@@ -109,7 +108,6 @@ export default {
     // wrong. The grid is centred on the pulsation read off the denominator
     // coefficients, so any typed-in system arrives framed on its own decades.
     gainView('gain', {
-      title: 'Bode — gain',
       overlays: MEASURED('gainPoint', 'gain mesuré'),
     }),
 

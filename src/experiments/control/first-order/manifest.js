@@ -1,8 +1,6 @@
 import { float, log } from '../../../core/fields.js';
 import { view, line, vline, hline, figure } from '../../../core/views.js';
-import { gainView, phaseView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
-
-const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
+import { at, gainView, phaseView, polesView, GUIDE, GUIDE_COLOR } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -120,7 +118,6 @@ export default {
     // zero produces instead of a roll-off. Same builder as the Bode plot of
     // Bode, Nyquist, Black and as the analog filter's response: one figure.
     gainView('gain', {
-      title: 'Bode — gain',
       overlays: [
         vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c = 1/τ' }),
         hline('gain3dB', { ...GUIDE, label: '−3 dB' }),
@@ -131,7 +128,7 @@ export default {
     phaseView('phase', {
       overlays: [
         vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c' }),
-        hline(() => -45, { ...GUIDE, label: '−45°' }),
+        at(-45, '−45°'),
       ],
     }),
   ],

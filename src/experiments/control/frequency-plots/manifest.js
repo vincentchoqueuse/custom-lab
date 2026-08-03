@@ -1,6 +1,6 @@
 import { float, log, select } from '../../../core/fields.js';
 import { view, plane, line, scatter, vline, hline } from '../../../core/views.js';
-import { gainView, phaseView, GUIDE_COLOR } from '../../../core/response-views.js';
+import { gainView, phaseView, GUIDE, GUIDE_COLOR } from '../../../core/response-views.js';
 
 /** The three verticals both Bode halves carry: the cursor, and the two
  *  pulsations the margins are read at. Declared once, so the two figures can
@@ -10,7 +10,6 @@ const MARKS = [
   vline('wco', { color: '#0072BD', dashed: true, width: 1.6, label: 'ω à 0 dB' }),
   vline('w180', { color: '#D95319', dashed: true, width: 1.6, label: 'ω à −180°' }),
 ];
-const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -130,7 +129,6 @@ export default {
     // NaN when it means nothing for the current system, and a non-finite
     // vline/hline is simply not drawn.
     gainView('gain', {
-      title: 'Bode — gain',
       overlays: [
         ...MARKS,
         vline('wr', { color: '#D95319', dashed: true, width: 1.6, label: 'ω_r' }),

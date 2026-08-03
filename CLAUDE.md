@@ -500,9 +500,17 @@ export const checks = [
 ];
 ```
 
-`npm run check` walks every `experiments/**/check.js`, prints a ✓/✗ table grouped by
-category, plus each check's execution time (performance-regression detection with no
-dedicated benchmark infrastructure).
+`npm run check` first runs the CATALOGUE checks — the standard-figure vocabulary
+(`core/figures.js`) and the scene vocabulary (`core/scenes.js`) — then walks every
+`experiments/**/check.js`, prints a ✓/✗ table grouped by category, plus each check's
+execution time (performance-regression detection with no dedicated benchmark
+infrastructure).
+
+**Everything declarative is a CLOSED list, and an unknown key is an error.** Scene
+keys, view builder options, figure names, param factories: a typo is caught at load
+time and by `npm run check`, never silently ignored. A silently ignored `visble:` or
+a `title:` left behind after a rename is the one failure mode a lecture cannot
+survive, because it looks exactly like working code.
 **No experiment is done without `numeric` or `statistical` checks.** UI code can be
 wrong without consequence; a wrong formula projected in a lecture hall is
 unacceptable.
@@ -763,12 +771,19 @@ export const checks = [
 │   │   ├── figures.js            # the catalogue's STANDARD FIGURES: global
 │   │   │                         #   ids, per-subject titles and order, and
 │   │   │                         #   the guard that makes drift impossible
+│   │   ├── scenes.js             # the SCENE vocabulary and its validation:
+│   │   │                         #   closed key list, types, and the view and
+│   │   │                         #   param references a scene makes
 │   │   ├── response-views.js     # the FIGURES a response experiment draws,
 │   │   │                         #   shared across analog, digital and control:
 │   │   │                         #   gainView/phaseView (a Bode plot IS a
 │   │   │                         #   réponse fréquentielle with another
 │   │   │                         #   abscissa), polesView, timeView,
 │   │   │                         #   impulseView, spectrumView
+│   │   ├── lti.js                # the closed-form TIME responses (second and
+│   │   │                         #   first order, step and impulse) — the
+│   │   │                         #   counterpart of bode.js, shared so that
+│   │   │                         #   no experiment is another one's library
 │   │   ├── bode.js               # the frequency sweep every LTI experiment
 │   │   │                         #   needs: log grid, dB, UNWRAPPED phase,
 │   │   │                         #   and the grid centre read off the

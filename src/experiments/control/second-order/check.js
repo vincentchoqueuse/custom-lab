@@ -1,4 +1,5 @@
-import { compute, stepValue, impulseValue } from './compute.js';
+import { compute } from './compute.js';
+import { secondOrderStep as stepValue, secondOrderImpulse as impulseValue } from '../../../core/lti.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
 const BASE = { K: 1, m: 0.3, w0: 2, seed: 42 };
