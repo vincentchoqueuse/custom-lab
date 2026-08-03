@@ -2,7 +2,7 @@ import { compute, spectrumOf, width3dB, windowedSamples } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
 const FS = 8000;
-const BASE = { sig: 'sine', win: 'rect', T: 40, f0: 300, k: 2000, tau: 15, tb: 30, seed: 42 };
+const BASE = { sig: 'sine', win: 'rect', T: 40, f0: 300, k: 2000, tau: 15, tb: 30, seed: 34 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;
 
 /**

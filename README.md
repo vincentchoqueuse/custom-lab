@@ -1,6 +1,11 @@
-# Pupitrace
+# expe34
 
 **Live site: <https://vincentchoqueuse.github.io/custom-lab/>**
+
+The name is a nod to the **GR 34** — the sentier des douaniers that runs the
+whole Breton coast. A long trail made of a great many short, well-marked
+stages, walked one at a time and always in the same order: which is what a
+catalogue of lecture demonstrations is, and where this one is taught.
 
 A purely static scientific demonstration engine for teaching — a catalog of
 interactive experiments (statistics, estimation, detection, digital
@@ -9,7 +14,8 @@ keyboard. Not a course companion: the professor's bench.
 
 Every lecture scene is a URL: one link reproduces the exact experiment,
 parameters, view and seed. Every experiment ships with a numerical
-correctness harness (`npm run check`) that gates deployment.
+correctness harness (`npm run check`) that gates deployment. The default
+seed is **34**, for the same reason as the name.
 
 See `CLAUDE.md` for the full vision, contracts and architecture.
 

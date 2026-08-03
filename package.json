@@ -1,5 +1,5 @@
 {
-  "name": "custom-lab",
+  "name": "expe34",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:subject": "node -e \"if(!process.env.PUPITRACE_SUBJECT)throw new Error('usage: PUPITRACE_SUBJECT=control npm run build:subject')\" && vite build",
+    "build:subject": "node -e \"if(!process.env.EXPE34_SUBJECT)throw new Error('usage: EXPE34_SUBJECT=control npm run build:subject')\" && vite build",
     "preview": "vite preview",
     "check": "node scripts/run-checks.js",
     "new:experiment": "node scripts/new-experiment.js",

@@ -1,4 +1,8 @@
-# Pupitrace — a scientific demonstration engine for teaching
+# expe34 — a scientific demonstration engine for teaching
+
+*(the name is a nod to the GR 34, the Breton coastal trail: a long route made
+of many short well-marked stages, walked one at a time and always in the same
+order. The default seed is 34 for the same reason.)*
 
 Document organized from durable to interchangeable:
 **Vision → Concepts → UX → Architecture → Implementation.**
@@ -19,7 +23,7 @@ staging rather than parameter editing.**
 
 1. **Fully static.** Everything runs in the browser. No backend, no API. A
    deployment may carry the whole catalogue or A SINGLE SUBJECT:
-   `PUPITRACE_SUBJECT=control npm run build` rewrites the four glob patterns at
+   `EXPE34_SUBJECT=control npm run build` rewrites the four glob patterns at
    build time (`scripts/subject-filter.js`) — 172 kB gzip → 118 kB, and the
    sidebar simply shows the one subject. Filtering at runtime would be pointless:
    `import.meta.glob` needs a literal pattern, so everything would already be in
@@ -288,7 +292,7 @@ what deviates. **These conventions are part of the core contract** (applied by t
 registry at load time):
 
 - **`random: true` declares that the experiment DRAWS**, and only then is a
-  `seed` param injected (`type: 'seed'`, default 42). Purity and reproducibility
+  `seed` param injected (`type: 'seed'`, default 34). Purity and reproducibility
   remain contract requirements for every compute; what is declared here is
   whether there is anything to re-draw. Half the catalogue draws nothing at all —
   a Bode plot, a convolution, a pole map — and a dice button that provably cannot

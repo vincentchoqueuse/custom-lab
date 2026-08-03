@@ -1,7 +1,7 @@
 // Build one subject instead of the whole catalogue.
 //
 //   npm run build                              → les 52 expériences
-//   PUPITRACE_SUBJECT=control npm run build    → l'automatique seule
+//   EXPE34_SUBJECT=control npm run build    → l'automatique seule
 //
 // Pourquoi un plugin et pas une condition dans le code : `import.meta.glob`
 // exige un motif LITTÉRAL, évalué par Vite avant que la moindre ligne ne
@@ -23,15 +23,15 @@ import { resolve } from 'node:path';
 const ROOT = resolve(process.cwd(), 'src/experiments');
 
 export function subjectFilter() {
-  const subject = process.env.PUPITRACE_SUBJECT?.trim();
-  if (!subject) return { name: 'pupitrace-subject-filter' };
+  const subject = process.env.EXPE34_SUBJECT?.trim();
+  if (!subject) return { name: 'expe34-subject-filter' };
 
   const known = readdirSync(ROOT, { withFileTypes: true })
     .filter((e) => e.isDirectory() && existsSync(resolve(ROOT, e.name, '_subject.js')))
     .map((e) => e.name);
   if (!known.includes(subject))
     throw new Error(
-      `PUPITRACE_SUBJECT='${subject}' is not a subject (known: ${known.join(', ')})`
+      `EXPE34_SUBJECT='${subject}' is not a subject (known: ${known.join(', ')})`
     );
 
   // les quatre globs du projet : manifestes, scènes, sujets, et celui du worker
@@ -43,7 +43,7 @@ export function subjectFilter() {
   ];
 
   return {
-    name: 'pupitrace-subject-filter',
+    name: 'expe34-subject-filter',
     enforce: 'pre',
     transform(code, id) {
       if (!id.includes('/src/core/') || !code.includes('import.meta.glob')) return null;

@@ -1,7 +1,7 @@
 import { compute, stepValue, impulseValue } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
-const BASE = { K: 1, tau: 1, tz: 0, seed: 42 };
+const BASE = { K: 1, tau: 1, tz: 0, seed: 34 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;
 
 export const checks = [

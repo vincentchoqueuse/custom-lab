@@ -1,7 +1,7 @@
 import { compute, overlap, gateGate, gateExp } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
-const BASE = { sig: 'gate', ker: 'gate', a: 1, b: 1, t: 1, seed: 42 };
+const BASE = { sig: 'gate', ker: 'gate', a: 1, b: 1, t: 1, seed: 34 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;
 const WIDTHS = [
   { a: 1, b: 1 },

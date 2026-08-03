@@ -1,7 +1,7 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 
-const BASE = { source: 'sine', f: 5, fe: 50, seed: 42 };
+const BASE = { source: 'sine', f: 5, fe: 50, seed: 34 };
 
 export const checks = [
   {

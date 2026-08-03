@@ -2,7 +2,7 @@ import { compute, closedParams, openLoop, closeIt, isoModulus } from './compute.
 import { secondOrderStep as stepValue } from '../_lib/lti.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
-const BASE = { w0: 1, m: 0.5, K: 4, seed: 42 };
+const BASE = { w0: 1, m: 0.5, K: 4, seed: 34 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;
 const CASES = [
   { w0: 1, m: 0.5, K: 4 },

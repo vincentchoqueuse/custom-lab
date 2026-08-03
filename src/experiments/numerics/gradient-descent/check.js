@@ -1,7 +1,7 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 
-const BASE = { fn: 'quad', kappa: 10, alpha: 0.1, beta: 0.9, N: 30, seed: 42 };
+const BASE = { fn: 'quad', kappa: 10, alpha: 0.1, beta: 0.9, N: 30, seed: 34 };
 
 export const checks = [
   {
