@@ -3,8 +3,22 @@
 // (?b=0.25,0.25,0.25,0.25), so any variation a student invents is a link.
 export default [
   {
+    id: 'through',
+    title: 'Scène 1 · Le signal entre, le signal sort',
+    view: 'time',
+    params: { b: [0.25, 0.25, 0.25, 0.25], source: 'square', f0: 125 },
+    visible: ['source', 'f0'],
+    notes: `Commencer par ce que fait le filtre, avant de dire comment il le fait :
+un carré entre (orange), quelque chose de plus rond sort (bleu). Quatre
+coefficients égaux à 1/4, rien d'autre.
+Question à poser AVANT de changer d'onglet : « qu'est-ce qui a disparu ? »
+Les angles — c'est-à-dire les harmoniques élevés. Les trois onglets suivants
+répondent chacun à leur façon : les coefficients, puis le spectre.
+Changer de source ou de f₀ : la sortie suit, le filtre ne change pas.`,
+  },
+  {
     id: 'moving-average',
-    title: 'Scène 1 · La moyenne glissante',
+    title: 'Scène 2 · La moyenne glissante',
     view: 'spectrum',
     params: { b: [0.25, 0.25, 0.25, 0.25], source: 'square', f0: 125 },
     visible: ['b'],
@@ -16,7 +30,7 @@ c'est le gain continu, il doit valoir 1.`,
   },
   {
     id: 'delay',
-    title: 'Scène 2 · Le retard pur',
+    title: 'Scène 3 · Le retard pur',
     view: 'time',
     params: { b: [0, 0, 0, 1], source: 'square', f0: 125 },
     visible: ['b'],
@@ -27,7 +41,7 @@ existe. Rajouter des zéros devant pour allonger l'attente.`,
   },
   {
     id: 'difference',
-    title: 'Scène 3 · Le différentiateur',
+    title: 'Scène 4 · Le différentiateur',
     view: 'spectrum',
     params: { b: [1, -1], source: 'saw', f0: 125 },
     visible: ['b'],
@@ -38,7 +52,7 @@ centrée) : même annulation du continu, mais un zéro apparaît aussi à Fs/2.`
   },
   {
     id: 'design',
-    title: 'Scène 4 · Fabriquer un passe-bande à la main',
+    title: 'Scène 5 · Fabriquer un passe-bande à la main',
     view: 'spectrum',
     params: { b: [0.5, 0, -0.5], source: 'square', f0: 125 },
     visible: ['b', 'f0'],

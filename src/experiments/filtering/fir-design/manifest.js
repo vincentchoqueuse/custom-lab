@@ -45,7 +45,7 @@ export default {
   views: [
     view(
       'signal',
-      'Un signal à travers',
+      'Réponse temporelle',
       line('sqIn', {
         label: 'entrée (carré 100 Hz)',
         overlays: [line('sqOut', { color: '#D95319', width: 2, label: 'sortie filtrée' })],
@@ -67,7 +67,7 @@ export default {
 
     view(
       'response',
-      'Réponse en fréquence',
+      'Réponse fréquentielle',
       line('response', {
         width: 1.8,
         overlays: [

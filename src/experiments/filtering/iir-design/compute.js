@@ -13,6 +13,7 @@
 // Digital b/a coefficients are exported — downloadable from the Inspector.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { toDb, polyEvalComplex } from '../../../core/numeric.js';
+import { periodicSignal, steadyTime } from '../../../core/bench.js';
 import { designButter, designCheby1, polyFromRoots } from '../../../core/filters.js';
 
 const FS = 8000;
@@ -55,11 +56,11 @@ function evalZ(b, a, f) {
 }
 
 /**
- * @param {{family: string, n: number, fc: number, Amax: number,
- *          method: string, seed: number}} params
+ * @param {{family: string, n: number, fc: number, Amax: number, method: string,
+ *          source: string, f0: number, seed: number}} params
  * @returns {{observables: Object}}
  */
-export function compute({ family, n, fc, Amax, method }) {
+export function compute({ family, n, fc, Amax, method, source, f0 }) {
   const ep = Math.sqrt(10 ** (Amax / 10) - 1);
   const proto = family === 'butter' ? designButter(n, ep) : designCheby1(n, ep, Amax);
   const dcTarget = family === 'butter' || n % 2 === 1 ? 1 : 10 ** (-Amax / 20);
@@ -168,6 +169,20 @@ export function compute({ family, n, fc, Amax, method }) {
     wi[i] = f;
   }
 
+  // ---- a periodic signal through the difference equation ----------------
+  // Same bench as every other filtering experiment (core/bench.js): the
+  // subject reads the same from one demo to the next.
+  const xin = periodicSignal(source, f0);
+  const yout = new Float64Array(xin.length);
+  for (let m = 0; m < xin.length; m++) {
+    let acc = 0;
+    for (let k = 0; k < b.length && k <= m; k++) acc += b[k] * xin[m - k];
+    for (let k = 1; k < a.length && k <= m; k++) acc -= a[k] * yout[m - k];
+    yout[m] = acc;
+  }
+  const tIn = steadyTime(xin, f0);
+  const tOut = steadyTime(yout, f0);
+
   // ---- impulse responses: difference equation vs analytic samples --------
   const hImp = new Float64Array(NH);
   for (let m = 0; m < NH; m++) {
@@ -200,6 +215,9 @@ export function compute({ family, n, fc, Amax, method }) {
 
   return {
     observables: {
+      tIn,
+      tOut,
+      impulseDig: { x: Float64Array.from({ length: NH }, (_, i) => i), y: hImp },
       respDig: { x: rf, y: rd },
       respAna: { x: rf, y: ra },
       warp: { x: wx, y: wy },

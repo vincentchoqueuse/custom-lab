@@ -1,8 +1,25 @@
 // Lecture script — auto-discovered by the registry.
 export default [
   {
+    id: 'through',
+    title: 'Scène 1 · Le signal entre, le signal sort',
+    view: 'time',
+    params: { method: 'bilinear', family: 'butter', n: 4, fc: 1000, Amax: 1,
+              source: 'square', f0: 200 },
+    visible: ['fc', 'n'],
+    notes: `Avant les méthodes de discrétisation, le résultat : les coefficients b
+et a calculés par la bilinéaire font tourner une équation aux différences, et
+voilà ce qu'elle rend. Un carré entre, un carré arrondi sort.
+Bouger l'ordre n : les flancs se raidissent, la sortie s'arrondit davantage.
+Question : « ce filtre-là, on l'a obtenu comment ? » — les onglets suivants
+répondent : sa réponse impulsionnelle, sa réponse fréquentielle comparée au
+prototype analogique, ses pôles et zéros, et le warping qui relie les deux
+mondes.`,
+  },
+  {
     id: 'match',
-    title: 'Scène 1 · Le prototype passe au numérique',
+    title: 'Scène 2 · Le prototype passe au numérique',
+    view: 'response',
     params: { method: 'bilinear', family: 'butter', n: 4, fc: 1000, Amax: 1 },
     visible: ['family', 'n'],
     notes: `La courbe numérique (bleue) épouse le prototype analogique
@@ -13,7 +30,8 @@ signature de la méthode — tout l'axe jω est enroulé sur le cercle unité.`,
   },
   {
     id: 'warping',
-    title: 'Scène 2 · Oublier le pre-warping',
+    title: 'Scène 3 · Oublier le pre-warping',
+    view: 'response',
     params: { method: 'naive', family: 'butter', n: 4, fc: 1000, Amax: 1 },
     visible: ['method', 'fc'],
     notes: `Bilinéaire sans pre-warping, f_c = 1000 Hz : coupure obtenue
@@ -24,7 +42,7 @@ sur la cible. Le pre-warping ne corrige qu'UN point — mais c'est le bon.`,
   },
   {
     id: 'zplane',
-    title: "Scène 3 · Le demi-plan gauche s'enroule",
+    title: "Scène 4 · Le demi-plan gauche s'enroule",
     view: 'zplane',
     params: { method: 'bilinear', family: 'butter', n: 6, fc: 1000, Amax: 1 },
     visible: ['n', 'fc'],
@@ -36,7 +54,8 @@ analogiques, autre carte (z = e^{pT}), plus de zéros à −1.`,
   },
   {
     id: 'aliasing',
-    title: "Scène 4 · L'invariance impulsionnelle et son repliement",
+    title: "Scène 5 · L'invariance impulsionnelle et son repliement",
+    view: 'response',
     params: { method: 'impulse', family: 'butter', n: 2, fc: 1000, Amax: 1 },
     visible: ['method', 'n'],
     notes: `h[n] = T·h_a(nT) EXACTEMENT — c'est sa définition, et le harnais
