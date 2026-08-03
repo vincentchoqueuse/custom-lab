@@ -1,4 +1,4 @@
-# Pupitre
+# Pupitrace
 
 **Live site: <https://vincentchoqueuse.github.io/custom-lab/>**
 

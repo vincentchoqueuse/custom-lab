@@ -1,4 +1,4 @@
-# Pupitre — a scientific demonstration engine for teaching
+# Pupitrace — a scientific demonstration engine for teaching
 
 Document organized from durable to interchangeable:
 **Vision → Concepts → UX → Architecture → Implementation.**
