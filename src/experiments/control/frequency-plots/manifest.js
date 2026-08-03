@@ -151,16 +151,7 @@ export default {
     // which is exactly what the plane view exists for. Hand-written rather
     // than through polesView: a locus is not a pole map.
     plane('nyquist', 'Nyquist', {
-      curves: [
-        // the abaque, under the locus: the Hall circles are the closed-loop
-        // iso-gain family |H/(1+H)| = M, and the highlighted one is the level
-        // the locus is TANGENT to — the closed loop's resonance, read off the
-        // open loop. Empty (hence invisible, legend included) for the fixed
-        // orders, which have no loop to close.
-        { source: 'hallGain', color: GUIDE_COLOR, width: 1, dashed: true, label: 'iso-gain BF' },
-        { source: 'hallPeak', color: '#EDB120', width: 1.8, label: 'résonance BF' },
-        { source: 'locus', color: '#0072BD', width: 2.4, label: 'lieu H(jω)' },
-      ],
+      curves: [{ source: 'locus', color: '#0072BD', width: 2.4, label: 'lieu H(jω)' }],
       clouds: [{ source: 'critical', color: GUIDE_COLOR, r: 4, opacity: 1, label: 'point −1' }],
       markers: { source: 'cursorPt', color: '#EDB120', label: 'H(jω_c)' },
       // the unit circle is the phase-margin construction: it only means
@@ -181,24 +172,18 @@ export default {
 
     // Black (Nichols): the same locus with the axes exchanged — gain against
     // phase, ω sliding along the curve instead of labelling it.
-    // The abaque de Nichols is the MAIN source and the locus an overlay, for
-    // one reason: layers draw in declaration order, and a chart grid belongs
-    // UNDER the curve it is read against. It is what turns Black from a
-    // curiosity into the tool the subject uses — the closed loop is read off
-    // the open-loop locus by seeing which contour the locus touches. Empty
-    // (hence invisible, legend included) for the fixed orders, which have no
-    // loop to close.
+    // The iso-gain abaque is NOT here: it answers a question about a CLOSED
+    // loop, and this experiment draws systems that are not in one. It lives
+    // in `closed-loop`, where the contour the locus touches has a meaning
+    // and an exact value to be checked against.
     view(
       'black',
       'Black (Nichols)',
-      line('isoGain', {
-        color: GUIDE_COLOR,
-        width: 1,
-        dashed: true,
-        label: 'iso-gain BF',
+      line('black', {
+        color: '#0072BD',
+        width: 2.4,
+        label: 'lieu de Black',
         overlays: [
-          line('isoPeak', { color: '#EDB120', width: 1.8, label: 'résonance BF' }),
-          line('black', { color: '#0072BD', width: 2.4, label: 'lieu de Black' }),
           scatter('cursorBlack', { color: '#EDB120', size: 7, label: 'ω_c' }),
           scatter('criticalBlack', { color: GUIDE_COLOR, size: 6, label: 'point critique' }),
           hline(() => 0, { color: GUIDE_COLOR, width: 1 }),

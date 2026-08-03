@@ -1,5 +1,5 @@
 import { float, select, coeffs } from '../../../core/fields.js';
-import { view, line, hline, vline, scatter } from '../../../core/views.js';
+import { view, line, hline, vline, scatter, figure } from '../../../core/views.js';
 import { gainView, phaseView, GUIDE_COLOR } from '../../../core/response-views.js';
 
 const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
@@ -13,7 +13,7 @@ const MEASURED = (source, label) => [
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'lti-response',
-  order: 4,
+  order: 5,
   title: 'Réponse d\'un système LTI quelconque',
   subtitle: 'Tapez num et den, choisissez l\'entrée — échelon, rampe ou sinusoïde',
   tags: ['LTI', 'fonction de transfert', 'échelon', 'rampe', 'régime permanent'],
@@ -77,9 +77,8 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
-    view(
+    figure(
       'response',
-      'Réponse temporelle',
       line('output', {
         width: 2.4,
         label: 'sortie y(t)',

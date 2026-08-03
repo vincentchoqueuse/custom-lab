@@ -7,7 +7,7 @@ const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'pid',
-  order: 5,
+  order: 6,
   title: 'Le PID, trois potards',
   subtitle: 'P pousse, I efface, D calme — et chacun a son prix',
   tags: ['PID', 'régulation', 'erreur statique', 'perturbation', 'boucle fermée'],
@@ -38,7 +38,7 @@ export default {
   views: [
     // closed-loop output: setpoint step, then the load disturbance at t = 10
     view(
-      'response',
+      'regulated',
       'Sortie régulée',
       line('output', {
         width: 2.4,
