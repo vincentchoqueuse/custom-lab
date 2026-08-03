@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, figure, line, scatter, vline, hline } from '../../../core/views.js';
+import { view, figure, line, scatter, stem, vline, hline } from '../../../core/views.js';
 
 /** Les fréquences vraies, en verticales — les mêmes sur les trois vues,
  *  déclarées une fois pour qu'elles ne puissent pas diverger. */
@@ -46,6 +46,14 @@ export default {
       max: 8,
       default: 2,
     }),
+    estimator: select('estimateur', {
+      description: 'fréquences dont part le modèle des moindres carrés',
+      options: [
+        { value: 'esprit', label: 'ESPRIT' },
+        { value: 'root', label: 'root-MUSIC' },
+      ],
+      default: 'esprit',
+    }),
     sources: select('sources', {
       description: 'nombre de raies réellement présentes',
       options: [
@@ -90,7 +98,7 @@ export default {
 
   groups: [
     { title: 'Signal', params: ['sources', 'df', 'snr', 'N'] },
-    { title: 'Modèle', params: ['d', 'M'] },
+    { title: 'Modèle', params: ['d', 'M', 'estimator'] },
   ],
 
   views: [
@@ -125,6 +133,43 @@ export default {
           hline('noiseLine', { color: '#77AC30', dashed: true, width: 1.6, label: 'bruit 2σ² (vrai)' }),
         ],
         axes: { x: { label: 'k' }, y: { label: 'λ_k / λ₁', unit: 'dB' } },
+      })
+    ),
+
+    // Le MODÈLE, une fois complet. Les méthodes à sous-espace rendent des
+    // fréquences et rien d'autre ; les amplitudes viennent d'un moindres
+    // carrés aux fréquences trouvées, et la variance du bruit de ce qui
+    // reste. C'est cette vue qui dit si le modèle EXPLIQUE la mesure, et
+    // pas seulement s'il a trouvé des raies au bon endroit.
+    //
+    // Un spectre de RAIES, donc un stem : une raie est discrète, et un trait
+    // continu prétendrait qu'il se passe quelque chose entre elles. Les deux
+    // estimations de bruit sont tracées séparément parce qu'elles viennent
+    // de deux calculs indépendants — les voir se superposer, ou non, est le
+    // diagnostic.
+    view(
+      'model',
+      'Spectre estimé',
+      stem('linesEst', {
+        color: '#0072BD',
+        size: 5,
+        baseline: -60,
+        label: 'raies estimées (MC)',
+        overlays: [
+          scatter('linesTrue', { color: '#EDB120', size: 11, label: 'vérité' }),
+          // Trois traits, et le CAS NOMINAL est qu'ils se confondent : c'est
+          // le résultat, pas un défaut d'affichage. Les libellés sont donc
+          // courts, parce qu'ils se chevauchent quand tout va bien et se
+          // séparent exactement quand quelque chose ne va pas — SNR trop
+          // bas, ou d faux. La statline donne les trois nombres.
+          hline('nsLs', { color: '#D95319', dashed: true, width: 1.8, label: 'résidu' }),
+          hline('nsEigen', { color: '#7E2F8E', dashed: true, width: 1.8, label: 'v. propres' }),
+          hline('nsTrue', { color: '#77AC30', width: 1.4, label: 'vrai' }),
+        ],
+        axes: {
+          x: { label: 'f', unit: 'Hz' },
+          y: { label: 'puissance', unit: 'dB', domain: [-60, 8] },
+        },
       })
     ),
 

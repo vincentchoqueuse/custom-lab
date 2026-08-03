@@ -7,10 +7,11 @@ import {
   musicPseudo,
   rootMusic,
   esprit,
+  lsAmplitudes,
 } from '../_lib/subspace.js';
 
 const FS = 1000;
-const BASE = { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2, seed: 34 };
+const BASE = { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2, estimator: 'esprit', seed: 34 };
 
 /** Un enregistrement de d exponentielles complexes, sans bruit. */
 const tones = (N, freqs) => {
@@ -286,6 +287,82 @@ export const checks = [
       return {
         ok: p2 < 3 && p3 === 3 && s3 === 0 && s5 >= 2,
         detail: `d=2 → ${p2} pics · d=3 → ${p3} pics, ${s3} estimation aberrante · d=5 → ${s5} aberrantes sur 5`,
+      };
+    },
+  },
+  {
+    name: 'sans bruit, les moindres carrés rendent les amplitudes exactes',
+    category: 'numeric',
+    run() {
+      // Une fois les fréquences connues, le modèle est LINÉAIRE : le moindres
+      // carrés n'est donc pas une approximation mais une résolution, et sans
+      // bruit il doit rendre l'amplitude au chiffre près et un résidu nul.
+      // Si cette étape dérivait, tout le « spectre estimé » deviendrait un
+      // dessin plausible et faux.
+      const N = 256;
+      const f = [200 / FS, 203.9 / FS, 330 / FS];
+      const A = [1, 0.5, 0.25];
+      const xr = new Float64Array(N);
+      const xi = new Float64Array(N);
+      for (let n = 0; n < N; n++)
+        for (let k = 0; k < 3; k++) {
+          const w = 2 * Math.PI * f[k] * n;
+          xr[n] += A[k] * Math.cos(w);
+          xi[n] += A[k] * Math.sin(w);
+        }
+      const ls = lsAmplitudes(xr, xi, Float64Array.from(f));
+      const worst = maxGap(range(3), (k) => Math.sqrt(ls.power[k]), (k) => A[k]);
+      return {
+        ok: worst < 1e-9 && ls.noise < 1e-20,
+        detail: `|ΔA| ≤ ${worst.toExponential(2)}, résidu ${ls.noise.toExponential(2)}`,
+      };
+    },
+  },
+  {
+    name: 'deux estimations INDÉPENDANTES du bruit tombent sur le vrai niveau',
+    category: 'statistical',
+    run() {
+      // Le résidu du modèle et la moyenne du plateau des valeurs propres ne
+      // partagent aucun calcul : l'un vient d'un moindres carrés dans le
+      // domaine temporel, l'autre d'une décomposition propre. Qu'ils
+      // concordent, et concordent avec la vérité, est ce qui autorise à dire
+      // que le modèle EXPLIQUE la mesure — et pas seulement qu'il a trouvé
+      // des raies au bon endroit.
+      //
+      // Tolérance : l'erreur relative d'une puissance estimée sur N points
+      // est ≈ 1/√N = 6 % à N = 256, soit 0.27 dB ; on prend 4 SE, arrondi
+      // à 1.5 dB pour couvrir aussi la dispersion du plateau.
+      const bad = [];
+      for (const snr of [40, 25, 10]) {
+        const { observables: o } = compute({ ...BASE, snr });
+        const gapPair = Math.abs(o.noiseLs.value - o.noiseEigen.value);
+        const gapTrue = Math.abs(o.noiseLs.value - o.noiseRef.value);
+        if (gapPair > 1.5 || gapTrue > 1.5)
+          bad.push(`SNR ${snr} : résidu ${o.noiseLs.value.toFixed(2)}, v.p. ${o.noiseEigen.value.toFixed(2)}, vrai ${o.noiseRef.value.toFixed(2)} dB`);
+      }
+      return {
+        ok: bad.length === 0,
+        detail: bad.length ? bad.join(' · ') : 'accord à 1.5 dB près à 40, 25 et 10 dB',
+      };
+    },
+  },
+  {
+    name: 'quand le modèle est faux, le résidu le dit — il passe AU-DESSUS',
+    category: 'numeric',
+    run() {
+      // La propriété qui rend la vue utile plutôt que décorative. Avec d trop
+      // petit, une source entière tombe dans le résidu : l'estimation du
+      // bruit ne peut alors plus être basse, et elle dépasse franchement le
+      // vrai niveau. C'est un diagnostic, et il est gratuit.
+      const ok3 = compute({ ...BASE, sources: 3, d: 3, snr: 30 }).observables;
+      const bad3 = compute({ ...BASE, sources: 3, d: 1, snr: 30 }).observables;
+      return {
+        ok:
+          Math.abs(ok3.noiseLs.value - ok3.noiseRef.value) < 1.5 &&
+          bad3.noiseLs.value > ok3.noiseRef.value + 6,
+        detail:
+          `d juste : ${ok3.noiseLs.value.toFixed(2)} dB (vrai ${ok3.noiseRef.value.toFixed(2)}) · ` +
+          `d = 1 : ${bad3.noiseLs.value.toFixed(2)} dB`,
       };
     },
   },
