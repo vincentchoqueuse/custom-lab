@@ -16,7 +16,7 @@ export default {
         { value: 'ff', label: 'écho simple : y = x + g·x[n−D]' },
         { value: 'fb', label: 'écho récursif : y = x + g·y[n−D]' },
       ],
-      default: 'ff',
+      default: 'fb',
     }),
     D: int('D', {
       description: 'retard en échantillons (dents espacées de Fs/D, Fs = 8 kHz)',
