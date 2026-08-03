@@ -4,14 +4,14 @@ import { view, line, stem, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'comb',
-  order: 3,
-  title: 'Le filtre en peigne (comb)',
+  order: 2,
+  title: 'Filtre IIR en peigne',
   subtitle: 'Un écho dans le temps, un peigne en fréquence — D règle les dents, g leur profondeur',
   tags: ['numérique', 'comb', 'écho', 'flanger', 'Karplus-Strong'],
 
   params: {
     structure: select('structure', {
-      description: 'écho simple (RIF) ou récursif (RII)',
+      description: 'écho simple (RIF) ou récursif (IIR)',
       options: [
         { value: 'ff', label: 'écho simple : y = x + g·x[n−D]' },
         { value: 'fb', label: 'écho récursif : y = x + g·y[n−D]' },

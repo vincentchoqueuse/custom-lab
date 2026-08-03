@@ -4,10 +4,10 @@ import { view, plane, line, stem, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'iir-design',
-  order: 4,
-  title: 'Filtres RII par discrétisation',
+  order: 5,
+  title: 'Design IIR par discrétisation',
   subtitle: "Bilinéaire, pre-warping, invariance impulsionnelle — l'analogique passe au numérique",
-  tags: ['numérique', 'RII', 'IIR', 'bilinéaire', 'invariance impulsionnelle', 'warping'],
+  tags: ['numérique', 'IIR', 'RII', 'bilinéaire', 'invariance impulsionnelle', 'warping'],
 
   params: {
     method: select('méthode', {
