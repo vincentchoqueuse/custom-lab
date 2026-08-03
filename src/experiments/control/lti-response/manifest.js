@@ -65,7 +65,7 @@ export default {
     { title: 'Entrée', params: ['input', 'f'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     view(

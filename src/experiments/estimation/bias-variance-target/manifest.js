@@ -45,7 +45,7 @@ export default {
     { title: 'Répétitions', params: ['M'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // CUSTOM view: the canonical 2×2 dartboard figure — four equal-aspect

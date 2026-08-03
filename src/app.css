@@ -590,6 +590,24 @@ kbd {
 }
 
 /* tabs — shadcn Tabs: muted container, active tab raised on card bg */
+/* one line for the representations and the instrument's actions: tabs on
+   the left, toolbar flush right (wrapping keeps it right-aligned on a
+   phone) — the Prompt Bar below is left entirely to the pills */
+.viewbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+
+.actionbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
 .tabs {
   display: inline-flex;
   align-self: flex-start;
@@ -597,7 +615,6 @@ kbd {
   background: var(--muted);
   padding: 4px;
   border-radius: 10px;
-  margin: 14px 0 0;
 }
 
 .tabs button {
@@ -784,8 +801,7 @@ kbd {
   margin: 0 auto;
 }
 
-.promptbar .pills,
-.promptbar .actions {
+.promptbar .pills {
   display: flex;
   gap: 8px;
   align-items: center;
@@ -828,8 +844,8 @@ kbd {
 .action-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 15px;
+  gap: 6px;
+  padding: 7px 10px;
   border-radius: 9px;
   border: 1px solid var(--border);
   background: var(--background);
@@ -847,56 +863,6 @@ kbd {
 .action-btn.on {
   border-color: var(--ring);
   box-shadow: 0 0 0 3px var(--ring-soft);
-}
-
-/* mobile-only compact actions: primary action + "⋯" menu
-   (scoped under .promptbar to outweigh the `.promptbar .actions` flex rule) */
-.promptbar .actions-compact {
-  display: none;
-}
-
-.action-btn.icon-only {
-  padding: 9px 11px;
-}
-
-.more-wrap {
-  position: relative;
-}
-
-.more-menu {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  right: 0;
-  min-width: 180px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: 5px;
-  z-index: 60;
-  display: flex;
-  flex-direction: column;
-}
-
-.more-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 7px;
-  font-size: 14px;
-  font-weight: 500;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.more-item:hover {
-  background: var(--accent);
-}
-
-.more-item.on {
-  background: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--ring);
 }
 
 /* non-modal popover: opens above the pill, plot stays fully visible */
@@ -1256,16 +1222,9 @@ kbd {
     display: inline-flex;
   }
 
-  /* the four labeled action buttons overflow a phone: collapse into the
-     compact block (primary action + "⋯" menu) */
-  .promptbar .actions-full {
+  /* a phone has no keyboard: the shortcut hint goes, the icon stays */
+  .actionbar kbd {
     display: none;
-  }
-
-  .promptbar .actions-compact {
-    display: flex;
-    gap: 8px;
-    align-items: center;
   }
 
   .promptbar {

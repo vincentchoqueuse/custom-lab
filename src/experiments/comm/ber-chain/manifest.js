@@ -62,7 +62,7 @@ export default {
     { title: 'Canal', params: ['ebn0Db', 'Nbits'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // equal-aspect plane: per-symbol bit labels, error clouds split by bit cost

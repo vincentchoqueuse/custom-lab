@@ -36,7 +36,7 @@ export default {
     { title: 'Recherche sur grille', params: ['step'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
 

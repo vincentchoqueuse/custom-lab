@@ -42,7 +42,7 @@ export default {
     { title: 'Système', params: ['K', 'm', 'w0'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // step response with the exponential envelope and the ±5% band

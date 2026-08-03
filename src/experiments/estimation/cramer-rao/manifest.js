@@ -55,7 +55,7 @@ export default {
     { title: 'Échantillonnage répété', params: ['N', 'M'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // the floor: empirical variances against σ²/N in log-log

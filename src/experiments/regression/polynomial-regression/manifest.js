@@ -35,7 +35,7 @@ export default {
     { title: 'Modèle estimé', params: ['d', 'lambda'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // Declarative only — true curve, noisy data, least-squares fit.

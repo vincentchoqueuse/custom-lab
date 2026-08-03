@@ -45,7 +45,7 @@ export default {
     { title: 'Observations', params: ['N', 'sigma', 'spread', 'outlier'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // The data first, with the quantity actually minimised drawn on it: the

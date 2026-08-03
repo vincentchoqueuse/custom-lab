@@ -49,7 +49,7 @@ export default {
     { title: 'Observation', params: ['Nsym'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // all 2T slices overlaid — one NaN-broken series drawn by the generic

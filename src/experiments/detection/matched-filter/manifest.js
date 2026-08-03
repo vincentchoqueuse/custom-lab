@@ -51,7 +51,7 @@ export default {
     { title: 'Monte Carlo', params: ['M'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // the pulse is invisible in the raw signal — that is the whole point

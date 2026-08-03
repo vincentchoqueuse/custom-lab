@@ -53,7 +53,7 @@ export default {
     { title: 'Trajectoires', params: ['n', 'K'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // Fully declarative — the funnel band is the main layer (under the

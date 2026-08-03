@@ -48,7 +48,7 @@ export default {
 
   groups: [{ title: 'Système', params: ['K', 'tau', 'tz'] }],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // Step response with the graphical constructions of the course: 63 % at

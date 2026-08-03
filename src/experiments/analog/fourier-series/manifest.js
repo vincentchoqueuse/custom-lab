@@ -58,7 +58,7 @@ export default {
     { title: 'Troncature', params: ['N'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // The reconstruction converging onto the ideal signal — Gibbs included.

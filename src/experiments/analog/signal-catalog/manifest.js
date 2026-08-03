@@ -63,7 +63,7 @@ export default {
     { title: 'Translation', params: ['t0'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     view(

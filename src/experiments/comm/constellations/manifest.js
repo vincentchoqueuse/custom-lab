@@ -48,7 +48,7 @@ export default {
     { title: 'Canal', params: ['snrDb', 'N'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // CUSTOM view: the I/Q plane needs an enforced EQUAL-ASPECT scale (PSK

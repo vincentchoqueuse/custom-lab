@@ -37,7 +37,7 @@ export default {
     { title: 'Estimation', params: ['N', 'model'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // Declarative only — the whole experiment needs zero UI code.

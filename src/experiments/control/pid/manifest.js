@@ -30,7 +30,7 @@ export default {
     { title: 'Mesure', params: ['sigma'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // closed-loop output: setpoint step, then the load disturbance at t = 10

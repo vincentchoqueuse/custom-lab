@@ -51,7 +51,7 @@ export default {
     { title: 'Échantillonnage', params: ['N', 'M', 'conf'] },
   ],
 
-  // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // CUSTOM view — justification: the M stacked horizontal CI segments with
