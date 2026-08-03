@@ -1,0 +1,217 @@
+// Au-delà de la résolution de Fourier — et à quel prix.
+//
+// Le périodogramme ne sépare pas deux raies plus proches que Fs/N. Ce n'est
+// pas un défaut d'algorithme : c'est la conséquence d'une hypothèse
+// MINIMALE, celle de ne rien supposer du signal. Les méthodes à haute
+// résolution font l'inverse — elles POSTULENT un modèle, « d exponentielles
+// complexes dans du bruit blanc » — et ce postulat achète une résolution
+// que Fourier ne peut pas atteindre. Toute l'expérience tient dans le prix
+// de ce marché.
+//
+// La covariance R = E[x xᴴ] d'un tel signal a une structure très
+// particulière : ses M valeurs propres se séparent en d GRANDES (le
+// sous-espace signal) et M−d égales à σ² (le sous-espace bruit). Les
+// vecteurs propres du bruit sont orthogonaux à toutes les exponentielles
+// présentes, ce qui donne trois estimateurs :
+//
+//   MUSIC        balaie 1/‖Eₙᴴa(f)‖² : là où a(f) tombe dans le signal, le
+//                dénominateur s'annule et le pseudo-spectre explose.
+//   root-MUSIC   annule le même dénominateur ALGÉBRIQUEMENT : les racines
+//                d'un polynôme, donc aucune grille, donc aucune résolution
+//                limitée par un pas de balayage.
+//   ESPRIT       n'utilise même pas le bruit : la structure de décalage du
+//                sous-espace signal donne les fréquences par une résolution
+//                de système linéaire.
+//
+// Et le prix, qu'il faut montrer autant que le gain : il faut CONNAÎTRE d.
+// Se tromper ne dégrade pas l'estimation, cela la casse — d trop petit et
+// une source disparaît, d trop grand et des pics fantômes apparaissent. Le
+// paramètre `d` est donc au premier plan, avec la vue des valeurs propres
+// qui sert à le choisir.
+//
+// PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { fft, toDb } from '../../../core/numeric.js';
+import { mulberry32, gaussFrom } from '../../../core/rng.js';
+import { covariance, hermitianEig, musicPseudo, rootMusic, esprit } from '../_lib/subspace.js';
+
+const FS = 1000; // Hz
+const F1 = 200; // première raie (Hz)
+const F3 = 330; // troisième raie, franchement à l'écart (Hz)
+const NFFT = 4096; // grille du périodogramme de référence
+const NGRID = 1500; // grille du pseudo-spectre
+const DB_FLOOR = -80;
+// La fenêtre de lecture suit la LIMITE DE FOURIER plutôt qu'un nombre de
+// hertz fixe : à N = 1024 les deux raies sont quatre fois plus proches
+// qu'à N = 256, et un cadrage figé les aurait écrasées l'une sur l'autre
+// exactement là où l'expérience demande de les distinguer.
+const SPAN_BINS = 8; // demi-largeur, en limites de Fourier
+const SPAN_MIN = 15; // Hz — plancher, pour que le lobe reste lisible
+
+/**
+ * @param {{N: number, M: number, d: number, sources: number, df: number,
+ *          snr: number, seed: number}} params
+ * @returns {{observables: Object}}
+ */
+export function compute({ N, M, d, sources, df, snr, seed }) {
+  const gauss = gaussFrom(mulberry32(seed));
+
+  // L'écart est exprimé en unités de la LIMITE DE FOURIER Fs/N : c'est le
+  // seul réglage qui garde son sens quand on change N, et il met le propos
+  // dans le paramètre lui-même — à 1 le périodogramme sépare tout juste, en
+  // dessous il ne peut plus, quoi qu'on fasse.
+  const fourier = FS / N;
+  const f2 = F1 + df * fourier;
+  const freqs = sources === 3 ? [F1, f2, F3] : [F1, f2];
+
+  // bruit blanc complexe circulaire : σ² total, σ²/2 par quadrature
+  const sigma = Math.sqrt(0.5 / 10 ** (snr / 10)); // puissance de raie = 1
+  const xr = new Float64Array(N);
+  const xi = new Float64Array(N);
+  for (let n = 0; n < N; n++) {
+    for (const f of freqs) {
+      const w = (2 * Math.PI * f * n) / FS;
+      xr[n] += Math.cos(w);
+      xi[n] += Math.sin(w);
+    }
+    xr[n] += sigma * gauss();
+    xi[n] += sigma * gauss();
+  }
+
+  /* ---------- la référence : le périodogramme ---------------------------- */
+  const pr = new Float64Array(NFFT);
+  const pi = new Float64Array(NFFT);
+  pr.set(xr.subarray(0, Math.min(N, NFFT)));
+  pi.set(xi.subarray(0, Math.min(N, NFFT)));
+  fft(pr, pi);
+  const span = Math.max(SPAN_BINS * fourier, SPAN_MIN);
+  const fLo = F1 - span;
+  const fHi = (sources === 3 ? F3 : f2) + span;
+  const pf = [];
+  const py = [];
+  let pMax = 0;
+  const mags = new Float64Array(NFFT);
+  for (let k = 0; k < NFFT; k++) {
+    mags[k] = pr[k] * pr[k] + pi[k] * pi[k];
+    if (mags[k] > pMax) pMax = mags[k];
+  }
+  for (let k = 0; k < NFFT; k++) {
+    const f = (k * FS) / NFFT;
+    if (f < fLo || f > fHi) continue;
+    pf.push(f);
+    py.push(toDb(Math.sqrt(mags[k] / pMax), DB_FLOOR));
+  }
+
+  /* ---------- la covariance et son spectre propre ------------------------ */
+  const Meff = Math.min(M, Math.floor(N / 2));
+  const R = covariance(xr, xi, Meff);
+  const eig = hermitianEig(R.re, R.im, Meff);
+  const dEff = Math.min(d, Meff - 1);
+
+  const evIdx = new Float64Array(Meff);
+  const evDb = new Float64Array(Meff);
+  const top = Math.max(eig.values[0], 1e-300);
+  for (let k = 0; k < Meff; k++) {
+    evIdx[k] = k + 1;
+    evDb[k] = toDb(Math.sqrt(Math.max(eig.values[k], 0) / top), DB_FLOOR);
+  }
+  // les d retenues comme signal, en surbrillance
+  const selIdx = new Float64Array(dEff);
+  const selDb = new Float64Array(dEff);
+  for (let k = 0; k < dEff; k++) {
+    selIdx[k] = k + 1;
+    selDb[k] = evDb[k];
+  }
+  // le niveau de bruit théorique σ², et le saut mesuré à la coupure
+  // 2σ² et non σ² : le bruit est complexe circulaire et porte σ² PAR
+  // QUADRATURE, donc une puissance totale de 2σ². C'est le niveau auquel le
+  // plateau se tient, et le check l'épingle contre la moyenne du plateau.
+  const noisePow = 2 * sigma * sigma;
+  const noiseDb = toDb(Math.sqrt(Math.max(noisePow, 1e-300) / top), DB_FLOOR);
+  const gapDb = dEff < Meff ? evDb[dEff - 1] - evDb[dEff] : NaN;
+
+  /* ---------- MUSIC, root-MUSIC, ESPRIT ---------------------------------- */
+  const grid = new Float64Array(NGRID);
+  for (let k = 0; k < NGRID; k++) grid[k] = (fLo + ((fHi - fLo) * k) / (NGRID - 1)) / FS;
+  const ps = musicPseudo(eig, Meff, dEff, grid);
+  let psMax = 0;
+  for (let k = 0; k < NGRID; k++) if (ps[k] > psMax) psMax = ps[k];
+  const gf = new Float64Array(NGRID);
+  const gy = new Float64Array(NGRID);
+  for (let k = 0; k < NGRID; k++) {
+    gf[k] = grid[k] * FS;
+    gy[k] = toDb(Math.sqrt(ps[k] / psMax), DB_FLOOR);
+  }
+
+  const rm = rootMusic(eig, Meff, dEff);
+  const es = esprit(eig, Meff, dEff);
+  const toHz = (a) => Float64Array.from(a, (v) => v * FS);
+  const rmHz = toHz(rm);
+  const esHz = toHz(es);
+
+  // Les estimations, posées sur le pseudo-spectre à hauteur fixe : ce sont
+  // des NOMBRES, pas des courbes, et les voir tomber (ou non) sur les
+  // verticales de vérité est toute la lecture de la vue.
+  const marks = (hz, y) => ({
+    x: Float64Array.from(hz),
+    y: Float64Array.from(hz, () => y),
+  });
+
+  /** plus grande erreur d'appariement, en Hz, entre estimations et vérité */
+  const worstErr = (hz) => {
+    if (hz.length === 0) return NaN;
+    let worst = 0;
+    for (const f of freqs.slice(0, dEff)) {
+      let best = Infinity;
+      for (const g of hz) best = Math.min(best, Math.abs(g - f));
+      worst = Math.max(worst, best);
+    }
+    return worst;
+  };
+
+  return {
+    observables: {
+      periodogram: { x: Float64Array.from(pf), y: Float64Array.from(py) },
+      eigenvalues: { x: evIdx, y: evDb },
+      eigenSelected: { x: selIdx, y: selDb },
+      pseudo: { x: gf, y: gy },
+      rootMusicMarks: marks(rmHz, -3),
+      espritMarks: marks(esHz, -8),
+      // les fréquences vraies, en verticales sur les trois vues
+      fTrue1: F1,
+      fTrue2: f2,
+      fTrue3: sources === 3 ? F3 : NaN,
+      noiseLine: noiseDb,
+      dLine: dEff + 0.5, // verticale : la coupure signal / bruit
+      fourierLimit: {
+        value: fourier,
+        meta: { label: 'limite de Fourier Fs/N', unit: 'Hz', precision: 2 },
+      },
+      spacing: {
+        value: f2 - F1,
+        meta: { label: 'écart des deux raies', unit: 'Hz', precision: 2 },
+      },
+      snapshots: { value: R.snapshots, meta: { label: 'instantanés' } },
+      eigenGap: {
+        value: gapDb,
+        meta: { label: 'saut à la coupure', unit: 'dB', precision: 1 },
+      },
+      errRoot: {
+        value: worstErr(rmHz),
+        meta: { label: 'erreur root-MUSIC', unit: 'Hz', precision: 3 },
+      },
+      errEsprit: {
+        value: worstErr(esHz),
+        meta: { label: 'erreur ESPRIT', unit: 'Hz', precision: 3 },
+      },
+      model: {
+        value:
+          dEff === sources
+            ? `d = ${dEff} = nombre de sources`
+            : dEff < sources
+              ? `d = ${dEff} < ${sources} sources : il en manque une`
+              : `d = ${dEff} > ${sources} sources : pics fantômes`,
+        meta: { label: 'modèle' },
+      },
+    },
+  };
+}
