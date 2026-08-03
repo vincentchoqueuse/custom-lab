@@ -2,7 +2,7 @@
 // Extension point for future i18n of the chrome (principle 7) — pedagogical
 // content (titles, labels, notes) never lives here: it belongs to manifests.
 export const STR = {
-  APP_NAME: 'Pupitre',
+  APP_NAME: 'Pupitrace',
   REPO_URL: 'https://github.com/vincentchoqueuse/custom-lab',
   GITHUB: 'View source on GitHub',
   SEARCH: 'Search experiments',

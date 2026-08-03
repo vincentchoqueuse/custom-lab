@@ -1,7 +1,7 @@
 <script>
   // App icon: the lectern — a slanted panel on its foot, carrying the figure.
-  // The name made a mark: a pupitre is what you play from, and what it holds
-  // up is the plot. Always dark, per the shadcn chrome; the faint outline
+  // The name made a mark: a pupitre is what you play from, a trace is what
+  // it carries — and what this one holds up is the plot. Always dark, per the shadcn chrome; the faint outline
   // keeps it visible on the dark sidebar too. Stays legible down to 16 px.
   let { size = 24 } = $props();
 </script>
