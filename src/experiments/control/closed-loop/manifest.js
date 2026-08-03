@@ -7,7 +7,7 @@ const CLOSED = '#D95319'; // la boucle fermée, partout la même couleur
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'closed-loop',
-  order: 4,
+  order: 5,
   title: 'Boucler un second ordre',
   subtitle: 'Un seul potard K — et le système change de vitesse, de dépassement et d’erreur',
   tags: [

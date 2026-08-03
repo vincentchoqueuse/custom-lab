@@ -14,7 +14,7 @@ const MARKS = [
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'frequency-plots',
-  order: 3,
+  order: 4,
   title: 'Bode, Nyquist, Black',
   subtitle: 'Trois diagrammes, un seul H(jω) — et un curseur pour les relier',
   tags: [
@@ -32,10 +32,13 @@ export default {
   params: {
     sys: select('système', {
       description: 'la fonction de transfert tracée',
+      // the expression IS the name of the system: "premier ordre K/(1+jωτ)"
+      // said the same thing twice, and the prose was the half that did not
+      // fit on a pill
       options: [
-        { value: 'first', label: 'premier ordre K/(1+jωτ)' },
-        { value: 'second', label: 'second ordre Kω₀²/(ω₀²−ω²+2jmω₀ω)' },
-        { value: 'openloop', label: 'boucle ouverte K/(jω(1+jωτ)(1+jωτ/5))' },
+        { value: 'first', label: 'K/(1+jωτ)' },
+        { value: 'second', label: 'Kω₀²/(ω₀²−ω²+2jmω₀ω)' },
+        { value: 'openloop', label: 'K/(jω(1+jωτ)(1+jωτ/5))' },
       ],
       default: 'first',
     }),

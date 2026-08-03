@@ -14,6 +14,8 @@
 //
 // PURE : pas de DOM, pas d'état. Importable depuis compute.js et check.js.
 
+import { polyEvalComplex } from '../../../core/numeric.js';
+
 const EPS = 1e-6; // la largeur de la zone traitée comme critique (m = 1)
 
 /**
@@ -83,4 +85,97 @@ export function firstOrderStep(K, tau, tz, t) {
 /** Partie continue de h(t) du premier ordre (le Dirac K·τ_z/τ est à part). */
 export function firstOrderImpulse(K, tau, tz, t) {
   return ((K * (1 - tz / tau)) / tau) * Math.exp(-t / tau);
+}
+
+/* ------------------------------------------------------------------------ */
+/* Racines d'un polynôme — les pôles et les zéros d'un système QUELCONQUE    */
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Racines complexes d'un polynôme à coefficients réels donnés en puissances
+ * DÉCROISSANTES, par l'itération de Durand–Kerner (Weierstrass) :
+ *
+ *   z_k ← z_k − p(z_k) / Π_{j≠k} (z_k − z_j)
+ *
+ * C'est la méthode de Newton appliquée simultanément aux n racines, le
+ * dénominateur jouant le rôle de la dérivée déflatée. Elle tient en trente
+ * lignes, ne demande aucune algèbre linéaire (pas de matrice compagne, pas
+ * de QR) et converge quadratiquement sur les racines simples — largement
+ * assez pour les ordres 1 à 6 qu'on tape en cours.
+ *
+ * Deux précautions qui ne sont pas cosmétiques :
+ *
+ *  - les racines NULLES sont épluchées à la main (zéros de queue). Sur une
+ *    racine multiple la convergence retombe au premier ordre et la précision
+ *    plafonne à ε^{1/m} ; un intégrateur double, s² en facteur, donnerait
+ *    deux points à 1e-8 de l'origine au lieu d'un pôle double net. Ici ils
+ *    sont exacts par construction.
+ *  - les points de départ sont FIXES (spirale de rayon Cauchy), jamais
+ *    tirés au hasard : le calcul doit être déterministe à paramètres égaux,
+ *    c'est le contrat du projet.
+ *
+ * @param {number[]} coeffs puissances décroissantes, coeffs[0] = terme de
+ *                          plus haut degré
+ * @returns {number[][]} [[Re, Im], …], de longueur deg(p)
+ */
+export function polyRoots(coeffs) {
+  const c = Array.from(coeffs, Number);
+  while (c.length > 1 && c[0] === 0) c.shift(); // un zéro de tête n'est pas un degré
+  const out = [];
+  while (c.length > 1 && c[c.length - 1] === 0) {
+    c.pop();
+    out.push([0, 0]); // racine à l'origine, exacte
+  }
+  const n = c.length - 1;
+  if (n <= 0) return out;
+
+  const a = c.map((v) => v / c[0]); // unitaire
+  // borne de Cauchy : toutes les racines sont dans |z| ≤ 1 + max|a_i|
+  let R = 1;
+  for (let i = 1; i <= n; i++) R = Math.max(R, Math.abs(a[i]));
+  R = 1 + R;
+
+  const zr = new Float64Array(n);
+  const zi = new Float64Array(n);
+  for (let k = 0; k < n; k++) {
+    const th = (2 * Math.PI * k) / n + 0.4; // 0.4 rad : jamais sur l'axe réel
+    zr[k] = 0.6 * R * Math.cos(th);
+    zi[k] = 0.6 * R * Math.sin(th);
+  }
+
+  for (let it = 0; it < 500; it++) {
+    let move = 0;
+    for (let k = 0; k < n; k++) {
+      const [pr, pi] = polyEvalComplex(a, zr[k], zi[k]);
+      let dr = 1;
+      let di = 0;
+      for (let j = 0; j < n; j++) {
+        if (j === k) continue;
+        const er = zr[k] - zr[j];
+        const ei = zi[k] - zi[j];
+        const t = dr * er - di * ei;
+        di = dr * ei + di * er;
+        dr = t;
+      }
+      const m = dr * dr + di * di;
+      if (!(m > 1e-300)) continue; // deux itérés confondus : on passe ce tour
+      const qr = (pr * dr + pi * di) / m;
+      const qi = (pi * dr - pr * di) / m;
+      zr[k] -= qr;
+      zi[k] -= qi;
+      move = Math.max(move, Math.hypot(qr, qi));
+    }
+    if (move < 1e-14) break;
+  }
+
+  // Un polynôme réel a des racines réelles ou conjuguées deux à deux ; une
+  // racine réelle multiple sort de l'itération avec une partie imaginaire
+  // résiduelle (le plafond ε^{1/m} ci-dessus). La remettre à zéro dit la
+  // vérité — un pôle double en −1 est réel — au lieu de dessiner deux points
+  // décollés de l'axe.
+  for (let k = 0; k < n; k++) {
+    const scale = Math.max(1, Math.abs(zr[k]));
+    out.push([zr[k], Math.abs(zi[k]) < 1e-6 * scale ? 0 : zi[k]]);
+  }
+  return out;
 }
