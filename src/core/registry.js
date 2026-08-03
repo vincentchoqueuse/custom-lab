@@ -2,9 +2,15 @@
 // experiment by name, and adding one never modifies the core. The registry
 // applies the core defaults (convention over configuration), which are part
 // of the core contract:
-//   - `seed` param injected into every schema
+//   - `seed` param injected into the schema of an experiment that DECLARES
+//     `random: true` — and only there. Half the catalogue draws nothing at
+//     all (a Bode plot, a convolution, a pole map), and a dice button that
+//     provably cannot change the picture is a promise the instrument does
+//     not keep. `npm run check` proves each declaration against the import
+//     graph, so neither direction can be got wrong.
 //   - `type: 'float'` implicit param type, `name` defaults to the param key
-//   - `actions` defaults to ['randomizeSeed', 'freeze']
+//   - `actions` defaults to ['randomizeSeed', 'freeze'] for a random
+//     experiment, ['freeze'] for a deterministic one
 //   - `groups` absent → one flat group
 //   - `scenes.js` auto-discovered and merged as `presets`; in a scene, `view`
 //     defaults to the first view, `drawer` to false, `masked`/`visible` to []
@@ -28,6 +34,7 @@ export class RegistryError extends Error {
 // it) but is out of the default toolbar: in a lecture the scene picker is
 // the reset, and the button only crowded the three that matter.
 const DEFAULT_ACTIONS = ['randomizeSeed', 'freeze'];
+const DEFAULT_ACTIONS_DETERMINISTIC = ['freeze'];
 
 const manifestModules = import.meta.glob('../experiments/*/*/manifest.js', { eager: true });
 const sceneModules = import.meta.glob('../experiments/*/*/scenes.js', { eager: true });
@@ -38,7 +45,7 @@ function pathKey(path) {
   return m ? { subject: m[1], key: `${m[1]}/${m[2]}` } : null;
 }
 
-function normalizeParams(raw, key) {
+function normalizeParams(raw, key, random) {
   const params = {};
   for (const [k, p] of Object.entries(raw ?? {})) {
     if (p === null || typeof p !== 'object')
@@ -47,7 +54,16 @@ function normalizeParams(raw, key) {
     if (!params[k].type) params[k].type = 'float';
     if (params[k].name == null) params[k].name = k;
   }
-  if (!params.seed) params.seed = seedField();
+  // Determinism is still a contract requirement — compute is pure and
+  // reproducible either way. What is declared here is whether the experiment
+  // draws at all: no draw, no seed, and nothing in the UI that pretends
+  // otherwise.
+  if (random && !params.seed) params.seed = seedField();
+  if (!random && params.seed)
+    throw new RegistryError(
+      `experiment '${key}': declares a 'seed' param without 'random: true'. ` +
+        `Add random: true, or drop the seed.`
+    );
   return params;
 }
 
@@ -82,7 +98,10 @@ for (const [path, mod] of Object.entries(manifestModules)) {
     throw new RegistryError(`experiment '${loc.key}': at least one view is required`);
 
   const scenesPath = path.replace(/manifest\.js$/, 'scenes.js');
-  const params = normalizeParams(src.params, loc.key);
+  if (src.random != null && typeof src.random !== 'boolean')
+    throw new RegistryError(`experiment '${loc.key}': 'random' must be a boolean`);
+  const random = src.random === true;
+  const params = normalizeParams(src.params, loc.key, random);
   const subjectMeta = subjectModules[`../experiments/${loc.subject}/_subject.js`]?.default ?? {};
   const views = normalizeViews(src.views, subjectMeta, loc.key);
   const manifest = {
@@ -95,7 +114,8 @@ for (const [path, mod] of Object.entries(manifestModules)) {
     subject: loc.subject,
     views,
     params,
-    actions: src.actions ?? DEFAULT_ACTIONS,
+    random,
+    actions: src.actions ?? (random ? DEFAULT_ACTIONS : DEFAULT_ACTIONS_DETERMINISTIC),
     groups:
       src.groups ??
       [{ title: null, params: Object.keys(params).filter((k) => k !== 'seed') }],

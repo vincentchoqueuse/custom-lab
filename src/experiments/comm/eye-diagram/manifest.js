@@ -5,6 +5,7 @@ import { view, line, histogram, scatter, vline, hline, figure } from '../../../c
 export default {
   id: 'eye-diagram',
   order: 3,
+  random: true,
   title: 'Le diagramme de l\'œil',
   subtitle: 'ISI, bruit et instant d\'échantillonnage — la santé d\'une liaison en un regard',
   tags: ['diagramme de l\'œil', 'ISI', 'cosinus surélevé', 'Nyquist', 'PAM'],

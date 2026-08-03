@@ -254,6 +254,11 @@ const actionApi = {
 };
 
 export function runAction(id) {
+  // An experiment that declares no seed has no randomizeSeed button — and
+  // must not answer R either, or the shortcut would silently bump a param
+  // that does not exist. The view bar and the keyboard obey the same list.
+  const m = manifest();
+  if (!m?.actions?.includes(id)) return;
   const a = coreActions[id];
   if (a) a.run(actionApi);
 }

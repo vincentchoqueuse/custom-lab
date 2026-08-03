@@ -46,8 +46,12 @@
       {/each}
     {/each}
 
-    <h3>{STR.SEED}</h3>
-    <ParamControl key="seed" spec={m.params.seed} />
+    <!-- only a random experiment has one: the registry injects the seed on
+         the strength of `random: true` and nowhere else -->
+    {#if m.params.seed}
+      <h3>{STR.SEED}</h3>
+      <ParamControl key="seed" spec={m.params.seed} />
+    {/if}
 
     {#if derivedEntries.length}
       <h3>{STR.DERIVED}</h3>

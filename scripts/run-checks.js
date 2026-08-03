@@ -10,7 +10,7 @@
 // before a lecture hall.
 
 import { readdirSync, existsSync } from 'node:fs';
-import { join, resolve, sep } from 'node:path';
+import { join, resolve, sep, dirname } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { normalizeViews } from '../src/core/figures.js';
@@ -72,9 +72,73 @@ function checkLayering() {
   }
 }
 
+/**
+ * `random: true` must say the truth, in both directions.
+ *
+ * The seed exists so a draw can be replayed; an experiment that draws
+ * NOTHING — a Bode plot, a convolution, a pole map — used to carry the dice
+ * button, the seed field and `?seed=` all the same, and pressing the dice
+ * provably changed nothing. Half the catalogue was in that state.
+ *
+ * mulberry32 is the only generator the project allows (CLAUDE.md), so
+ * "this experiment draws" is exactly "its compute reaches core/rng.js",
+ * directly or through anything it imports. That is a fact about the source,
+ * not a promise in a manifest, which is why it can be checked rather than
+ * trusted: a manifest declaring `random: true` without a generator, or
+ * using one without declaring it, fails here.
+ */
+function checkRandomness() {
+  const EXP = resolve(process.cwd(), 'src/experiments');
+  const cache = new Map();
+  const reachesRng = (file, seen = new Set()) => {
+    const abs = resolve(file);
+    if (seen.has(abs)) return false;
+    seen.add(abs);
+    if (cache.has(abs)) return cache.get(abs);
+    if (!existsSync(abs)) return false;
+    const src = readFileSync(abs, 'utf8');
+    let hit = /from\s+'[^']*core\/rng\.js'/.test(src);
+    if (!hit)
+      for (const m of src.matchAll(/from\s+'(\.[^']+\.js)'/g))
+        if (reachesRng(resolve(dirname(abs), m[1]), seen)) {
+          hit = true;
+          break;
+        }
+    cache.set(abs, hit);
+    return hit;
+  };
+
+  const bad = [];
+  let n = 0;
+  for (const sub of readdirSync(EXP, { withFileTypes: true })) {
+    if (!sub.isDirectory()) continue;
+    for (const exp of readdirSync(join(EXP, sub.name), { withFileTypes: true })) {
+      if (!exp.isDirectory()) continue;
+      const dir = join(EXP, sub.name, exp.name);
+      if (!existsSync(join(dir, 'manifest.js'))) continue;
+      n++;
+      const declared = /^\s*random:\s*true,\s*$/m.test(readFileSync(join(dir, 'manifest.js'), 'utf8'));
+      const draws = reachesRng(join(dir, 'compute.js'));
+      if (declared && !draws)
+        bad.push(`${sub.name}/${exp.name}: declares random: true but never reaches core/rng.js`);
+      if (!declared && draws)
+        bad.push(`${sub.name}/${exp.name}: uses core/rng.js but does not declare random: true`);
+    }
+  }
+  console.log(`  ${dim('randomness')}`);
+  if (bad.length) {
+    for (const b of bad) console.log(`    ${red('✗')} ${b}`);
+    fail++;
+  } else {
+    console.log(`    ${green('✓')} random: true matches the generator in all ${n} experiments`);
+    pass++;
+  }
+}
+
 async function checkCatalogue() {
   console.log(bold('catalogue'));
   checkLayering();
+  checkRandomness();
   console.log(`  ${dim('vocabulary')}`);
   let figuresOk = true;
   let scenesOk = true;
@@ -108,7 +172,7 @@ async function checkCatalogue() {
       for (const [i, sc] of scenes.entries()) {
         nScenes++;
         try {
-          validateScene(sc, i, { views, params: manifest.params }, key);
+          validateScene(sc, i, { views, params: manifest.params, random: manifest.random }, key);
         } catch (err) {
           scenesOk = false;
           console.log(`    ${red('✗')} ${err.message}`);

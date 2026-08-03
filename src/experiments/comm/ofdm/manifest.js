@@ -5,6 +5,7 @@ import { view, plane, line, scatter } from '../../../core/views.js';
 export default {
   id: 'ofdm',
   order: 6,
+  random: true,
   title: 'OFDM et canal sélectif',
   subtitle: 'Le canal creuse des trous ; la FFT le rend plat, porteuse par porteuse',
   tags: ['OFDM', 'multitrajets', 'préfixe cyclique', 'égalisation'],

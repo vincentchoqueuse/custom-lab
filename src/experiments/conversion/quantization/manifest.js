@@ -5,6 +5,7 @@ import { view, line, histogram, density, vline, hline, figure } from '../../../c
 export default {
   id: 'quantization',
   order: 3,
+  random: true,
   title: 'Quantification',
   subtitle: "L'escalier du CAN, son erreur, et la règle des 6 dB par bit",
   tags: ['numérique', 'CAN', 'quantification', 'SNR', 'dither'],

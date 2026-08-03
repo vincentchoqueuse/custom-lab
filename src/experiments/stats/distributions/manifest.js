@@ -5,6 +5,7 @@ import { view, custom, line } from '../../../core/views.js';
 export default {
   id: 'distributions',
   order: 1,
+  random: true,
   title: 'Catalogue de lois',
   subtitle: 'pdf/pmf et CDF : théorie contre réalisations',
   tags: ['probabilités', 'lois', 'histogramme', 'CDF', 'Poisson', 'gaussienne'],

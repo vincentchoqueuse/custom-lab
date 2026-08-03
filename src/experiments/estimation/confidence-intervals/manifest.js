@@ -5,6 +5,7 @@ import { view, custom, histogram, line, density, vline, hline } from '../../../c
 export default {
   id: 'confidence-intervals',
   order: 6,
+  random: true,
   title: 'Intervalles de confiance',
   subtitle: 'Couverture fréquentiste et largeur des IC',
   tags: ['fréquentiste', 'IC', 'Student'],

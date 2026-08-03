@@ -5,6 +5,7 @@ import { view, line, scatter, vline } from '../../../core/views.js';
 export default {
   id: 'matched-filter',
   order: 2,
+  random: true,
   title: 'Le filtre adapté',
   subtitle: 'Corréler avec ce que l\'on cherche : le pic sort du bruit, gain 10·log₁₀(N)',
   tags: ['filtre adapté', 'corrélation', 'SNR', 'gain de traitement', 'radar'],

@@ -276,6 +276,8 @@ Rules:
 - Every displayable quantity is a named observable; views and overlays reference them
   by name and never compute anything scientific (pixel scaling: yes; variance: never).
 - Seeded RNG (`core/rng.js`, mulberry32) exclusively. Never `Math.random()`.
+  A compute that reaches it — directly or through a `_lib` module — makes its
+  experiment `random: true`, and that correspondence is enforced by `npm run check`.
 - `Float64Array` vectorization in hot loops; no arrays of objects on hot paths.
 - Serializable data only (worker → UI transfer).
 
@@ -285,12 +287,24 @@ To keep experiments minimal, the core applies these defaults; a manifest only wr
 what deviates. **These conventions are part of the core contract** (applied by the
 registry at load time):
 
-- **`seed` is injected** into every schema (`type: 'seed'`, default 42). Determinism
-  is a contract requirement, not an experiment choice — impossible to forget.
+- **`random: true` declares that the experiment DRAWS**, and only then is a
+  `seed` param injected (`type: 'seed'`, default 42). Purity and reproducibility
+  remain contract requirements for every compute; what is declared here is
+  whether there is anything to re-draw. Half the catalogue draws nothing at all —
+  a Bode plot, a convolution, a pole map — and a dice button that provably cannot
+  change the picture is a promise the instrument does not keep. A deterministic
+  experiment therefore has no seed field, no dice, no `R`, and no `?seed=` in its
+  URL. **The declaration is checked, not trusted**: mulberry32 is the only
+  generator the project allows, so "this experiment draws" is exactly "its compute
+  reaches `core/rng.js`", directly or transitively — `npm run check` fails a
+  manifest that declares `random: true` without a generator, and one that uses a
+  generator without declaring it.
 - **`type: 'float'`** is the implicit param type.
-- **`actions`** defaults to `['randomizeSeed', 'freeze']`. `resetDefaults` stays in
-  the registry for a manifest that wants it: in a lecture the scene picker IS the
-  reset. Actions live in the view bar (tabs line, flush right), as icon + shortcut.
+- **`actions`** defaults to `['randomizeSeed', 'freeze']` — `['freeze']` alone when
+  the experiment is not `random`. `resetDefaults` stays in the registry for a
+  manifest that wants it: in a lecture the scene picker IS the reset. Actions live
+  in the view bar (tabs line, flush right), as icon + shortcut. A keyboard
+  shortcut obeys the same list: `R` is inert where there is no seed to bump.
 - **`groups`** absent → one flat group.
 - **`layout: 'plot'`** is implied when a view has a `plot` key.
 - **Standard figures are named once** in `core/figures.js`. A manifest declares
@@ -600,6 +614,7 @@ import { view, line } from '../../core/views.js';
 /** @type {import('../../core/types').ExperimentManifest} */
 export default {
   id: 'sinusoid',
+  random: true,                                 // it draws: σ·bruit, so it gets a seed
   title: 'La sinusoïde',
   subtitle: 'Amplitude, fréquence, phase — et un peu de bruit',
   tags: ['signal', 'sinusoïde', 'fondamentaux'],
@@ -653,7 +668,8 @@ import { mulberry32, gaussFrom } from '../../core/rng.js';
 const FS = 200;   // sampling rate (Hz)
 const T = 2;      // duration (s)
 
-/** PURE, stateless, seeded. `seed` is injected by the core. */
+/** PURE, stateless, seeded. `seed` is injected by the core because the
+ *  manifest declares `random: true`. */
 export function compute({ A, f, phi, sigma, seed }) {
   const gauss = gaussFrom(mulberry32(seed));
   const n = FS * T;

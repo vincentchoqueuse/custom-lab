@@ -6,6 +6,7 @@ import { canonicalLaws } from '../_lib/laws.js';
 export default {
   id: 'law-large-numbers',
   order: 4,
+  random: true,
   title: 'Loi des grands nombres',
   subtitle: 'Chaque trajectoire de x̄ₙ converge vers μ — à la vitesse 1/√n',
   tags: ['LGN', 'convergence', 'moyenne empirique', 'trajectoires'],

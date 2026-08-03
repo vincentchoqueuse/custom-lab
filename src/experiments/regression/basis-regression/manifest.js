@@ -5,6 +5,7 @@ import { view, line, scatter, vline, hline, figure } from '../../../core/views.j
 export default {
   id: 'basis-regression',
   order: 3,
+  random: true,
   title: 'Régression à fonctions de base',
   subtitle: 'Linéaire ne veut pas dire droite — mêmes moindres carrés, nouvelles formes',
   tags: ['fonctions de base', 'moindres carrés', 'RBF', 'noyau', 'train/test', 'sur-ajustement'],

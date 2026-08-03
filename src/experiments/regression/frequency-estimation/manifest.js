@@ -5,6 +5,7 @@ import { view, line, scatter, vline, figure } from '../../../core/views.js';
 export default {
   id: 'frequency-estimation',
   order: 4,
+  random: true,
   title: 'Estimation de fréquence (moindres carrés)',
   subtitle: 'Un critère non convexe estimé à la grille — le pas règle coût et précision',
   tags: ['moindres carrés', 'fréquence', 'grille', 'non convexe'],

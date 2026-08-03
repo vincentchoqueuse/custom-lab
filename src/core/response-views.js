@@ -172,6 +172,10 @@ export function polesView(opts = {}) {
     maxHalf,
   } = opts;
   return figurePlane('poles', {
+    // Re(s) = 0 is the line the whole subject turns on — "le pôle passe à
+    // droite" needs the right to be drawn. Not an option: a pole map that
+    // hides the imaginary axis is a pole map missing its point.
+    axisLines: true,
     markers: { source: poles, color: POLE_COLOR, label: poleLabel },
     ...(zeros
       ? { clouds: [{ source: zeros, color: ZERO_COLOR, r: 4.5, opacity: 1, label: zeroLabel }] }

@@ -5,6 +5,7 @@ import { view, line, histogram, density, vline } from '../../../core/views.js';
 export default {
   id: 'affine-transform',
   order: 2,
+  random: true,
   title: 'Transformation affine Y = aX + b',
   subtitle: 'Comment a et b déplacent, dilatent et retournent une densité',
   tags: ['transformation', 'variable aléatoire', 'moyenne', 'variance'],

@@ -83,6 +83,8 @@ import { view, histogram, vline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: '${id}',
+  // this template draws: the seed, the dice and R exist because of this line
+  random: true,
   title: '${title}',
   subtitle: 'TODO — one line about the experiment',
   tags: [],
@@ -90,7 +92,7 @@ export default {
   params: {
     N: int('N', { description: 'nombre de réalisations', min: 10, max: 5000, step: 10, default: 500 }),
     mu: float('μ', { description: 'moyenne', min: -3, max: 3, step: 0.1, default: 0 }),
-    // seed is injected by the core
+    // seed is injected by the core, because of random: true above
   },
 
   views: [
@@ -117,7 +119,8 @@ export default {
 
   params: {
     a: float('a', { description: 'paramètre de la courbe', min: 0.5, max: 5, step: 0.1, default: 2 }),
-    // seed is injected by the core
+    // no random: true — this template draws nothing, so it gets no seed,
+    // no dice button and no ?seed= in its URL
   },
 
   views: [
@@ -158,10 +161,11 @@ export function compute({ N, mu, seed }) {
 }
 `
   : `// TODO — replace the dummy curve with the experiment's science.
-// PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+// PURE and stateless — runs in a worker. Fully deterministic: no generator,
+// hence no `random: true` in the manifest and no seed in the signature.
 
-/** @param {{a: number, seed: number}} params */
-export function compute({ a, seed }) {
+/** @param {{a: number}} params */
+export function compute({ a }) {
   const ng = 201;
   const x = new Float64Array(ng);
   const y = new Float64Array(ng);
@@ -201,7 +205,7 @@ export const checks = [
   : `import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 
-const BASE = { a: 2, seed: 1 };
+const BASE = { a: 2 };
 
 export const checks = [
   {
