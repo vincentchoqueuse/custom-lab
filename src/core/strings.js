@@ -34,6 +34,7 @@ export const STR = {
   VIEW_LOAD_ERROR: '⚠ This view failed to load',
   RETRY: 'Retry',
   SEED: 'Seed',
+  LEGEND_TOGGLE: 'click to hide or show this series',
   DERIVED: 'Derived',
   CLOSE: 'Close',
   MASKED_HINT: 'Hidden parameter — use Reveal to unveil',
