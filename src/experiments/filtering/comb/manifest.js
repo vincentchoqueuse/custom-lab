@@ -58,6 +58,24 @@ export default {
 
   views: [
     view(
+      'time',
+      'Temporel',
+      line('tOut', {
+        width: 1.8,
+        label: 'sortie',
+        overlays: [line('tIn', { color: '#D95319', dashed: true, label: 'entrée' })],
+        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
+      })
+    ),
+
+    view(
+      'impulse',
+      "L'écho",
+      stem('impulse', {
+        axes: { x: 'n', y: 'h[n]' },
+      })
+    ),
+    view(
       'spectrum',
       'Fréquentiel',
       line('specOut', {
@@ -72,23 +90,6 @@ export default {
           x: { label: 'f', unit: 'Hz' },
           y: { label: 'amplitude', unit: 'dB', domain: [-80, 30] },
         },
-      })
-    ),
-    view(
-      'impulse',
-      "L'écho",
-      stem('impulse', {
-        axes: { x: 'n', y: 'h[n]' },
-      })
-    ),
-    view(
-      'time',
-      'Temporel',
-      line('tOut', {
-        width: 1.8,
-        label: 'sortie',
-        overlays: [line('tIn', { color: '#D95319', dashed: true, label: 'entrée' })],
-        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
       })
     ),
   ],

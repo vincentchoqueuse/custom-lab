@@ -401,6 +401,16 @@ export default {
   //
   // RULE: declarative first. A custom view must be justified in a comment.
   // A custom pattern repeated twice becomes a generic type in ui/plots/.
+  //
+  // VIEW ORDER is a convention, not a detail — a listener who moves from one
+  // experiment to the next must find the same tab in the same place:
+  //   signal experiment: temporal FIRST, then the spectrum, then the extras
+  //   filter experiment: the signal in and out FIRST, then the impulse
+  //     response, then the frequency response, then the extras
+  // An experiment whose subject IS another representation (spectrogram, eye
+  // diagram, I/Q plane) leads with it and says so in a comment. A scene that
+  // must open elsewhere declares its `view` — the tab order is the catalogue's
+  // grammar, the scene's view is the lecture's.
 
   // No `presets` here: lecture scenes live in scenes.js, auto-discovered by the
   // registry and merged into the manifest. No `story` either (absent = reserved

@@ -3,6 +3,7 @@ export default [
   {
     id: 'truncate',
     title: "Scène 1 · Tronquer l'infini",
+    view: 'impulse',
     params: { fc: 1000, N: 21, win: 'rect' },
     visible: ['N'],
     notes: `La réponse idéale (orange) est un sinc INFINI et non causal : on n'en

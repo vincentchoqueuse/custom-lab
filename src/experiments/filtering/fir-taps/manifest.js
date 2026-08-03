@@ -36,12 +36,23 @@ export default {
 
   views: [
     view(
+      'time',
+      'Temporel',
+      line('tOut', {
+        width: 1.8,
+        label: 'sortie',
+        overlays: [line('tIn', { color: '#D95319', dashed: true, label: 'entrée' })],
+        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
+      })
+    ),
+    view(
       'impulse',
       'Réponse impulsionnelle',
       stem('taps', {
         axes: { x: 'k', y: 'b[k] = h[k]' },
       })
     ),
+
     view(
       'spectrum',
       'Fréquentiel',
@@ -61,16 +72,6 @@ export default {
           x: { label: 'f', unit: 'Hz' },
           y: { label: 'amplitude', unit: 'dB', domain: [-60, 20] },
         },
-      })
-    ),
-    view(
-      'time',
-      'Temporel',
-      line('tOut', {
-        width: 1.8,
-        label: 'sortie',
-        overlays: [line('tIn', { color: '#D95319', dashed: true, label: 'entrée' })],
-        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
       })
     ),
   ],
