@@ -1,5 +1,5 @@
 import { float, bool, select } from '../../../core/fields.js';
-import { view, line, scatter, bars, vline } from '../../../core/views.js';
+import { view, line, stem, vline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -44,7 +44,7 @@ export default {
         label: 'sortie CNA',
         overlays: [
           line('idealSig', { color: '#D95319', dashed: true, label: 'signal idéal' }),
-          scatter('samples', { color: '#7E2F8E', size: 4, opacity: 0.9, label: 'échantillons Fs' }),
+          stem('samples', { color: '#7E2F8E', size: 3.4, opacity: 0.9, label: 'échantillons Fs' }),
         ],
         axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
       })
@@ -52,7 +52,7 @@ export default {
     view(
       'digital',
       'Le domaine numérique',
-      bars('upBars', {
+      stem('upBars', {
         label: 'zero-stuffing ×L',
         overlays: [line('upLine', { color: '#D95319', width: 2, label: 'après filtre' })],
         axes: { x: { label: 't', unit: 'ms' }, y: 'x[k] à L·Fs' },

@@ -17,6 +17,7 @@ const PLOT_TYPES = [
   'line',
   'scatter',
   'bars',
+  'stem',
   'vline',
   'hline',
   'density',
@@ -74,6 +75,9 @@ export const histogram = (source, opts) => makePlot('histogram', source, opts);
 export const line = (source, opts) => makePlot('line', source, opts);
 export const scatter = (source, opts) => makePlot('scatter', source, opts);
 export const bars = (source, opts) => makePlot('bars', source, opts);
+/** Stalk + marker from a baseline (MATLAB `stem`): THE discrete-signal plot —
+ *  sampled signals, filter coefficients, impulse responses, line spectra. */
+export const stem = (source, opts) => makePlot('stem', source, opts);
 export const vline = (source, opts) => makePlot('vline', source, opts);
 export const hline = (source, opts) => makePlot('hline', source, opts);
 export const density = (source, opts) => makePlot('density', source, opts);

@@ -1,5 +1,5 @@
 import { float, int, log } from '../../../core/fields.js';
-import { view, line, scatter, bars, vline, hline } from '../../../core/views.js';
+import { view, line, scatter, stem, vline, hline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -72,7 +72,7 @@ export default {
     view(
       'coefficients',
       'Coefficients',
-      bars('coeffsHat', {
+      stem('coeffsHat', {
         color: '#D95319',
         opacity: 0.75,
         label: 'MC',

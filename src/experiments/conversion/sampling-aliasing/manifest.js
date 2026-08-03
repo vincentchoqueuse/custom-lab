@@ -1,5 +1,5 @@
 import { float, select } from '../../../core/fields.js';
-import { view, line, bars, scatter, vline } from '../../../core/views.js';
+import { view, line, stem, scatter, vline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -45,7 +45,7 @@ export default {
         label: 'signal continu',
         overlays: [
           line('reconstructed', { color: '#D95319', width: 2.4, label: 'reconstruit (sinc)' }),
-          scatter('sampled', { color: '#7E2F8E', size: 4, label: 'échantillons' }),
+          stem('sampled', { color: '#7E2F8E', size: 3.4, label: 'échantillons' }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
       })
@@ -55,12 +55,12 @@ export default {
     view(
       'spectrum',
       'Spectre',
-      bars('specTrue', {
+      stem('specTrue', {
         color: '#0072BD',
         opacity: 0.8,
         label: 'raies vraies',
         overlays: [
-          bars('specAlias', { color: '#D95319', opacity: 0.55, label: 'après repliement' }),
+          stem('specAlias', { color: '#D95319', opacity: 0.8, label: 'après repliement' }),
           vline((p) => p.fe / 2, { color: '#EDB120', dashed: true, width: 2, label: 'fe/2' }),
         ],
         axes: { x: { label: 'f', unit: 'Hz' }, y: 'amplitude' },

@@ -1,5 +1,5 @@
 import { coeffs, float, select } from '../../../core/fields.js';
-import { view, line, bars, vline } from '../../../core/views.js';
+import { view, line, stem, vline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -38,7 +38,7 @@ export default {
     view(
       'impulse',
       'Réponse impulsionnelle',
-      bars('taps', {
+      stem('taps', {
         axes: { x: 'k', y: 'b[k] = h[k]' },
       })
     ),
