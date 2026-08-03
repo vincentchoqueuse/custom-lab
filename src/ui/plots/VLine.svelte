@@ -7,6 +7,10 @@
   const color = $derived(spec.color ?? '#EDB120');
 </script>
 
+<!-- A reference line whose pixel position is not a number is not drawn:
+     for one frame during an experiment or scene swap the scale can be
+     built from a domain that does not exist yet. -->
+{#if Number.isFinite(xs(x))}
 <g>
   <line
     x1={xs(x)}
@@ -28,3 +32,4 @@
     >
   {/if}
 </g>
+{/if}

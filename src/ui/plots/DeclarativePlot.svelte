@@ -133,7 +133,10 @@
         hi = Math.max(hi, l.v);
       }
     }
-    if (!Number.isFinite(lo)) return isLog ? [0.1, 10] : [0, 1];
+    // BOTH ends must exist: a layer that contributed only one usable edge
+    // would otherwise build a scale with an infinite bound, and every
+    // pixel computed from it would be NaN.
+    if (!Number.isFinite(lo) || !Number.isFinite(hi)) return isLog ? [0.1, 10] : [0, 1];
     if (lo === hi) {
       if (isLog) return [lo / 2, hi * 2];
       lo -= 1;
@@ -173,7 +176,10 @@
         hi = Math.max(hi, l.v);
       }
     }
-    if (!Number.isFinite(lo)) return isLog ? [0.1, 10] : [0, 1];
+    // BOTH ends must exist: a layer that contributed only one usable edge
+    // would otherwise build a scale with an infinite bound, and every
+    // pixel computed from it would be NaN.
+    if (!Number.isFinite(lo) || !Number.isFinite(hi)) return isLog ? [0.1, 10] : [0, 1];
     if (lo === hi) {
       if (isLog) return [lo / 2, hi * 2];
       lo -= 1;
