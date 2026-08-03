@@ -4,9 +4,9 @@ import { view, figure, line, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'demodulation',
-  order: 4,
+  order: 5,
   random: true, // bruit gaussien additif
-  title: 'Démoduler : Hilbert et Teager',
+  title: 'Démodulation AM et FM',
   subtitle: 'Retrouver A(t) et f(t) — une méthode globale, une méthode locale',
   tags: ['démodulation', 'Hilbert', 'Teager-Kaiser', 'DESA', 'enveloppe', 'fréquence instantanée'],
 

@@ -6,7 +6,7 @@ export default {
   id: 'eye-diagram',
   order: 3,
   random: true,
-  title: 'Le diagramme de l\'œil',
+  title: 'Diagramme de l\'œil',
   subtitle: 'ISI, bruit et instant d\'échantillonnage — la santé d\'une liaison en un regard',
   tags: ['diagramme de l\'œil', 'ISI', 'cosinus surélevé', 'Nyquist', 'PAM'],
 

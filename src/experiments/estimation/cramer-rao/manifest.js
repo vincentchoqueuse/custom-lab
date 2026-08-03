@@ -6,7 +6,7 @@ export default {
   id: 'cramer-rao',
   order: 5,
   random: true,
-  title: 'La borne de Cramér-Rao',
+  title: 'Borne de Cramér-Rao',
   subtitle:
     'Estimer μ à partir de N tirages gaussiens : aucun estimateur ne descend sous σ²/N',
   tags: ['Cramér-Rao', 'information de Fisher', 'efficacité', 'estimateur'],

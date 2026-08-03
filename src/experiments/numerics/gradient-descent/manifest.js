@@ -5,7 +5,7 @@ import { view, custom, line } from '../../../core/views.js';
 export default {
   id: 'gradient-descent',
   order: 2,
-  title: 'La descente : gradient contre Newton',
+  title: 'Descente : gradient contre Newton',
   subtitle: 'Trois algorithmes, un paysage — le conditionnement décide de tout',
   tags: ['optimisation', 'gradient', 'Newton', 'momentum', 'conditionnement', 'Rosenbrock'],
 

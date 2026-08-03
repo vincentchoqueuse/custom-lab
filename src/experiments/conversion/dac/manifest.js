@@ -5,7 +5,7 @@ import { view, line, stem, vline, figure } from '../../../core/views.js';
 export default {
   id: 'dac',
   order: 4,
-  title: 'Le CNA : suréchantillonnage et reconstruction',
+  title: 'CNA : suréchantillonnage et reconstruction',
   subtitle: "Zero-stuffing, filtre d'interpolation, escalier — et l'enveloppe en sinc",
   tags: ['numérique', 'analogique', 'CNA', 'DAC', 'suréchantillonnage', 'interpolation', 'ZOH'],
 

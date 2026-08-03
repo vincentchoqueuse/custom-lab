@@ -12,9 +12,9 @@ const TRUTH = [
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'subspace',
-  order: 5,
+  order: 4,
   random: true, // bruit gaussien complexe
-  title: 'Au-delà de la résolution de Fourier',
+  title: 'Techniques haute résolution',
   subtitle: 'MUSIC, root-MUSIC, ESPRIT — ce qu’un modèle achète, et ce qu’il coûte',
   tags: ['haute résolution', 'MUSIC', 'ESPRIT', 'sous-espace', 'valeurs propres'],
 

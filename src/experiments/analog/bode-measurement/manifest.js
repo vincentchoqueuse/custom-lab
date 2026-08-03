@@ -5,7 +5,7 @@ import { gainView, phaseView, HERTZ } from '../../../core/response-views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'bode-measurement',
-  order: 6,
+  order: 2,
   random: true,
   title: "Réponse fréquentielle à l'oscillo",
   subtitle: 'Le Bode point par point : deux traces, un rapport, un déphasage',
