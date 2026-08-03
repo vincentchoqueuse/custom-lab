@@ -5,6 +5,7 @@ import { view, histogram, line, scatter, vline, figure } from '../../../core/vie
 export default {
   id: 'uniform-bound',
   order: 3,
+  random: true,
   title: 'Estimer la borne d\'une loi uniforme',
   subtitle: 'X ~ U[0, θ] : max, max+min ou 2x̄ — trois estimateurs de θ',
   tags: ['estimateur', 'biais', 'EQM', 'uniforme', 'statistique d\'ordre'],

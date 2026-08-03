@@ -133,6 +133,8 @@ function validatePlaneSpec(spec, where) {
     throw new ViewError(`${where}: segments must be an observable name or a literal array`);
   if (spec.circle != null && spec.circle.radius == null)
     throw new ViewError(`${where}: circle needs a radius (number or p => number)`);
+  if (spec.axisLines != null && typeof spec.axisLines !== 'boolean')
+    throw new ViewError(`${where}: axisLines must be a boolean`);
   for (const k of ['minHalf', 'maxHalf']) {
     const v = spec[k];
     if (v != null && typeof v !== 'number' && typeof v !== 'function')
@@ -150,6 +152,7 @@ function validatePlaneSpec(spec, where) {
  *   segments: an observable name or a literal [{x1,y1,x2,y2}]
  *   circle:   {radius: number | p => n, color, label}    guide circle
  *   minHalf/maxHalf: number or p => number               window bounds
+ *   axisLines: true                                      draw the origin cross
  *   symmetric: false                                     frame the data,
  *     not the origin (a Nyquist locus lives under the real axis)
  *   axes:     {x, y} labels

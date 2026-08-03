@@ -66,10 +66,15 @@ export function validateScene(s, i, manifest, key) {
       `${where}: opens on view '${s.view}', which does not exist (${[...viewIds].join(', ')})`
     );
 
-  // `seed` is injected into every schema by the registry (determinism is a
-  // contract requirement, not an experiment choice), so a scene may set it
-  // even though no manifest declares it.
-  const params = new Set([...Object.keys(manifest.params ?? {}), 'seed']);
+  // The registry injects `seed` into a RANDOM experiment's schema, so a
+  // scene of one may set it without the manifest declaring it. A
+  // deterministic experiment has no seed at all, and a scene naming one is
+  // a leftover to be caught here rather than a value that quietly does
+  // nothing.
+  const params = new Set([
+    ...Object.keys(manifest.params ?? {}),
+    ...(manifest.random ? ['seed'] : []),
+  ]);
   for (const list of ['visible', 'masked'])
     for (const p of s[list] ?? [])
       if (!params.has(p)) throw new SceneError(`${where}: ${list} names '${p}', which is not a param`);

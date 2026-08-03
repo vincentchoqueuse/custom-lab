@@ -92,6 +92,7 @@
   markerColor={spec.markers?.color ?? '#EDB120'}
   labels={spec.markers?.labels ? val(spec.markers.labels) : null}
   {segments}
+  axisLines={spec.axisLines === true}
   minHalf={bound(spec.minHalf, 1.4)}
   maxHalf={bound(spec.maxHalf, 3)}
   xLabel={spec.axes?.x ?? 'I'}

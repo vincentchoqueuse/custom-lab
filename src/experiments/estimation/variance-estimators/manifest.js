@@ -5,6 +5,7 @@ import { view, histogram, line, vline, hline, figure } from '../../../core/views
 export default {
   id: 'variance-estimators',
   order: 2,
+  random: true,
   title: 'Biais et variance d\'un estimateur',
   subtitle: 'Deux estimateurs de σ² : diviser par N ou par N−1 ?',
   tags: ['estimateur', 'biais', 'variance', 'distribution d\'échantillonnage'],

@@ -6,6 +6,7 @@ import { at, gainView, phaseView, GUIDE, GUIDE_COLOR } from '../../../core/respo
 export default {
   id: 'pid',
   order: 6,
+  random: true,
   title: 'Le PID, trois potards',
   subtitle: 'P pousse, I efface, D calme — et chacun a son prix',
   tags: ['PID', 'régulation', 'erreur statique', 'perturbation', 'boucle fermée'],

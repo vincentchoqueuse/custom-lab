@@ -5,6 +5,7 @@ import { view, histogram, line, density, vline, hline, figure } from '../../../c
 export default {
   id: 'cramer-rao',
   order: 5,
+  random: true,
   title: 'La borne de Cramér-Rao',
   subtitle:
     'Estimer μ à partir de N tirages gaussiens : aucun estimateur ne descend sous σ²/N',

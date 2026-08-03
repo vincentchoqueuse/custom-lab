@@ -5,6 +5,7 @@ import { view, line, scatter, stem, vline, hline, figure } from '../../../core/v
 export default {
   id: 'polynomial-regression',
   order: 2,
+  random: true,
   title: 'Régression polynomiale',
   subtitle: 'Moindres carrés et ridge : ajustement, sur-ajustement, régularisation',
   tags: ['moindres carrés', 'régression', 'polynôme', 'overfitting', 'ridge', 'régularisation'],

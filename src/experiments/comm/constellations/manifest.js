@@ -5,6 +5,7 @@ import { view, plane, line, scatter } from '../../../core/views.js';
 export default {
   id: 'constellations',
   order: 1,
+  random: true,
   title: 'Constellations dans le bruit',
   subtitle: 'QPSK, 16-QAM… : décision au plus proche voisin et prix du débit',
   tags: ['modulation', 'QPSK', 'QAM', 'SER', 'AWGN', 'décision'],

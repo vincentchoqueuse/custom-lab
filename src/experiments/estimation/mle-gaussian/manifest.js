@@ -5,6 +5,7 @@ import { view, line, scatter, vline } from '../../../core/views.js';
 export default {
   id: 'mle-gaussian',
   order: 4,
+  random: true,
   title: 'Maximum de vraisemblance',
   subtitle: 'Estimer μ (et σ) à partir de N réalisations gaussiennes',
   tags: ['estimation', 'MLE', 'vraisemblance', 'gaussienne'],

@@ -5,6 +5,7 @@ import { view, line, scatter, histogram, density, hline, vline, figure } from '.
 export default {
   id: 'linear-regression',
   order: 1,
+  random: true,
   title: 'Régression linéaire',
   subtitle: 'Ajuster y = a·x + b au sens des moindres carrés — et ce que vaut la pente',
   tags: ['moindres carrés', 'droite', 'résidus', 'R²', 'levier'],

@@ -5,6 +5,7 @@ import { view, line, scatter, hline } from '../../../core/views.js';
 export default {
   id: 'hamming-code',
   order: 4,
+  random: true,
   title: 'Le code de Hamming (7,4)',
   subtitle: 'Corriger une erreur par trame — et le vrai prix du débit sacrifié',
   tags: ['codage', 'Hamming', 'BER', 'syndrome', 'gain de codage'],

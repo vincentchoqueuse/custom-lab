@@ -25,6 +25,7 @@
     markerColor = '#EDB120',
     labels = null, // string[] per marker, drawn under each point
     segments = [], // [{x1, y1, x2, y2}] dashed boundary lines
+    axisLines = false, // draw the x = 0 / y = 0 cross through the origin
     minHalf = 1.4,
     maxHalf = 3,
     xLabel = 'I',
@@ -105,6 +106,31 @@
     <Axes {xs} {ys} xAxis={{ label: xLabel }} yAxis={{ label: yLabel }} w={iw} h={ih} {k} {kt} />
 
     <g clip-path="url(#iq-clip)">
+      <!-- The cross through the origin. On a pole map it is not decoration:
+           Re(s) = 0 is the line the whole subject is about, and "le pôle passe
+           à droite" is a great deal easier to say when the right is drawn.
+           Under everything else, and only when the plane asks for it. -->
+      {#if axisLines}
+        <line
+          x1={xs(0)}
+          y1="0"
+          x2={xs(0)}
+          y2={ih}
+          stroke="var(--muted-fg)"
+          stroke-width={1.1 * k}
+          opacity="0.5"
+        />
+        <line
+          x1="0"
+          y1={ys(0)}
+          x2={iw}
+          y2={ys(0)}
+          stroke="var(--muted-fg)"
+          stroke-width={1.1 * k}
+          opacity="0.5"
+        />
+      {/if}
+
       {#each segments as s, i (i)}
         <line
           x1={xs(s.x1)}
