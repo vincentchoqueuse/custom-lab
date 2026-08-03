@@ -76,6 +76,17 @@ export default {
 
   views: [
     view(
+      'time',
+      'Signal fenêtré',
+      line('signal', {
+        overlays: [
+          line('envUp', { color: '#D95319', dashed: true, label: 'enveloppe' }),
+          line('envDown', { color: '#D95319', dashed: true }),
+        ],
+        axes: { x: 'n', y: 'x(n)·w(n)' },
+      })
+    ),
+    view(
       'spectrum',
       'Spectre',
       line('spectrum', {
@@ -89,6 +100,7 @@ export default {
         },
       })
     ),
+
     view(
       'kernel',
       'La fenêtre au microscope',
@@ -100,17 +112,6 @@ export default {
           x: { label: 'écart à la raie', unit: 'bins (Fs/N)' },
           y: { label: '|W(f)|', unit: 'dB', domain: [-100, 5] },
         },
-      })
-    ),
-    view(
-      'time',
-      'Signal fenêtré',
-      line('signal', {
-        overlays: [
-          line('envUp', { color: '#D95319', dashed: true, label: 'enveloppe' }),
-          line('envDown', { color: '#D95319', dashed: true }),
-        ],
-        axes: { x: 'n', y: 'x(n)·w(n)' },
       })
     ),
   ],

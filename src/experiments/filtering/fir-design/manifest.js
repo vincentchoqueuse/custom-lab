@@ -44,6 +44,15 @@ export default {
 
   views: [
     view(
+      'signal',
+      'Un signal à travers',
+      line('sqIn', {
+        label: 'entrée (carré 100 Hz)',
+        overlays: [line('sqOut', { color: '#D95319', width: 2, label: 'sortie filtrée' })],
+        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
+      })
+    ),
+    view(
       'impulse',
       'Réponse impulsionnelle',
       stem('taps', {
@@ -55,6 +64,7 @@ export default {
         axes: { x: 'n', y: 'h[n]' },
       })
     ),
+
     view(
       'response',
       'Réponse en fréquence',
@@ -68,15 +78,6 @@ export default {
           x: { label: 'f', unit: 'Hz' },
           y: { label: '|H(f)|', unit: 'dB', domain: [-100, 8] },
         },
-      })
-    ),
-    view(
-      'signal',
-      'Un signal à travers',
-      line('sqIn', {
-        label: 'entrée (carré 100 Hz)',
-        overlays: [line('sqOut', { color: '#D95319', width: 2, label: 'sortie filtrée' })],
-        axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
       })
     ),
   ],

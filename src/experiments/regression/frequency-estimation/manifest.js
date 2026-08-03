@@ -39,6 +39,20 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
 
   views: [
+
+    view(
+      'signal',
+      'Temporel',
+      line('trueSignal', {
+        width: 2,
+        label: 'vrai',
+        overlays: [
+          scatter('noisySamples', { color: '#7E2F8E', size: 3, opacity: 0.5, label: 'observations' }),
+          line('fittedSignal', { color: '#D95319', width: 2, dashed: true, label: 'estimé (grille)' }),
+        ],
+        axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
+      })
+    ),
     // The star view: the least-squares cost over frequency, the evaluated
     // grid points sitting ON the curve, and the argmin.
     view(
@@ -53,20 +67,6 @@ export default {
           vline('fHat', { color: '#77AC30', width: 1.6, label: 'f̂' }),
         ],
         axes: { x: { label: 'f', unit: 'Hz' }, y: 'J(f)' },
-      })
-    ),
-
-    view(
-      'signal',
-      'Temporel',
-      line('trueSignal', {
-        width: 2,
-        label: 'vrai',
-        overlays: [
-          scatter('noisySamples', { color: '#7E2F8E', size: 3, opacity: 0.5, label: 'observations' }),
-          line('fittedSignal', { color: '#D95319', width: 2, dashed: true, label: 'estimé (grille)' }),
-        ],
-        axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
       })
     ),
   ],
