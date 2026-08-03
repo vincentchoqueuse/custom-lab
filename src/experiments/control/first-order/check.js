@@ -156,8 +156,10 @@ export const checks = [
       const b = obs({ tz: -0.7 });
       const gGap = maxGap(range(a.gain.y.length), (i) => a.gain.y[i], (i) => b.gain.y[i]);
       const pGap = maxGap(range(a.phase.y.length), (i) => a.phase.y[i], (i) => b.phase.y[i]);
+      // the identity is exact on the modulus; the curve is stored in dB, and
+      // 20·log₁₀ of two bit-identical moduli still differs in the last ulp
       return {
-        ok: gGap < 1e-15 && pGap > 90,
+        ok: gGap < 1e-12 && pGap > 90,
         detail: `gain identique à ${gGap.toExponential(1)}, phase écartée de ${pGap.toFixed(1)}°`,
       };
     },

@@ -8,7 +8,8 @@
 //   P alone: steady-state error 1/(1+Kp) — measured against theory.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-import { rk4Step } from '../../../core/numeric.js';
+import { rk4Step, toDb } from '../../../core/numeric.js';
+import { bodeSweep, bodeObservables } from '../../../core/bode.js';
 
 const H = 0.005; // loop period (s)
 const T_END = 20;
@@ -90,10 +91,41 @@ export function compute({ Kp, Ki, Kd, sigma, seed }) {
   uMean /= uCnt;
   const uStd = Math.sqrt(Math.max(uVarAcc / uCnt - uMean * uMean, 0));
 
+  /* ---------- the open loop L = C·G, where the margins live --------------- */
+  // Same three gains, same plant, seen in frequency instead of in time:
+  //   C(jω) = Kp + Ki/(jω) − Kd·jω/(1 + jωτ_f)   (derivative on the FILTERED
+  //           measurement, exactly as the loop above implements it — so this
+  //           is the transfer function of the code, not of a textbook PID)
+  //   G(jω) = 1/(1 − ω² + 2jω)
+  // The integrator makes |L| → ∞ at ω → 0 and pins the phase at −90° there,
+  // which is the frequency face of "Ki kills the static error". The phase
+  // margin read here is the same stability the step response shows in time —
+  // two readings of one loop, which is the point of putting them side by side.
+  const bodeL = bodeSweep(
+    (w) => {
+      // C(jω): the integral term is −jKi/ω, the filtered derivative
+      // Kd·jω/(1+jωτ_f) = Kd·ω²τ_f/(1+ω²τ_f²) + j·Kd·ω/(1+ω²τ_f²)
+      const df = 1 + (w * TAU_F) ** 2;
+      const cr = Kp + (Kd * w * w * TAU_F) / df;
+      const ci = -Ki / w + (Kd * w) / df;
+      // G(jω) = 1/((1−ω²) + 2jω)
+      const gr = 1 - w * w;
+      const gi = 2 * w;
+      const gd = gr * gr + gi * gi;
+      // C·G
+      const pr = (cr * gr + ci * gi) / gd;
+      const pi = (ci * gr - cr * gi) / gd;
+      return [pr, pi];
+    },
+    { center: 1, decades: 2.5 } // ω₀ = 1 rad/s: the plant's own pulsation
+  );
+
   return {
     observables: {
       output: { x: t, y: ys },
       command: { x: t, y: us },
+      ...bodeObservables(bodeL),
+      zeroDb: toDb(1), // hline: 0 dB, where the phase margin is read
       overshoot: {
         value: Math.max(0, (overshootMax - 1) * 100),
         meta: { label: 'dépassement', unit: '%', precision: 1 },

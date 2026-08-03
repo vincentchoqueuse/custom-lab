@@ -22,11 +22,16 @@
     return { x, y };
   };
 
+  /** A p => number radius may return NaN: the circle then has no meaning for
+   *  the current params and is simply not drawn, legend included — the same
+   *  rule vline/hline follow in the cartesian plots. */
+  const circleR = $derived(num(spec.circle?.radius) ?? (spec.circle ? 1 : NaN));
+
   const clouds = $derived.by(() => {
     const out = [];
-    if (spec.circle) {
+    if (Number.isFinite(circleR)) {
       out.push({
-        ...circlePoints(num(spec.circle.radius) ?? 1),
+        ...circlePoints(circleR),
         color: spec.circle.color ?? 'var(--muted-fg)',
         r: 0.9,
         opacity: 0.45,
@@ -34,15 +39,20 @@
     }
     for (const c of spec.clouds ?? []) {
       const v = val(c.source);
-      if (v) out.push({ x: v.x, y: v.y, color: c.color, r: c.r, opacity: c.opacity, max: c.max });
+      if (drawn(v))
+        out.push({ x: v.x, y: v.y, color: c.color, r: c.r, opacity: c.opacity, max: c.max });
     }
     return out;
   });
 
+  /** An observable that resolves to no point at all is a layer the current
+   *  params do not have (a system with no zeros, an abaque that only means
+   *  something for an open loop). It is dropped from the drawing AND from the
+   *  legend — an entry pointing at nothing is worse than no entry. */
+  const drawn = (v) => v?.x?.length > 0;
+
   const curves = $derived.by(() =>
-    (spec.curves ?? [])
-      .map((c) => ({ ...c, ...(val(c.source) ?? {}) }))
-      .filter((c) => c.x)
+    (spec.curves ?? []).map((c) => ({ ...c, ...(val(c.source) ?? {}) })).filter(drawn)
   );
 
   const segments = $derived(
@@ -53,12 +63,12 @@
     [
       ...(spec.markers?.label ? [{ label: spec.markers.label, color: spec.markers.color }] : []),
       ...(spec.curves ?? [])
-        .filter((c) => c.label)
+        .filter((c) => c.label && drawn(val(c.source)))
         .map((c) => ({ label: c.label, color: c.color })),
       ...(spec.clouds ?? [])
-        .filter((c) => c.label)
+        .filter((c) => c.label && drawn(val(c.source)))
         .map((c) => ({ label: c.label, color: c.color })),
-      ...(spec.circle?.label
+      ...(spec.circle?.label && Number.isFinite(circleR)
         ? [{ label: spec.circle.label, color: spec.circle.color ?? '#a1a1aa' }]
         : []),
     ]

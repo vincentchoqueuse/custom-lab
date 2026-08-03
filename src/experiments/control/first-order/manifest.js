@@ -1,5 +1,8 @@
 import { float, log } from '../../../core/fields.js';
-import { view, plane, line, vline, hline } from '../../../core/views.js';
+import { view, line, vline, hline } from '../../../core/views.js';
+import { gainView, phaseView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
+
+const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -68,27 +71,17 @@ export default {
           line('tangent', { color: '#D95319', width: 1.4, dashed: true, label: 'tangente en 0' }),
           hline((p) => p.K, { color: '#EDB120', dashed: true, width: 1.6, label: 'K' }),
           hline((p) => (p.tz === 0 ? 0.632 * p.K : NaN), {
-            color: '#a1a1aa',
+            color: GUIDE_COLOR,
             width: 1,
             label: '63 % de K',
           }),
-          vline((p) => (p.tz === 0 ? p.tau : NaN), {
-            color: '#a1a1aa',
-            width: 1,
-            dashed: true,
-            label: 'τ',
-          }),
+          vline((p) => (p.tz === 0 ? p.tau : NaN), { ...GUIDE, label: 'τ' }),
           hline((p) => (p.tz === 0 ? 0.95 * p.K : NaN), {
-            color: '#a1a1aa',
+            color: GUIDE_COLOR,
             width: 1,
             label: '95 % de K',
           }),
-          vline((p) => (p.tz === 0 ? 3 * p.tau : NaN), {
-            color: '#a1a1aa',
-            width: 1,
-            dashed: true,
-            label: '3τ',
-          }),
+          vline((p) => (p.tz === 0 ? 3 * p.tau : NaN), { ...GUIDE, label: '3τ' }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 'y(t)' },
       })
@@ -110,7 +103,7 @@ export default {
             width: 2,
             label: 'Dirac K·τ_z/τ',
           }),
-          vline((p) => p.tau, { color: '#a1a1aa', width: 1, dashed: true, label: 'τ' }),
+          vline((p) => p.tau, { ...GUIDE, label: 'τ' }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 'h(t)' },
       })
@@ -118,51 +111,30 @@ export default {
 
     // One pole, at most one zero, on the equal-aspect s-plane: the zero
     // crosses to the right half-plane exactly when τ_z becomes negative.
-    plane('poles', 'Pôles et zéros', {
-      markers: { source: 'poles', color: '#D95319', label: 'pôle −1/τ' },
-      clouds: [{ source: 'zeros', color: '#0072BD', r: 5, opacity: 1, label: 'zéro −1/τ_z' }],
-      axes: { x: 'Re(s)', y: 'Im(s)' },
+    polesView({
+      poleLabel: 'pôle −1/τ',
+      zeroLabel: 'zéro −1/τ_z',
       minHalf: (p) => Math.max(1.5 / p.tau, 1),
       maxHalf: 60,
     }),
 
     // |H(jω)|: the −20 dB/decade slope, the cut-off at 1/τ, and the shelf a
-    // zero produces instead of a roll-off.
-    view(
-      'freq',
-      'Réponse fréquentielle',
-      line('gain', {
-        color: '#7E2F8E',
-        width: 2.4,
-        label: '|H(jω)|',
-        overlays: [
-          vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c = 1/τ' }),
-          hline('gain3dB', { color: '#a1a1aa', width: 1, dashed: true, label: '−3 dB' }),
-        ],
-        axes: {
-          x: { label: 'ω', unit: 'rad/s', scale: 'log' },
-          y: { label: '|H|', scale: 'log' },
-        },
-      })
-    ),
+    // zero produces instead of a roll-off. Same builder as the Bode plot of
+    // Bode, Nyquist, Black and as the analog filter's response: one figure.
+    gainView('gain', {
+      title: 'Bode — gain',
+      overlays: [
+        vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c = 1/τ' }),
+        hline('gain3dB', { ...GUIDE, label: '−3 dB' }),
+      ],
+    }),
 
     // The phase, where the non-minimum-phase zero shows its true cost.
-    view(
-      'phase',
-      'Phase',
-      line('phase', {
-        color: '#77AC30',
-        width: 2.4,
-        label: 'arg H(jω)',
-        overlays: [
-          vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c' }),
-          hline(() => -45, { color: '#a1a1aa', width: 1, dashed: true, label: '−45°' }),
-        ],
-        axes: {
-          x: { label: 'ω', unit: 'rad/s', scale: 'log' },
-          y: { label: 'phase', unit: '°' },
-        },
-      })
-    ),
+    phaseView('phase', {
+      overlays: [
+        vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c' }),
+        hline(() => -45, { ...GUIDE, label: '−45°' }),
+      ],
+    }),
   ],
 };

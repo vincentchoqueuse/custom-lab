@@ -8,6 +8,7 @@
 // phase ARE |H| and arg H — the living definition of frequency response.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { rk4Step, polyEvalComplex } from '../../../core/numeric.js';
+import { bodeSweep, bodeObservables, naturalPulsation, polyTransfer } from '../../../core/bode.js';
 
 const T_END = 20;
 const H = 0.005;
@@ -126,8 +127,28 @@ export function compute({ num, den, input, f }) {
 
   const dc = den[den.length - 1] !== 0 ? num[num.length - 1] / den[den.length - 1] : NaN;
 
+  /* ---------- the Bode pair, for ANY typed-in transfer function ----------- */
+  // The grid is centred on the characteristic pulsation read off the
+  // denominator coefficients (core/bode.js), so a system typed in with any
+  // coefficients still arrives framed on its own decades instead of on a
+  // straight line. The phase is unwrapped: a fourth order goes past −180°,
+  // and atan2's fold would be a jump the system does not have.
+  const wn = naturalPulsation(den);
+  const bode = bodeSweep(polyTransfer(num, den), {
+    center: Number.isFinite(wn) && wn > 0 ? wn : 1,
+  });
+  // the sine measurement, as ONE point on those two curves: this experiment
+  // claims the measured gain and phase ARE |H| and arg H, and here they are,
+  // sitting on the theory
+  const wMeas = input === 'sine' ? 2 * Math.PI * f : NaN;
+  const pt = (v) => ({ x: Float64Array.from([wMeas]), y: Float64Array.from([v]) });
+
   return {
     observables: {
+      ...bodeObservables(bode),
+      gainPoint: pt(input === 'sine' ? 20 * Math.log10(gainMeas) : NaN),
+      phasePoint: pt(phaseMeas),
+      wMeas, // vline: the pulsation the sine is actually exciting
       inputSignal: { x: ts, y: us },
       output: { x: ts, y: ys },
       trackError: { x: ts, y: es },

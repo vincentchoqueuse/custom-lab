@@ -1,5 +1,8 @@
 import { float, log } from '../../../core/fields.js';
-import { view, plane, line, vline, hline } from '../../../core/views.js';
+import { view, line, vline, hline } from '../../../core/views.js';
+import { gainView, phaseView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
+
+const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -56,8 +59,8 @@ export default {
           line('envHi', { color: '#D95319', width: 1.3, dashed: true, label: 'enveloppe' }),
           line('envLo', { color: '#D95319', width: 1.3, dashed: true }),
           hline((p) => p.K, { color: '#EDB120', dashed: true, width: 1.6, label: 'K' }),
-          hline((p) => 1.05 * p.K, { color: '#a1a1aa', width: 1 }),
-          hline((p) => 0.95 * p.K, { color: '#a1a1aa', width: 1, label: '±5%' }),
+          hline((p) => 1.05 * p.K, { color: GUIDE_COLOR, width: 1 }),
+          hline((p) => 0.95 * p.K, { color: GUIDE_COLOR, width: 1, label: '±5%' }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 'y(t)' },
       })
@@ -72,7 +75,7 @@ export default {
         width: 2.5,
         label: 'h(t)',
         overlays: [
-          hline(() => 0, { color: '#a1a1aa', width: 1 }),
+          hline(() => 0, { color: GUIDE_COLOR, width: 1 }),
           vline((p) => Math.PI / (p.w0 * Math.sqrt(Math.max(1 - p.m * p.m, 0))), {
             color: '#EDB120',
             dashed: true,
@@ -86,32 +89,34 @@ export default {
 
     // equal-aspect plane: the poles travel on the ω₀ circle as m varies,
     // then split on the real axis
-    plane('poles', 'Plan des pôles', {
-      markers: { source: 'poles', color: '#D95319', label: 'pôles' },
+    // a pure second order has no zero: polesView omits the cloud rather than
+    // leaving an empty legend entry
+    polesView({
+      title: 'Plan des pôles',
+      zeros: null,
       circle: { radius: (p) => p.w0, label: 'cercle |s| = ω₀' },
-      axes: { x: 'Re(s)', y: 'Im(s)' },
       minHalf: (p) => Math.max(1.3 * p.w0, 1),
       maxHalf: 60,
     }),
 
-    // |H(jω)| in log-log with the resonance when m < 1/√2
-    view(
-      'freq',
-      'Réponse fréquentielle',
-      line('freqResponse', {
-        color: '#7E2F8E',
-        width: 2.4,
-        label: '|H(jω)|',
-        overlays: [
-          vline((p) => p.w0, { color: '#EDB120', dashed: true, width: 1.8, label: 'ω₀' }),
-          vline('wr', { color: '#D95319', dashed: true, width: 1.6, label: 'ωr' }),
-          hline((p) => p.K, { color: '#a1a1aa', width: 1, dashed: true, label: 'K' }),
-        ],
-        axes: {
-          x: { label: 'ω', unit: 'rad/s', scale: 'log' },
-          y: { label: '|H|', scale: 'log' },
-        },
-      })
-    ),
+    // The Bode pair, titled and ordered as everywhere else in the subject.
+    // The resonance shows on the gain when m < 1/√2; the phase always
+    // crosses −90° at ω₀ and ends at −180°.
+    gainView('gain', {
+      title: 'Bode — gain',
+      overlays: [
+        vline((p) => p.w0, { color: '#EDB120', dashed: true, width: 1.8, label: 'ω₀' }),
+        vline('wr', { color: '#D95319', dashed: true, width: 1.6, label: 'ωr' }),
+        hline('gainK', { ...GUIDE, label: 'K' }),
+      ],
+    }),
+
+    phaseView('phase', {
+      overlays: [
+        vline((p) => p.w0, { color: '#EDB120', dashed: true, width: 1.8, label: 'ω₀' }),
+        hline(() => -90, { ...GUIDE, label: '−90°' }),
+        hline(() => -180, { ...GUIDE, label: '−180°' }),
+      ],
+    }),
   ],
 };

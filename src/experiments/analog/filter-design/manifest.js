@@ -1,5 +1,6 @@
 import { float, select } from '../../../core/fields.js';
-import { view, plane, line, band, vline } from '../../../core/views.js';
+import { view, line, band, vline } from '../../../core/views.js';
+import { gainView, polesView, HERTZ } from '../../../core/response-views.js';
 import { requiredOrder } from './compute.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
@@ -72,26 +73,26 @@ export default {
   },
 
   views: [
-    view(
-      'response',
-      'Réponse et gabarit',
-      line('response', {
-        width: 2,
-        overlays: [
-          band('zone1', { color: '#EDB120', opacity: 0.18, label: 'gabarit' }),
-          band('zone2', { color: '#EDB120', opacity: 0.18 }),
-          vline('fp', { color: '#EDB120', dashed: true, label: 'f_p' }),
-          vline('fstop', { color: '#EDB120', dashed: true, label: 'f_a' }),
-        ],
-        axes: {
-          x: { label: 'f', unit: 'Hz', scale: 'log' },
-          y: { label: '|H(jf)|', unit: 'dB', domain: [-90, 5] },
-        },
-      })
-    ),
-    plane('poles', 'Pôles et zéros', {
-      clouds: [{ source: 'zeros', color: '#0072BD', r: 4, opacity: 0.95, label: 'zéros (sur jω)' }],
-      markers: { source: 'poles', color: '#D95319', label: 'pôles' },
+    // |H| on a log hertz axis — the shared frequency figure, with this
+    // experiment's own gabarit bands laid over it.
+    gainView('response', {
+      id: 'response',
+      title: 'Réponse et gabarit',
+      x: HERTZ,
+      yLabel: '|H(jf)|',
+      domain: [-90, 5],
+      label: undefined,
+      color: undefined,
+      width: 2,
+      overlays: [
+        band('zone1', { color: '#EDB120', opacity: 0.18, label: 'gabarit' }),
+        band('zone2', { color: '#EDB120', opacity: 0.18 }),
+        vline('fp', { color: '#EDB120', dashed: true, label: 'f_p' }),
+        vline('fstop', { color: '#EDB120', dashed: true, label: 'f_a' }),
+      ],
+    }),
+    polesView({
+      zeroLabel: 'zéros (sur jω)',
       circle: { radius: 1, label: 'cercle |s| = ωp' },
       segments: [{ x1: 0, y1: -5, x2: 0, y2: 5 }],
       axes: { x: 'Re(s)/ωp', y: 'Im(s)/ωp' },

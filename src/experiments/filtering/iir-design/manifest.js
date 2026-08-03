@@ -1,6 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, plane, line, vline } from '../../../core/views.js';
-import { timeView, impulseView } from '../../../core/filter-views.js';
+import { view, line, vline } from '../../../core/views.js';
+import { timeView, impulseView, polesView } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -92,15 +92,14 @@ export default {
         },
       })
     ),
-    plane('zplane', 'Pôles et zéros', {
-      clouds: [{ source: 'zeros', color: '#0072BD', r: 4, opacity: 0.95, label: 'zéros' }],
-      markers: { source: 'poles', color: '#D95319', label: 'pôles' },
+    polesView({
+      id: 'zplane',
+      variable: 'z',
       circle: { radius: 1, label: 'cercle unité (stabilité)' },
       segments: [
         { x1: -1.6, y1: 0, x2: 1.6, y2: 0 },
         { x1: 0, y1: -1.6, x2: 0, y2: 1.6 },
       ],
-      axes: { x: 'Re(z)', y: 'Im(z)' },
       minHalf: 1.25,
       maxHalf: 1.6,
     }),

@@ -1,5 +1,6 @@
 import { float, log, select } from '../../../core/fields.js';
 import { view, line, scatter, vline } from '../../../core/views.js';
+import { gainView, phaseView, HERTZ } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -79,37 +80,34 @@ export default {
         axes: { x: { label: 't', unit: 'ms' }, y: 'tension (V)' },
       })
     ),
-    view(
-      'gain',
-      'Bode — gain',
-      line('gainTheory', {
-        width: 2,
-        label: 'théorie',
-        overlays: [
-          scatter('gainMeas', { color: '#D95319', size: 3.5, opacity: 0.9, label: 'mesures' }),
-          vline('f', { color: '#EDB120', dashed: true, label: 'f' }),
-        ],
-        axes: {
-          x: { label: 'f', unit: 'Hz', scale: 'log' },
-          y: { label: '|H|', unit: 'dB', domain: [-65, 30] },
-        },
-      })
-    ),
-    view(
-      'phase',
-      'Bode — phase',
-      line('phaseTheory', {
-        width: 2,
-        label: 'théorie',
-        overlays: [
-          scatter('phaseMeas', { color: '#D95319', size: 3.5, opacity: 0.9, label: 'mesures' }),
-          vline('f', { color: '#EDB120', dashed: true, label: 'f' }),
-        ],
-        axes: {
-          x: { label: 'f', unit: 'Hz', scale: 'log' },
-          y: { label: 'arg H', unit: '°', domain: [-190, 10] },
-        },
-      })
-    ),
+    // The two halves of a Bode plot, built by the shared frequency figures —
+    // the abscissa is in hertz here and in rad/s in automatique, and that is
+    // the ONLY difference between this plot and the one in Bode, Nyquist,
+    // Black. What the experiment adds is its own: the measured points over
+    // the theory, and the vline on the pulsation currently being swept.
+    gainView('gainTheory', {
+      id: 'gain',
+      title: 'Bode — gain',
+      x: HERTZ,
+      domain: [-65, 30],
+      label: 'théorie',
+      color: undefined,
+      width: 2,
+      overlays: [
+        scatter('gainMeas', { color: '#D95319', size: 3.5, opacity: 0.9, label: 'mesures' }),
+        vline('f', { color: '#EDB120', dashed: true, label: 'f' }),
+      ],
+    }),
+    phaseView('phaseTheory', {
+      x: HERTZ,
+      domain: [-190, 10],
+      label: 'théorie',
+      color: undefined,
+      width: 2,
+      overlays: [
+        scatter('phaseMeas', { color: '#D95319', size: 3.5, opacity: 0.9, label: 'mesures' }),
+        vline('f', { color: '#EDB120', dashed: true, label: 'f' }),
+      ],
+    }),
   ],
 };

@@ -130,12 +130,15 @@
 
       {#each clouds as c, ci (ci)}
         {#each { length: Math.min(c.x.length, c.max ?? 3000) } as _, i (i)}
-          <circle cx={xs(c.x[i])} cy={ys(c.y[i])} r={(c.r ?? 1.7) * k} fill={dataColor(c.color)} opacity={c.opacity ?? 0.3} />
+          {#if Number.isFinite(c.x[i]) && Number.isFinite(c.y[i])}
+            <circle cx={xs(c.x[i])} cy={ys(c.y[i])} r={(c.r ?? 1.7) * k} fill={dataColor(c.color)} opacity={c.opacity ?? 0.3} />
+          {/if}
         {/each}
       {/each}
 
       {#if markers}
         {#each { length: markers.x.length } as _, i (i)}
+          {#if Number.isFinite(markers.x[i]) && Number.isFinite(markers.y[i])}
           <circle
             cx={xs(markers.x[i])}
             cy={ys(markers.y[i])}
@@ -156,6 +159,7 @@
             >
               {labels[i]}
             </text>
+          {/if}
           {/if}
         {/each}
       {/if}
