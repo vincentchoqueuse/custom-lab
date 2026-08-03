@@ -1,7 +1,7 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 
-const BASE = { system: 'linear', h: 0.1, theta0: 2.5, seed: 42 };
+const BASE = { system: 'linear', h: 0.1, theta0: 2.5, seed: 34 };
 
 function slope(o, key) {
   // log-log fit between the two ends of the clean part of the h grid

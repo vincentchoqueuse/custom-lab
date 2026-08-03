@@ -1,7 +1,7 @@
 import { compute, coefficients, meanOf, idealValue } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
-const BASE = { wave: 'square', N: 10, A: 1, alpha: 0.25, seed: 42 };
+const BASE = { wave: 'square', N: 10, A: 1, alpha: 0.25, seed: 34 };
 
 /** aₙ = 2∫₀¹ x(t)cos(2πnt)dt, by Simpson over the pulse's exact support. */
 function pulseCosineByQuadrature(A, alpha, n, steps = 20000) {

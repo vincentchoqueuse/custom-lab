@@ -117,7 +117,9 @@ function checkRandomness() {
       const dir = join(EXP, sub.name, exp.name);
       if (!existsSync(join(dir, 'manifest.js'))) continue;
       n++;
-      const declared = /^\s*random:\s*true,\s*$/m.test(readFileSync(join(dir, 'manifest.js'), 'utf8'));
+      // `random: true,` followed by an explanatory comment is normal and
+      // wanted — the pattern anchors on the comma, never on the line end.
+      const declared = /^\s*random:\s*true\s*,/m.test(readFileSync(join(dir, 'manifest.js'), 'utf8'));
       const draws = reachesRng(join(dir, 'compute.js'));
       if (declared && !draws)
         bad.push(`${sub.name}/${exp.name}: declares random: true but never reaches core/rng.js`);

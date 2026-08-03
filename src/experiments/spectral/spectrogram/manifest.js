@@ -1,10 +1,10 @@
 import { float, select } from '../../../core/fields.js';
-import { view, custom, line, vline, hline } from '../../../core/views.js';
+import { view, custom, figure, line, vline, hline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'spectrogram',
-  order: 3,
+  order: 4,
   title: 'Le spectrogramme',
   subtitle: 'Voir le temps ET la fréquence — au prix du compromis de Gabor',
   tags: ['numérique', 'STFT', 'temps-fréquence', 'chirp', 'Gabor'],
@@ -109,6 +109,36 @@ export default {
     // justification comment in views/Spectrogram.svelte (canvas-rasterized,
     // embedded as an SVG <image> so freeze/export keep working).
     custom('map', 'Spectrogramme', () => import('./views/Spectrogram.svelte')),
+
+    // The two readings the map exists to improve on, under the catalogue's
+    // own names so they are recognised for what they are — the same
+    // "Signal temporel" and the same "Spectre" as everywhere else in
+    // analyse spectrale. They are not decoration: a chirp and the same tones
+    // played backwards have the SAME spectrum, and the time plot says when
+    // without saying what. Showing both next to the map is the argument for
+    // the STFT; the map alone is only its conclusion.
+    figure(
+      'time',
+      line('signal', {
+        width: 1.2,
+        label: 'x(t)',
+        overlays: [vline('tCut', { color: '#EDB120', dashed: true, width: 1.8, label: 't' })],
+        axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
+      })
+    ),
+
+    figure(
+      'spectrum',
+      line('spectrum', {
+        width: 1.6,
+        label: '|X(f)| sur les 2 s',
+        overlays: [vline('nyquist', { color: '#EDB120', dashed: true, label: 'Fs/2' })],
+        axes: {
+          x: { label: 'f', unit: 'Hz' },
+          y: { label: '|X(f)|', unit: 'dB', domain: [-80, 5] },
+        },
+      })
+    ),
 
     view(
       'slice',

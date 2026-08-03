@@ -2,7 +2,7 @@ import { compute } from './compute.js';
 import { secondOrderStep as stepValue, secondOrderImpulse as impulseValue } from '../_lib/lti.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
-const BASE = { K: 1, m: 0.3, w0: 2, seed: 42 };
+const BASE = { K: 1, m: 0.3, w0: 2, seed: 34 };
 
 export const checks = [
   {

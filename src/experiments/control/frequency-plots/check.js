@@ -10,7 +10,7 @@ import {
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { bodeSweep } from '../_lib/bode.js';
 
-const BASE = { sys: 'first', K: 1, tau: 1, w0: 1, m: 0.3, wc: 1, seed: 42 };
+const BASE = { sys: 'first', K: 1, tau: 1, w0: 1, m: 0.3, wc: 1, seed: 34 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;
 
 export const checks = [

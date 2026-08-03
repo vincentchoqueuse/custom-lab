@@ -141,6 +141,7 @@ export function seedField() {
     min: 0,
     max: 2147483647,
     step: 1,
-    default: 42,
+    // 34, like the GR 34 the project is named after
+    default: 34,
   };
 }

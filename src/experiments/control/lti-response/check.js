@@ -3,7 +3,7 @@ import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { polyEvalComplex } from '../../../core/numeric.js';
 import { secondOrderPoles } from '../_lib/lti.js';
 
-const BASE = { num: [1], den: [1, 2, 1], input: 'step', f: 0.5, seed: 42 };
+const BASE = { num: [1], den: [1, 2, 1], input: 'step', f: 0.5, seed: 34 };
 
 export const checks = [
   {

@@ -5,7 +5,7 @@ import { subjectFilter } from './scripts/subject-filter.js';
 
 export default defineConfig({
   plugins: [
-    // PUPITRACE_SUBJECT=control npm run build → un déploiement mono-sujet.
+    // EXPE34_SUBJECT=control npm run build → un déploiement mono-sujet.
     // Doit passer AVANT svelte(): il réécrit les motifs de glob, que Vite
     // résout ensuite.
     subjectFilter(),

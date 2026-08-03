@@ -1,5 +1,6 @@
 import { compute } from './compute.js';
-import { standardChecks, maxGap } from '../../../core/checks.js';
+import { standardChecks, maxGap, maxAbsDiff, range } from '../../../core/checks.js';
+import { fft, windowValue } from '../../../core/numeric.js';
 
 const FS = 2000;
 const T = 2;
@@ -137,5 +138,86 @@ export const checks = [
       return { ok: gap <= binHz, detail: `écart max ${gap.toFixed(1)} Hz (bin = ${binHz.toFixed(1)} Hz)` };
     },
   },
+  {
+    name: 'full spectrum: the two tones land on 300 Hz and 300 + Δf',
+    category: 'numeric',
+    run() {
+      // The whole-record spectrum resolves what a single STFT frame cannot:
+      // over 2 s the Rayleigh limit is 0.5 Hz, so Δf = 15 Hz is two clean
+      // peaks. Each is asked to be within one bin of where the source puts
+      // it — the identity, not a tolerance pulled out of the air.
+      const bin = FS / 4096;
+      const o = compute({ ...BASE, source: 'tones', df: 15 }).observables;
+      const peaks = [];
+      for (let k = 1; k < o.spectrum.x.length - 1; k++) {
+        const y = o.spectrum.y[k];
+        if (y > -25 && y > o.spectrum.y[k - 1] && y >= o.spectrum.y[k + 1]) peaks.push(o.spectrum.x[k]);
+      }
+      const gap = maxGap([300, 315], (f) => Math.min(...peaks.map((q) => Math.abs(q - f))));
+      return {
+        ok: peaks.length === 2 && gap <= bin,
+        detail: `${peaks.length} raies ${peaks.map((f) => f.toFixed(1)).join(', ')} Hz, écart max ${gap.toFixed(2)} ≤ ${bin.toFixed(2)} Hz`,
+      };
+    },
+  },
+  {
+    name: 'the spectrum is blind to time: reversing the chirp leaves it unchanged',
+    category: 'numeric',
+    run() {
+      // THE argument for the STFT, as an identity rather than as a slogan:
+      // |X(f)| of a real signal is unchanged by time reversal, so an
+      // up-chirp and a down-chirp — visibly opposite on the map — have the
+      // same spectrum.
+      //
+      // The claim is about the SIGNAL, so both records are analysed with the
+      // SYMMETRIC Hann here (windowValue's fourth argument), for which
+      // w[N−1−n] = w[n] holds exactly and the identity is therefore exact.
+      // compute() uses the periodic variant — the right choice for STFT
+      // frames, where the window tiles — and the periodic Hann is NOT its own
+      // reversal: analysing the reversed record with it leaves a residual of
+      // 7.9e-4, which is the window's asymmetry and not the signal's. Passing
+      // that off as "the tolerance" would have hidden the one thing this
+      // check exists to state.
+      const o = compute({ ...BASE, source: 'chirp' }).observables;
+      const n = o.signal.y.length;
+      const rev = Float64Array.from(o.signal.y, (_, i) => o.signal.y[n - 1 - i]);
+      // recompute the spectrum of the reversed record with the same recipe
+      const spectrumOf = (sig) => {
+        const NF = 4096;
+        const re = new Float64Array(NF);
+        const im = new Float64Array(NF);
+        for (let i = 0; i < sig.length; i++) re[i] = sig[i] * windowValue('hann', i, sig.length, true);
+        fft(re, im);
+        return Float64Array.from({ length: NF / 2 + 1 }, (_, k) => Math.hypot(re[k], im[k]));
+      };
+      const a = spectrumOf(o.signal.y);
+      const b = spectrumOf(rev);
+      const scale = Math.max(...a);
+      const worst = maxAbsDiff(a, b) / scale;
+      return { ok: worst < 1e-9, detail: `écart relatif max ${worst.toExponential(2)}` };
+    },
+  },
+  {
+    name: 'the time view is the source itself, at full rate',
+    category: 'numeric',
+    run() {
+      // The plotted signal must BE x(t), not a decimated cousin: a decimated
+      // chirp would alias and quietly draw the wrong picture.
+      const o = compute({ ...BASE, source: 'am', fm: 8 }).observables;
+      const worst = maxGap(
+        range(o.signal.x.length),
+        (i) => o.signal.y[i],
+        (i) => {
+          const t = o.signal.x[i];
+          return (1 + 0.8 * Math.sin(2 * Math.PI * 8 * t)) * Math.sin(2 * Math.PI * 400 * t);
+        }
+      );
+      return {
+        ok: worst < 1e-12 && o.signal.x.length === FS * 2,
+        detail: `${o.signal.x.length} points, max|Δ|=${worst.toExponential(2)}`,
+      };
+    },
+  },
   standardChecks.determinism(compute, BASE, 'slice'),
+  standardChecks.determinism(compute, BASE, 'spectrum'),
 ];
