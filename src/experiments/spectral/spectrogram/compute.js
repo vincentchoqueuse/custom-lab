@@ -54,7 +54,11 @@ function sourceValue(source, p, t) {
 export function compute({ source, f1, df, fm, fmod, fdev, N, win, tcut }) {
   const p = { f1, df, fm, fmod, fdev };
   const x = new Float64Array(NS);
-  for (let i = 0; i < NS; i++) x[i] = sourceValue(source, p, i / FS);
+  const tFull = new Float64Array(NS);
+  for (let i = 0; i < NS; i++) {
+    tFull[i] = i / FS;
+    x[i] = sourceValue(source, p, tFull[i]);
+  }
 
   const w = new Float64Array(N);
   for (let n = 0; n < N; n++) w[n] = windowValue(win, n, N);
@@ -121,6 +125,35 @@ export function compute({ source, f1, df, fm, fmod, fdev, N, win, tcut }) {
     sliceDb[k] = db[cCut * rows + k];
   }
 
+  /* ---------- the two readings the spectrogram exists to improve on ------ */
+  // The whole signal in time, and the whole record's spectrum. This is the
+  // comparison that MOTIVATES the STFT rather than illustrating it: the time
+  // plot says when something happens and nothing about what; the spectrum
+  // says what frequencies are present and nothing about when. A chirp and
+  // the same tones played in the reverse order have the SAME spectrum. Only
+  // the map has both, and it pays the Gabor price for it.
+  //
+  // Always Hann, whatever the analysis window: this is not an STFT frame,
+  // it is the reference the frames are judged against, and it should not
+  // move when N or `win` move.
+  const NFULL = 4096; // ≥ NS = 4000, and the FFT is radix-2
+  const fr = new Float64Array(NFULL);
+  const fi = new Float64Array(NFULL);
+  for (let i = 0; i < NS; i++) fr[i] = x[i] * windowValue('hann', i, NS);
+  fft(fr, fi);
+  const fullRows = NFULL / 2 + 1;
+  const fullBin = FS / NFULL;
+  const fullF = new Float64Array(fullRows);
+  const fullMag = new Float64Array(fullRows);
+  let fullMax = 0;
+  for (let k = 0; k < fullRows; k++) {
+    fullF[k] = k * fullBin;
+    fullMag[k] = Math.hypot(fr[k], fi[k]);
+    if (fullMag[k] > fullMax) fullMax = fullMag[k];
+  }
+  const fullDb = new Float64Array(fullRows);
+  for (let k = 0; k < fullRows; k++) fullDb[k] = toDb(fullMag[k] / fullMax, DB_FLOOR);
+
   // time zoom around tcut (full resolution — the local oscillation is the point)
   const i0 = Math.max(0, Math.round((tcut - ZOOM) * FS));
   const i1 = Math.min(NS - 1, Math.round((tcut + ZOOM) * FS));
@@ -135,8 +168,11 @@ export function compute({ source, f1, df, fm, fmod, fdev, N, win, tcut }) {
     observables: {
       spectro: { data: db, rows, cols, tMin: tCols[0], tMax: tCols[cols - 1], fMax: FS / 2 },
       ridge: { x: tCols, y: ridge },
+      signal: { x: tFull, y: x },
+      spectrum: { x: fullF, y: fullDb },
       slice: { x: freqs, y: sliceDb },
       zoom: { x: zt, y: zx },
+      tCut: tcut, // vline: where the slice and the zoom are taken, on the signal
       parsevalGap, // checks
       nyquist: FS / 2, // hline in the slice view
       fRes: { value: binHz, meta: { label: 'Δf = Fs/N', unit: 'Hz', precision: 2 } },
