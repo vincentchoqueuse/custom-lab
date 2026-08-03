@@ -399,6 +399,15 @@ kbd {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  flex: 0 1 auto;
+}
+
+/* The sidebar toggle is the one control that must NEVER shrink: it is how a
+   phone gets back to the catalogue. It was being crushed to 0 px wide,
+   because `.right` had no min-width and therefore refused to shrink at all,
+   so the whole overflow landed on `.left`. */
+.header .side-open {
+  flex: 0 0 auto;
 }
 
 .header .crumb {
@@ -418,6 +427,15 @@ kbd {
   align-items: center;
   gap: 8px;
   justify-content: flex-end;
+  /* shrinkable, and the scene picker inside is what yields — the icon
+     buttons keep their size, the long title gets the ellipsis */
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.header .right > .icon-btn,
+.header .right > a {
+  flex: 0 0 auto;
 }
 
 .icon-btn {
@@ -649,6 +667,9 @@ kbd {
 .tabs-select select {
   appearance: none;
   width: 100%;
+  /* a <select> is sized by its LONGEST option and will not shrink below it
+     unless this is set — the same trap as the header, one line lower */
+  min-width: 0;
   padding: 8px 32px 8px 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -1263,29 +1284,44 @@ kbd {
     display: none;
   }
 
+  /* basis 0, not auto: with `auto` the select asks for the width of its
+     LONGEST option — "Ce que ça coûte à la boucle" claimed the whole bar and
+     pushed the actions onto a second line. With basis 0 it takes what is
+     left once the actions have their size, and truncates. */
   .tabs-select {
     display: flex;
-    flex: 1 1 auto;
-    max-width: 60%;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .actionbar {
+    flex: 0 0 auto;
   }
 
   /* Same problem, worse: a scene is titled "Scène 1 · La forme compagne :
      x = (y, ẏ)" and the picker was wrapping it onto four lines, eating a
      third of the screen before the plot got any. One line, ellipsis, and the
      full title is still one tap away in the menu. */
-  /* bounded, so the ellipsis does the work: left unbounded the picker simply
-     pushed the link, QR and fullscreen buttons off the right edge instead of
-     wrapping — one overflow traded for another */
+  /* The picker is the only elastic thing in the header: it takes what is
+     left once the toggle and the four icon buttons have their size, and the
+     ellipsis does the rest. A fixed vw cap was the wrong tool — it works at
+     390 px and overflows at 320. */
   .preset-picker {
     min-width: 0;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
   }
 
   .preset-picker > button {
     width: 100%;
-    max-width: 46vw;
     min-width: 0;
     padding: 8px 10px;
+  }
+
+  /* "Automatique / Boucler un second ordre" truncated to "A.." tells nobody
+     anything, and it was costing the toggle its room. The sidebar and the
+     plot already say where you are. */
+  .header .crumb {
+    display: none;
   }
 
   .preset-picker > button span {
