@@ -1,9 +1,13 @@
 <!--
-  Generic equal-aspect I/Q plane (promoted from comm/constellations after a
+  Generic equal-aspect plane (promoted from comm/constellations after a
   second experiment needed it, per the custom-pattern-repeated-twice rule).
-  Renders, in order: boundary segments, point clouds, marker points, and
-  optional per-marker text labels — all in one shared equal-aspect window
-  (circles stay circles). Receives ready-made data via props; pixel scaling
+  Renders, in order: boundary segments, CURVES, point clouds, marker points,
+  and optional per-marker text labels — all in one shared equal-aspect window
+  (circles stay circles, and a Nyquist half-circle looks like one).
+  The window is centred on the origin by default, which is what a
+  constellation and a pole map want; `symmetric = false` frames the data
+  where it actually lies, which is what a Nyquist locus wants — it lives
+  entirely under the real axis and would otherwise waste half the plot. Receives ready-made data via props; pixel scaling
   only, no scientific computation.
 -->
 <script>
@@ -15,6 +19,8 @@
 
   let {
     clouds = [], // [{x, y, color, r, opacity, max}] drawn in order
+    curves = [], // [{x, y, color, width, dashed}] polylines, drawn under the clouds
+    symmetric = true, // false: frame the data instead of the origin
     markers = null, // {x, y} ideal points
     markerColor = '#EDB120',
     labels = null, // string[] per marker, drawn under each point
@@ -31,21 +37,61 @@
   const k = $derived(strokeScale(pres));
   const kt = $derived(typeScale(pres));
 
-  // equal-aspect window: square data extent stretched to the frame's aspect
+  // equal-aspect window: a square data extent stretched to the frame's aspect,
+  // so one data unit is the same number of pixels on both axes
   const window_ = $derived.by(() => {
-    let h = minHalf;
-    for (const c of clouds) {
-      for (let i = 0; i < c.x.length; i++) {
-        h = Math.max(h, Math.abs(c.x[i]), Math.abs(c.y[i]));
+    let x0 = Infinity;
+    let x1 = -Infinity;
+    let y0 = Infinity;
+    let y1 = -Infinity;
+    const eat = (X, Y) => {
+      for (let i = 0; i < X.length; i++) {
+        if (!Number.isFinite(X[i]) || !Number.isFinite(Y[i])) continue;
+        x0 = Math.min(x0, X[i]);
+        x1 = Math.max(x1, X[i]);
+        y0 = Math.min(y0, Y[i]);
+        y1 = Math.max(y1, Y[i]);
       }
-    }
-    h = Math.min(h * 1.05, maxHalf);
+    };
+    for (const c of clouds) eat(c.x, c.y);
+    for (const c of curves) eat(c.x, c.y);
+    if (markers) eat(markers.x, markers.y);
+    if (!Number.isFinite(x0)) return { halfX: minHalf, halfY: minHalf, cx: 0, cy: 0 };
+
+    const cx = symmetric ? 0 : (x0 + x1) / 2;
+    const cy = symmetric ? 0 : (y0 + y1) / 2;
+    const reach = symmetric
+      ? Math.max(Math.abs(x0), Math.abs(x1), Math.abs(y0), Math.abs(y1))
+      : Math.max((x1 - x0) / 2, (y1 - y0) / 2);
+    const h = Math.min(Math.max(reach, minHalf) * 1.06, maxHalf);
     const scale = Math.min(iw, ih) / (2 * h); // px per data unit, both axes
-    return { halfX: iw / scale / 2, halfY: ih / scale / 2 };
+    return { halfX: iw / scale / 2, halfY: ih / scale / 2, cx, cy };
   });
 
-  const xs = $derived(scaleLinear().domain([-window_.halfX, window_.halfX]).range([0, iw]));
-  const ys = $derived(scaleLinear().domain([-window_.halfY, window_.halfY]).range([ih, 0]));
+  const path = (c) => {
+    let d = '';
+    let pen = false;
+    for (let i = 0; i < c.x.length; i++) {
+      if (!Number.isFinite(c.x[i]) || !Number.isFinite(c.y[i])) {
+        pen = false;
+        continue;
+      }
+      d += `${pen ? 'L' : 'M'}${xs(c.x[i]).toFixed(2)} ${ys(c.y[i]).toFixed(2)}`;
+      pen = true;
+    }
+    return d;
+  };
+
+  const xs = $derived(
+    scaleLinear()
+      .domain([window_.cx - window_.halfX, window_.cx + window_.halfX])
+      .range([0, iw])
+  );
+  const ys = $derived(
+    scaleLinear()
+      .domain([window_.cy - window_.halfY, window_.cy + window_.halfY])
+      .range([ih, 0])
+  );
 </script>
 
 <svg class="plot-svg" viewBox="0 0 {W} {H}" role="img">
@@ -68,6 +114,17 @@
           stroke-width={1.1 * k}
           stroke-dasharray="{5 * k} {4 * k}"
           opacity="0.55"
+        />
+      {/each}
+
+      {#each curves as c, i (i)}
+        <path
+          d={path(c)}
+          fill="none"
+          stroke={dataColor(c.color ?? '#0072BD')}
+          stroke-width={(c.width ?? 2) * k}
+          stroke-dasharray={c.dashed ? `${6 * k} ${5 * k}` : null}
+          stroke-linejoin="round"
         />
       {/each}
 
