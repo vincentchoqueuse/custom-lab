@@ -161,7 +161,12 @@ statline of key observables, export. Minimal tabs when the experiment has severa
 views.
 
 **View bar (tabs line).** The representations on the left when the experiment has
-several, and flush right the instrument's actions — `randomizeSeed`, `freeze`, the
+several — a segmented control on a desktop or a projector, where the room should see
+that there ARE four readings before any is opened, and a NATIVE `<select>` below
+860 px, because six tabs the length of "Réponse impulsionnelle" do not fit a phone.
+Both are in the DOM, CSS shows exactly one, and the native picker buys the platform's
+own wheel plus keyboard and screen-reader support for nothing. Flush right, the
+instrument's actions — `randomizeSeed`, `freeze`, the
 Parameters toggle, `revealHidden` when a pill is masked. **Icon + shortcut only**:
 the icon is read at a glance from the back of the room and the letter is what the
 hand presses; the words were the widest part and said the least. Full labels live in

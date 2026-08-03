@@ -9,6 +9,7 @@ export const STR = {
   SEARCH_PLACEHOLDER: 'Type to search experiments…',
   NO_RESULTS: 'No matching experiment',
   PARAMETERS: 'Parameters',
+  VIEW_PICKER: 'Representation',
   SCENE: 'Scene',
   NO_SCENES: 'No scenes',
   ACTION_DRAW: 'Draw',
