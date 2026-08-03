@@ -51,9 +51,13 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze, resetDefaults]
 
   views: [
-    // Step response with the two graphical constructions of the course: the
-    // 63 % point at t = τ, and the initial tangent — which crosses the final
+    // Step response with the graphical constructions of the course: 63 % at
+    // t = τ, 95 % at 3τ, and the initial tangent — which crosses the final
     // value at t = τ EXACTLY, zero or no zero (checked).
+    // The two percentage readings hold for the PURE first order only: with a
+    // zero the curve no longer starts at 0, so they are hidden rather than
+    // left on screen pointing at the wrong instants. The tangent stays, since
+    // its identity survives τ_z.
     view(
       'step',
       'Réponse indicielle',
@@ -63,8 +67,28 @@ export default {
         overlays: [
           line('tangent', { color: '#D95319', width: 1.4, dashed: true, label: 'tangente en 0' }),
           hline((p) => p.K, { color: '#EDB120', dashed: true, width: 1.6, label: 'K' }),
-          hline((p) => 0.632 * p.K, { color: '#a1a1aa', width: 1, label: '63 % de K' }),
-          vline((p) => p.tau, { color: '#a1a1aa', width: 1, dashed: true, label: 'τ' }),
+          hline((p) => (p.tz === 0 ? 0.632 * p.K : NaN), {
+            color: '#a1a1aa',
+            width: 1,
+            label: '63 % de K',
+          }),
+          vline((p) => (p.tz === 0 ? p.tau : NaN), {
+            color: '#a1a1aa',
+            width: 1,
+            dashed: true,
+            label: 'τ',
+          }),
+          hline((p) => (p.tz === 0 ? 0.95 * p.K : NaN), {
+            color: '#a1a1aa',
+            width: 1,
+            label: '95 % de K',
+          }),
+          vline((p) => (p.tz === 0 ? 3 * p.tau : NaN), {
+            color: '#a1a1aa',
+            width: 1,
+            dashed: true,
+            label: '3τ',
+          }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 'y(t)' },
       })

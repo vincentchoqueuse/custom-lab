@@ -200,9 +200,16 @@
   const yDomain = $derived(held?.y ?? yDomainAuto);
 
   function mkScale(axis, domain, range) {
-    const s = axis.scale === 'log' ? scaleLog() : scaleLinear();
+    const isLog = axis.scale === 'log';
+    const s = isLog ? scaleLog() : scaleLinear();
     s.domain(domain).range(range);
-    if (!Array.isArray(axis.domain)) s.nice();
+    // `nice()` rounds a domain outward to whole tick steps — a good idea on a
+    // linear axis (round numbers, at most one step of slack), a bad one on a
+    // log axis, where the step is a DECADE: a curve spanning 0.4…40 would be
+    // framed 0.1…100 and left floating in the middle of an empty plot. Log
+    // axes therefore keep the domain the data asked for (already padded
+    // multiplicatively upstream), and d3 still labels the decades inside it.
+    if (!Array.isArray(axis.domain) && !isLog) s.nice();
     return s;
   }
 
