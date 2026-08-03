@@ -24,8 +24,41 @@ Chaque point suit une loi du χ² à 2 degrés de liberté, dont l'écart-type
 affine la RÉSOLUTION, jamais la variance.`,
   },
   {
+    id: 'cutting',
+    title: 'Scène 2 · Où passent les échantillons',
+    view: 'segments',
+    params: { method: 'bartlett', N: 4096, L: 256, win: 'rect', snr: 10, a2: -20, df: 40 },
+    visible: ['method', 'win'],
+    notes: `Avant de parler de variance, regarder le découpage. En bleu les
+fenêtres posées là où elles tombent, en orange LEUR SOMME : le poids
+total que chaque échantillon reçoit dans l'estimation.
+
+Quatre cas à parcourir dans cet ordre, en faisant lire la courbe orange
+à voix haute (la statline la résume aussi) :
+
+  1. Bartlett + rectangulaire  → somme plate à 1.
+     Chaque échantillon compte une fois. Rien de perdu, rien de compté
+     deux fois.
+  2. Bartlett + Hann           → la somme ONDULE et retombe à 0 entre
+     les segments. Les échantillons du bord de chaque segment sont
+     purement et simplement jetés. Question à la salle : « on a payé
+     ces mesures, où sont-elles passées ? »
+  3. Welch + Hann              → somme plate à 1 de nouveau. Le
+     recouvrement remet exactement le poids que la fenêtre enlevait :
+     c'est la condition COLA, et c'est vérifié à 1e-12 par le harnais.
+     Voilà l'information récupérée.
+  4. Welch + rectangulaire     → somme plate à 2. Chaque échantillon est
+     compté DEUX fois, sans aucune atténuation. Les segments voisins
+     partagent la moitié de leurs données brutes : ils sont corrélés,
+     et c'est exactement pourquoi ce réglage perd 20 % de variance
+     (scène suivante).
+
+Cette vue seule justifie la fenêtre de Welch. La suite ne fait que la
+mesurer.`,
+  },
+  {
     id: 'welch',
-    title: 'Scène 2 · Moyenner, et payer en résolution',
+    title: 'Scène 3 · Moyenner, et payer en résolution',
     view: 'spectrum',
     params: { method: 'welch', N: 2048, L: 256, win: 'hann', snr: 10, a2: -20, df: 40 },
     visible: ['method', 'L'],
@@ -54,7 +87,7 @@ les bords — c'est la raison d'être de cette fenêtre, pas un détail.`,
   },
   {
     id: 'buried',
-    title: 'Scène 3 · Deux façons de perdre une raie',
+    title: 'Scène 4 · Deux façons de perdre une raie',
     view: 'spectrum',
     params: { method: 'welch', N: 4096, L: 512, win: 'rect', snr: 10, a2: -35, df: 12 },
     visible: ['win', 'a2', 'df'],
@@ -73,7 +106,7 @@ sert à rien, changer de fenêtre pour un problème de variance non plus.`,
   },
   {
     id: 'law',
-    title: 'Scène 4 · La pente −1/2',
+    title: 'Scène 5 · La pente −1/2',
     view: 'consistency',
     params: { method: 'welch', N: 4096, L: 256, win: 'hann', snr: 10, a2: -20, df: 40 },
     visible: ['method', 'N'],
