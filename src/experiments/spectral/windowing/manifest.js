@@ -103,8 +103,21 @@ export default {
       'kernel',
       'La fenêtre au microscope',
       line('kernel', {
+        // Deux traits, et l'écart entre eux est la leçon : ce que le tracé
+        // MONTRE, et ce que la théorie DIT pour cette fenêtre à ce N —
+        // TFtd en forme close, maximum raffiné par section dorée, jamais
+        // une valeur tabulée. Ils ne coïncident pas exactement, et c'est
+        // honnête : à 16× de bourrage la grille ne tombe pas sur le sommet
+        // du lobe, donc la lecture passe légèrement en dessous. La statline
+        // chiffre l'écart.
         overlays: [
-          hline('sidelobe', { color: '#D95319', dashed: true, label: 'lobes secondaires' }),
+          hline('sidelobe', { color: '#D95319', dashed: true, width: 1.8, label: 'lu' }),
+          hline('sidelobeTheoryLine', { color: '#7E2F8E', dashed: true, width: 1.8, label: 'théorie' }),
+          // et OÙ la théorie place ce sommet : avec le niveau, cela fait une
+          // croix sur le lobe. Les deux traits horizontaux se confondent dès
+          // que la lecture est bonne — ce qui est le cas visé, donc un
+          // repère qui ne dépend pas de leur écart est nécessaire.
+          vline('sidelobeBinLine', { color: '#7E2F8E', dashed: true, width: 1.2 }),
         ],
         axes: {
           x: { label: 'écart à la raie', unit: 'bins (Fs/N)' },
