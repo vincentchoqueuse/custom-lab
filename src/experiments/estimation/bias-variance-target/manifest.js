@@ -1,5 +1,5 @@
 import { float, int } from '../../../core/fields.js';
-import { view, custom, histogram, line, vline } from '../../../core/views.js';
+import { view, custom, histogram, line, vline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -53,9 +53,8 @@ export default {
     // no generic 1D plot type.
     custom('targets', 'La cible', () => import('./views/Targets.svelte')),
 
-    view(
+    figure(
       'sampling',
-      'Distributions (coordonnée x)',
       histogram('dMean', {
         color: '#0072BD',
         opacity: 0.55,

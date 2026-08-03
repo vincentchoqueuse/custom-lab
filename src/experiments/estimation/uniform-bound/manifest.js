@@ -1,5 +1,5 @@
 import { float, int } from '../../../core/fields.js';
-import { view, histogram, line, scatter, vline } from '../../../core/views.js';
+import { view, histogram, line, scatter, vline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -57,9 +57,8 @@ export default {
     ),
 
     // An estimator IS a random variable: the three sampling distributions.
-    view(
+    figure(
       'sampling',
-      'Distributions des estimateurs',
       histogram('t1', {
         color: '#D95319',
         opacity: 0.55,

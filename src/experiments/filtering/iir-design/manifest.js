@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, line, vline } from '../../../core/views.js';
+import { view, line, vline, figure } from '../../../core/views.js';
 import { timeView, impulseView, polesView } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
@@ -76,9 +76,8 @@ export default {
     timeView(),
     impulseView({ source: 'impulseDig', label: 'h[n] du filtre numérique' }),
 
-    view(
-      'response',
-      'Réponse fréquentielle',
+    figure(
+      'gain',
       line('respDig', {
         width: 2,
         label: 'numérique',
@@ -93,7 +92,6 @@ export default {
       })
     ),
     polesView({
-      id: 'zplane',
       variable: 'z',
       circle: { radius: 1, label: 'cercle unité (stabilité)' },
       segments: [

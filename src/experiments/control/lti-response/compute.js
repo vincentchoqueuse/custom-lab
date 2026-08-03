@@ -8,7 +8,7 @@
 // phase ARE |H| and arg H — the living definition of frequency response.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { rk4Step, polyEvalComplex } from '../../../core/numeric.js';
-import { bodeSweep, bodeObservables, naturalPulsation, polyTransfer } from '../../../core/bode.js';
+import { bodeSweep, bodeObservables, naturalPulsation, polyTransfer } from '../_lib/bode.js';
 
 const T_END = 20;
 const H = 0.005;
@@ -129,7 +129,7 @@ export function compute({ num, den, input, f }) {
 
   /* ---------- the Bode pair, for ANY typed-in transfer function ----------- */
   // The grid is centred on the characteristic pulsation read off the
-  // denominator coefficients (core/bode.js), so a system typed in with any
+  // denominator coefficients (_lib/bode.js), so a system typed in with any
   // coefficients still arrives framed on its own decades instead of on a
   // straight line. The phase is unwrapped: a fourth order goes past −180°,
   // and atan2's fold would be a jump the system does not have.

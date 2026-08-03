@@ -29,7 +29,7 @@ que l'œil.`,
     id: 'gain',
     title: '+3 dB par doublement',
     params: { shape: 'rect', N: 32, snr: 0.2, tau: 32, M: 2000 },
-    view: 'gain',
+    view: 'processing',
     visible: ['N', 'shape'],
     notes: `SNR de sortie = N·SNR d'entrée : chaque doublement de N gagne 3 dB —
 la droite en axe log-N, confirmée par le Monte Carlo (points orange).

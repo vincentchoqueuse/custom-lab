@@ -11,6 +11,15 @@
   const val = (name) => obs?.[name]?.value;
   /** minHalf/maxHalf/circle.radius accept a number or p => number. */
   const num = (v) => (typeof v === 'function' ? v(params) : v);
+  /** A window bound is evaluated against the CURRENT params, which for one
+   *  frame during an experiment or scene swap may still be the previous
+   *  ones — `1.5 / p.tau` with no tau gives NaN, and a NaN half-window turns
+   *  every axis tick into `x="NaN"`. Fall back to the default rather than
+   *  render a broken frame. */
+  const bound = (v, fallback) => {
+    const n = num(v);
+    return Number.isFinite(n) && n > 0 ? n : fallback;
+  };
 
   const circlePoints = (radius, n = 140) => {
     const x = new Float64Array(n);
@@ -83,8 +92,8 @@
   markerColor={spec.markers?.color ?? '#EDB120'}
   labels={spec.markers?.labels ? val(spec.markers.labels) : null}
   {segments}
-  minHalf={num(spec.minHalf) ?? 1.4}
-  maxHalf={num(spec.maxHalf) ?? 3}
+  minHalf={bound(spec.minHalf, 1.4)}
+  maxHalf={bound(spec.maxHalf, 3)}
   xLabel={spec.axes?.x ?? 'I'}
   yLabel={spec.axes?.y ?? 'Q'}
   {legend}

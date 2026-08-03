@@ -4,46 +4,21 @@
 //   m = 1: y = K(1 − (1 + ω₀t)e^(−ω₀t))
 //   m > 1: two real poles −ω₀(m ∓ √(m²−1)), biexponential
 // Impulse response, exact in the same three regimes (and the derivative of
-// the step response, which the harness checks):
-//   m < 1: h = Kω₀²/ω_d · e^(−mω₀t)·sin(ω_d t)
-//   m = 1: h = Kω₀²·t·e^(−ω₀t)
-//   m > 1: h = Kω₀²(e^(r₁t) − e^(r₂t))/(r₁ − r₂)
+// the step response, which the harness checks).
+// Both closed forms live in _lib/lti.js: three other experiments read them,
+// and an experiment must not be another one's library.
 // Observables: the step response with its ±5% band and envelope, the impulse
 // response, the poles, and Mr = K/(2m√(1−m²)) at ωr = ω₀√(1−2m²) when
 // m < 1/√2.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 
 const NG = 800; // time samples
-import { bodeSweep, bodeObservables } from '../../../core/bode.js';
+import { bodeSweep, bodeObservables } from '../_lib/bode.js';
+import { secondOrderStep as stepValue, secondOrderImpulse as impulseValue } from '../_lib/lti.js';
 import { toDb } from '../../../core/numeric.js';
 
 const NW = 61; // frequency grid: ±1.5 decades around ω₀ (center = ω₀ exact)
 const EPS = 1e-6;
-
-export function stepValue(K, m, w0, t) {
-  if (Math.abs(m - 1) < EPS) return K * (1 - (1 + w0 * t) * Math.exp(-w0 * t));
-  if (m < 1) {
-    const wd = w0 * Math.sqrt(1 - m * m);
-    const e = Math.exp(-m * w0 * t);
-    return K * (1 - e * (Math.cos(wd * t) + (m / Math.sqrt(1 - m * m)) * Math.sin(wd * t)));
-  }
-  const s = Math.sqrt(m * m - 1);
-  const r1 = -w0 * (m - s);
-  const r2 = -w0 * (m + s);
-  return K * (1 - (r2 * Math.exp(r1 * t) - r1 * Math.exp(r2 * t)) / (r2 - r1));
-}
-
-export function impulseValue(K, m, w0, t) {
-  if (Math.abs(m - 1) < EPS) return K * w0 * w0 * t * Math.exp(-w0 * t);
-  if (m < 1) {
-    const wd = w0 * Math.sqrt(1 - m * m);
-    return ((K * w0 * w0) / wd) * Math.exp(-m * w0 * t) * Math.sin(wd * t);
-  }
-  const s = Math.sqrt(m * m - 1);
-  const r1 = -w0 * (m - s);
-  const r2 = -w0 * (m + s);
-  return (K * w0 * w0 * (Math.exp(r1 * t) - Math.exp(r2 * t))) / (r1 - r2);
-}
 
 /**
  * @param {{K: number, m: number, w0: number, seed: number}} params
@@ -105,7 +80,7 @@ export function compute({ K, m, w0 }) {
   // (the |s| = ω₀ guide circle is drawn by the plane view, not computed here)
 
   // |H(jω)| on a log grid centered exactly on ω₀
-  // H(jω) = Kω₀²/(ω₀²−ω² + 2jmω₀ω), swept by core/bode.js — the same grid,
+  // H(jω) = Kω₀²/(ω₀²−ω² + 2jmω₀ω), swept by _lib/bode.js — the same grid,
   // the same dB and the same unwrapped phase as everywhere else in the
   // subject. The phase is the half the experiment was missing: it passes
   // through −90° at ω₀ whatever m, and ends at −180°, which is exactly what

@@ -3,7 +3,7 @@ export default [
   {
     id: 'through',
     title: 'Scène 1 · Le signal entre, le signal sort',
-    view: 'time',
+    view: 'response',
     params: { method: 'bilinear', family: 'butter', n: 4, fc: 1000, Amax: 1,
               source: 'square', f0: 200 },
     visible: ['fc', 'n'],
@@ -43,7 +43,7 @@ sur la cible. Le pre-warping ne corrige qu'UN point — mais c'est le bon.`,
   {
     id: 'zplane',
     title: "Scène 4 · Le demi-plan gauche s'enroule",
-    view: 'zplane',
+    view: 'poles',
     params: { method: 'bilinear', family: 'butter', n: 6, fc: 1000, Amax: 1 },
     visible: ['n', 'fc'],
     notes: `Les pôles analogiques du demi-plan gauche atterrissent DANS le

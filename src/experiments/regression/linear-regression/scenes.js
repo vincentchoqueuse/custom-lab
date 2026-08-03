@@ -34,7 +34,7 @@ c'est que la droite ne suffit plus.`,
     id: 'levier',
     title: 'Scène 3 · Écarter les x vaut mieux qu\'en ajouter',
     params: { a: 1.5, b: 1, sigma: 1.5, N: 20, spread: 1, outlier: 0 },
-    view: 'sampling',
+    view: 'slope-law',
     visible: ['spread', 'N'],
     lock: true,
     notes: `Quatre cents expériences répétées : l'histogramme est la loi de â.

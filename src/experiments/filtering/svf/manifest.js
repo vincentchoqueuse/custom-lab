@@ -1,5 +1,5 @@
 import { float, log, select } from '../../../core/fields.js';
-import { view, line, vline } from '../../../core/views.js';
+import { view, line, vline, figure } from '../../../core/views.js';
 import { timeView, impulseView } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
@@ -73,9 +73,8 @@ export default {
 
     // hand-written: four transfer functions in one frame is this experiment's
     // whole point, and no other filter experiment draws that
-    view(
-      'outputs',
-      'Réponse fréquentielle',
+    figure(
+      'gain',
       line('respLp', {
         label: 'passe-bas',
         overlays: [

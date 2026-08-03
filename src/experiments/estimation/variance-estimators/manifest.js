@@ -1,5 +1,5 @@
 import { float, int } from '../../../core/fields.js';
-import { view, histogram, line, vline, hline } from '../../../core/views.js';
+import { view, histogram, line, vline, hline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -37,9 +37,8 @@ export default {
 
   views: [
     // An estimator IS a random variable: its sampling distribution, M times.
-    view(
+    figure(
       'sampling',
-      'Distribution des estimateurs',
       histogram('v1', {
         color: '#D95319',
         opacity: 0.55,

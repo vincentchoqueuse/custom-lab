@@ -1,7 +1,7 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 import { qfunc } from '../../../core/numeric.js';
-import { hamming74, codewordTable } from '../../../core/codes.js';
+import { hamming74, codewordTable } from '../_lib/codes.js';
 
 const BASE = { code: 'hamming74', ebn0Db: 4, Nbits: 100000, seed: 29 };
 

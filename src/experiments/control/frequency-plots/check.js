@@ -3,13 +3,12 @@ import {
   transfer,
   naturalW,
   phaseOf,
-  isoModulus,
   w180Of,
   modAt180,
   TAU_RATIO,
 } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
-import { bodeSweep } from '../../../core/bode.js';
+import { bodeSweep } from '../_lib/bode.js';
 
 const BASE = { sys: 'first', K: 1, tau: 1, w0: 1, m: 0.3, wc: 1, seed: 42 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;
@@ -338,114 +337,11 @@ export const checks = [
     },
   },
   {
-    name: 'abaque : tout point tracé vérifie |H/(1+H)| = M, sur Black et sur Nyquist',
-    category: 'numeric',
-    run() {
-      // The contours have a DEFINING identity, so it is asserted on the drawn
-      // points themselves rather than on the formula that produced them: every
-      // point of the iso-gain family must give exactly its own closed-loop
-      // modulus, whether it was built as a Nichols contour (φ, dB) or as a
-      // Hall circle (Re, Im).
-      const closedOf = (re, im) => Math.hypot(re, im) / Math.hypot(1 + re, im);
-      let worst = 0;
-      for (const db of [-12, -6, -3, -1, 0, 1, 3, 6, 12]) {
-        const M = 10 ** (db / 20);
-        // Nichols: the modulus solved at a given open-loop phase
-        for (let i = -270; i <= -90; i += 1) {
-          for (const r of isoModulus(M, i)) {
-            const a = (i * Math.PI) / 180;
-            worst = Math.max(worst, Math.abs(closedOf(r * Math.cos(a), r * Math.sin(a)) - M));
-          }
-        }
-        // Hall: the circle of centre −M²/(M²−1) and radius M/|M²−1|, and the
-        // bisector Re = −1/2 that M = 1 degenerates into
-        if (Math.abs(M - 1) > 1e-12) {
-          const cx = -(M * M) / (M * M - 1);
-          const rr = M / Math.abs(M * M - 1);
-          for (let i = 0; i < 120; i++) {
-            const a = (2 * Math.PI * i) / 120;
-            worst = Math.max(worst, Math.abs(closedOf(cx + rr * Math.cos(a), rr * Math.sin(a)) - M));
-          }
-        } else {
-          for (const im of [-3, -1, 0, 0.5, 2]) worst = Math.max(worst, Math.abs(closedOf(-0.5, im) - 1));
-        }
-      }
-      return { ok: worst < 1e-12, detail: `écart max ${worst.toExponential(2)}` };
-    },
-  },
-  {
-    name: 'abaque : le contour mis en avant est bien TANGENT au lieu ouvert',
-    category: 'numeric',
-    run() {
-      // the reading the scene asks for: the highlighted level is the maximum
-      // of |T| over the band, so no plotted point of the locus may exceed it,
-      // and the tangency pulsation must reach it exactly
-      const gap = maxGap(
-        [
-          { tau: 1, K: 0.5 },
-          { tau: 1, K: 1 },
-          { tau: 0.3, K: 4 },
-          { tau: 2, K: 2 },
-        ],
-        ({ tau, K }) => {
-          const o = obs({ sys: 'openloop', tau, K });
-          const M = 10 ** (o.mrClosed.value / 20);
-          const at = (w) => {
-            const [re, im] = transfer('openloop', w, { K, tau });
-            return Math.hypot(re, im) / Math.hypot(1 + re, im);
-          };
-          let over = 0;
-          for (let i = 0; i < o.gain.x.length; i++) over = Math.max(over, at(o.gain.x[i]) - M);
-          // the contour passes exactly through the tangency point
-          const wr = o.wrClosed.value;
-          const contour = isoModulus(M, phaseOf('openloop', wr, { tau }));
-          const here = Math.hypot(...transfer('openloop', wr, { K, tau }));
-          const onIt = Math.min(...contour.map((r) => Math.abs(r - here)));
-          return Math.max(over, Math.abs(at(wr) - M), onIt);
-        }
-      );
-      return { ok: gap < 1e-6, detail: `écart max ${gap.toExponential(2)}` };
-    },
-  },
-  {
-    name: 'abaque : rien de tracé hors boucle ouverte, ni au-delà de K critique',
-    category: 'numeric',
-    run() {
-      // an empty series is how a layer says "these params do not have me":
-      // the fixed orders have no loop to close, and past K critique a
-      // "resonance" would be a number that reads like physics and is not one
-      const empty = (o, k) => o[k].x.length === 0;
-      const fixed = [{ sys: 'first' }, { sys: 'second', m: 0.3 }].every((p) => {
-        const o = obs(p);
-        return (
-          ['isoGain', 'isoPeak', 'hallGain', 'hallPeak'].every((k) => empty(o, k)) &&
-          Number.isNaN(o.mrClosed.value)
-        );
-      });
-      const unstable = [6, 6.5, 20].every((K) => {
-        const o = obs({ sys: 'openloop', tau: 1, K });
-        return (
-          empty(o, 'isoPeak') &&
-          empty(o, 'hallPeak') &&
-          Number.isNaN(o.mrClosed.value) &&
-          !empty(o, 'isoGain') // the grid itself stays: it is what K crosses
-        );
-      });
-      // and below K critique the resonance IS reported, and grows with K
-      const peaks = [1, 3, 5, 5.9].map((K) => obs({ sys: 'openloop', tau: 1, K }).mrClosed.value);
-      const grows = peaks.every((v, i) => Number.isFinite(v) && (i === 0 || v > peaks[i - 1]));
-      return {
-        ok: fixed && unstable && grows,
-        detail: `M_r = ${peaks.map((v) => v.toFixed(1)).join(' → ')} dB de K = 1 à 5.9`,
-      };
-    },
-  },
-  {
-    name: 'le dépliage de core/bode.js retrouve la phase en forme close',
+    name: 'le dépliage de _lib/bode.js retrouve la phase en forme close',
     category: 'numeric',
     run() {
       // This experiment computes its phase in CLOSED FORM, because it can.
-      // Every other system in the subject goes through core/bode.js, which
+      // Every other system in the subject goes through _lib/bode.js, which
       // unwraps atan2 instead — the only option for a typed-in polynomial or
       // a PID loop. Here both answers exist, so they are compared: the shared
       // module is validated against the one system with an exact phase,

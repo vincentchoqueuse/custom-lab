@@ -42,7 +42,7 @@ export default {
       })
     ),
     view(
-      'gain',
+      'kgain',
       'Gain de Kalman',
       line('gains', {
         overlays: [hline('kInf', { color: '#EDB120', dashed: true, label: 'K∞' })],

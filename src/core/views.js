@@ -93,24 +93,32 @@ export function view(id, title, spec) {
 }
 
 /**
- * Declarative EQUAL-ASPECT plane (I/Q, poles, z-plane): the one view shape
- * that a cartesian plot cannot express, since circles must stay circles.
- * Everything is resolved against the observables by ui/plots/PlanePlot:
- *   curves:   [{source, color, width, dashed, label}]   polylines
- *   clouds:   [{source, color, r, opacity, max, label}]  point sets
- *   markers:  {source, color, labels, label}             emphasized points
- *   segments: an observable name or a literal [{x1,y1,x2,y2}]
- *   circle:   {radius: number | p => n, color, label}    guide circle
- *   minHalf/maxHalf: number or p => number               window bounds
- *   symmetric: false                                     frame the data,
- *     not the origin (a Nyquist locus lives under the real axis)
- *   axes:     {x, y} labels
- * The legend is built from the labels, as in the cartesian plots.
+ * A STANDARD figure (core/figures.js): the manifest NAMES the figure and the
+ * registry stamps its id and its title — the subject's title, since the same
+ * plot is honestly "Bode — gain" in automatique and "Réponse fréquentielle" in
+ * filtrage. `variant` picks another name from the figure's CLOSED list when an
+ * experiment needs one its subject does not default to. No free text, ever:
+ * a title you never type is a title you can never mistype.
  */
-export function plane(id, title, spec = {}) {
-  const where = `plane '${id}'`;
-  if (typeof id !== 'string' || !id) throw new ViewError('plane: id is required');
-  if (typeof title !== 'string' || !title) throw new ViewError(`${where}: title is required`);
+export function figure(key, spec, { variant } = {}) {
+  if (typeof key !== 'string' || !key) throw new ViewError('figure: key is required');
+  if (spec === null || typeof spec !== 'object' || !PLOT_TYPES.includes(spec.type))
+    throw new ViewError(`figure '${key}': spec must be built with a plot factory`);
+  return { figure: key, ...(variant ? { variant } : {}), kind: 'plot', spec, layout: 'plot' };
+}
+
+/** The same, for the equal-aspect plane (the pole map). */
+export function figurePlane(key, spec = {}, { variant } = {}) {
+  if (typeof key !== 'string' || !key) throw new ViewError('figurePlane: key is required');
+  validatePlaneSpec(spec, `figurePlane '${key}'`);
+  return { figure: key, ...(variant ? { variant } : {}), kind: 'plane', spec, layout: 'plot' };
+}
+
+
+/** The spec half of a plane, checked on its own so `plane` and `figurePlane`
+ *  share one validation instead of one of them faking a view to borrow the
+ *  other's. */
+function validatePlaneSpec(spec, where) {
   for (const c of spec.clouds ?? []) {
     if (c === null || typeof c !== 'object' || typeof c.source !== 'string')
       throw new ViewError(`${where}: each cloud needs a { source } observable name`);
@@ -130,6 +138,27 @@ export function plane(id, title, spec = {}) {
     if (v != null && typeof v !== 'number' && typeof v !== 'function')
       throw new ViewError(`${where}: ${k} must be a number or p => number`);
   }
+}
+
+/**
+ * Declarative EQUAL-ASPECT plane (I/Q, poles, z-plane): the one view shape
+ * that a cartesian plot cannot express, since circles must stay circles.
+ * Everything is resolved against the observables by ui/plots/PlanePlot:
+ *   curves:   [{source, color, width, dashed, label}]   polylines
+ *   clouds:   [{source, color, r, opacity, max, label}]  point sets
+ *   markers:  {source, color, labels, label}             emphasized points
+ *   segments: an observable name or a literal [{x1,y1,x2,y2}]
+ *   circle:   {radius: number | p => n, color, label}    guide circle
+ *   minHalf/maxHalf: number or p => number               window bounds
+ *   symmetric: false                                     frame the data,
+ *     not the origin (a Nyquist locus lives under the real axis)
+ *   axes:     {x, y} labels
+ * The legend is built from the labels, as in the cartesian plots.
+ */
+export function plane(id, title, spec = {}) {
+  if (typeof id !== 'string' || !id) throw new ViewError('plane: id is required');
+  if (typeof title !== 'string' || !title) throw new ViewError(`plane '${id}': title is required`);
+  validatePlaneSpec(spec, `plane '${id}'`);
   return { id, title, kind: 'plane', spec, layout: 'plot' };
 }
 

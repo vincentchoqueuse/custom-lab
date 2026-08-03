@@ -84,7 +84,7 @@ export default {
 
     // the processing gain: +3 dB per doubling of N, whatever the shape
     view(
-      'gain',
+      'processing',
       'Gain de traitement',
       line('gainTheory', {
         color: '#7E2F8E',

@@ -1,5 +1,5 @@
 import { float, bool, select } from '../../../core/fields.js';
-import { view, line, stem, vline } from '../../../core/views.js';
+import { view, line, stem, vline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -36,9 +36,8 @@ export default {
   },
 
   views: [
-    view(
+    figure(
       'time',
-      "L'escalier du CNA",
       line('staircase', {
         width: 1.6,
         label: 'sortie CNA',
@@ -58,9 +57,8 @@ export default {
         axes: { x: { label: 't', unit: 'ms' }, y: 'x[k] à L·Fs' },
       })
     ),
-    view(
+    figure(
       'spectrum',
-      'Les images et le sinc',
       line('spectrum', {
         overlays: [
           line('sincEnv', { color: '#D95319', dashed: true, label: 'enveloppe sinc ZOH' }),

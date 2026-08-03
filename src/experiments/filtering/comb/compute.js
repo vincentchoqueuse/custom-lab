@@ -19,7 +19,7 @@ import {
   steadyTime,
   steadySpectrumDb,
   responseGrid,
-} from '../../../core/bench.js';
+} from '../_lib/bench.js';
 
 const { FS } = BENCH; // the bench discards g^(SKIP/D) ≪ 1 of transient
 const DB_FLOOR = -80;

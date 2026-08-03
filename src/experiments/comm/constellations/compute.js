@@ -12,7 +12,7 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { dbToLin, pairsToSeries } from '../../../core/numeric.js';
-import { constellation, serTheory } from '../../../core/modulation.js';
+import { constellation, serTheory } from '../_lib/modulation.js';
 
 const DB_GRID = Array.from({ length: 11 }, (_, i) => 2 * i); // 0…20 dB
 const N_CURVE = 6000; // symbols per Monte Carlo point of the SER curve

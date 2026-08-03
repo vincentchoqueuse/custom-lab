@@ -17,13 +17,23 @@ staging rather than parameter editing.**
 
 ## Non-negotiable principles
 
-1. **Fully static.** Everything runs in the browser. No backend, no API.
+1. **Fully static.** Everything runs in the browser. No backend, no API. A
+   deployment may carry the whole catalogue or A SINGLE SUBJECT:
+   `PUPITRACE_SUBJECT=control npm run build` rewrites the four glob patterns at
+   build time (`scripts/subject-filter.js`) — 172 kB gzip → 118 kB, and the
+   sidebar simply shows the one subject. Filtering at runtime would be pointless:
+   `import.meta.glob` needs a literal pattern, so everything would already be in
+   the bundle.
 2. **The URL is the API.** All state (experiment, params, view, preset, panels) is
    encoded in the hash. One link = one reproducible lecture scene.
 3. **Declarative.** Each experiment is a self-contained directory described by a
    manifest. The core knows no experiment by name.
 4. **Adding an experiment never modifies the core.** Automatic discovery via
-   `import.meta.glob`. Zero hand-maintained index files.
+   `import.meta.glob`. Zero hand-maintained index files. **The core knows no
+   experiment, and that is now checked**: no file of `src/core/` may import
+   anything under `src/experiments/` (`npm run check`, layering). Code shared by
+   ONE subject lives with that subject, in `experiments/<subject>/_lib/`; only
+   code used across subjects earns a place in `core/`.
 5. **Strict layer separation**: scientific computation → observables → declarative
    views → graphic components. Views NEVER perform scientific computation.
 6. **AGPL-3.0. Code, UI, and commits in English.** Pedagogical content (param labels,
@@ -62,9 +72,10 @@ graphic components       — generic (Histogram, Line, Scatter…), reused every
 ## Observables
 
 Every displayable quantity is a named observable produced by `compute()`. Its type is
-**inferred by default** (`Float64Array` → vector, `number` → scalar, `{x, y}` →
-series, `[{...}]` → records); an optional `meta` field resolves ambiguities and adds
-richness (unit, label, precision). Export, inspector and overlays rely on these types
+**inferred by default** (`Float64Array` → vector, `number` → scalar, `string` → text,
+`{x, y}` → series, `[{...}]` → records); an optional `meta` field resolves ambiguities
+and adds richness (unit, label, precision). A `text` observable is a reading like any
+other — a regime name, a verdict — and shows in the statline beside the numbers. Export, inspector and overlays rely on these types
 — without imposing ceremony on the simple case.
 
 ## Scenes (presets)
@@ -161,7 +172,12 @@ statline of key observables, export. Minimal tabs when the experiment has severa
 views.
 
 **View bar (tabs line).** The representations on the left when the experiment has
-several, and flush right the instrument's actions — `randomizeSeed`, `freeze`, the
+several — a segmented control on a desktop or a projector, where the room should see
+that there ARE four readings before any is opened, and a NATIVE `<select>` below
+860 px, because six tabs the length of "Réponse impulsionnelle" do not fit a phone.
+Both are in the DOM, CSS shows exactly one, and the native picker buys the platform's
+own wheel plus keyboard and screen-reader support for nothing. Flush right, the
+instrument's actions — `randomizeSeed`, `freeze`, the
 Parameters toggle, `revealHidden` when a pill is masked. **Icon + shortcut only**:
 the icon is read at a glance from the back of the room and the letter is what the
 hand presses; the words were the widest part and said the least. Full labels live in
@@ -277,6 +293,14 @@ registry at load time):
   reset. Actions live in the view bar (tabs line, flush right), as icon + shortcut.
 - **`groups`** absent → one flat group.
 - **`layout: 'plot'`** is implied when a view has a `plot` key.
+- **Standard figures are named once** in `core/figures.js`. A manifest declares
+  `figure('gain', …)` and never a title; the registry stamps the global id and
+  the subject's own name for it (`_subject.js` → `figures` for the variant,
+  `figureOrder` for the tab grammar). The rule the registry enforces at load
+  time, and `npm run check` repeats: **a canonical id carries the canonical
+  title, or the view takes an id of its own.** A pole map called "Plan des
+  pôles" while every other one says "Pôles et zéros" is a load-time error, not
+  a thing to notice in class.
 - **`order` ranks the experiment inside its subject** — the lecture progression, not
   the alphabet: the sidebar and the palette read a subject in the order the course
   meets its demos. Absent → the experiment lands at the end of its subject,
@@ -413,6 +437,18 @@ export default {
   // RULE: declarative first. A custom view must be justified in a comment.
   // A custom pattern repeated twice becomes a generic type in ui/plots/.
   //
+  // STANDARD FIGURES are declared, not retyped. A view that IS one of the
+  // catalogue's standard figures is built with the `figure` factory and NEVER
+  // states a title: the id comes from core/figures.js (global, so ?view=gain
+  // is the magnitude figure everywhere) and the title comes from the SUBJECT
+  // (_subject.js `figures`/`figureOrder`), because the same plot is honestly
+  // "Bode — gain" in automatique and "Réponse fréquentielle" in filtrage.
+  // The registry enforces it both ways at load time, and `npm run check`
+  // repeats the enforcement: a canonical id may not carry a hand-written
+  // title, and the standard figures must appear in the subject's order.
+  // An experiment whose figure is genuinely its own ("L'oscillo", "Diagramme
+  // de l'œil") declares an ordinary view with its own id and its own title.
+  //
   // VIEW ORDER is a convention, not a detail — a listener who moves from one
   // experiment to the next must find the same tab in the same place:
   //   signal experiment: temporal FIRST, then the spectrum, then the extras
@@ -480,9 +516,17 @@ export const checks = [
 ];
 ```
 
-`npm run check` walks every `experiments/**/check.js`, prints a ✓/✗ table grouped by
-category, plus each check's execution time (performance-regression detection with no
-dedicated benchmark infrastructure).
+`npm run check` first runs the CATALOGUE checks — the standard-figure vocabulary
+(`core/figures.js`) and the scene vocabulary (`core/scenes.js`) — then walks every
+`experiments/**/check.js`, prints a ✓/✗ table grouped by category, plus each check's
+execution time (performance-regression detection with no dedicated benchmark
+infrastructure).
+
+**Everything declarative is a CLOSED list, and an unknown key is an error.** Scene
+keys, view builder options, figure names, param factories: a typo is caught at load
+time and by `npm run check`, never silently ignored. A silently ignored `visble:` or
+a `title:` left behind after a rename is the one failure mode a lecture cannot
+survive, because it looks exactly like working code.
 **No experiment is done without `numeric` or `statistical` checks.** UI code can be
 wrong without consequence; a wrong formula projected in a lecture hall is
 unacceptable.
@@ -740,17 +784,18 @@ export const checks = [
 │   │   ├── scales.js             # thin wrapper over d3-scale/array/shape/format
 │   │   ├── fields.js             # field factories (float, int, select…) + load-time validation
 │   │   ├── views.js              # view/plot/overlay factories + load-time validation
+│   │   ├── figures.js            # the catalogue's STANDARD FIGURES: global
+│   │   │                         #   ids, per-subject titles and order, and
+│   │   │                         #   the guard that makes drift impossible
+│   │   ├── scenes.js             # the SCENE vocabulary and its validation:
+│   │   │                         #   closed key list, types, and the view and
+│   │   │                         #   param references a scene makes
 │   │   ├── response-views.js     # the FIGURES a response experiment draws,
 │   │   │                         #   shared across analog, digital and control:
 │   │   │                         #   gainView/phaseView (a Bode plot IS a
 │   │   │                         #   réponse fréquentielle with another
 │   │   │                         #   abscissa), polesView, timeView,
 │   │   │                         #   impulseView, spectrumView
-│   │   ├── bode.js               # the frequency sweep every LTI experiment
-│   │   │                         #   needs: log grid, dB, UNWRAPPED phase,
-│   │   │                         #   and the grid centre read off the
-│   │   │                         #   denominator coefficients
-│   │   ├── bench.js              # the shared digital-filter test bench
 │   │   ├── checks.js             # standardChecks factories (determinism…)
 │   │   ├── strings.js            # all core UI strings (English constants)
 │   │   ├── worker-host.js        # worker + 30 Hz throttle + lecture guard
@@ -767,7 +812,12 @@ export const checks = [
 │   └── experiments/              # one directory per subject; the directory
 │       ├── estimation/           #   name IS the first URL segment, so a
 │       │   ├── _subject.js       #   subject stays small enough to be scanned
-│       │   │                     #   { title: 'Estimation', order: 2 }
+│       │   │                     #   { title, order, figures, figureOrder }
+│       │   ├── _lib/             #   the subject's OWN shared code, when it
+│       │   │                     #   has any: control/_lib/{bode,lti}.js,
+│       │   │                     #   filtering/_lib/bench.js,
+│       │   │                     #   comm/_lib/{codes,modulation}.js,
+│       │   │                     #   stats/_lib/laws.js
 │       │   └── confidence-intervals/
 │       │       ├── manifest.js   # definition (stable)
 │       │       ├── scenes.js     # lecture script (edited before each class)

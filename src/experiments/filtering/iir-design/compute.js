@@ -13,7 +13,7 @@
 // Digital b/a coefficients are exported — downloadable from the Inspector.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { toDb, polyEvalComplex } from '../../../core/numeric.js';
-import { periodicSignal, steadyTime } from '../../../core/bench.js';
+import { periodicSignal, steadyTime } from '../_lib/bench.js';
 import { designButter, designCheby1, polyFromRoots } from '../../../core/filters.js';
 
 const FS = 8000;
@@ -170,7 +170,7 @@ export function compute({ family, n, fc, Amax, method, source, f0 }) {
   }
 
   // ---- a periodic signal through the difference equation ----------------
-  // Same bench as every other filtering experiment (core/bench.js): the
+  // Same bench as every other filtering experiment (_lib/bench.js): the
   // subject reads the same from one demo to the next.
   const xin = periodicSignal(source, f0);
   const yout = new Float64Array(xin.length);

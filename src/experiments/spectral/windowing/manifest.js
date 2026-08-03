@@ -1,5 +1,5 @@
 import { float, select } from '../../../core/fields.js';
-import { view, line, vline, hline } from '../../../core/views.js';
+import { view, line, vline, hline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -75,9 +75,8 @@ export default {
   ],
 
   views: [
-    view(
+    figure(
       'time',
-      'Signal fenêtré',
       line('signal', {
         overlays: [
           line('envUp', { color: '#D95319', dashed: true, label: 'enveloppe' }),
@@ -86,9 +85,8 @@ export default {
         axes: { x: 'n', y: 'x(n)·w(n)' },
       })
     ),
-    view(
+    figure(
       'spectrum',
-      'Spectre',
       line('spectrum', {
         overlays: [
           vline('f1', { color: '#EDB120', dashed: true, label: 'f₁' }),

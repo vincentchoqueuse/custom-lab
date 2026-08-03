@@ -1,8 +1,6 @@
 import { float, log } from '../../../core/fields.js';
-import { view, line, vline, hline } from '../../../core/views.js';
-import { gainView, phaseView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
-
-const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
+import { view, line, vline, hline, figure } from '../../../core/views.js';
+import { at, gainView, phaseView, polesView, GUIDE, GUIDE_COLOR } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -61,9 +59,8 @@ export default {
     // zero the curve no longer starts at 0, so they are hidden rather than
     // left on screen pointing at the wrong instants. The tangent stays, since
     // its identity survives τ_z.
-    view(
+    figure(
       'step',
-      'Réponse indicielle',
       line('stepResponse', {
         width: 2.5,
         label: 'y(t)',
@@ -90,9 +87,8 @@ export default {
     // Impulse response: the exponential, plus the Dirac the zero creates —
     // its weight is in the statline, since an arrow of infinite height is not
     // something a plot can honestly draw.
-    view(
+    figure(
       'impulse',
-      'Réponse impulsionnelle',
       line('impulseResponse', {
         color: '#0072BD',
         width: 2.5,
@@ -122,7 +118,6 @@ export default {
     // zero produces instead of a roll-off. Same builder as the Bode plot of
     // Bode, Nyquist, Black and as the analog filter's response: one figure.
     gainView('gain', {
-      title: 'Bode — gain',
       overlays: [
         vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c = 1/τ' }),
         hline('gain3dB', { ...GUIDE, label: '−3 dB' }),
@@ -133,7 +128,7 @@ export default {
     phaseView('phase', {
       overlays: [
         vline('wc', { color: '#EDB120', dashed: true, width: 1.8, label: 'ω_c' }),
-        hline(() => -45, { ...GUIDE, label: '−45°' }),
+        at(-45, '−45°'),
       ],
     }),
   ],

@@ -637,6 +637,36 @@ kbd {
   box-shadow: var(--shadow-sm);
 }
 
+/* the phone shape of the same control: hidden until the breakpoint, where
+   the segmented control is hidden instead. Exactly one is ever visible. */
+.tabs-select {
+  display: none;
+  position: relative;
+  align-items: center;
+  min-width: 0;
+}
+
+.tabs-select select {
+  appearance: none;
+  width: 100%;
+  padding: 8px 32px 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--muted);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+
+.tabs-select svg {
+  position: absolute;
+  right: 10px;
+  color: var(--muted-fg);
+  pointer-events: none;
+}
+
 /* the plot is the answer: always-light card (projector legibility) */
 .plot-card {
   background: #ffffff;
@@ -1225,6 +1255,50 @@ kbd {
   /* a phone has no keyboard: the shortcut hint goes, the icon stays */
   .actionbar kbd {
     display: none;
+  }
+
+  /* six representations do not fit in a 380 px bar: the segmented control
+     becomes the platform's own picker, and the plot keeps its height */
+  .tabs {
+    display: none;
+  }
+
+  .tabs-select {
+    display: flex;
+    flex: 1 1 auto;
+    max-width: 60%;
+  }
+
+  /* Same problem, worse: a scene is titled "Scène 1 · La forme compagne :
+     x = (y, ẏ)" and the picker was wrapping it onto four lines, eating a
+     third of the screen before the plot got any. One line, ellipsis, and the
+     full title is still one tap away in the menu. */
+  /* bounded, so the ellipsis does the work: left unbounded the picker simply
+     pushed the link, QR and fullscreen buttons off the right edge instead of
+     wrapping — one overflow traded for another */
+  .preset-picker {
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+
+  .preset-picker > button {
+    width: 100%;
+    max-width: 46vw;
+    min-width: 0;
+    padding: 8px 10px;
+  }
+
+  .preset-picker > button span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .preset-picker .menu {
+    right: auto;
+    left: 0;
+    min-width: 0;
+    width: min(88vw, 340px);
   }
 
   .promptbar {

@@ -1,5 +1,5 @@
 import { float, int } from '../../../core/fields.js';
-import { view, histogram, line, density, vline, hline } from '../../../core/views.js';
+import { view, histogram, line, density, vline, hline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -75,9 +75,8 @@ export default {
     ),
 
     // three widths at the same N, against the best-possible density
-    view(
+    figure(
       'sampling',
-      'Distributions des trois estimateurs de μ',
       histogram('dMean', {
         color: '#0072BD',
         opacity: 0.55,

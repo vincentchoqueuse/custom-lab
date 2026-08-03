@@ -106,30 +106,5 @@ Au-delà, les marges deviennent négatives : la boucle fermée diverge. Le faire
 constater sur Black aussi — la courbe passe à gauche du point critique.
 Dernier geste : redescendre τ à 0.5 et faire prédire K_crit avant de le lire.`,
   },
-  {
-    id: 'abaque',
-    title: 'Scène 7 · L\'abaque : lire la boucle FERMÉE sur le lieu OUVERT',
-    params: { sys: 'openloop', K: 1, tau: 1, wc: 0.8 },
-    view: 'black',
-    visible: ['K', 'wc'],
-    notes: `La question que les jeunes posent toujours : « on trace la boucle
-ouverte, mais ce qui m'intéresse c'est la boucle fermée ». L'abaque répond.
-Les contours gris sont la famille |H/(1+H)| = M : tous les points du plan qui
-donnent le MÊME gain en boucle fermée. Sur Black c'est l'abaque de Nichols,
-sur Nyquist ce sont les cercles de Hall — une seule famille, deux dessins,
-exactement comme H(jω) lui-même.
-Le contour jaune est celui que le lieu TOUCHE : la tangence donne la
-résonance en boucle fermée, ici 2.67 dB (statline). Le faire pointer du
-doigt avant de lire le chiffre.
-Puis monter K doucement. Le lieu glisse vers le point critique, la tangence
-saute de contour en contour, et la résonance grimpe : 2.7 dB à K = 1,
-11.7 dB à K = 3, 23.7 dB à K = 5. La question à poser à ce moment-là :
-« et si je continue ? » — le contour tangent se resserre autour du point
-critique jusqu'à ce qu'il n'y ait plus rien à toucher. À K = 6 le lieu passe
-PAR le point critique : la résonance devient infinie, l'app cesse d'afficher
-un chiffre, et c'est exactement ce que veut dire « instable ».
-Les marges disent la même chose autrement : plus la marge de phase est
-faible, plus la résonance est forte. Deux lectures, un seul phénomène.`,
-  },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

@@ -25,7 +25,7 @@
 //     since those carry no scale.
 //
 // PURE: no DOM, no state. Importable from compute.js and from check.js.
-import { toDb, polyEvalComplex } from './numeric.js';
+import { toDb, polyEvalComplex } from '../../../core/numeric.js';
 
 export const NW = 361; // grid points — 60 per decade over the default span
 export const DECADES = 3;

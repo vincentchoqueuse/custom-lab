@@ -1,5 +1,5 @@
 import { float, int, log, select } from '../../../core/fields.js';
-import { view, line, scatter, vline, hline } from '../../../core/views.js';
+import { view, line, scatter, vline, hline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -60,9 +60,8 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
-    view(
+    figure(
       'fit',
-      'Ajustement',
       line('trueCurve', {
         width: 2.2,
         label: 'vraie fonction',

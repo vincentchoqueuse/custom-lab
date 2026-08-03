@@ -3,7 +3,7 @@ export default [
   {
     id: 'through',
     title: 'Scène 1 · Le signal entre, le signal sort',
-    view: 'time',
+    view: 'response',
     params: { source: 'square', f0: 110, fc: 500, Q: 2, output: 'lp' },
     visible: ['fc', 'output'],
     notes: `Deux multiplications par échantillon, et le carré s'arrondit. Bouger f_c
@@ -17,7 +17,7 @@ jette la pente.`,
   {
     id: 'sculpt',
     title: 'Scène 2 · Sculpter les harmoniques',
-    view: 'outputs',
+    view: 'gain',
     params: { source: 'square', f0: 110, fc: 500, Q: 2, output: 'lp' },
     visible: ['fc', 'output'],
     notes: `Lire la courbe passe-bas : elle vaut 1 jusqu'à f_c puis s'effondre.
@@ -31,7 +31,7 @@ f_c sous 330 Hz : il ne reste que la fondamentale — un sinus.`,
   {
     id: 'resonance',
     title: 'Scène 3 · La résonance chante',
-    view: 'outputs',
+    view: 'gain',
     params: { source: 'saw', f0: 110, fc: 550, Q: 12, output: 'lp' },
     visible: ['fc', 'Q'],
     notes: `Q = 12 : une bosse de +20 dB à f_c. L'harmonique qui passe dessous
@@ -45,7 +45,7 @@ Q est grand.`,
   {
     id: 'four',
     title: 'Scène 4 · Quatre filtres pour deux multiplications',
-    view: 'outputs',
+    view: 'gain',
     params: { source: 'square', f0: 110, fc: 600, Q: 2, output: 'lp' },
     visible: ['Q', 'fc'],
     notes: `La structure de Chamberlin : DEUX multiplications par échantillon,
@@ -57,7 +57,7 @@ règne sur les synthétiseurs depuis les années 80.`,
   {
     id: 'notch',
     title: 'Scène 5 · Le notch chirurgical',
-    view: 'outputs',
+    view: 'gain',
     params: { source: 'square', f0: 110, fc: 330, Q: 8, output: 'notch' },
     visible: ['fc', 'Q'],
     notes: `Courbe notch : une encoche qui plonge exactement à f_c (propriété du

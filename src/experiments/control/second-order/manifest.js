@@ -1,8 +1,6 @@
 import { float, log } from '../../../core/fields.js';
-import { view, line, vline, hline } from '../../../core/views.js';
-import { gainView, phaseView, polesView, GUIDE_COLOR } from '../../../core/response-views.js';
-
-const GUIDE = { color: GUIDE_COLOR, width: 1, dashed: true };
+import { view, line, vline, hline, figure } from '../../../core/views.js';
+import { at, gainView, phaseView, polesView, GUIDE, GUIDE_COLOR } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -49,9 +47,8 @@ export default {
 
   views: [
     // step response with the exponential envelope and the ±5% band
-    view(
+    figure(
       'step',
-      'Réponse indicielle',
       line('stepResponse', {
         width: 2.5,
         label: 'y(t)',
@@ -67,9 +64,8 @@ export default {
     ),
 
     // impulse response: the same two parameters, seen as a free oscillation
-    view(
+    figure(
       'impulse',
-      'Réponse impulsionnelle',
       line('impulseResponse', {
         color: '#0072BD',
         width: 2.5,
@@ -92,7 +88,6 @@ export default {
     // a pure second order has no zero: polesView omits the cloud rather than
     // leaving an empty legend entry
     polesView({
-      title: 'Plan des pôles',
       zeros: null,
       circle: { radius: (p) => p.w0, label: 'cercle |s| = ω₀' },
       minHalf: (p) => Math.max(1.3 * p.w0, 1),
@@ -103,7 +98,6 @@ export default {
     // The resonance shows on the gain when m < 1/√2; the phase always
     // crosses −90° at ω₀ and ends at −180°.
     gainView('gain', {
-      title: 'Bode — gain',
       overlays: [
         vline((p) => p.w0, { color: '#EDB120', dashed: true, width: 1.8, label: 'ω₀' }),
         vline('wr', { color: '#D95319', dashed: true, width: 1.6, label: 'ωr' }),
@@ -114,8 +108,8 @@ export default {
     phaseView('phase', {
       overlays: [
         vline((p) => p.w0, { color: '#EDB120', dashed: true, width: 1.8, label: 'ω₀' }),
-        hline(() => -90, { ...GUIDE, label: '−90°' }),
-        hline(() => -180, { ...GUIDE, label: '−180°' }),
+        at(-90, '−90°'),
+        at(-180, '−180°'),
       ],
     }),
   ],

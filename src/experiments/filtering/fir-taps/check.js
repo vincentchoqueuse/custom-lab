@@ -1,6 +1,6 @@
 import { compute, firGain } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
-import { BENCH } from '../../../core/bench.js';
+import { BENCH } from '../_lib/bench.js';
 
 const FS = BENCH.FS;
 // f0 = 125 Hz = 64 bins of the 4096-point window: harmonics on exact bins

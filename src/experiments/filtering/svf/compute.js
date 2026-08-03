@@ -21,7 +21,7 @@ import {
   steadyTime,
   steadySpectrumDb,
   responseGrid,
-} from '../../../core/bench.js';
+} from '../_lib/bench.js';
 
 const { FS } = BENCH;
 const DB_FLOOR = -80;

@@ -5,7 +5,7 @@ export default [
   {
     id: 'through',
     title: 'Scène 1 · Le signal entre, le signal sort',
-    view: 'time',
+    view: 'response',
     params: { b: [0.25, 0.25, 0.25, 0.25], source: 'square', f0: 125 },
     visible: ['source', 'f0'],
     notes: `Commencer par ce que fait le filtre, avant de dire comment il le fait :
@@ -19,7 +19,7 @@ Changer de source ou de f₀ : la sortie suit, le filtre ne change pas.`,
   {
     id: 'moving-average',
     title: 'Scène 2 · La moyenne glissante',
-    view: 'spectrum',
+    view: 'gain',
     params: { b: [0.25, 0.25, 0.25, 0.25], source: 'square', f0: 125 },
     visible: ['b'],
     notes: `Quatre coefficients égaux à 1/4 : le filtre le plus naïf du monde —
@@ -31,7 +31,7 @@ c'est le gain continu, il doit valoir 1.`,
   {
     id: 'delay',
     title: 'Scène 3 · Le retard pur',
-    view: 'time',
+    view: 'response',
     params: { b: [0, 0, 0, 1], source: 'square', f0: 125 },
     visible: ['b'],
     notes: `b = 0,0,0,1 : le filtre ne fait RIEN… sauf attendre. La sortie est
@@ -42,7 +42,7 @@ existe. Rajouter des zéros devant pour allonger l'attente.`,
   {
     id: 'difference',
     title: 'Scène 4 · Le différentiateur',
-    view: 'spectrum',
+    view: 'gain',
     params: { b: [1, -1], source: 'saw', f0: 125 },
     visible: ['b'],
     notes: `b = 1,−1 : la différence de deux échantillons. Σb = 0 → le continu
@@ -53,7 +53,7 @@ centrée) : même annulation du continu, mais un zéro apparaît aussi à Fs/2.`
   {
     id: 'design',
     title: 'Scène 5 · Fabriquer un passe-bande à la main',
-    view: 'spectrum',
+    view: 'gain',
     params: { b: [0.5, 0, -0.5], source: 'square', f0: 125 },
     visible: ['b', 'f0'],
     notes: `0.5,0,−0.5 : zéros au continu ET à Fs/2, une bosse au milieu — un

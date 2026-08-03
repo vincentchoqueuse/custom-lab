@@ -1,5 +1,5 @@
 import { float, select } from '../../../core/fields.js';
-import { view, line, stem, scatter, vline } from '../../../core/views.js';
+import { view, line, stem, scatter, vline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -37,9 +37,8 @@ export default {
 
   views: [
     // continuous truth, its samples, and what the samples let us rebuild
-    view(
+    figure(
       'time',
-      'Temporel',
       line('continuous', {
         width: 2,
         label: 'signal continu',
@@ -52,9 +51,8 @@ export default {
     ),
 
     // true line spectrum vs its folded image in the first Nyquist zone
-    view(
+    figure(
       'spectrum',
-      'Spectre',
       stem('specTrue', {
         color: '#0072BD',
         opacity: 0.8,

@@ -11,7 +11,7 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { dbToLin, pairsToSeries } from '../../../core/numeric.js';
-import { constellationMap, berTheoryGray } from '../../../core/modulation.js';
+import { constellationMap, berTheoryGray } from '../_lib/modulation.js';
 
 const DB_GRID = Array.from({ length: 8 }, (_, i) => 2 * i); // 0…14 dB
 const SYM_CURVE = 4000; // symbols per Monte Carlo point of the BER curve

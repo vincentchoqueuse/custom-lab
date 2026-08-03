@@ -2,10 +2,19 @@
 // npm run check — walks every experiments/**/check.js, runs the checks and
 // prints a ✓/✗ table grouped by category, with per-check execution time
 // (performance-regression detection with no dedicated benchmark infra).
+//
+// It also runs the CATALOGUE checks first: the standard-figure vocabulary
+// (core/figures.js) and the scene → view references. Those two are what the
+// registry enforces at load time; running them here means a rename that
+// breaks the catalogue fails in the harness, before the browser and long
+// before a lecture hall.
 
-import { readdirSync } from 'node:fs';
+import { readdirSync, existsSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { readFileSync } from 'node:fs';
+import { normalizeViews } from '../src/core/figures.js';
+import { validateScene } from '../src/core/scenes.js';
 
 const ROOT = resolve(process.cwd(), 'src/experiments');
 
@@ -26,6 +35,101 @@ const red = (s) => `\x1b[31m${s}\x1b[0m`;
 
 let pass = 0;
 let fail = 0;
+
+/* ------------------------------------------------------------- catalogue --
+   The vocabulary and the scene references, replayed exactly as the registry
+   does it — but outside Vite, so `npm run check` catches them too. */
+/**
+ * Principle 4, made checkable: THE CORE KNOWS NO EXPERIMENT. It discovers
+ * them by glob and never by name — so no file of src/core/ may import
+ * anything under src/experiments/, in either direction of the path.
+ *
+ * Until the subject-specific modules moved next to their subject, this rule
+ * lived only in prose. A `bode.js` sitting in core/ could have reached into
+ * control/ and nothing would have said a word.
+ */
+function checkLayering() {
+  const bad = [];
+  const walk = (dir) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.js') || e.name.endsWith('.svelte')) {
+        const src = readFileSync(p, 'utf8');
+        for (const m of src.matchAll(/from\s+'([^']+)'/g))
+          if (/experiments\//.test(m[1])) bad.push(`${p} → ${m[1]}`);
+      }
+    }
+  };
+  walk(resolve(process.cwd(), 'src/core'));
+  console.log(`  ${dim('layering')}`);
+  if (bad.length) {
+    for (const b of bad) console.log(`    ${red('✗')} core imports an experiment: ${b}`);
+    fail++;
+  } else {
+    console.log(`    ${green('✓')} no file of core/ imports experiments/  ${dim('(principle 4)')}`);
+    pass++;
+  }
+}
+
+async function checkCatalogue() {
+  console.log(bold('catalogue'));
+  checkLayering();
+  console.log(`  ${dim('vocabulary')}`);
+  let figuresOk = true;
+  let scenesOk = true;
+  let nViews = 0;
+  let nScenes = 0;
+  for (const sub of readdirSync(ROOT, { withFileTypes: true })) {
+    if (!sub.isDirectory()) continue;
+    const dir = join(ROOT, sub.name);
+    const subjectFile = join(dir, '_subject.js');
+    const subject = existsSync(subjectFile)
+      ? (await import(pathToFileURL(subjectFile).href)).default
+      : {};
+    for (const exp of readdirSync(dir, { withFileTypes: true })) {
+      const mf = join(dir, exp.name, 'manifest.js');
+      if (!exp.isDirectory() || !existsSync(mf)) continue;
+      const key = `${sub.name}/${exp.name}`;
+      let views;
+      let manifest;
+      try {
+        manifest = (await import(pathToFileURL(mf).href)).default;
+        views = normalizeViews(manifest.views, subject, key);
+        nViews += views.length;
+      } catch (err) {
+        figuresOk = false;
+        console.log(`    ${red('✗')} ${err.message}`);
+        continue;
+      }
+      const sf = join(dir, exp.name, 'scenes.js');
+      if (!existsSync(sf)) continue;
+      const scenes = (await import(pathToFileURL(sf).href)).default ?? [];
+      for (const [i, sc] of scenes.entries()) {
+        nScenes++;
+        try {
+          validateScene(sc, i, { views, params: manifest.params }, key);
+        } catch (err) {
+          scenesOk = false;
+          console.log(`    ${red('✗')} ${err.message}`);
+        }
+      }
+    }
+  }
+  if (figuresOk)
+    console.log(`    ${green('✓')} standard figures: id, title and order  ${dim(`(${nViews} views)`)}`);
+  console.log(`  ${dim('scenes')}`);
+  if (scenesOk)
+    console.log(
+      `    ${green('✓')} keys, types, view and param references  ${dim(`(${nScenes} scenes)`)}`
+    );
+  figuresOk ? pass++ : fail++;
+  scenesOk ? pass++ : fail++;
+  console.log('');
+}
+
+await checkCatalogue();
+
 const files = findChecks(ROOT);
 
 if (files.length === 0) {

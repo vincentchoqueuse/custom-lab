@@ -6,7 +6,7 @@
 //   · a length-L moving average nulls exactly at k·Fs/L (Dirichlet zeros);
 //   · b = [0…0,1] is an all-pass pure delay: |H| = 1 everywhere and the
 //     output is the input shifted by D samples, bit for bit.
-// Same bench as the SVF and comb experiments (core/bench.js): a periodic
+// Same bench as the SVF and comb experiments (_lib/bench.js): a periodic
 // signal, steady-state time and spectra, the |H| overlay — so the three
 // filtering experiments read identically and this file stays short.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
@@ -17,7 +17,7 @@ import {
   steadyTime,
   steadySpectrumDb,
   responseGrid,
-} from '../../../core/bench.js';
+} from '../_lib/bench.js';
 
 const { FS } = BENCH;
 const DB_FLOOR = -60;

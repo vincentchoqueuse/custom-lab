@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:subject": "node -e \"if(!process.env.PUPITRACE_SUBJECT)throw new Error('usage: PUPITRACE_SUBJECT=control npm run build:subject')\" && vite build",
     "preview": "vite preview",
     "check": "node scripts/run-checks.js",
     "new:experiment": "node scripts/new-experiment.js",
