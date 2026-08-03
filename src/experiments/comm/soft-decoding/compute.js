@@ -1,6 +1,6 @@
 // Soft versus hard decoding, paired on the SAME noise: BPSK over AWGN with
 // the rate tax (γc = R·γb per coded bit), each block decoded twice —
-//   hard:  threshold each sample, then syndrome / majority (core/codes.js)
+//   hard:  threshold each sample, then syndrome / majority (_lib/codes.js)
 //   soft:  ML over the 2ᵏ codewords, argmax of the correlation Σ yᵢ(1−2cᵢ)
 // The hard curve is the exact enumeration; the soft reference is the union
 // bound Pb ≲ Σ_{c≠0} (w_msg/k)·Q(√(2γc·w(c))), tight at high SNR.
@@ -16,7 +16,7 @@ import {
   codewordTable,
   enumerateHard,
   berHardExact,
-} from '../../../core/codes.js';
+} from '../_lib/codes.js';
 
 const DB_GRID = Array.from({ length: 9 }, (_, i) => i); // 0…8 dB
 const BLOCKS_CURVE = 4000; // blocks per Monte Carlo point of the BER curve

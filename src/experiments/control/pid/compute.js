@@ -9,7 +9,7 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { rk4Step, toDb } from '../../../core/numeric.js';
-import { bodeSweep, bodeObservables } from '../../../core/bode.js';
+import { bodeSweep, bodeObservables } from '../_lib/bode.js';
 
 const H = 0.005; // loop period (s)
 const T_END = 20;

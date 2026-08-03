@@ -17,7 +17,7 @@
 // One exact identity survives all three, and it is the reason the tangent is
 // drawn: the initial tangent always crosses the final value at t = τ exactly.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { bodeSweep, bodeObservables } from '../../../core/bode.js';
+import { bodeSweep, bodeObservables } from '../_lib/bode.js';
 import { toDb } from '../../../core/numeric.js';
 
 const NG = 800; // time samples
@@ -74,7 +74,7 @@ export function compute({ K, tau, tz }) {
   const zy = hasZero ? Float64Array.from([0]) : new Float64Array(0);
 
   /* ---------- frequency: the shared Bode sweep ----------------------------- */
-  // H(jω) = K(1 + jωτ_z)/(1 + jωτ), evaluated by core/bode.js — the same
+  // H(jω) = K(1 + jωτ_z)/(1 + jωτ), evaluated by _lib/bode.js — the same
   // sweep, the same dB and the same unwrapped phase as every other system in
   // the subject.
   const wc = 1 / tau;

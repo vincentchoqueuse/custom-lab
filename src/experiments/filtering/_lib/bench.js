@@ -5,7 +5,7 @@
 // steady-state convention — so every filtering experiment reads the same:
 //   x = periodicSignal(...)  →  filter  →  steadyTime / steadySpectrumDb
 // All pure and worker/Node-safe, importable from compute.js AND check.js.
-import { fft, toDb, windowValue } from './numeric.js';
+import { fft, toDb, windowValue } from '../../../core/numeric.js';
 
 export const BENCH = {
   FS: 8000, // sampling rate (Hz)

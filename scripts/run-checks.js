@@ -12,6 +12,7 @@
 import { readdirSync, existsSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { readFileSync } from 'node:fs';
 import { normalizeViews } from '../src/core/figures.js';
 import { validateScene } from '../src/core/scenes.js';
 
@@ -38,8 +39,42 @@ let fail = 0;
 /* ------------------------------------------------------------- catalogue --
    The vocabulary and the scene references, replayed exactly as the registry
    does it — but outside Vite, so `npm run check` catches them too. */
+/**
+ * Principle 4, made checkable: THE CORE KNOWS NO EXPERIMENT. It discovers
+ * them by glob and never by name — so no file of src/core/ may import
+ * anything under src/experiments/, in either direction of the path.
+ *
+ * Until the subject-specific modules moved next to their subject, this rule
+ * lived only in prose. A `bode.js` sitting in core/ could have reached into
+ * control/ and nothing would have said a word.
+ */
+function checkLayering() {
+  const bad = [];
+  const walk = (dir) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.js') || e.name.endsWith('.svelte')) {
+        const src = readFileSync(p, 'utf8');
+        for (const m of src.matchAll(/from\s+'([^']+)'/g))
+          if (/experiments\//.test(m[1])) bad.push(`${p} → ${m[1]}`);
+      }
+    }
+  };
+  walk(resolve(process.cwd(), 'src/core'));
+  console.log(`  ${dim('layering')}`);
+  if (bad.length) {
+    for (const b of bad) console.log(`    ${red('✗')} core imports an experiment: ${b}`);
+    fail++;
+  } else {
+    console.log(`    ${green('✓')} no file of core/ imports experiments/  ${dim('(principle 4)')}`);
+    pass++;
+  }
+}
+
 async function checkCatalogue() {
   console.log(bold('catalogue'));
+  checkLayering();
   console.log(`  ${dim('vocabulary')}`);
   let figuresOk = true;
   let scenesOk = true;

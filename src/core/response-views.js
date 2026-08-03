@@ -9,7 +9,7 @@
 // A student who meets one and then the other should meet one figure twice,
 // not two figures — so there is one builder, and the differences are options.
 //
-// core/bench.js already made the digital-filter experiments COMPUTE the same
+// _lib/bench.js already made the digital-filter experiments COMPUTE the same
 // way (one sampling rate, one analysis window, one steady-state convention).
 // This is the display half, widened: the same colours, the same axis labels
 // and the same legend across every subject that draws a response.

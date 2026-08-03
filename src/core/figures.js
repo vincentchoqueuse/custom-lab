@@ -1,7 +1,7 @@
 // The catalogue's vocabulary of STANDARD FIGURES — the names, declared once.
 //
 // The code behind the figures was already shared (core/response-views.js,
-// core/bode.js). What kept drifting was the NAME: the same pole map was
+// _lib/bode.js). What kept drifting was the NAME: the same pole map was
 // "Pôles et zéros" in one experiment and "Plan des pôles" in the next, and
 // `?view=gain` meant a Bode gain here and a Kalman gain there. A name is a
 // thing that repeats, so it is declared once, here, and nowhere else.

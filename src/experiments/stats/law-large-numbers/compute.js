@@ -4,7 +4,7 @@
 // primitive breaks segments on non-finite values).
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32 } from '../../../core/rng.js';
-import { canonicalLaws } from '../../../core/laws.js';
+import { canonicalLaws } from '../_lib/laws.js';
 
 /** Log-spaced integer checkpoints 1…n (≈ 260, unique, ascending). */
 function logCheckpoints(n) {

@@ -31,7 +31,7 @@
 // ω_co·Te.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { sinc, toDb } from '../../../core/numeric.js';
-import { bodeSweep } from '../../../core/bode.js';
+import { bodeSweep } from '../_lib/bode.js';
 
 const NT = 1200; // dense "analog" grid
 const NW = 361;
@@ -78,7 +78,7 @@ export function compute({ fe, f0, wco }) {
 
   /* ---------- fréquentiel : le module en sinc, la phase en droite -------- */
   // La grille couvre 2.5 décades autour de Fe, donc les deux premiers zéros
-  // et toute la bande utile. Le balayage partagé (core/bode.js) déplierait
+  // et toute la bande utile. Le balayage partagé (_lib/bode.js) déplierait
   // la phase par atan2 ; ici la phase EST une droite en forme close, et
   // c'est cette droite qu'il faut montrer — le saut de 180° aux zéros du
   // sinc est un artefact du signe, pas un retard.

@@ -30,8 +30,8 @@
 // une mesure, et on peut la vérifier.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { toDb } from '../../../core/numeric.js';
-import { bodeSweep } from '../../../core/bode.js';
-import { secondOrderStep as stepValue } from '../../../core/lti.js';
+import { bodeSweep } from '../_lib/bode.js';
+import { secondOrderStep as stepValue } from '../_lib/lti.js';
 
 const NT = 700; // time samples
 const NW = 361; // frequency grid

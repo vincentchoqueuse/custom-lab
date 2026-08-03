@@ -11,7 +11,7 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32 } from '../../../core/rng.js';
 import { qfunc, dbToLin, pairsToSeries } from '../../../core/numeric.js';
-import { hamming74, repetition3, enumerateHard, berHardExact } from '../../../core/codes.js';
+import { hamming74, repetition3, enumerateHard, berHardExact } from '../_lib/codes.js';
 
 const DB_GRID = Array.from({ length: 9 }, (_, i) => 1.5 * i); // 0…12 dB
 const BLOCKS_CURVE = 3000; // blocks per Monte Carlo point of the BER curve

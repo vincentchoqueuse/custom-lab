@@ -3,7 +3,7 @@
 // numeric.js and codes.js). All constellations have unit average energy.
 // PSK points are laid on the ring in ORDER (angle offset π/m), so ring
 // adjacency is index adjacency — what Gray mapping relies on.
-import { qfunc } from './numeric.js';
+import { qfunc } from '../../../core/numeric.js';
 
 export const BITS_PER_SYMBOL = { bpsk: 1, qpsk: 2, '8psk': 3, '16qam': 4 };
 

@@ -1,5 +1,5 @@
 // Les réponses temporelles en forme close des systèmes canoniques — la
-// moitié TEMPORELLE de ce que core/bode.js fait en fréquence.
+// moitié TEMPORELLE de ce que _lib/bode.js fait en fréquence.
 //
 // Elles vivaient dans `control/second-order/compute.js`, et trois autres
 // expériences avaient fini par importer ce fichier : une expérience était

@@ -5,7 +5,7 @@
 //   m > 1: two real poles −ω₀(m ∓ √(m²−1)), biexponential
 // Impulse response, exact in the same three regimes (and the derivative of
 // the step response, which the harness checks).
-// Both closed forms live in core/lti.js: three other experiments read them,
+// Both closed forms live in _lib/lti.js: three other experiments read them,
 // and an experiment must not be another one's library.
 // Observables: the step response with its ±5% band and envelope, the impulse
 // response, the poles, and Mr = K/(2m√(1−m²)) at ωr = ω₀√(1−2m²) when
@@ -13,8 +13,8 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 
 const NG = 800; // time samples
-import { bodeSweep, bodeObservables } from '../../../core/bode.js';
-import { secondOrderStep as stepValue, secondOrderImpulse as impulseValue } from '../../../core/lti.js';
+import { bodeSweep, bodeObservables } from '../_lib/bode.js';
+import { secondOrderStep as stepValue, secondOrderImpulse as impulseValue } from '../_lib/lti.js';
 import { toDb } from '../../../core/numeric.js';
 
 const NW = 61; // frequency grid: ±1.5 decades around ω₀ (center = ω₀ exact)
@@ -80,7 +80,7 @@ export function compute({ K, m, w0 }) {
   // (the |s| = ω₀ guide circle is drawn by the plane view, not computed here)
 
   // |H(jω)| on a log grid centered exactly on ω₀
-  // H(jω) = Kω₀²/(ω₀²−ω² + 2jmω₀ω), swept by core/bode.js — the same grid,
+  // H(jω) = Kω₀²/(ω₀²−ω² + 2jmω₀ω), swept by _lib/bode.js — the same grid,
   // the same dB and the same unwrapped phase as everywhere else in the
   // subject. The phase is the half the experiment was missing: it passes
   // through −90° at ω₀ whatever m, and ends at −180°, which is exactly what

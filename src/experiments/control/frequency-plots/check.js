@@ -8,7 +8,7 @@ import {
   TAU_RATIO,
 } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
-import { bodeSweep } from '../../../core/bode.js';
+import { bodeSweep } from '../_lib/bode.js';
 
 const BASE = { sys: 'first', K: 1, tau: 1, w0: 1, m: 0.3, wc: 1, seed: 42 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;
@@ -337,11 +337,11 @@ export const checks = [
     },
   },
   {
-    name: 'le dépliage de core/bode.js retrouve la phase en forme close',
+    name: 'le dépliage de _lib/bode.js retrouve la phase en forme close',
     category: 'numeric',
     run() {
       // This experiment computes its phase in CLOSED FORM, because it can.
-      // Every other system in the subject goes through core/bode.js, which
+      // Every other system in the subject goes through _lib/bode.js, which
       // unwraps atan2 instead — the only option for a typed-in polynomial or
       // a PID loop. Here both answers exist, so they are compared: the shared
       // module is validated against the one system with an exact phase,

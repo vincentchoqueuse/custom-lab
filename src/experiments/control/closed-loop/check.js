@@ -1,5 +1,5 @@
 import { compute, closedParams, openLoop, closeIt, isoModulus } from './compute.js';
-import { secondOrderStep as stepValue } from '../../../core/lti.js';
+import { secondOrderStep as stepValue } from '../_lib/lti.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 
 const BASE = { w0: 1, m: 0.5, K: 4, seed: 42 };

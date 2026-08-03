@@ -34,11 +34,11 @@
 // analytiquement dans chaque base. Aucun schéma d'intégration ne peut donc
 // être accusé si les trois courbes divergent — elles ne divergent pas.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { bodeSweep } from '../../../core/bode.js';
+import { bodeSweep } from '../_lib/bode.js';
 import {
   secondOrderStep as stepValue,
   secondOrderImpulse as impulseValue,
-} from '../../../core/lti.js';
+} from '../_lib/lti.js';
 
 const NT = 700;
 const NW = 361;

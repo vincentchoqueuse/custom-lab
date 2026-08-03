@@ -1,9 +1,14 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import legacy from '@vitejs/plugin-legacy';
+import { subjectFilter } from './scripts/subject-filter.js';
 
 export default defineConfig({
   plugins: [
+    // PUPITRACE_SUBJECT=control npm run build → un déploiement mono-sujet.
+    // Doit passer AVANT svelte(): il réécrit les motifs de glob, que Vite
+    // résout ensuite.
+    subjectFilter(),
     svelte(),
     // Single legacy build (SystemJS + classic scripts + core-js polyfills):
     // classroom tablets run old iPad Safari, where ES-module loading proved

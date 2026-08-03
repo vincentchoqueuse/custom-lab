@@ -4,7 +4,7 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32 } from '../../../core/rng.js';
 import { normalPdf, mean, variance } from '../../../core/numeric.js';
-import { canonicalLaws } from '../../../core/laws.js';
+import { canonicalLaws } from '../_lib/laws.js';
 
 /**
  * @param {{law: string, n: number, M: number, p: number, seed: number}} params

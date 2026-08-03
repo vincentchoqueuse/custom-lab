@@ -1,6 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
 import { view, bars, density } from '../../../core/views.js';
-import { canonicalLaws } from '../../../core/laws.js';
+import { canonicalLaws } from '../_lib/laws.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {

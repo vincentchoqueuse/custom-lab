@@ -17,13 +17,23 @@ staging rather than parameter editing.**
 
 ## Non-negotiable principles
 
-1. **Fully static.** Everything runs in the browser. No backend, no API.
+1. **Fully static.** Everything runs in the browser. No backend, no API. A
+   deployment may carry the whole catalogue or A SINGLE SUBJECT:
+   `PUPITRACE_SUBJECT=control npm run build` rewrites the four glob patterns at
+   build time (`scripts/subject-filter.js`) — 172 kB gzip → 118 kB, and the
+   sidebar simply shows the one subject. Filtering at runtime would be pointless:
+   `import.meta.glob` needs a literal pattern, so everything would already be in
+   the bundle.
 2. **The URL is the API.** All state (experiment, params, view, preset, panels) is
    encoded in the hash. One link = one reproducible lecture scene.
 3. **Declarative.** Each experiment is a self-contained directory described by a
    manifest. The core knows no experiment by name.
 4. **Adding an experiment never modifies the core.** Automatic discovery via
-   `import.meta.glob`. Zero hand-maintained index files.
+   `import.meta.glob`. Zero hand-maintained index files. **The core knows no
+   experiment, and that is now checked**: no file of `src/core/` may import
+   anything under `src/experiments/` (`npm run check`, layering). Code shared by
+   ONE subject lives with that subject, in `experiments/<subject>/_lib/`; only
+   code used across subjects earns a place in `core/`.
 5. **Strict layer separation**: scientific computation → observables → declarative
    views → graphic components. Views NEVER perform scientific computation.
 6. **AGPL-3.0. Code, UI, and commits in English.** Pedagogical content (param labels,
@@ -786,15 +796,6 @@ export const checks = [
 │   │   │                         #   réponse fréquentielle with another
 │   │   │                         #   abscissa), polesView, timeView,
 │   │   │                         #   impulseView, spectrumView
-│   │   ├── lti.js                # the closed-form TIME responses (second and
-│   │   │                         #   first order, step and impulse) — the
-│   │   │                         #   counterpart of bode.js, shared so that
-│   │   │                         #   no experiment is another one's library
-│   │   ├── bode.js               # the frequency sweep every LTI experiment
-│   │   │                         #   needs: log grid, dB, UNWRAPPED phase,
-│   │   │                         #   and the grid centre read off the
-│   │   │                         #   denominator coefficients
-│   │   ├── bench.js              # the shared digital-filter test bench
 │   │   ├── checks.js             # standardChecks factories (determinism…)
 │   │   ├── strings.js            # all core UI strings (English constants)
 │   │   ├── worker-host.js        # worker + 30 Hz throttle + lecture guard
@@ -811,7 +812,12 @@ export const checks = [
 │   └── experiments/              # one directory per subject; the directory
 │       ├── estimation/           #   name IS the first URL segment, so a
 │       │   ├── _subject.js       #   subject stays small enough to be scanned
-│       │   │                     #   { title: 'Estimation', order: 2 }
+│       │   │                     #   { title, order, figures, figureOrder }
+│       │   ├── _lib/             #   the subject's OWN shared code, when it
+│       │   │                     #   has any: control/_lib/{bode,lti}.js,
+│       │   │                     #   filtering/_lib/bench.js,
+│       │   │                     #   comm/_lib/{codes,modulation}.js,
+│       │   │                     #   stats/_lib/laws.js
 │       │   └── confidence-intervals/
 │       │       ├── manifest.js   # definition (stable)
 │       │       ├── scenes.js     # lecture script (edited before each class)
