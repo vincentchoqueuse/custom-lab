@@ -1,6 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
 import { vline } from '../../../core/views.js';
-import { timeView, impulseView, spectrumView } from '../../../core/filter-views.js';
+import { timeView, impulseView, spectrumView } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {

@@ -736,6 +736,13 @@ export const checks = [
 │   │   ├── scales.js             # thin wrapper over d3-scale/array/shape/format
 │   │   ├── fields.js             # field factories (float, int, select…) + load-time validation
 │   │   ├── views.js              # view/plot/overlay factories + load-time validation
+│   │   ├── response-views.js     # the FIGURES a response experiment draws,
+│   │   │                         #   shared across analog, digital and control:
+│   │   │                         #   gainView/phaseView (a Bode plot IS a
+│   │   │                         #   réponse fréquentielle with another
+│   │   │                         #   abscissa), polesView, timeView,
+│   │   │                         #   impulseView, spectrumView
+│   │   ├── bench.js              # the shared digital-filter test bench
 │   │   ├── checks.js             # standardChecks factories (determinism…)
 │   │   ├── strings.js            # all core UI strings (English constants)
 │   │   ├── worker-host.js        # worker + 30 Hz throttle + lecture guard
