@@ -5,7 +5,11 @@
   // samples that do not exist, and a bare cloud of dots loses the baseline.
   let { xs, ys, pts, spec = {}, h, k = 1 } = $props();
 
-  const y0 = $derived(Math.min(h, Math.max(0, ys(spec.baseline ?? 0))));
+  // a log axis has no zero: the stalks then stand on the bottom of the frame
+  const y0 = $derived.by(() => {
+    const b = ys(spec.baseline ?? 0);
+    return Number.isFinite(b) ? Math.min(h, Math.max(0, b)) : h;
+  });
   const r = $derived((spec.size ?? 2.6) * k);
   const w = $derived((spec.width ?? 1.2) * k);
   const color = $derived(spec.color ?? '#0072BD');
