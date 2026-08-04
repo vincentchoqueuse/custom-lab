@@ -17,6 +17,8 @@
         return `x[${o.value.x.length}] y[${o.value.y.length}]`;
       case 'records':
         return `[${o.value.length}]`;
+      case 'image':
+        return `${(o.value.length / 1024).toFixed(1)} kB`;
       default:
         return '';
     }
@@ -33,6 +35,11 @@
         return `y: ${Array.from(o.value.y.slice(0, 3), fmt).join(', ')}…`;
       case 'records':
         return JSON.stringify(o.value[0] ?? {}).slice(0, 48);
+      case 'text':
+        return o.value.slice(0, 48);
+      // le type MIME suffit : la valeur est une URI de vingt mille caractères
+      case 'image':
+        return o.value.slice(5, o.value.indexOf(';'));
       default:
         return '?';
     }

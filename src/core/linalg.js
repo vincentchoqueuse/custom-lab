@@ -7,16 +7,17 @@
 // et en ACP ; équations normales en régression polynomiale et en régression
 // sur base ; produit matrice-vecteur en filtrage et en apprentissage.
 //
-// CE QU'IL NE CONTIENT PAS, VOLONTAIREMENT : LU, QR, SVD, Cholesky,
-// déterminant, inverse. Aucune expérience ne les utilise, donc AUCUN CHECK
-// ne les exercerait — et une décomposition fausse que personne ne teste est
-// pire que pas de décomposition du tout, parce qu'on lui fait confiance le
-// jour où on s'en sert. Le principe 7 du projet dit cela ; ce paragraphe
-// est là pour qu'on s'en souvienne au moment de « compléter la boîte ».
+// CE QU'IL NE CONTIENT PAS, VOLONTAIREMENT : LU, QR, Cholesky, déterminant,
+// inverse. Aucune expérience ne les utilise, donc AUCUN CHECK ne les
+// exercerait — et une décomposition fausse que personne ne teste est pire
+// que pas de décomposition du tout, parce qu'on lui fait confiance le jour
+// où on s'en sert. Le principe 7 du projet dit cela ; ce paragraphe est là
+// pour qu'on s'en souvienne au moment de « compléter la boîte ».
 //
-// Le jour où une expérience aura besoin de la SVD — la compression d'image
-// est la suite naturelle de l'ACP, et elle est spectaculaire en amphi —
-// elle entrera ici AVEC ses identités et l'expérience qui les exerce.
+// La SVD, elle, EST là — et la façon dont elle est arrivée est la règle en
+// action : elle est entrée le jour où une expérience l'a exercée (la
+// compression d'image), avec ses identités dans le harnais, et pas la
+// veille « parce qu'une boîte d'algèbre linéaire a une SVD ».
 //
 // Convention : une matrice n × m est un `Float64Array` de n·m en LIGNE
 // MAJEURE, A[i][j] = A[i * m + j]. Sauf `solveLinearSystem`, hérité, qui
@@ -205,4 +206,104 @@ export function ridgeSolve(AtA, Aty, lambda, { skipFirst = false } = {}) {
     return copy;
   });
   return solveLinearSystem(A, Array.from(Aty));
+}
+
+/**
+ * DÉCOMPOSITION EN VALEURS SINGULIÈRES d'une matrice m × n réelle :
+ * A = U·diag(σ)·Vᵀ, σ décroissantes.
+ *
+ * Elle entre ici le jour où une expérience l'exerce — la compression
+ * d'image — et pas avant, conformément à l'en-tête de ce module.
+ *
+ * Voie choisie : diagonaliser AᵀA (symétrique, n × n) par le Jacobi
+ * ci-dessus, d'où V et σ² ; puis U = A·V/σ. C'est la construction du cours,
+ * elle tient en quinze lignes, et son défaut est connu et documenté : les
+ * PETITES valeurs singulières y perdent en précision relative, puisqu'on
+ * passe par leur carré (σ ≈ √ε·σmax est le plancher). Pour une compression
+ * qui garde les grandes et jette les petites, c'est sans conséquence — et
+ * le harnais borne l'erreur de reconstruction complète à 1e-10, ce qui le
+ * prouve plutôt que de le supposer.
+ *
+ * Les colonnes de U correspondant à une valeur singulière nulle ne sont pas
+ * complétées en base orthonormée : elles restent nulles. Une reconstruction
+ * ne les utilise jamais, et prétendre les avoir calculées serait mentir.
+ *
+ * @param {Float64Array} A m × n en ligne majeure (non modifiée)
+ * @returns {{u: Float64Array, s: Float64Array, v: Float64Array, rank: number}}
+ *   u est m × r, v est n × r, tous deux en ligne majeure, r = min(m, n).
+ */
+export function svd(A, m, n) {
+  const r = Math.min(m, n);
+
+  // AᵀA, symétrique n × n
+  const AtA = new Float64Array(n * n);
+  for (let a = 0; a < n; a++)
+    for (let b = a; b < n; b++) {
+      let acc = 0;
+      for (let i = 0; i < m; i++) acc += A[i * n + a] * A[i * n + b];
+      AtA[a * n + b] = acc;
+      AtA[b * n + a] = acc;
+    }
+
+  const eig = jacobiSym(AtA, n);
+  const order = Array.from({ length: n }, (_, k) => k).sort(
+    (a, b) => eig.values[b] - eig.values[a]
+  );
+
+  const s = new Float64Array(r);
+  const v = new Float64Array(n * r);
+  for (let k = 0; k < r; k++) {
+    const src = order[k];
+    s[k] = Math.sqrt(Math.max(eig.values[src], 0));
+    for (let j = 0; j < n; j++) v[j * r + k] = eig.vectors[j * n + src];
+  }
+
+  // Le rang NUMÉRIQUE, et son seuil est celui de cette voie-ci : passer par
+  // AᵀA fait perdre la moitié des chiffres, donc une valeur singulière
+  // vraiment nulle ressort autour de √ε·σmax et non de ε·σmax. Compter avec
+  // le seuil habituel (ε) donnerait 65 au lieu de 4 sur une image
+  // construite de rang 4 — un chiffre faux, et le harnais le vérifie.
+  const rankTol = Math.max(m, n) * Math.sqrt(Number.EPSILON) * (s[0] || 1);
+  let rank = 0;
+  for (let k = 0; k < r; k++) if (s[k] > rankTol) rank++;
+
+  // U = A·V/σ, colonne par colonne ; σ nulle ⇒ colonne laissée à zéro
+  const u = new Float64Array(m * r);
+  const tol = 1e-12 * (s[0] || 1);
+  for (let k = 0; k < r; k++) {
+    if (s[k] <= tol) continue;
+    const inv = 1 / s[k];
+    for (let i = 0; i < m; i++) {
+      let acc = 0;
+      const off = i * n;
+      for (let j = 0; j < n; j++) acc += A[off + j] * v[j * r + k];
+      u[i * r + k] = acc * inv;
+    }
+  }
+  return { u, s, v, rank };
+}
+
+/**
+ * La meilleure approximation de rang k : Aₖ = Σ_{i<k} σᵢ·uᵢvᵢᵀ.
+ *
+ * « Meilleure » n'est pas une façon de parler — Eckart–Young dit que
+ * ‖A − Aₖ‖²_F = Σ_{i≥k} σᵢ², et qu'aucune matrice de rang k ne fait mieux.
+ * C'est le même théorème que celui de l'ACP, sur la même page.
+ */
+export function lowRank(model, m, n, k) {
+  const { u, s, v } = model;
+  const r = s.length;
+  const out = new Float64Array(m * n);
+  const kk = Math.min(k, r);
+  for (let c = 0; c < kk; c++) {
+    const sc = s[c];
+    if (sc === 0) continue;
+    for (let i = 0; i < m; i++) {
+      const ui = sc * u[i * r + c];
+      if (ui === 0) continue;
+      const off = i * n;
+      for (let j = 0; j < n; j++) out[off + j] += ui * v[j * r + c];
+    }
+  }
+  return out;
 }
