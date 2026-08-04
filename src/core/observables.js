@@ -4,16 +4,19 @@
 
 /**
  * @param {*} value
- * @returns {'scalar'|'text'|'vector'|'series'|'records'|'unknown'}
+ * @returns {'scalar'|'text'|'image'|'vector'|'series'|'records'|'unknown'}
  */
 export function inferType(value) {
   if (value == null) return 'unknown';
   if (typeof value === 'number') return 'scalar';
-  // A named quantity is not always a number: a regime ("plein recouvrement"),
-  // a verdict, the names of the two state components. They belong in the
-  // statline like any other reading — and were silently dropped as 'unknown'
-  // until an experiment noticed one of them never appeared.
-  if (typeof value === 'string') return 'text';
+  // A raster image travels as a `data:` URI — the only shape that crosses a
+  // worker boundary, survives a DOM clone (freeze, SVG export) and needs no
+  // canvas. It is a string, but it is NOT a reading: dumped in the statline
+  // it puts twenty thousand base64 characters where two numbers should be,
+  // which is exactly what happened the day the first one appeared. Hence a
+  // type of its own, on a prefix that admits no ambiguity.
+  if (typeof value === 'string')
+    return value.startsWith('data:image/') ? 'image' : 'text';
   if (ArrayBuffer.isView(value)) return 'vector';
   if (Array.isArray(value)) {
     if (value.length && typeof value[0] === 'object' && value[0] !== null) return 'records';
