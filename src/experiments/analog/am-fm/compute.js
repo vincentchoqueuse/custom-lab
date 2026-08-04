@@ -132,7 +132,7 @@ export function compute({ mode, fm, ka, beta }) {
           value: 2 * (beta + 1) * fm,
           meta: { label: 'Carson 2(β+1)f_m', unit: 'Hz', precision: 0 },
         },
-        b98m: { value: b98, meta: { label: 'B mesurée (98%)', unit: 'Hz', precision: 0 } },
+        b98m: { value: b98, meta: { label: 'measured B (98%)', unit: 'Hz', precision: 0 } },
       };
 
   return {

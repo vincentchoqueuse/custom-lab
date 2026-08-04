@@ -172,19 +172,19 @@ export function compute({ signal, T: Tms, f0, t0: t0ms }) {
       peak: { value: peak, meta: { label: '|X| max', precision: 4 } },
       energy: {
         value: energyOf(signal, T, f0) * 1000,
-        meta: { label: 'énergie', unit: 'ms', precision: 3 },
+        meta: { label: 'energy', unit: 'ms', precision: 3 },
       },
       b3: {
         value: b3,
-        meta: { label: 'bande à −3 dB (unilatérale)', unit: 'Hz', precision: 0 },
+        meta: { label: '−3 dB bandwidth (one-sided)', unit: 'Hz', precision: 0 },
       },
       tb: {
         value: b3 * T,
-        meta: { label: 'produit T·B₃ (invariant d’échelle)', precision: 4 },
+        meta: { label: 'product T·B₃ (scale invariant)', precision: 4 },
       },
       firstNull: {
         value: firstNullOf(signal, T),
-        meta: { label: 'premier zéro', unit: 'Hz', precision: 0 },
+        meta: { label: 'first zero', unit: 'Hz', precision: 0 },
       },
       sidelobe: {
         value: sidelobeDbOf(signal, T, f0, fp, peak),

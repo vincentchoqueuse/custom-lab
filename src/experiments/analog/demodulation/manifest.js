@@ -8,13 +8,13 @@ export default {
   random: true, // bruit gaussien additif
   // pluriel, comme l'expérience miroir « Modulations AM et FM » : les deux
   // en portent bien deux, et le catalogue se lit par paires
-  title: 'Démodulations AM et FM',
-  subtitle: 'Retrouver A(t) et f(t) — une méthode globale, une méthode locale',
-  tags: ['démodulation', 'Hilbert', 'Teager-Kaiser', 'DESA', 'enveloppe', 'fréquence instantanée'],
+  title: 'AM and FM demodulation',
+  subtitle: 'Recovering A(t) and f(t) — one global method, one local method',
+  tags: ['demodulation', 'Hilbert', 'Teager–Kaiser', 'DESA', 'envelope', 'instantaneous frequency'],
 
   params: {
     fc: float('f_c', {
-      description: 'porteuse — c’est elle qu’il faut monter pour atteindre Fs/4',
+      description: 'carrier — this is what to raise to reach Fs/4',
       min: 400,
       max: 2400,
       step: 50,
@@ -23,7 +23,7 @@ export default {
       precision: 0,
     }),
     ka: float('k_a', {
-      description: "profondeur de modulation d'amplitude",
+      description: 'amplitude modulation depth',
       min: 0,
       max: 0.9,
       step: 0.05,
@@ -31,7 +31,7 @@ export default {
       precision: 2,
     }),
     fam: float('f_AM', {
-      description: "fréquence de la modulation d'amplitude",
+      description: 'frequency of the amplitude modulation',
       min: 10,
       max: 120,
       step: 5,
@@ -40,7 +40,7 @@ export default {
       precision: 0,
     }),
     fdev: float('Δf', {
-      description: 'excursion en fréquence (Fs = 8 kHz)',
+      description: 'frequency deviation (Fs = 8 kHz)',
       min: 0,
       max: 800,
       step: 25,
@@ -49,7 +49,7 @@ export default {
       precision: 0,
     }),
     ffm: float('f_FM', {
-      description: 'fréquence de la modulation de fréquence',
+      description: 'frequency of the frequency modulation',
       min: 5,
       max: 100,
       step: 5,
@@ -58,7 +58,7 @@ export default {
       precision: 0,
     }),
     snr: float('SNR', {
-      description: 'rapport signal à bruit',
+      description: 'signal-to-noise ratio',
       min: 0,
       max: 60,
       step: 1,
@@ -75,24 +75,24 @@ export default {
       // analytique n'y a plus de sens et les DEUX méthodes déraillent, pour
       // une raison sans rapport avec ce que l'expérience enseigne.
       when: (p) => p.fc - p.fdev < 50,
-      message: 'La fréquence instantanée passerait sous 50 Hz : baisser Δf ou monter f_c',
+      message: 'The instantaneous frequency would fall below 50 Hz: lower Δf or raise f_c',
     },
   ],
 
   derived: {
     bande: {
-      label: 'fréquence instantanée',
+      label: 'instantaneous frequency',
       calc: (p) => `${p.fc - p.fdev} … ${p.fc + p.fdev} Hz`,
     },
     desa: {
-      label: 'domaine de DESA (Fs/4)',
+      label: 'DESA validity range (Fs/4)',
       calc: (p) => (p.fc + p.fdev > 2000 ? 'DÉPASSÉ — Teager va se replier' : 'respecté'),
     },
   },
 
   groups: [
     { title: 'Modulation', params: ['fc', 'ka', 'fam', 'fdev', 'ffm'] },
-    { title: 'Bruit', params: ['snr'] },
+    { title: 'Noise', params: ['snr'] },
   ],
 
   views: [
@@ -103,7 +103,7 @@ export default {
       line('envTrue', {
         color: '#EDB120',
         width: 2.6,
-        label: 'A(t) vraie',
+        label: 'true A(t)',
         overlays: [
           line('signal', { color: '#a1a1aa', width: 0.7, opacity: 0.45, label: 'x(t)' }),
           line('envHilbert', { color: '#0072BD', width: 1.8, label: 'Hilbert' }),
@@ -119,11 +119,11 @@ export default {
     // traverse cette ligne, la courbe orange s'en va et la bleue reste.
     view(
       'freq',
-      'Fréquence instantanée',
+      'Instantaneous frequency',
       line('freqTrue', {
         color: '#EDB120',
         width: 2.6,
-        label: 'f(t) vraie',
+        label: 'true f(t)',
         overlays: [
           line('freqHilbert', { color: '#0072BD', width: 1.8, label: 'Hilbert' }),
           line('freqTeager', { color: '#D95319', width: 1.8, label: 'Teager (DESA-2)' }),
@@ -141,7 +141,7 @@ export default {
         width: 1.6,
         label: '|X(f)|',
         overlays: [
-          vline('fCarrier', { color: '#EDB120', dashed: true, width: 1.6, label: 'porteuse' }),
+          vline('fCarrier', { color: '#EDB120', dashed: true, width: 1.6, label: 'carrier' }),
         ],
         axes: { x: { label: 'f', unit: 'Hz' }, y: { label: '|X(f)|', unit: 'dB' } },
       })

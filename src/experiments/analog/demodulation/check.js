@@ -10,7 +10,7 @@ const tone = (n, A, f, phi = 0) =>
 
 export const checks = [
   {
-    name: 'DESA-2 est EXACT sur une sinusoïde pure — amplitude et fréquence',
+    name: 'DESA-2 is EXACT on a pure sinusoid — amplitude and frequency',
     category: 'numeric',
     run() {
       // Pas « précis », exact : sur x[n] = A·cos(Ωn+φ), les deux formules de
@@ -39,7 +39,7 @@ export const checks = [
     },
   },
   {
-    name: 'DESA-2 se replie au-delà de Fs/4, et exactement de 2(f − Fs/4)',
+    name: 'DESA-2 folds above Fs/4, by exactly 2(f − Fs/4)',
     category: 'numeric',
     run() {
       // Le domaine de l'estimateur, démontré plutôt que constaté : Ω sort
@@ -65,7 +65,7 @@ export const checks = [
     },
   },
   {
-    name: 'Hilbert : |x + j·H{x}| = A sur une sinusoïde pure',
+    name: 'Hilbert: |x + j·H{x}| = A on a pure sinusoid',
     category: 'numeric',
     run() {
       // Le signal analytique d'une sinusoïde est A·e^{jΩn} : son module est
@@ -87,7 +87,7 @@ export const checks = [
     },
   },
   {
-    name: 'Hilbert : exact sur un bin de la TFD, et pas ailleurs',
+    name: 'Hilbert: exact on a DFT bin, and not elsewhere',
     category: 'numeric',
     run() {
       // Le domaine de Hilbert, symétrique de celui de DESA — et je l'avais
@@ -124,7 +124,7 @@ export const checks = [
     },
   },
   {
-    name: 'sans bruit, l’erreur restante est le COUPLAGE, pas le hasard',
+    name: 'with no noise, the remaining error is COUPLING, not chance',
     category: 'numeric',
     run() {
       // Aucune des deux méthodes n'est exacte sur un signal AM ET FM
@@ -153,7 +153,7 @@ export const checks = [
     },
   },
   {
-    name: 'sous le bruit, Teager décroche deux à trois fois plus vite',
+    name: 'under noise, Teager degrades two to three times faster',
     category: 'statistical',
     run() {
       // L'affirmation centrale de la scène 3, et elle est mesurée avant
@@ -177,7 +177,7 @@ export const checks = [
     },
   },
   {
-    name: 'Teager annonce sa propre défaillance (arccos hors domaine)',
+    name: 'Teager announces its own failure (arccos out of domain)',
     category: 'numeric',
     run() {
       // La propriété rare que la scène 3 met en avant : quand le modèle

@@ -2,87 +2,96 @@
 export default [
   {
     id: 'shapes',
-    title: 'Scène 1 · Les sept signaux, dans le temps',
+    title: 'Scene 1 · The seven signals, in time',
     params: { signal: 'rect', T: 5, t0: 0 },
     view: 'time',
     visible: ['signal', 'T'],
-    notes: `Parcourir le catalogue avant de parler de spectre : dérouler les sept
-formes et les faire trier à voix haute. Trois familles apparaissent :
-celles qui s'arrêtent (porte, triangle), celles qui décroissent sans
-jamais s'annuler (gaussienne, exponentielles), celle qui traîne (sinc).
-Question à poser AVANT de passer à l'onglet Spectre :
-« laquelle a le spectre le plus étroit, à votre avis ? »
-T règle la durée de toutes : le lien durée ↔ largeur se joue là.`,
+    notes: `Going through the catalogue before mentioning spectra at all, and
+having the room sort the shapes out loud, produces three families: those that
+stop (gate, triangle), those that decay without ever reaching zero (Gaussian,
+exponentials), and the one that lingers (sinc).
+
+The question to ask before opening the spectrum tab is which of them has the
+narrowest spectrum. T sets the duration of all of them, and the duration–width
+relation is the whole point of the experiment.`,
   },
   {
     id: 'gate',
-    title: 'Scène 2 · La porte et le sinus cardinal',
+    title: 'Scene 2 · The gate and the cardinal sine',
     params: { signal: 'rect', T: 5, t0: 0 },
     view: 'spectrum',
     visible: ['T'],
-    notes: `La paire de base du cours. Le premier zéro est à 1/T : lire la valeur
-dans la statline, puis la retrouver sur l'axe.
-Question AVANT de bouger T : « si je double la durée de la porte,
-que devient la largeur du lobe ? »
-Réponse attendue fausse : "elle double". Elle est DIVISÉE par deux.`,
+    notes: `The basic pair of the course. The first zero sits at 1/T, a value
+worth reading in the statline and then locating on the axis.
+
+Before moving T, it is worth asking what doubling the gate duration does to the
+lobe width. The expected wrong answer is that it doubles. It is halved.`,
   },
   {
     id: 'scaling',
-    title: 'Scène 3 · Comprimer dans le temps, étaler en fréquence',
+    title: 'Scene 3 · Compress in time, spread in frequency',
     params: { signal: 'rect', T: 15, t0: 0 },
     view: 'spectrum',
     visible: ['T'],
     lock: true,
-    notes: `Les axes arrivent déjà figés : le cadre ne bougera plus, seule la
-courbe bouge. Geler (F) à T = 15 ms, puis descendre à 2 ms :
-le lobe s'ouvre sous les yeux, le fantôme gris reste étroit.
-Le produit T·B₃ affiché ne bouge pas d'un chiffre — c'est le théorème
-de changement d'échelle, pas une coïncidence.`,
+    notes: `The axes arrive pinned, so the frame will not move and only the curve
+will. Freezing at T = 15 ms and coming down to 2 ms opens the lobe in front of
+the room while the grey ghost stays narrow.
+
+The displayed product T·B₃ does not change by a digit. That is the scaling
+theorem rather than a coincidence, and the ghost is what makes it a
+demonstration.`,
   },
   {
     id: 'gauss',
-    title: 'Scène 4 · La gaussienne, point fixe de Fourier',
+    title: 'Scene 4 · The Gaussian, a fixed point of Fourier',
     params: { signal: 'gauss', T: 5, t0: 0 },
     view: 'spectrum',
     visible: ['signal', 'T'],
-    notes: `Passer de la porte à la gaussienne et comparer les deux onglets
-Signal / Spectre : même forme des deux côtés. Aucun lobe secondaire,
-aucun zéro — c'est le seul signal du catalogue dans ce cas.
-Enchaîner sur l'onglet dB : la gaussienne plonge, la porte traîne.`,
+    notes: `Moving from the gate to the Gaussian and comparing the signal and
+spectrum tabs shows the same shape on both sides — no sidelobes and no zeros,
+the only signal in the catalogue for which that is true.
+
+The dB tab then separates them sharply: the Gaussian plunges, the gate
+lingers.`,
   },
   {
     id: 'delay',
-    title: 'Scène 5 · Le retard ne se voit que dans la phase',
+    title: 'Scene 5 · A delay is only visible in the phase',
     params: { signal: 'rect', T: 5, t0: 0 },
     view: 'phase',
     visible: ['t0'],
-    notes: `Bouger t₀ et regarder d'abord l'onglet Spectre : |X(f)| ne bouge pas
-d'un pixel (c'est vérifié à l'identique dans le harnais numérique).
-Revenir sur la phase : elle prend une pente −2πt₀, d'autant plus raide
-que le retard est grand. Les dents de scie sont le repliement à ±π.
-Morale : un spectre d'amplitude seul ne sait pas dire QUAND.`,
+    notes: `Moving t₀ while watching the spectrum tab changes |X(f)| by not one
+pixel, which the numerical harness verifies as an exact identity.
+
+The phase tab is where the delay went: a slope of −2πt₀, steeper the longer the
+delay, with the sawtooth pattern coming from the wrap at ±π. The moral is worth
+stating — a magnitude spectrum alone cannot say WHEN.`,
   },
   {
     id: 'sidelobes',
-    title: 'Scène 6 · Les lobes secondaires, en dB',
+    title: 'Scene 6 · Sidelobes, in dB',
     params: { signal: 'rect', T: 5, t0: 0 },
     view: 'db',
     visible: ['signal'],
-    notes: `Alterner porte / triangle : −13.3 dB contre −26.5 dB, exactement le
-double en dB puisque sinc² = sinc au carré.
-C'est déjà tout le fenêtrage : adoucir les bords écrase les lobes.
-Faire le lien avec l'expérience « Fenêtrage spectral ».`,
+    notes: `Alternating gate and triangle gives −13.3 dB against −26.5 dB,
+exactly twice as many decibels because the triangle's transform is the sinc
+squared.
+
+That is already the whole idea of windowing: softening the edges crushes the
+sidelobes. The spectral-windowing experiment takes it from here.`,
   },
   {
     id: 'rf',
-    title: 'Scène 7 · Moduler, c’est déplacer le spectre',
+    title: 'Scene 7 · Modulating is shifting the spectrum',
     params: { signal: 'rf', T: 5, f0: 600, t0: 0 },
     view: 'spectrum',
     visible: ['f0', 'T'],
-    notes: `La même porte, multipliée par un cosinus : le lobe est parti se poser
-en ±f₀, moitié moins haut, même largeur 2/T.
-Bouger f₀ : le motif se déplace sans se déformer.
-Bouger T : la largeur change, la position non. Deux paramètres,
-deux effets orthogonaux — c'est le théorème de modulation.`,
+    notes: `The same gate multiplied by a cosine: the lobe has moved to ±f₀, half
+as tall, with the same width 2/T.
+
+Moving f₀ translates the pattern without deforming it; moving T changes the
+width and not the position. Two parameters, two orthogonal effects — which is
+the modulation theorem, seen rather than derived.`,
   },
 ];

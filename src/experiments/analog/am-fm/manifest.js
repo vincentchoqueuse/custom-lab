@@ -5,13 +5,13 @@ import { view, line, scatter, figure } from '../../../core/views.js';
 export default {
   id: 'am-fm',
   order: 4,
-  title: 'Modulations AM et FM',
-  subtitle: 'Bandes latérales, raies de Bessel et règle de Carson',
-  tags: ['analogique', 'AM', 'FM', 'Bessel', 'Carson', 'modulation'],
+  title: 'AM and FM modulation',
+  subtitle: 'Sidebands, Bessel lines and the Carson rule',
+  tags: ['analog', 'AM', 'FM', 'Bessel', 'Carson', 'modulation'],
 
   params: {
     mode: select('mode', {
-      description: 'type de modulation (porteuse 1 kHz)',
+      description: 'modulation type (1 kHz carrier)',
       options: [
         { value: 'am', label: 'AM' },
         { value: 'fm', label: 'FM' },
@@ -19,7 +19,7 @@ export default {
       default: 'am',
     }),
     fm: float('f_m', {
-      description: 'fréquence du message',
+      description: 'message frequency',
       min: 20,
       max: 200,
       step: 0.5,
@@ -28,7 +28,7 @@ export default {
       precision: 1,
     }),
     ka: float('k_a', {
-      description: "indice de modulation AM (surmodulation au-delà de 1)",
+      description: 'AM modulation index (overmodulation above 1)',
       min: 0,
       max: 1.5,
       step: 0.05,
@@ -37,7 +37,7 @@ export default {
       visibleIf: { mode: 'am' },
     }),
     beta: float('β', {
-      description: 'indice de modulation FM (extinction de porteuse à 2.405)',
+      description: 'FM modulation index (carrier null at 2.405)',
       min: 0.1,
       max: 8,
       step: 0.005,
@@ -52,7 +52,7 @@ export default {
       'time',
       line('sig', {
         overlays: [
-          line('envUp', { color: '#D95319', dashed: true, label: 'enveloppe' }),
+          line('envUp', { color: '#D95319', dashed: true, label: 'envelope' }),
           line('envDown', { color: '#D95319', dashed: true }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 's(t)' },
@@ -61,8 +61,8 @@ export default {
     figure(
       'spectrum',
       line('spectrum', {
-        label: 'mesuré',
-        overlays: [scatter('theoryLines', { color: '#D95319', size: 3.5, label: 'théorie' })],
+        label: 'measured',
+        overlays: [scatter('theoryLines', { color: '#D95319', size: 3.5, label: 'theory' })],
         axes: {
           x: { label: 'f', unit: 'Hz' },
           y: { label: '|S(f)|', unit: 'dB', domain: [-70, 5] },

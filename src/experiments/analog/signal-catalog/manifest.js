@@ -5,26 +5,26 @@ import { view, line, hline, vline, figure } from '../../../core/views.js';
 export default {
   id: 'signal-catalog',
   order: 1,
-  title: 'Catalogue de signaux',
-  subtitle: 'Sept signaux, sept transformées de Fourier — amplitude, dB et phase',
-  tags: ['analogique', 'Fourier', 'transformée', 'spectre', 'catalogue'],
+  title: 'A catalogue of signals',
+  subtitle: 'Seven signals, seven Fourier transforms — magnitude, dB and phase',
+  tags: ['analog', 'Fourier', 'transform', 'spectrum', 'catalogue'],
 
   params: {
     signal: select('signal', {
-      description: 'signal du catalogue',
+      description: 'signal from the catalogue',
       options: [
-        { value: 'rect', label: 'porte Π(t/T)' },
+        { value: 'rect', label: 'gate Π(t/T)' },
         { value: 'triangle', label: 'triangle Λ(t/T)' },
-        { value: 'gauss', label: 'gaussienne e^(−π(t/T)²)' },
-        { value: 'expo', label: 'exponentielle causale e^(−t/T)·u(t)' },
-        { value: 'expo2', label: 'exponentielle bilatérale e^(−|t|/T)' },
-        { value: 'sinc', label: 'sinus cardinal sinc(t/T)' },
-        { value: 'rf', label: 'sinusoïde tronquée cos(2πf₀t)·Π(t/T)' },
+        { value: 'gauss', label: 'Gaussian e^(−π(t/T)²)' },
+        { value: 'expo', label: 'causal exponential e^(−t/T)·u(t)' },
+        { value: 'expo2', label: 'two-sided exponential e^(−|t|/T)' },
+        { value: 'sinc', label: 'cardinal sine sinc(t/T)' },
+        { value: 'rf', label: 'truncated sinusoid cos(2πf₀t)·Π(t/T)' },
       ],
       default: 'rect',
     }),
     T: float('T', {
-      description: 'durée caractéristique',
+      description: 'characteristic duration',
       min: 1,
       max: 20,
       step: 0.5,
@@ -33,7 +33,7 @@ export default {
       precision: 1,
     }),
     f0: float('f₀', {
-      description: 'fréquence de la sinusoïde tronquée',
+      description: 'frequency of the truncated sinusoid',
       min: 200,
       max: 2000,
       step: 10,
@@ -43,7 +43,7 @@ export default {
       visibleIf: { signal: 'rf' },
     }),
     t0: float('t₀', {
-      description: 'retard du signal',
+      description: 'delay of the signal',
       min: -8,
       max: 8,
       step: 0.1,
@@ -94,7 +94,7 @@ export default {
     // their decay rate (−13 dB for the gate, −27 dB for the triangle).
     view(
       'db',
-      'Spectre en dB',
+      'Spectrum in dB',
       line('magDb', {
         color: '#7E2F8E',
         width: 2,

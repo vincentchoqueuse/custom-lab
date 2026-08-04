@@ -2,119 +2,112 @@
 export default [
   {
     id: 'envelope',
-    title: 'Scène 1 · Deux informations dans une seule courbe',
+    title: 'Scene 1 · Two pieces of information in one curve',
     view: 'time',
     params: { fc: 1000, ka: 0.5, fam: 40, fdev: 200, ffm: 25, snr: 40 },
     visible: ['ka', 'snr'],
-    notes: `Le signal gris est modulé EN AMPLITUDE ET EN FRÉQUENCE en même
-temps. La courbe jaune est l'enveloppe vraie — celle qu'on cherche.
-Les deux estimations se posent dessus et on ne les distingue pas.
+    notes: `The grey signal is modulated in amplitude AND in frequency at the
+same time. The yellow curve is the true envelope, the thing being looked for,
+and the two estimates land on it indistinguishably.
 
-Poser la question de méthode avant celle de résultat :
-« ces deux courbes viennent de deux calculs qui n'ont rien en commun. »
+The method question is worth asking before the result question, because these
+two curves come from calculations with nothing in common.
 
-  HILBERT est GLOBAL : une FFT sur tout l'enregistrement, on annule les
-  fréquences négatives, et A = |x + j·H{x}|. La valeur à l'instant t
-  dépend de TOUS les échantillons, y compris ceux d'après. Aucune
-  démodulation en temps réel là-dedans.
+  HILBERT is GLOBAL: an FFT over the whole record, the negative frequencies
+  removed, and A = |x + j·H{x}|. The value at time t depends on ALL the
+  samples, including those that come after it. There is no real-time
+  demodulation anywhere in that.
 
-  TEAGER est LOCAL : Ψ(x)[n] = x[n]² − x[n+1]·x[n−1]. Trois échantillons,
-  deux multiplications, et ce nombre vaut déjà A²sin²Ω. Pas de
-  transformée, pas de retard, un coût par point indépendant de la
-  longueur du signal.
+  TEAGER is LOCAL: Ψ(x)[n] = x[n]² − x[n+1]·x[n−1]. Three samples, two
+  multiplications, and that number already equals A²sin²Ω. No transform, no
+  latency, and a cost per point independent of the length of the signal.
 
-Monter k_a jusqu'à 0.9 : les deux suivent. Le résultat est le même, le
-prix ne l'est pas — et c'est ce qui se paie dans la scène 3.`,
+Raising k_a to 0.9 keeps both faithful. The result is the same; the price is
+not, and the third scene is where the difference gets paid.`,
   },
   {
     id: 'frequency',
-    title: 'Scène 2 · Et la fréquence, dans la même courbe',
+    title: 'Scene 2 · And the frequency, from the same curve',
     view: 'freq',
     params: { fc: 1000, ka: 0.5, fam: 40, fdev: 200, ffm: 25, snr: 40 },
     visible: ['fdev', 'ffm'],
-    notes: `La seconde information, extraite du MÊME signal. La fréquence
-instantanée oscille entre 800 et 1200 Hz, et les deux méthodes la
-suivent.
+    notes: `The second piece of information, extracted from the SAME signal. The
+instantaneous frequency swings between 800 and 1200 Hz and both methods follow
+it.
 
-Hilbert dérive la phase déroulée — donc il faut d'abord dérouler, et un
-saut mal déroulé se voit immédiatement. Teager ne déroule rien : il lit
-Ω directement dans un rapport d'énergies.
+Hilbert differentiates the unwrapped phase, so the phase has to be unwrapped
+first, and a badly unwrapped jump shows immediately. Teager unwraps nothing: it
+reads Ω directly out of a ratio of energies.
 
-Monter Δf et f_FM : les deux tiennent tant qu'on reste dans le domaine.
-La ligne verte, elle, annonce ce qui se passe quand on en sort — c'est
-la scène 4.
+Raising Δf and f_FM keeps both honest as long as the estimate stays inside its
+domain. The green line announces what happens outside it, which is scene 4.
 
-Sans bruit, aucune des deux n'est exacte sur ce signal : 2.1 Hz d'erreur
-pour Teager, 3.4 Hz pour Hilbert (statline). Ce n'est pas du bruit, c'est
-le COUPLAGE — l'amplitude et la fréquence bougent ensemble, et les deux
-méthodes supposent implicitement qu'elles bougent lentement l'une par
-rapport à la porteuse.`,
+With no noise at all, neither is exact on this signal: 2.1 Hz of error for
+Teager and 3.4 Hz for Hilbert, in the statline. That is not noise but COUPLING
+— amplitude and frequency move together, and both methods implicitly assume
+they move slowly compared with the carrier.`,
   },
   {
     id: 'noise',
-    title: 'Scène 3 · Le prix de la localité',
+    title: 'Scene 3 · What locality costs',
     view: 'freq',
     params: { fc: 1000, ka: 0.5, fam: 40, fdev: 200, ffm: 25, snr: 20 },
     visible: ['snr'],
-    notes: `Faire prédire avant de descendre le SNR : « laquelle des deux va
-lâcher en premier ? »
+    notes: `The prediction is worth collecting before lowering the SNR: which of
+the two gives way first?
 
-Puis descendre, et lire la statline. Les erreurs RMS en fréquence,
-mesurées :
+The measured RMS frequency errors:
+
     SNR 40 dB → Hilbert 8.9 Hz,  Teager 17.6 Hz
     SNR 30 dB → Hilbert 26 Hz,   Teager 59 Hz
     SNR 20 dB → Hilbert 84 Hz,   Teager 266 Hz
     SNR 10 dB → Hilbert 287 Hz,  Teager 548 Hz
 
-Teager décroche deux à trois fois plus vite. La raison est dans sa
-définition : Ψ est un PRODUIT d'échantillons voisins, donc le bruit y
-entre au carré, et rien ne le moyenne. Hilbert fait une FFT, et une FFT
-EST un moyennage sur tout l'enregistrement. La localité qui rendait
-Teager gratuit est exactement ce qui le rend fragile.
+Teager degrades two to three times faster, and the reason is in its definition:
+Ψ is a PRODUCT of neighbouring samples, so noise enters it squared and nothing
+averages it away. Hilbert computes an FFT, and an FFT IS an average over the
+whole record. The locality that made Teager free is exactly what makes it
+fragile.
 
-Et une chose rare, à montrer : Teager ANNONCE sa propre défaillance. La
-statline compte les « arccos hors domaine » — 0 jusqu'à 30 dB, 42 à
-20 dB, 233 à 10 dB. Quand l'argument de l'arccos sort de [−1, 1], le
-modèle sinusoïdal local n'est plus tenable, et l'algorithme le sait.`,
+One rare property is worth showing: Teager ANNOUNCES its own failure. The
+statline counts the out-of-domain arccos calls — none up to 30 dB, 42 at 20 dB,
+233 at 10 dB. When the argument of the arccos leaves [−1, 1] the local
+sinusoidal model no longer holds, and the algorithm knows it.`,
   },
   {
     id: 'fold',
-    title: 'Scène 4 · Là où Teager se replie',
+    title: 'Scene 4 · Where Teager folds back',
     view: 'freq',
     params: { fc: 1800, ka: 0.5, fam: 40, fdev: 400, ffm: 25, snr: 50 },
     visible: ['fc', 'fdev'],
-    notes: `Bruit quasi nul, et pourtant la courbe orange fait n'importe quoi
-au-dessus de la ligne verte — pendant que la bleue suit parfaitement.
-Ce n'est donc pas une question de bruit.
+    notes: `There is almost no noise here, and yet the orange curve does
+something absurd above the green line while the blue one follows perfectly. So
+this is not a noise problem.
 
-DESA-2 obtient la pulsation par Ω = ½·arccos(…). L'arccos rend [0, π],
-donc Ω ne peut PAS dépasser π/2, donc f ne peut pas dépasser Fs/4 =
-2000 Hz. Au-delà, l'estimation se replie exactement comme un
-sous-échantillonnage : le harnais vérifie que l'erreur vaut exactement
-2(f − Fs/4).
+DESA-2 obtains the pulsation as Ω = ½·arccos(…). The arccos returns [0, π], so
+Ω cannot exceed π/2 and f cannot exceed Fs/4 = 2000 Hz. Above that the estimate
+folds exactly as undersampling folds, and the harness verifies that the error
+equals exactly 2(f − Fs/4).
 
-La porteuse est montée à 1800 Hz pour cette scène, et l'excursion vaut
-400 : la fréquence instantanée balaie donc 1400 → 2200 Hz et traverse la
-ligne verte par le haut, en restant franchement positive. (Descendre la
-porteuse au lieu de la monter ferait passer f_i sous zéro, où le signal
-analytique n'a plus de sens et où les DEUX méthodes déraillent — un
-autre problème, qu'on ne veut pas mélanger à celui-ci.)
+The carrier is at 1800 Hz for this scene with a deviation of 400, so the
+instantaneous frequency sweeps 1400 to 2200 Hz and crosses the green line from
+below while staying firmly positive. (Lowering the carrier instead would take
+f_i below zero, where the analytic signal stops meaning anything and BOTH
+methods fail — a different problem, not worth mixing in here.)
 
-Faire glisser f_c de 1800 à 1400 et regarder la courbe orange revenir se
-coller sur la jaune dès qu'elle repasse tout entière sous la ligne.
+Sliding f_c from 1800 down to 1400 brings the orange curve back onto the yellow
+one as soon as the whole sweep is under the line.
 
-La morale n'est pas « Teager est moins bon ». C'est qu'un estimateur a
-un DOMAINE, que ce domaine se démontre en deux lignes à partir de sa
-formule, et qu'on ne s'en aperçoit jamais en lisant seulement le
-résultat.
+The moral is not that Teager is worse. It is that an estimator has a DOMAIN,
+that this domain follows in two lines from its formula, and that nobody notices
+it by reading the result alone.
 
-Hilbert a le sien, et il est moins visible donc plus traître : la TFD
-traite l'enregistrement comme PÉRIODIQUE. Une porteuse qui ne boucle pas
-exactement sur les N échantillons crée une discontinuité de raccord dont
-la fuite est GLOBALE — pas confinée aux bords. Mesuré par le harnais :
-exact à 1e-10 quand la porteuse tombe sur un bin de la TFD, 8.5 Hz
-d'erreur quand elle tombe à 153.6 bins. Rien dans la courbe ne le dit ;
-seul le calcul le dit.`,
+Hilbert has one too, less visible and therefore more treacherous: the DFT
+treats the record as PERIODIC. A carrier that does not close exactly on the N
+samples creates a wrap-around discontinuity whose leakage is GLOBAL rather than
+confined to the edges. Measured by the harness: exact to 1e-10 when the carrier
+lands on a DFT bin, 8.5 Hz of error when it lands at 153.6 bins. Nothing in the
+curve says so; only the calculation does.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

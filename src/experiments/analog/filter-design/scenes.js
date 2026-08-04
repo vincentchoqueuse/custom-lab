@@ -2,47 +2,56 @@
 export default [
   {
     id: 'families',
-    title: 'Scène 1 · Un gabarit, quatre familles',
+    title: 'Scene 1 · One specification, four families',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
     visible: ['family'],
-    notes: `Le gabarit est fixé (1 dB / 40 dB / octave de transition). Faire
-défiler les familles en lisant l'ordre dans la statline : Butterworth 8,
-Chebyshev 5, elliptique 4. L'ordre, c'est des ampli-op, des condensateurs, du
-coût. Question : « alors pourquoi Butterworth est-il partout ? » — garder la
-réponse pour la scène 4.`,
+    notes: `The specification is fixed: 1 dB of ripple, 40 dB of attenuation, one
+octave of transition. Cycling through the families while reading the order in
+the statline gives Butterworth 8, Chebyshev 5, elliptic 4.
+
+Order is not an abstraction — it is op-amps, capacitors and cost. Which raises
+the question worth holding until the last scene: if the elliptic is half the
+order, why is Butterworth everywhere?`,
   },
   {
     id: 'tighten',
-    title: 'Scène 2 · Resserrer le gabarit',
+    title: 'Scene 2 · Tightening the specification',
     params: { family: 'ellip', fp: 1000, fstop: 1400, Amax: 0.5, Amin: 60 },
     visible: ['fstop', 'Amin'],
-    notes: `Transition à 1.4× et 60 dB : l'elliptique tient en n = 6. Geler (F),
-passer f_a à 1200 Hz : n = 8. Chaque décibel de gabarit se paie en ordre — et
-la validation bloque quand le gabarit devient déraisonnable. Ouvrir le tiroir
-Parameters pour montrer la sélectivité dérivée.`,
+    notes: `A 1.4× transition at 60 dB is met by an elliptic of order 6.
+Freezing and moving f_a to 1200 Hz takes it to 8.
+
+Every decibel of specification is paid for in order, and the validation rule
+blocks the computation when the demand becomes unreasonable rather than
+returning a meaningless filter. The parameters drawer shows the derived
+selectivity alongside.`,
   },
   {
     id: 'geometry',
-    title: 'Scène 3 · La géométrie des familles',
+    title: 'Scene 3 · The geometry of the families',
     view: 'poles',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
     visible: ['family'],
-    notes: `Butterworth : pôles sur un CERCLE. Chebyshev 1 : le cercle s'aplatit
-en ellipse. Chebyshev 2 et elliptique : des ZÉROS apparaissent sur l'axe jω —
-ce sont eux qui creusent la bande d'arrêt (les encoches de la réponse). Moins
-de pôles, mieux placés, plus des zéros : c'est toute l'histoire du design.`,
+    notes: `Butterworth puts its poles on a CIRCLE. Chebyshev 1 flattens that
+circle into an ellipse. Chebyshev 2 and the elliptic add ZEROS on the jω axis,
+and those zeros are what dig the notches into the stop band.
+
+Fewer poles, better placed, plus zeros: that is the whole history of filter
+design in one figure.`,
   },
   {
     id: 'price',
-    title: 'Scène 4 · Le prix de la sélectivité',
+    title: 'Scene 4 · What selectivity costs',
     view: 'delay',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
     visible: ['family'],
-    notes: `Réponse à la question de la scène 1. Geler (F) le retard de groupe
-de Butterworth : presque plat. Passer à l'elliptique : le retard s'envole près
-de f_p — les composantes proches du bord arrivent EN RETARD (distorsion de
-phase, ruine des transitoires). La sélectivité se paie en phase. Bonus :
-l'Inspector exporte les coefficients num/den (prototype normalisé ET rad/s)
-pour Micro-Cap, SPICE ou un TP.`,
+    notes: `This answers the question left open in scene 1. Freezing the group
+delay of the Butterworth shows it nearly flat; switching to the elliptic sends
+it soaring near f_p, so components close to the band edge arrive LATE. That is
+phase distortion, and it wrecks transients.
+
+Selectivity is paid for in phase. As a practical aside, the Inspector exports
+the numerator and denominator coefficients — normalized prototype and rad/s —
+for Micro-Cap, SPICE or a lab session.`,
   },
 ];

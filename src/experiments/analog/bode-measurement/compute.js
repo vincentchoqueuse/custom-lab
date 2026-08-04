@@ -115,10 +115,10 @@ export function compute({ system, fc, f0, Q, f, sigma, seed }) {
       gainMeas: { x: sf, y: sg },
       phaseTheory: { x: tf, y: tp },
       phaseMeas: { x: sf, y: sp },
-      gMeasDb: { value: toDb(m.g), meta: { label: 'gain mesuré', unit: 'dB', precision: 2 } },
-      gThDb: { value: toDb(m.gTh), meta: { label: '|H| théorie', unit: 'dB', precision: 2 } },
-      phMeasDeg: { value: toDeg(m.phi), meta: { label: 'phase mesurée', unit: '°', precision: 1 } },
-      phThDeg: { value: toDeg(m.phiTh), meta: { label: 'arg H théorie', unit: '°', precision: 1 } },
+      gMeasDb: { value: toDb(m.g), meta: { label: 'measured gain', unit: 'dB', precision: 2 } },
+      gThDb: { value: toDb(m.gTh), meta: { label: '|H| theory', unit: 'dB', precision: 2 } },
+      phMeasDeg: { value: toDeg(m.phi), meta: { label: 'measured phase', unit: '°', precision: 1 } },
+      phThDeg: { value: toDeg(m.phiTh), meta: { label: 'arg H theory', unit: '°', precision: 1 } },
     },
   };
 }

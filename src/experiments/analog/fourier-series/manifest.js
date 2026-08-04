@@ -5,26 +5,26 @@ import { view, line, stem, vline, figure } from '../../../core/views.js';
 export default {
   id: 'fourier-series',
   order: 6,
-  title: 'Séries de Fourier',
+  title: 'Fourier series',
   subtitle:
-    'Reconstruire un signal harmonique par harmonique — enveloppe, Gibbs et rapport cyclique',
-  tags: ['analogique', 'Fourier', 'harmoniques', 'spectre', 'Gibbs', 'train d\'impulsions'],
+    'Rebuilding a signal harmonic by harmonic — envelope, Gibbs and duty cycle',
+  tags: ['analog', 'Fourier', 'harmonics', 'spectrum', 'Gibbs', 'pulse train'],
 
   params: {
     wave: select('signal', {
-      description: 'forme d\'onde périodique',
+      description: 'periodic waveform',
       options: [
-        { value: 'square', label: 'carré' },
+        { value: 'square', label: 'square' },
         { value: 'triangle', label: 'triangle' },
-        { value: 'sawtooth', label: 'dent de scie' },
-        { value: 'pulse', label: 'train d\'impulsions' },
+        { value: 'sawtooth', label: 'sawtooth' },
+        { value: 'pulse', label: 'pulse train' },
       ],
       default: 'square',
     }),
-    N: int('N', { description: 'nombre d\'harmoniques conservées', min: 1, max: 60, default: 5 }),
+    N: int('N', { description: 'number of harmonics kept', min: 1, max: 60, default: 5 }),
     A: float('A', { description: 'amplitude', min: 0.2, max: 2, step: 0.05, default: 1 }),
     alpha: float('α', {
-      description: 'rapport cyclique du train d\'impulsions',
+      description: 'duty cycle of the pulse train',
       min: 0.05,
       max: 0.95,
       step: 0.01,
@@ -37,7 +37,7 @@ export default {
 
   derived: {
     fondamental: {
-      label: 'harmoniques paires',
+      label: 'even harmonics',
       calc: (p) =>
         p.wave === 'sawtooth'
           ? 'présentes'
@@ -48,14 +48,14 @@ export default {
               : 'présentes',
     },
     zeroEnveloppe: {
-      label: 'zéros de l\'enveloppe',
+      label: 'zeros of the envelope',
       calc: (p) => (p.wave === 'pulse' ? `n = k/α = ${(1 / p.alpha).toFixed(1)} ; …` : '—'),
     },
   },
 
   groups: [
     { title: 'Signal', params: ['wave', 'A', 'alpha'] },
-    { title: 'Troncature', params: ['N'] },
+    { title: 'Truncation', params: ['N'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -68,7 +68,7 @@ export default {
         width: 2,
         label: 'signal',
         overlays: [
-          line('reconstruction', { color: '#D95319', width: 2.4, label: 'somme partielle (N)' }),
+          line('reconstruction', { color: '#D95319', width: 2.4, label: 'partial sum (N)' }),
         ],
         axes: { x: { label: 't', unit: 'T' }, y: 'x(t)' },
       })
@@ -82,7 +82,7 @@ export default {
         color: '#0072BD',
         opacity: 0.85,
         overlays: [
-          line('envelope', { color: '#D95319', width: 2, label: 'enveloppe' }),
+          line('envelope', { color: '#D95319', width: 2, label: 'envelope' }),
         ],
         axes: { x: 'n (rang de l\'harmonique)', y: 'amplitude de l\'harmonique' },
       })
@@ -91,13 +91,13 @@ export default {
     // Truncation error vs N in log-log: the slope IS the smoothness.
     view(
       'convergence',
-      'Erreur vs N',
+      'Error vs N',
       line('errorVsN', {
         color: '#7E2F8E',
         width: 2.2,
-        label: 'erreur RMS (Parseval)',
+        label: 'RMS error (Parseval)',
         overlays: [vline('currentN', { color: '#EDB120', dashed: true, width: 2, label: 'N' })],
-        axes: { x: { label: 'N', scale: 'log' }, y: { label: 'erreur RMS', scale: 'log' } },
+        axes: { x: { label: 'N', scale: 'log' }, y: { label: 'RMS error', scale: 'log' } },
       })
     ),
   ],

@@ -149,7 +149,7 @@ export function compute({ family, fp, fstop, Amax, Amin }) {
       nOrder: { value: n, meta: { label: 'ordre n', precision: 0 } },
       attStopDb: {
         value: attStop,
-        meta: { label: 'atténuation à f_a', unit: 'dB', precision: 1 },
+        meta: { label: 'attenuation at f_a', unit: 'dB', precision: 1 },
       },
     },
   };

@@ -2,47 +2,56 @@
 export default [
   {
     id: 'am-sidebands',
-    title: 'Scène 1 · AM : le message est dans les bandes latérales',
+    title: 'Scene 1 · AM: the message lives in the sidebands',
     view: 'spectrum',
     params: { mode: 'am', fm: 62.5, ka: 0.5 },
     visible: ['ka', 'fm'],
-    notes: `Trois raies : la porteuse à 0 dB et le message, DEUX fois, à ±f_m.
-Monter k_a : seules les bandes latérales bougent (20·log10(k_a/2), les points
-oranges le prédisent). Statline : à k_a = 0.5, ~89 % de la puissance part dans
-la porteuse — qui ne transporte AUCUNE information. C'est le procès de l'AM.`,
+    notes: `Three lines: the carrier at 0 dB and the message, twice, at ±f_m.
+
+Raising k_a moves the sidebands and nothing else, by 20·log10(k_a/2), which the
+orange theory points predict. The statline gives the verdict: at k_a = 0.5 some
+89 % of the power goes into the carrier, which carries no information
+whatsoever. That is the case against amplitude modulation, in one number.`,
   },
   {
     id: 'overmod',
-    title: "Scène 2 · Surmodulation : l'enveloppe trahit",
+    title: 'Scene 2 · Overmodulation: the envelope gives it away',
     view: 'time',
     params: { mode: 'am', fm: 62.5, ka: 0.9 },
     visible: ['ka'],
-    notes: `Geler (F) à k_a = 0.9 : l'enveloppe orange reproduit le message.
-Passer k_a = 1.4 : les enveloppes se CROISENT — un détecteur d'enveloppe
-(la diode du poste à galène) verrait |enveloppe| : le message est plié,
-irrécupérable. Voilà pourquoi k_a ≤ 1, et pourquoi la radio AM sonne comme
-elle sonne quand l'émetteur pousse.`,
+    notes: `Freezing at k_a = 0.9 leaves an orange envelope that reproduces the
+message faithfully. Moving to k_a = 1.4 makes the two envelopes CROSS, and an
+envelope detector — the diode of a crystal set — would see |envelope|: the
+message is folded and cannot be recovered.
+
+That is why k_a ≤ 1, and why AM radio sounds the way it does when the
+transmitter is pushed.`,
   },
   {
     id: 'bessel',
-    title: 'Scène 3 · FM : les raies de Bessel',
+    title: 'Scene 3 · FM: the Bessel lines',
     view: 'spectrum',
     params: { mode: 'fm', fm: 62.5, beta: 0.5 },
     visible: ['beta', 'fm'],
-    notes: `β petit : la FM ressemble à l'AM (porteuse + 2 raies). Monter β
-lentement : les raies POUSSENT par paires, amplitudes J_n(β) (points oranges).
-Le spectre s'élargit : Carson 2(β+1)f_m dans la statline, contre la largeur
-98 % mesurée. Question : « la FM large bande, on paie quoi, on gagne quoi ? »`,
+    notes: `At small β, FM looks like AM: a carrier and two lines. Raising β
+slowly grows the lines in pairs, with amplitudes J_n(β) that the orange points
+predict, and the spectrum widens.
+
+The statline carries Carson's rule, 2(β+1)f_m, next to the measured 98 %
+bandwidth. The question that follows is the design question: with wideband FM,
+what is being paid and what is being bought?`,
   },
   {
-    id: 'extinction',
-    title: 'Scène 4 · β = 2.405 : la porteuse disparaît',
+    id: 'null',
+    title: 'Scene 4 · β = 2.405: the carrier vanishes',
     view: 'spectrum',
     params: { mode: 'fm', fm: 62.5, beta: 2.405 },
     visible: ['beta'],
-    notes: `Premier zéro de J₀ : la porteuse s'éteint alors qu'on ne module QUE
-la phase. Bouger β de ±0.2 autour de 2.405 pour la voir renaître. Historique :
-c'est ainsi qu'on calibrait la déviation des émetteurs FM — on cherche
-l'extinction au spectromètre, et Δf = 2.405·f_m exactement.`,
+    notes: `At the first zero of J₀ the carrier disappears entirely, even though
+only the phase is being modulated. Moving β by ±0.2 either side brings it back.
+
+This is not a curiosity: it is how FM transmitter deviation used to be
+calibrated. The null is found on a spectrum analyser, and Δf = 2.405·f_m
+exactly.`,
   },
 ];

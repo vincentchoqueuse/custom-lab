@@ -147,11 +147,11 @@ export function compute({ sig, ker, a, b, t }) {
   if (sig === 'gate' && ker === 'gate') {
     const lo = Math.min(a, b);
     const hi = Math.max(a, b);
-    if (t <= 0) regime = 'avant : aucun recouvrement, y = 0';
-    else if (t < lo) regime = 'entrée : le recouvrement grandit, y monte';
-    else if (t <= hi) regime = 'plein recouvrement : y est au plateau';
-    else if (t < a + b) regime = 'sortie : le recouvrement diminue, y descend';
-    else regime = 'après : plus de recouvrement, y = 0';
+    if (t <= 0) regime = 'before: no overlap, y = 0';
+    else if (t < lo) regime = 'entering: the overlap grows, y rises';
+    else if (t <= hi) regime = 'full overlap: y is on the plateau';
+    else if (t < a + b) regime = 'leaving: the overlap shrinks, y falls';
+    else regime = 'after: no overlap left, y = 0';
   }
 
   // les deux aires, par le même découpage : ∫x sur son support, ∫h sur le
@@ -177,12 +177,12 @@ export function compute({ sig, ker, a, b, t }) {
       yValue: { value: yNow, meta: { label: 'y(t) = aire du produit', precision: 4 } },
       support: {
         value: a + (ker === 'gate' ? b : 0),
-        meta: { label: 'largeur du support', unit: 's', precision: 3 },
+        meta: { label: 'support width', unit: 's', precision: 3 },
       },
       areaX: { value: areaX, meta: { label: '∫x', precision: 4 } },
       areaH: { value: areaH, meta: { label: '∫h', precision: 4 } },
       areaY: { value: trapz(tau, yOut), meta: { label: '∫(x*h) = ∫x · ∫h', precision: 4 } },
-      regime: { value: regime, meta: { label: 'régime' } },
+      regime: { value: regime, meta: { label: 'regime' } },
     },
   };
 }
