@@ -138,11 +138,28 @@ These name the app's own machinery and are already fixed in
 
 ## Scene notes
 
-Notes are a **teaching script**, not documentation: they are the one place in the
-repository written in the second person, and they carry the questions to ask the
-room and the wrong answers to expect. Translate the intent, not the sentence — a
-note that reads like a manual has lost what makes it worth having.
+Notes carry what the lecture is for: what to show, in what order, which question
+to put to the room and which wrong answer to expect. They are read by the person
+teaching, before and during the class.
 
-Keep the imperative ("Freeze at φ = 0, then turn the dial"), keep the questions
-in quotation marks, and keep the timing cues ("BEFORE moving N"). Capitals used
-for emphasis are deliberate and survive translation.
+**Write them in prose, not as a transcript of speech.** Complete sentences,
+ordinary punctuation, no telegraphic fragments and no stage directions in the
+imperative:
+
+> ✗ `n=1 : flat comb, 6 teeth — nothing Gaussian. Raise n: 2 (triangle),
+> 5 (bell), 30 (perfect). Hammer R!`
+>
+> ✓ `At n = 1 the histogram is a flat comb with six teeth, and nothing about it
+> is Gaussian. Raising n gives a triangle at 2, a bell at 5, and by 30 a curve
+> the eye cannot tell from the orange one.`
+
+The reason is not decorum. A note is read once at speed the night before, and
+again in the middle of a lecture with a room waiting; a fragment has to be
+reconstructed both times, a sentence does not. Prose also survives being read by
+someone who did not write it — which is the whole point of a catalogue meant to
+be adapted by colleagues.
+
+What survives the change of register: the questions to ask, quoted as they will
+be asked; the wrong answer worth predicting; the number the room should read off
+the statline. What goes: exclamation marks, abbreviations, and the imperative
+mood used as shorthand for "do this now".
