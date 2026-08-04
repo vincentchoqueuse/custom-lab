@@ -224,17 +224,17 @@ export function compute({ N, pad, f1, df, a2, win }) {
       },
       sidelobeTheory: {
         value: th.db,
-        meta: { label: 'théorie', unit: 'dB', precision: 2 },
+        meta: { label: 'theory', unit: 'dB', precision: 2 },
       },
       sidelobeTheoryLine: th.db, // hline sur la vue du noyau
       sidelobeBinLine: th.bin, // vline : où la théorie place ce sommet
       sidelobeBin: {
         value: th.bin,
-        meta: { label: 'à', unit: 'bins', precision: 3 },
+        meta: { label: 'at', unit: 'bins', precision: 3 },
       },
       sidelobeGap: {
         value: sidelobe - th.db,
-        meta: { label: 'écart lu − théorie', unit: 'dB', precision: 2 },
+        meta: { label: 'measured − theory', unit: 'dB', precision: 2 },
       },
       binWidth: {
         value: FS / N,

@@ -27,7 +27,7 @@ function dirichletMag(f, f0, N) {
 
 export const checks = [
   {
-    name: 'sinusoïde tronquée : le spectre EST le noyau de Dirichlet',
+    name: 'truncated sinusoid: the spectrum IS the Dirichlet kernel',
     category: 'numeric',
     run() {
       const T = 12; // ms → N = 96 samples
@@ -41,7 +41,7 @@ export const checks = [
     },
   },
   {
-    name: 'Parseval à travers la FFT zero-paddée',
+    name: 'Parseval through the zero-padded FFT',
     category: 'numeric',
     run() {
       const T = 17;
@@ -56,7 +56,7 @@ export const checks = [
     },
   },
   {
-    name: 'troncature nue : T·B₃ = 0.886 dès que le lobe est étroit devant f₀',
+    name: 'bare truncation: T·B₃ = 0.886 as soon as the lobe is narrow against f₀',
     category: 'numeric',
     run() {
       // 0.8858 = twice the 0.4429 half-width of |sinc| — the same constant the
@@ -69,7 +69,7 @@ export const checks = [
     },
   },
   {
-    name: 'les fenêtres élargissent le lobe dans les rapports connus',
+    name: 'the windows widen the lobe by the known factors',
     category: 'numeric',
     run() {
       // −3 dB main-lobe widths, in units of 1/T: rect 0.886, Hamming 1.30,
@@ -83,7 +83,7 @@ export const checks = [
     },
   },
   {
-    name: 'la largeur décroît en 1/T : pente −1 en log-log',
+    name: 'the width falls as 1/T: slope −1 on log–log axes',
     category: 'numeric',
     run() {
       const o = obs({ T: 40 });
@@ -96,7 +96,7 @@ export const checks = [
     },
   },
   {
-    name: 'chirp : deux régimes, un minimum entre les deux (Gabor)',
+    name: 'chirp: two regimes, a minimum between them (Gabor)',
     category: 'numeric',
     run() {
       // The claim is the SHAPE, not a closed form: the width falls as the
@@ -123,7 +123,7 @@ export const checks = [
     },
   },
   {
-    name: 'sinusoïde amortie : la largeur plafonne à 1/(πτ)',
+    name: 'damped sinusoid: the width saturates at 1/(πτ)',
     category: 'numeric',
     run() {
       // for T ≫ τ the record holds the whole decay: the line keeps the
@@ -139,7 +139,7 @@ export const checks = [
     },
   },
   {
-    name: 'salve : au-delà de sa durée, la largeur ne bouge plus',
+    name: 'burst: past its duration, the width stops moving',
     category: 'numeric',
     run() {
       // past the burst the window only adds zeros — interpolation, not
@@ -153,7 +153,7 @@ export const checks = [
     },
   },
   {
-    name: 'le signal ne dépend pas de la durée d\'observation',
+    name: 'the signal does not depend on the observation duration',
     category: 'numeric',
     run() {
       // the first samples of a short record and of a long one are the same

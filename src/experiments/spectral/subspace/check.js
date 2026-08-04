@@ -29,7 +29,7 @@ const tones = (N, freqs) => {
 
 export const checks = [
   {
-    name: 'décomposition propre : R·v = λ·v et vecteurs orthonormés',
+    name: 'eigendecomposition: R·v = λ·v with orthonormal vectors',
     category: 'numeric',
     run() {
       // La brique dont tout dépend, épinglée par sa DÉFINITION plutôt que
@@ -92,7 +92,7 @@ export const checks = [
     },
   },
   {
-    name: 'sans bruit, le rang de la covariance EST le nombre de sources',
+    name: 'with no noise, the rank of the covariance IS the number of sources',
     category: 'numeric',
     run() {
       // La structure sur laquelle repose toute la méthode : d exponentielles
@@ -113,7 +113,7 @@ export const checks = [
     },
   },
   {
-    name: 'sans bruit, ESPRIT rend les fréquences à la précision machine',
+    name: 'with no noise, ESPRIT returns the frequencies to machine precision',
     category: 'numeric',
     run() {
       // ESPRIT ne balaie rien : sa précision n'est pas limitée par une
@@ -141,7 +141,7 @@ export const checks = [
     },
   },
   {
-    name: 'sans bruit, root-MUSIC atteint le plancher de sa racine double',
+    name: 'with no noise, root-MUSIC reaches the floor of its double root',
     category: 'numeric',
     run() {
       // Et pas la précision machine, POUR UNE RAISON : le polynôme de
@@ -173,7 +173,7 @@ export const checks = [
     },
   },
   {
-    name: 'le pseudo-spectre culmine aux fréquences vraies',
+    name: 'the pseudo-spectrum peaks at the true frequencies',
     category: 'numeric',
     run() {
       // MUSIC balaie, donc sa précision EST celle de la grille : on lui
@@ -197,7 +197,7 @@ export const checks = [
     },
   },
   {
-    name: 'LE propos : MUSIC sépare ce que le périodogramme fond en une bosse',
+    name: 'THE point: MUSIC separates what the periodogram merges into one hump',
     category: 'numeric',
     run() {
       // La raison d'être de l'expérience, énoncée comme une vérification :
@@ -219,7 +219,7 @@ export const checks = [
     },
   },
   {
-    name: 'le plateau des valeurs propres est le vrai niveau de bruit 2σ²',
+    name: 'the eigenvalue plateau is the true noise level 2σ²',
     category: 'statistical',
     run() {
       // Deux corrections de physique par rapport à ce que j'avais écrit.
@@ -252,7 +252,7 @@ export const checks = [
     },
   },
   {
-    name: 'se tromper de d : par défaut une source disparaît, par excès on en invente',
+    name: 'getting d wrong: too small loses a source, too large invents one',
     category: 'numeric',
     run() {
       // Deuxième correction de ma propre pédagogie par la mesure. J'avais
@@ -292,7 +292,7 @@ export const checks = [
     },
   },
   {
-    name: 'sans bruit, les moindres carrés rendent les amplitudes exactes',
+    name: 'with no noise, least squares returns the exact amplitudes',
     category: 'numeric',
     run() {
       // Une fois les fréquences connues, le modèle est LINÉAIRE : le moindres
@@ -320,7 +320,7 @@ export const checks = [
     },
   },
   {
-    name: 'deux estimations INDÉPENDANTES du bruit tombent sur le vrai niveau',
+    name: 'two INDEPENDENT noise estimates land on the true level',
     category: 'statistical',
     run() {
       // Le résidu du modèle et la moyenne du plateau des valeurs propres ne
@@ -353,7 +353,7 @@ export const checks = [
     },
   },
   {
-    name: 'quand le modèle est faux, le résidu le dit — il passe AU-DESSUS',
+    name: 'when the model is wrong, the residual says so — it goes ABOVE',
     category: 'numeric',
     run() {
       // La propriété qui rend la vue utile plutôt que décorative. Avec d trop
@@ -374,7 +374,7 @@ export const checks = [
     },
   },
   {
-    name: 'le cadrage en fréquence ne dépend plus de N ni de Δf',
+    name: 'the frequency framing no longer depends on N or Δf',
     category: 'numeric',
     run() {
       // Le cadre est figé POUR que la résolution se voie bouger : si la
@@ -412,7 +412,7 @@ export const checks = [
     },
   },
   {
-    name: 'une fréquence inventée se chiffre, même hors du cadre',
+    name: 'an invented frequency gets a number, even outside the frame',
     category: 'numeric',
     run() {
       // Le cadre étant figé, une raie fantôme à 840 Hz n'étire plus l'axe :

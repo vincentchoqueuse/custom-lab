@@ -13,7 +13,7 @@ const whiteNoise = (n, sigma, seed) => {
 
 export const checks = [
   {
-    name: 'normalisation densité : E[P] = σ²/Fs sur du bruit blanc',
+    name: 'density normalization: E[P] = σ²/Fs on white noise',
     category: 'statistical',
     run() {
       // La normalisation |X|²/(Fs·Σw²) est choisie POUR que la moyenne du
@@ -64,7 +64,7 @@ export const checks = [
     },
   },
   {
-    name: 'moyenner K segments divise la fluctuation par √K',
+    name: 'averaging K segments divides the fluctuation by √K',
     category: 'statistical',
     run() {
       // La loi que la vue « Fluctuation vs K » trace. Segments DISJOINTS,
@@ -90,7 +90,7 @@ export const checks = [
     },
   },
   {
-    name: 'la segmentation compte juste : Welch obtient 2N/L − 1 segments, Bartlett N/L',
+    name: 'the segmentation counts right: Welch gets 2N/L − 1 segments, Bartlett N/L',
     category: 'numeric',
     run() {
       // Comptage exact, pas statistique : c'est la comptabilité qui décide
@@ -112,7 +112,7 @@ export const checks = [
     },
   },
   {
-    name: 'sans bruit, la raie tombe exactement sur son bin',
+    name: 'with no noise, the line lands exactly on its bin',
     category: 'numeric',
     run() {
       // 150 Hz et 190 Hz à Fs = 1000 sur N = 2048 : 307.2 et 389.12 bins,
@@ -138,7 +138,7 @@ export const checks = [
     },
   },
   {
-    name: 'la fluctuation tracée est celle que la statline annonce',
+    name: 'the plotted fluctuation is the one the statline announces',
     category: 'numeric',
     run() {
       // Le point K = 1 de la courbe et le nombre affiché doivent être le
@@ -206,7 +206,7 @@ export const checks = [
     },
   },
   {
-    name: 'la raie faible est exactement A₂ dB sous la forte',
+    name: 'the weak line is exactly A₂ dB below the strong one',
     category: 'numeric',
     run() {
       // A₂ est un niveau en dB, donc un rapport de PUISSANCES : l'écart entre
@@ -235,7 +235,7 @@ export const checks = [
     },
   },
   {
-    name: 'la somme des fenêtres raconte les quatre cas, exactement',
+    name: 'the sum of the windows tells the four cases, exactly',
     category: 'numeric',
     run() {
       // La vue « Découpage et recouvrement » repose entièrement sur cette

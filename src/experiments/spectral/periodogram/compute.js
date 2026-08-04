@@ -291,23 +291,23 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
       coverage: {
         value: flat
           ? wMin > 1.5
-            ? `plate à ${wMin.toFixed(2)} — chaque échantillon compté deux fois`
-            : 'plate à 1 — recouvrement parfait, chaque échantillon pèse 1'
-          : `ondule de ${wMin.toFixed(2)} à ${wMax.toFixed(2)} — les bords des segments sont sous-pondérés`,
-        meta: { label: 'somme des fenêtres' },
+            ? `flat at ${wMin.toFixed(2)} — every sample counted twice`
+            : 'flat at 1 — perfect overlap, every sample weighs 1'
+          : `ripples from ${wMin.toFixed(2)} to ${wMax.toFixed(2)} — segment edges are underweighted`,
+        meta: { label: 'sum of the windows' },
       },
-      segments: { value: est.segments, meta: { label: 'segments moyennés K' } },
+      segments: { value: est.segments, meta: { label: 'segments averaged K' } },
       fRes: {
         value: FS / seg.L,
-        meta: { label: 'résolution Fs/L', unit: 'Hz', precision: 2 },
+        meta: { label: 'resolution Fs/L', unit: 'Hz', precision: 2 },
       },
       stdRatio: {
         value: fl.ratio,
-        meta: { label: 'fluctuation d’un bin à l’autre', precision: 3 },
+        meta: { label: 'fluctuation from bin to bin', precision: 3 },
       },
       stdRatioRaw: {
         value: flRaw.ratio,
-        meta: { label: 'la même, sans moyenner', precision: 3 },
+        meta: { label: 'the same, without averaging', precision: 3 },
       },
       verdict: {
         value:

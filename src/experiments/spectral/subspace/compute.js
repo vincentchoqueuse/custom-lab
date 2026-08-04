@@ -271,32 +271,32 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
       dLine: dEff + 0.5, // verticale : la coupure signal / bruit
       fourierLimit: {
         value: fourier,
-        meta: { label: 'limite de Fourier Fs/N', unit: 'Hz', precision: 2 },
+        meta: { label: 'Fourier limit Fs/N', unit: 'Hz', precision: 2 },
       },
       spacing: {
         value: f2 - F1,
-        meta: { label: 'écart des deux raies', unit: 'Hz', precision: 2 },
+        meta: { label: 'gap between the lines', unit: 'Hz', precision: 2 },
       },
-      snapshots: { value: R.snapshots, meta: { label: 'instantanés' } },
+      snapshots: { value: R.snapshots, meta: { label: 'snapshots' } },
       eigenGap: {
         value: gapDb,
-        meta: { label: 'saut à la coupure', unit: 'dB', precision: 1 },
+        meta: { label: 'jump at the cutoff', unit: 'dB', precision: 1 },
       },
       errRoot: {
         value: worstErr(rmHz),
-        meta: { label: 'erreur root-MUSIC', unit: 'Hz', precision: 3 },
+        meta: { label: 'root-MUSIC error', unit: 'Hz', precision: 3 },
       },
       errEsprit: {
         value: worstErr(esHz),
-        meta: { label: 'erreur ESPRIT', unit: 'Hz', precision: 3 },
+        meta: { label: 'ESPRIT error', unit: 'Hz', precision: 3 },
       },
       strayRoot: {
         value: strayHz(rmHz),
-        meta: { label: 'invention root-MUSIC', unit: 'Hz', precision: 2 },
+        meta: { label: 'root-MUSIC invention', unit: 'Hz', precision: 2 },
       },
       strayEsprit: {
         value: strayHz(esHz),
-        meta: { label: 'invention ESPRIT', unit: 'Hz', precision: 2 },
+        meta: { label: 'ESPRIT invention', unit: 'Hz', precision: 2 },
       },
       // les trois spectres, même forme : raies + niveau de bruit
       linesTrue,
@@ -329,7 +329,7 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
       },
       noiseRef: {
         value: dbP(2 * sigma * sigma),
-        meta: { label: 'bruit vrai', unit: 'dB', precision: 2 },
+        meta: { label: 'true noise', unit: 'dB', precision: 2 },
       },
       ampErrRoot: {
         value: ampErrOf(rm, lsRoot.power),
@@ -346,7 +346,7 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
             : dEff < sources
               ? `d = ${dEff} < ${sources} sources : il en manque une`
               : `d = ${dEff} > ${sources} sources : pics fantômes`,
-        meta: { label: 'modèle' },
+        meta: { label: 'model' },
       },
     },
   };

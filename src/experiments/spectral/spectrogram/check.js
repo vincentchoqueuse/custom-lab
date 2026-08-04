@@ -113,7 +113,7 @@ export const checks = [
     },
   },
   {
-    name: 'FM : la crête suit F + Δ·sin(2π f_mod t), à un bin près',
+    name: 'FM: the ridge follows F + Δ·sin(2π f_mod t), to within a bin',
     category: 'numeric',
     run() {
       // The phase is integrated in closed form; the STFT is asked whether it

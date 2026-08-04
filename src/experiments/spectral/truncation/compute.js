@@ -146,15 +146,15 @@ export function compute(params) {
       spectrum: { x: sf, y: sy },
       widthVsT: { x: sweepT, y: sweepB },
       // the vlines read T and f₀ straight from the params — no observable needed
-      nSamples: { value: N, meta: { label: 'échantillons', precision: 0 } },
-      b3: { value: b3, meta: { label: 'largeur à −3 dB', unit: 'Hz', precision: 2 } },
+      nSamples: { value: N, meta: { label: 'samples', precision: 0 } },
+      b3: { value: b3, meta: { label: '−3 dB width', unit: 'Hz', precision: 2 } },
       tb3: {
         value: (b3 * T) / 1000,
         meta: { label: 'produit T·B₃', precision: 3 },
       },
       resolution: {
         value: 1000 / T,
-        meta: { label: 'résolution 1/T', unit: 'Hz', precision: 2 },
+        meta: { label: 'resolution 1/T', unit: 'Hz', precision: 2 },
       },
     },
   };

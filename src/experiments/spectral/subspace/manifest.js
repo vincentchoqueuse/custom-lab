@@ -14,7 +14,7 @@ const F_AXIS = { label: 'f', unit: 'Hz', domain: fWindow };
 /** Les fréquences vraies, en verticales — les mêmes sur les trois vues,
  *  déclarées une fois pour qu'elles ne puissent pas diverger. */
 const TRUTH = [
-  vline('fTrue1', { color: '#EDB120', dashed: true, width: 1.6, label: 'vraies fréquences' }),
+  vline('fTrue1', { color: '#EDB120', dashed: true, width: 1.6, label: 'true frequencies' }),
   vline('fTrue2', { color: '#EDB120', dashed: true, width: 1.6 }),
   vline('fTrue3', { color: '#EDB120', dashed: true, width: 1.6 }),
 ];
@@ -24,13 +24,13 @@ export default {
   id: 'subspace',
   order: 4,
   random: true, // bruit gaussien complexe
-  title: 'Techniques haute résolution',
-  subtitle: 'MUSIC, root-MUSIC, ESPRIT — ce qu’un modèle achète, et ce qu’il coûte',
-  tags: ['haute résolution', 'MUSIC', 'ESPRIT', 'sous-espace', 'valeurs propres'],
+  title: 'High-resolution methods',
+  subtitle: 'MUSIC, root-MUSIC, ESPRIT — what a model buys, and what it costs',
+  tags: ['high resolution', 'MUSIC', 'ESPRIT', 'subspace', 'eigenvalues'],
 
   params: {
     df: float('Δf', {
-      description: 'écart des deux raies, en unités de la limite de Fourier Fs/N',
+      description: 'gap between the two lines, in units of the Fourier limit Fs/N',
       min: 0.05,
       max: 3,
       step: 0.05,
@@ -42,7 +42,7 @@ export default {
       precision: 2,
     }),
     snr: float('SNR', {
-      description: 'rapport signal à bruit par raie',
+      description: 'signal-to-noise ratio per line',
       min: -10,
       max: 50,
       step: 1,
@@ -51,21 +51,21 @@ export default {
       precision: 0,
     }),
     d: int('d', {
-      description: 'valeurs propres retenues comme SIGNAL — le paramètre qu’il faut deviner',
+      description: 'eigenvalues kept as SIGNAL — the parameter that has to be guessed',
       min: 1,
       max: 8,
       default: 2,
     }),
     sources: select('sources', {
-      description: 'nombre de raies réellement présentes',
+      description: 'number of lines actually present',
       options: [
-        { value: 2, label: '2 (deux raies proches)' },
-        { value: 3, label: '3 (+ une raie à l’écart)' },
+        { value: 2, label: '2 (two close lines)' },
+        { value: 3, label: '3 (+ one line further off)' },
       ],
       default: 2,
     }),
     N: select('N', {
-      description: "longueur de l'enregistrement (Fs = 1 kHz)",
+      description: 'record length (Fs = 1 kHz)',
       options: [
         { value: 128, label: '128' },
         { value: 256, label: '256' },
@@ -75,7 +75,7 @@ export default {
       default: 256,
     }),
     M: int('M', {
-      description: 'ordre de la covariance — le nombre de vecteurs propres disponibles',
+      description: 'covariance order — the number of eigenvectors available',
       min: 4,
       max: 32,
       // la résolution de MUSIC croît avec M : à M = 12 il ne sépare plus
@@ -86,21 +86,21 @@ export default {
   },
 
   validate: [
-    { when: (p) => p.d >= p.M, message: 'd doit rester strictement inférieur à M' },
-    { when: (p) => p.M > p.N / 2, message: 'M ne peut pas dépasser N/2 (pas assez d’instantanés)' },
+    { when: (p) => p.d >= p.M, message: 'd must stay strictly below M' },
+    { when: (p) => p.M > p.N / 2, message: 'M cannot exceed N/2 (not enough snapshots)' },
   ],
 
   derived: {
-    limite: { label: 'limite de Fourier Fs/N', calc: (p) => `${(1000 / p.N).toFixed(2)} Hz` },
+    fourierLimit: { label: 'Fourier limit Fs/N', calc: (p) => `${(1000 / p.N).toFixed(2)} Hz` },
     ecart: {
-      label: 'écart demandé',
-      calc: (p) => `${((p.df * 1000) / p.N).toFixed(2)} Hz (${p.df}× la limite)`,
+      label: 'requested gap',
+      calc: (p) => `${((p.df * 1000) / p.N).toFixed(2)} Hz (${p.df}× the limit)`,
     },
   },
 
   groups: [
     { title: 'Signal', params: ['sources', 'df', 'snr', 'N'] },
-    { title: 'Modèle', params: ['d', 'M'] },
+    { title: 'Model', params: ['d', 'M'] },
   ],
 
   views: [
@@ -111,7 +111,7 @@ export default {
       'spectrum',
       line('periodogram', {
         width: 2,
-        label: 'périodogramme',
+        label: 'periodogram',
         overlays: TRUTH,
         axes: { x: F_AXIS, y: { label: '|X(f)|', unit: 'dB' } },
       })
@@ -123,16 +123,16 @@ export default {
     // parce qu'on fabrique le signal et jamais dans la vraie vie.
     view(
       'eigen',
-      'Valeurs propres',
+      'Eigenvalues',
       line('eigenvalues', {
         width: 2,
-        label: 'λ_k (décroissantes)',
+        label: 'λ_k (decreasing)',
         overlays: [
-          scatter('eigenSelected', { color: '#D95319', size: 9, label: 'retenues comme signal' }),
-          vline('dLine', { color: '#D95319', dashed: true, width: 1.6, label: 'coupure d' }),
+          scatter('eigenSelected', { color: '#D95319', size: 9, label: 'kept as signal' }),
+          vline('dLine', { color: '#D95319', dashed: true, width: 1.6, label: 'cutoff d' }),
           // 2σ² et non σ² : le bruit est complexe circulaire, il porte σ²
           // par quadrature. L'étiquette dit donc le niveau réel.
-          hline('noiseLine', { color: '#77AC30', dashed: true, width: 1.6, label: 'bruit 2σ² (vrai)' }),
+          hline('noiseLine', { color: '#77AC30', dashed: true, width: 1.6, label: 'noise 2σ² (true)' }),
         ],
         axes: { x: { label: 'k' }, y: { label: 'λ_k / λ₁', unit: 'dB' } },
       })
@@ -156,12 +156,12 @@ export default {
     // cesse d'expliquer la mesure.
     view(
       'model',
-      'Spectre estimé',
+      'Estimated spectrum',
       stem('linesTrue', {
         color: '#EDB120',
         size: 7,
         baseline: -60,
-        label: 'vérité',
+        label: 'ground truth',
         overlays: [
           stem('linesRoot', { color: '#D95319', size: 4.5, baseline: -60, label: 'root-MUSIC' }),
           stem('linesEsprit', { color: '#7E2F8E', size: 4.5, baseline: -60, label: 'ESPRIT' }),
@@ -172,14 +172,14 @@ export default {
           // aussi ce qui rend visible d'un coup d'œil qu'un socle est
           // remonté. Le bord supérieur reste tracé par-dessus : un aplat
           // translucide ne se lit pas au décibel près.
-          band('bandTrue', { color: '#EDB120', opacity: 0.16, label: 'vérité' }),
+          band('bandTrue', { color: '#EDB120', opacity: 0.16, label: 'ground truth' }),
           band('bandRoot', { color: '#D95319', opacity: 0.16, label: 'root-MUSIC' }),
           band('bandEsprit', { color: '#7E2F8E', opacity: 0.16, label: 'ESPRIT' }),
-          hline('nsTrue', { color: '#EDB120', width: 1.6, label: 'vérité' }),
+          hline('nsTrue', { color: '#EDB120', width: 1.6, label: 'ground truth' }),
           hline('nsRoot', { color: '#D95319', dashed: true, width: 1.6, label: 'root-MUSIC' }),
           hline('nsEsprit', { color: '#7E2F8E', dashed: true, width: 1.6, label: 'ESPRIT' }),
         ],
-        axes: { x: F_AXIS, y: { label: 'puissance', unit: 'dB', domain: [MODEL_FLOOR, 8] } },
+        axes: { x: F_AXIS, y: { label: 'power', unit: 'dB', domain: [MODEL_FLOOR, 8] } },
       })
     ),
 
@@ -189,7 +189,7 @@ export default {
     // points : root-MUSIC et ESPRIT donnent des NOMBRES, pas des courbes.
     view(
       'pseudo',
-      'Pseudo-spectre',
+      'Pseudo-spectrum',
       line('pseudo', {
         width: 2.2,
         label: 'MUSIC',
@@ -198,7 +198,7 @@ export default {
           scatter('rootMusicMarks', { color: '#D95319', size: 10, label: 'root-MUSIC' }),
           scatter('espritMarks', { color: '#7E2F8E', size: 10, label: 'ESPRIT' }),
         ],
-        axes: { x: F_AXIS, y: { label: 'pseudo-spectre', unit: 'dB' } },
+        axes: { x: F_AXIS, y: { label: 'pseudo-spectrum', unit: 'dB' } },
       })
     ),
   ],

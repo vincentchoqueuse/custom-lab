@@ -2,58 +2,66 @@
 export default [
   {
     id: 'gabor',
-    title: 'Scène 1 · Le compromis de Gabor',
+    title: 'Scene 1 · The Gabor trade-off',
     params: { source: 'chirp', f1: 900, N: 256, win: 'hann', tcut: 1 },
     visible: ['N'],
-    notes: `Un chirp, une diagonale. Geler (F) à N = 64 : le temps est net, la
-fréquence baveuse. Passer N = 1024 : l'inverse. Statline : Δf·Δt = 1, toujours
-— on ne choisit pas d'être bon partout, on choisit OÙ être bon. C'est le
-principe d'incertitude, version traitement du signal.`,
+    notes: `A chirp is a diagonal. Freezing at N = 64 gives a sharp time axis and
+a blurred frequency axis; N = 1024 gives the opposite.
+
+The statline holds the invariant: Δf·Δt = 1, always. One does not choose to be
+good everywhere, only WHERE to be good. This is the uncertainty principle in
+its signal-processing form.`,
   },
   {
     id: 'tones',
-    title: 'Scène 2 · Deux notes, combien de temps pour les distinguer ?',
+    title: 'Scene 2 · Two notes: how long to tell them apart?',
     params: { source: 'tones', df: 15, N: 64, win: 'hann', tcut: 1 },
     visible: ['N', 'df'],
-    notes: `Deux tons à 15 Hz d'écart, fenêtre courte : UNE bande. Question à la
-salle : « il faut écouter combien de temps pour entendre deux notes ? »
-Réponse : ~1/Δf. Monter N jusqu'à la séparation (N = 256 : Δf devient 7.8 Hz).
-L'oreille fait exactement ce calcul.`,
+    notes: `Two tones 15 Hz apart with a short window give a single band. The
+question to the room is how long one has to listen to hear two notes, and the
+answer is about 1/Δf.
+
+Raising N until they separate — at N = 256, where Δf becomes 7.8 Hz — turns the
+answer into a measurement. The ear performs exactly this calculation.`,
   },
   {
     id: 'aliasing',
-    title: 'Scène 3 · Le rebond sur Nyquist',
+    title: 'Scene 3 · The bounce off Nyquist',
     params: { source: 'chirp', f1: 2800, N: 256, win: 'hann', tcut: 1 },
     visible: ['f1'],
-    notes: `Prédiction AVANT de monter f₁ : « le chirp monte, que fait la crête
-en atteignant 1000 Hz ? » Elle REBONDIT — repliement en zigzag, la signature
-visuelle du théorème d'échantillonnage. Relier à l'expérience Échantillonnage :
-même phénomène, vu cette fois dans le plan temps-fréquence.`,
+    notes: `The prediction belongs before f₁ is raised: the chirp climbs, so what
+does the ridge do when it reaches 1000 Hz?
+
+It BOUNCES. The zigzag is aliasing, and it is the visual signature of the
+sampling theorem — the same phenomenon as in the sampling experiment, seen this
+time in the time–frequency plane.`,
   },
   {
     id: 'am',
-    title: 'Scène 4 · Deux descriptions du même signal',
+    title: 'Scene 4 · Two descriptions of the same signal',
     params: { source: 'am', fm: 8, N: 128, win: 'hann', tcut: 1 },
     visible: ['N', 'fm'],
-    notes: `AM à f_m = 8 Hz. Fenêtre courte (N = 128, Δt = 64 ms) : on VOIT le
-battement — des colonnes qui pulsent. Geler (F), passer N = 1024 (Δt = 512 ms,
-Δf = 2 Hz) : le battement disparaît, remplacé par TROIS raies — porteuse et
-bandes latérales à ±f_m. Aucune des deux images n'est fausse : c'est la même
-physique, projetée sur deux résolutions.`,
+    notes: `An AM signal at f_m = 8 Hz. With a short window — N = 128, so
+Δt = 64 ms — the beat is visible as pulsing columns.
+
+Freezing and moving to N = 1024, giving Δt = 512 ms and Δf = 2 Hz, makes the
+beat disappear and replaces it with THREE lines: the carrier and its sidebands
+at ±f_m. Neither picture is wrong. It is the same physics projected onto two
+resolutions.`,
   },
   {
     id: 'fm',
-    title: 'Scène 5 · Deux crêtes qui se croisent',
+    title: 'Scene 5 · Two ridges crossing',
     params: { source: 'fm', f1: 900, fmod: 1, fdev: 150, N: 256, win: 'hann', tcut: 0.5 },
     visible: ['fmod', 'fdev'],
-    notes: `Un chirp ET une sinusoïde dont la fréquence oscille lentement : une
-droite qui monte, une sinusoïde qui ondule autour de 500 Hz, et elles se
-croisent. Aucun spectre ne peut montrer ça — c'est exactement pour cette
-image que le spectrogramme existe.
-Monter f_mod : l'ondulation se resserre, puis se BROUILLE — la fréquence
-change trop vite pour la fenêtre. Descendre N à 64 : la crête FM redevient
-nette et la ligne du chirp s'épaissit. C'est Gabor, avec deux signaux qui
-demandent des réglages opposés dans la même image.
-Élargir Δ : l'excursion grandit jusqu'à toucher le chirp.`,
+    notes: `A chirp AND a sinusoid whose frequency oscillates slowly: a rising
+line and a wave around 500 Hz, and they cross. No spectrum can show that, and
+this picture is precisely why the spectrogram exists.
+
+Raising f_mod tightens the oscillation until it BLURS — the frequency is
+changing too fast for the window. Dropping N to 64 sharpens the FM ridge again
+and thickens the chirp line. That is Gabor with two signals asking for opposite
+settings in the same image. Widening Δ grows the deviation until it touches the
+chirp.`,
   },
 ];

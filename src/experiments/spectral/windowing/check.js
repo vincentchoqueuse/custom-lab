@@ -67,7 +67,7 @@ export const checks = [
   },
   standardChecks.determinism(compute, BASE, 'spectrum'),
   {
-    name: 'lobes secondaires : la théorie calculée recoupe la littérature',
+    name: 'sidelobes: the computed theory matches the literature',
     category: 'numeric',
     run() {
       // Les quatre chiffres du cours (Harris 1978), retrouvés par le calcul
@@ -87,7 +87,7 @@ export const checks = [
     },
   },
   {
-    name: 'la forme close vaut la somme directe (1e-14)',
+    name: 'the closed form equals the direct sum (1e-14)',
     category: 'numeric',
     run() {
       // La forme close n'est pas une approximation : c'est la même TFtd,
@@ -114,7 +114,7 @@ export const checks = [
     },
   },
   {
-    name: 'le tracé lit le bon lobe : sous la théorie, et de moins en moins',
+    name: 'the plot reads the right lobe: below theory, and by less and less',
     category: 'numeric',
     run() {
       // La grille du tracé (16× de bourrage) ne tombe pas sur le sommet du
