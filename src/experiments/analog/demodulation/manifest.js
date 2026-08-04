@@ -5,7 +5,7 @@ import { view, figure, line, vline, hline } from '../../../core/views.js';
 export default {
   id: 'demodulation',
   order: 5,
-  random: true, // bruit gaussien additif
+  random: true, // additive Gaussian noise
   // plural, like the mirror experiment "AM and FM modulation": both really carry
   // two, and the catalogue is read in pairs
   title: 'AM and FM demodulation',
@@ -80,13 +80,13 @@ export default {
   ],
 
   derived: {
-    bande: {
+    band: {
       label: 'instantaneous frequency',
       calc: (p) => `${p.fc - p.fdev} … ${p.fc + p.fdev} Hz`,
     },
     desa: {
       label: 'DESA validity range (Fs/4)',
-      calc: (p) => (p.fc + p.fdev > 2000 ? 'DÉPASSÉ — Teager va se replier' : 'respecté'),
+      calc: (p) => (p.fc + p.fdev > 2000 ? 'EXCEEDED — Teager will fold' : 'respected'),
     },
   },
 

@@ -135,7 +135,7 @@ export const checks = [
     },
   },
   {
-    name: 'valeur moyenne du train d\'impulsions = Aα (moyenne temporelle)',
+    name: 'mean value of the pulse train = Aα (time average)',
     category: 'numeric',
     run() {
       // independent route: average the drawn signal over its two periods

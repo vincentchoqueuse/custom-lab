@@ -23,16 +23,16 @@
 //      therefore passes through the original samples without displacing them,
 //      which the harness pins at 1e-12.
 //
-// No zero-order hold here: that is the ANALOG stage of the DAC, a
-// autre histoire (son enveloppe en sinc, son affaissement en bord de bande),
-// and mixing it into this one blurred both.
+// No zero-order hold here: that is the ANALOG stage of the DAC, another story
+// (its sinc envelope, its droop at the band edge), and mixing it into this one
+// blurred both.
 //
 // PURE, stateless — runs in a worker; entirely deterministic (no draw).
 import { fft, sinc } from '../../../core/numeric.js';
 import { magSpectrum, freqAxis, dbAmpAll, peakNear, tone } from '../../../core/dsp.js';
 
-const FS = 8000; // fréquence d'échantillonnage de départ (Hz)
-const N_PLOT = 24; // échantillons de base tracés (3 ms)
+const FS = 8000; // starting sampling rate (Hz)
+const N_PLOT = 24; // base samples drawn (3 ms)
 const N_SPEC = 256; // échantillons de base analysés
 const NFFT = 8192;
 const DB_FLOOR = -90;
@@ -51,7 +51,7 @@ export function interpKernel(L, half) {
   return h;
 }
 
-/** Convolution linéaire, retard de groupe compensé. */
+/** Linear convolution, group delay compensated. */
 export function filterStream(up, h, half) {
   const n = up.length;
   const taps = h.length;
@@ -66,7 +66,7 @@ export function filterStream(up, h, half) {
   return y;
 }
 
-/** |X(f)| en dB sur la grille NFFT, fenêtre de Hann, normalisé par `norm`. */
+/** |X(f)| in dB on the NFFT grid, Hann window, normalized by `norm`. */
 const spectrumDb = (sig, norm) =>
   dbAmpAll(
     magSpectrum(sig, { nfft: NFFT, window: 'hann' }).map((m) => m / norm),
@@ -90,7 +90,7 @@ export function compute({ f0, L, stage, half }) {
   const h = interpKernel(L, halfTaps);
   const yUp = filterStream(up, h, halfTaps);
 
-  /* ---------- temporel ---------------------------------------------------- */
+  /* ---------- time domain --------------------------------------------------- */
   // Abscissa in milliseconds, THE SAME at all three steps: that is what makes
   // it visible that the signal does not move and only the grid tightens.
   const msBase = new Float64Array(N_PLOT);
@@ -120,7 +120,7 @@ export function compute({ f0, L, stage, half }) {
   const stemsX = stage === 'samples' ? msBase : msUp;
   const stemsY = stage === 'samples' ? vBase : stage === 'stuffed' ? vStuffed : vFiltered;
 
-  /* ---------- spectre ----------------------------------------------------- */
+  /* ---------- spectrum ------------------------------------------------------ */
   // Common normalization: the top of the spectrum BEFORE filtering. The three
   // steps are therefore read on the same scale, and the amplitude recovery
   // brought by the filter's gain L shows instead of being masked by a

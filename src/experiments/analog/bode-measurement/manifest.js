@@ -12,7 +12,7 @@ export default {
   tags: ['analog', 'Bode', 'oscilloscope', 'measurement', 'RC', 'resonance'],
 
   params: {
-    system: select('système', {
+    system: select('system', {
       description: 'circuit under test',
       options: [
         { value: 'rc', label: 'RC low-pass (first order)' },

@@ -27,7 +27,7 @@ export default {
       description: 'denominator of H(s), decreasing powers',
       default: [1, 2, 1],
     }),
-    input: select('entrée', {
+    input: select('input', {
       description: 'signal applied at t = 0',
       options: [
         { value: 'step', label: 'step' },

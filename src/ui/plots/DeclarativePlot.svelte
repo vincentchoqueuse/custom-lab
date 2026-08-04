@@ -271,7 +271,7 @@
     for (const l of layers) {
       if (!l.s.label || l.kind === 'none') continue;
       if (l.pts && l.pts.length === 0) continue;
-      // une ligne de repère hors domaine n'est pas tracée : ne pas l'annoncer
+      // a reference line outside the domain is not drawn: do not advertise it
       if ((l.kind === 'vline' || l.kind === 'hline') && !Number.isFinite(l.v)) continue;
       if (seen.has(l.s.label)) continue;
       seen.add(l.s.label);

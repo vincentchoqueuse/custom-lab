@@ -29,7 +29,7 @@ export default {
       unit: 'ms',
       precision: 0,
     }),
-    win: select('fenêtre', {
+    win: select('window', {
       description: 'shape of the truncation',
       options: [
         { value: 'rect', label: 'rectangular (bare truncation)' },
@@ -66,7 +66,7 @@ export default {
       precision: 1,
       visibleIf: { sig: 'damped' },
     }),
-    tb: float('T_salve', {
+    tb: float('T_burst', {
       description: 'burst duration',
       min: 5,
       max: 200,

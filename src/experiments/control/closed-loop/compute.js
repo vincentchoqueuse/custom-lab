@@ -72,7 +72,7 @@ const ISO_DB = [-12, -6, -3, -1, 0, 1, 3, 6, 12];
 const ISO_CLIP_DB = 28;
 const N_PHI = 481;
 
-/** Modules de boucle ouverte situés sur |L/(1+L)| = M à la phase φ (degrés). */
+/** Open-loop magnitudes lying on |L/(1+L)| = M at phase φ (degrees). */
 export function isoModulus(M, phiDeg) {
   const c = Math.cos((phiDeg * Math.PI) / 180);
   const s = Math.sin((phiDeg * Math.PI) / 180);
@@ -84,7 +84,7 @@ export function isoModulus(M, phiDeg) {
   return [(M * M * c + root) / den, (M * M * c - root) / den].filter((r) => r > 0);
 }
 
-/** Polylignes séparées par des NaN : un contour par niveau, en (φ°, dB). */
+/** Polylines separated by NaNs: one contour per level, in (φ°, dB). */
 function abaque(levelsDb) {
   const x = [];
   const y = [];
@@ -117,7 +117,7 @@ function abaque(levelsDb) {
 export function compute({ w0, m, K }) {
   const bf = closedParams(K, m, w0);
 
-  /* ---------- temporel : le même échelon, deux systèmes ------------------- */
+  /* ---------- time domain: the same step, two systems --------------------- */
   // m'ω₀' = mω₀: both envelopes decay at the same speed, so a single observation
   // window suffices for both — which is already the lesson.
   const T = 9 / (m * w0);
@@ -134,7 +134,7 @@ export function compute({ w0, m, K }) {
     peakClosed = Math.max(peakClosed, yClosed[i]);
   }
 
-  /* ---------- fréquentiel : la boucle ouverte ET la boucle fermée --------- */
+  /* ---------- frequency domain: the open loop AND the closed loop --------- */
   const L = bodeSweep((w) => openLoop(w, { K, m, w0 }), { center: w0, decades: DECADES, n: NW });
   const Tf = bodeSweep((w) => closeIt(openLoop(w, { K, m, w0 })), {
     center: w0,
@@ -142,7 +142,7 @@ export function compute({ w0, m, K }) {
     n: NW,
   });
 
-  /* ---------- l'abaque, et la résonance qu'elle mesure -------------------- */
+  /* ---------- the chart, and the resonance it measures -------------------- */
   // The closed loop being a known second order, its resonance has a closed form:
   // it is NOT read off the curve, it is computed — and the highlighted contour is
   // that one. The tangency therefore becomes a visual verification of an exact

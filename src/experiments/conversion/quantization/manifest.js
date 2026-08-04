@@ -47,7 +47,7 @@ export default {
     ),
     view(
       'error',
-      "L'erreur",
+      'The error',
       line('errT', {
         overlays: [
           hline((p) => 1 / 2 ** p.b, { color: '#EDB120', dashed: true, label: '+Δ/2' }),
@@ -58,10 +58,10 @@ export default {
     ),
     view(
       'error-hist',
-      "Distribution de l'erreur",
+      'Distribution of the error',
       histogram('error', {
         overlays: [density('errPdf', { label: 'uniform ±Δ/2' })],
-        axes: { x: 'erreur', y: 'densité' },
+        axes: { x: 'error', y: 'density' },
       })
     ),
     view(

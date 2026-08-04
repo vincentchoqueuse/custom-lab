@@ -58,7 +58,7 @@ const run = (p) => compute({ signal: 'rect', T: 5, f0: F0, t0: 0, seed: 1, ...p 
 
 export const checks = [
   {
-    name: 'transformées : intégrale de Fourier numérique = forme fermée',
+    name: 'transforms: numerical Fourier integral = closed form',
     category: 'numeric',
     run() {
       // frequencies spread over the displayed band, offset so none lands on a
@@ -79,11 +79,11 @@ export const checks = [
           where = signal;
         }
       }
-      return { ok: worst < 1e-9, detail: `écart max ${worst.toExponential(1)} (${where})` };
+      return { ok: worst < 1e-9, detail: `max gap ${worst.toExponential(1)} (${where})` };
     },
   },
   {
-    name: 'énergies : ∫x²(t)dt = forme fermée',
+    name: 'energies: ∫x²(t)dt = closed form',
     category: 'numeric',
     run() {
       const gap = maxGap(Object.keys(SUPPORT), (signal) => {
@@ -91,25 +91,25 @@ export const checks = [
         const e = simpson((u) => xOf(signal, u, T0, F0) ** 2, a, b);
         return Math.abs(e - energyOf(signal, T0, F0)) / T0;
       });
-      return { ok: gap < 1e-9, detail: `écart relatif max ${gap.toExponential(1)}` };
+      return { ok: gap < 1e-9, detail: `max relative gap ${gap.toExponential(1)}` };
     },
   },
   {
-    name: 'sinus cardinal : ∫sinc²(t/T)dt = T (queues en 1/t², ±200T)',
+    name: 'sinc: ∫sinc²(t/T)dt = T (1/t² tails, ±200T)',
     category: 'numeric',
     run() {
       // The only signal without a natural support: truncating at ±200T leaves
       // ≈ T/(200π²) ≈ 5e-4·T in the tails. Documented, not hidden.
       const e = simpson((u) => xOf('sinc', u, T0, F0) ** 2, -200 * T0, 200 * T0, 400000);
       const rel = Math.abs(e - T0) / T0;
-      return { ok: rel < 2e-3, detail: `écart ${(100 * rel).toFixed(3)} %` };
+      return { ok: rel < 2e-3, detail: `gap ${(100 * rel).toFixed(3)} %` };
     },
   },
   {
-    name: 'Parseval : ∫|X(f)|²df = énergie du signal',
+    name: 'Parseval: ∫|X(f)|²df = energy of the signal',
     category: 'numeric',
     run() {
-      // 1/f² spectra (porte, exponentielle causale) leave ~3e-4·T beyond
+      // 1/f² spectra (gate, causal exponential) leave ~3e-4·T beyond
       // ±300/T. The sinc is integrated over its exact band; its tolerance pays
       // for the Dirichlet half-value at the band edge, which one Simpson
       // endpoint weight turns into a ~h·T/2 bias — quadrature, not physics.
@@ -120,27 +120,27 @@ export const checks = [
         const F = signal === 'sinc' ? 0.5 / T0 : 300 / T0 + (signal === 'rf' ? F0 : 0);
         const e = simpson((f) => X0(signal, f, T0, F0).reduce((s, v) => s + v * v, 0), -F, F, 400000);
         const rel = Math.abs(e - energyOf(signal, T0, F0)) / T0;
-        if (rel > tol[signal]) return { ok: false, detail: `${signal}: écart ${rel.toExponential(1)}` };
+        if (rel > tol[signal]) return { ok: false, detail: `${signal}: gap ${rel.toExponential(1)}` };
         if (rel > worst) {
           worst = rel;
           where = signal;
         }
       }
-      return { ok: true, detail: `écart max ${worst.toExponential(1)} (${where})` };
+      return { ok: true, detail: `max gap ${worst.toExponential(1)} (${where})` };
     },
   },
   {
-    name: 'un retard ne change pas |X(f)| — à l’identique',
+    name: 'a delay does not change |X(f)| — bit for bit',
     category: 'numeric',
     run() {
       const a = run({ signal: 'expo', t0: 0 }).mag.y;
       const b = run({ signal: 'expo', t0: 3.7 }).mag.y;
       const gap = maxAbsDiff(a, b);
-      return { ok: gap === 0, detail: `écart ${gap} sur ${a.length} points` };
+      return { ok: gap === 0, detail: `gap ${gap} over ${a.length} points` };
     },
   },
   {
-    name: 'un retard ajoute exactement −2πft₀ à la phase',
+    name: 'a delay adds exactly −2πft₀ to the phase',
     category: 'numeric',
     run() {
       const t0ms = 2;
@@ -148,11 +148,11 @@ export const checks = [
       const p1 = phaseByFreq(run({ signal: 'expo', t0: t0ms }).phase);
       const fs = [...p0.keys()].filter((f) => p1.has(f));
       const gap = maxGap(fs, (f) => wrap(p1.get(f) - p0.get(f) + 2 * Math.PI * f * (t0ms / 1000)));
-      return { ok: gap < 1e-9, detail: `écart max ${gap.toExponential(1)} rad sur ${fs.length} points` };
+      return { ok: gap < 1e-9, detail: `max gap ${gap.toExponential(1)} rad over ${fs.length} points` };
     },
   },
   {
-    name: 'bandes à −3 dB : formes fermées (exp, exp bilat., gaussienne, sinc)',
+    name: '−3 dB bandwidths: closed forms (exp, two-sided exp, Gaussian, sinc)',
     category: 'numeric',
     run() {
       const expected = {
@@ -165,11 +165,11 @@ export const checks = [
         Object.keys(expected),
         (s) => (run({ signal: s }).b3.value - expected[s]) / expected[s]
       );
-      return { ok: gap < 1e-9, detail: `écart relatif max ${gap.toExponential(1)}` };
+      return { ok: gap < 1e-9, detail: `max relative gap ${gap.toExponential(1)}` };
     },
   },
   {
-    name: 'invariance d’échelle : T·B₃ indépendant de T',
+    name: 'scale invariance: T·B₃ independent of T',
     category: 'numeric',
     run() {
       // The truncated sinusoid is excluded: at f₀T ≈ 2 its two lobes overlap,
@@ -180,11 +180,11 @@ export const checks = [
         const b = run({ signal: s, T: 11 }).tb.value;
         return (a - b) / a;
       });
-      return { ok: gap < 1e-12, detail: `écart relatif max ${gap.toExponential(1)}` };
+      return { ok: gap < 1e-12, detail: `max relative gap ${gap.toExponential(1)}` };
     },
   },
   {
-    name: 'lobes secondaires : porte −13.26 dB, triangle exactement le double',
+    name: 'sidelobes: gate −13.26 dB, triangle exactly twice that',
     category: 'numeric',
     run() {
       const r = run({ signal: 'rect' }).sidelobe.value;
@@ -193,23 +193,23 @@ export const checks = [
       const okT = Math.abs(t - 2 * r) < 1e-9; // sinc² ⇒ le dB double
       return {
         ok: okR && okT,
-        detail: `porte ${r.toFixed(3)} dB, triangle ${t.toFixed(3)} dB`,
+        detail: `gate ${r.toFixed(3)} dB, triangle ${t.toFixed(3)} dB`,
       };
     },
   },
   {
-    name: 'premiers zéros : |X(1/T)| = 0 pour la porte et le triangle',
+    name: 'first zeros: |X(1/T)| = 0 for the gate and the triangle',
     category: 'numeric',
     run() {
       const gap = maxGap(['rect', 'triangle'], (s) => {
         const n0 = run({ signal: s }).firstNull.value;
         return Math.hypot(...X0(s, n0, T0, F0)) / T0;
       });
-      return { ok: gap < 1e-15, detail: `|X| résiduel max ${gap.toExponential(1)}` };
+      return { ok: gap < 1e-15, detail: `max residual |X| ${gap.toExponential(1)}` };
     },
   },
   {
-    name: 'modulation : le spectre de la porte, déplacé en f₀',
+    name: 'modulation: the spectrum of the gate, shifted to f₀',
     category: 'numeric',
     run() {
       // |X_rf(f₀+δ)| = (T/2)|sinc(δT)| up to the cross term (T/2)sinc((2f₀+δ)T)
@@ -224,7 +224,7 @@ export const checks = [
       }
       return {
         ok: worst <= bound + 1e-18,
-        detail: `écart ${(worst / T0).toExponential(1)}·T ≤ terme croisé ${(bound / T0).toExponential(1)}·T`,
+        detail: `gap ${(worst / T0).toExponential(1)}·T ≤ cross term ${(bound / T0).toExponential(1)}·T`,
       };
     },
   },

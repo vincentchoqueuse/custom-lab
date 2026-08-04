@@ -69,7 +69,7 @@ export default {
       line('channel', {
         width: 2,
         axes: {
-          x: 'sous-porteuse k',
+          x: 'subcarrier k',
           y: { label: '|H_k|²', unit: 'dB', domain: [-40, 12] },
         },
       })
@@ -93,7 +93,7 @@ export default {
         overlays: [
           line('berTheory', { color: '#D95319', width: 2, label: 'Q(√(|H_k|²·SNR))' }),
         ],
-        axes: { x: 'sous-porteuse k', y: 'BER' },
+        axes: { x: 'subcarrier k', y: 'BER' },
       })
     ),
   ],

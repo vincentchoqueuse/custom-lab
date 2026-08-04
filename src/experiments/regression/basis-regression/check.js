@@ -64,7 +64,7 @@ export const checks = [
       });
       return {
         ok: o.rmseTrain.value < 0.15,
-        detail: `RMSE=${o.rmseTrain.value.toFixed(4)} avec M=1`,
+        detail: `RMSE=${o.rmseTrain.value.toFixed(4)} at M=1`,
       };
     },
   },

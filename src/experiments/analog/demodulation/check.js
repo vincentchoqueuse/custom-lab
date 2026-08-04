@@ -4,7 +4,7 @@ import { standardChecks, maxGap, range } from '../../../core/checks.js';
 const FS = 8000;
 const BASE = { fc: 1000, ka: 0.5, fam: 40, fdev: 200, ffm: 25, snr: 40, seed: 34 };
 
-/** Une sinusoïde pure de n échantillons. */
+/** A pure sinusoid of n samples. */
 const tone = (n, A, f, phi = 0) =>
   Float64Array.from({ length: n }, (_, i) => A * Math.cos((2 * Math.PI * f * i) / FS + phi));
 
@@ -146,7 +146,7 @@ export const checks = [
         ok: same && bounded,
         detail:
           `A : Hilbert ${a.errAmpHilbert.value.toExponential(2)}, Teager ${a.errAmpTeager.value.toExponential(2)} · ` +
-          `f : ${a.errFreqHilbert.value.toFixed(2)} / ${a.errFreqTeager.value.toFixed(2)} Hz, indépendant de la graine`,
+          `f: ${a.errFreqHilbert.value.toFixed(2)} / ${a.errFreqTeager.value.toFixed(2)} Hz, independent of the seed`,
       };
     },
   },

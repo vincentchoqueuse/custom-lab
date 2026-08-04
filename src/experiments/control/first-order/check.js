@@ -175,7 +175,7 @@ export const checks = [
         Math.abs(a.zeros.x[0] - 2) < 1e-15 && // −1/(−0.5) = +2, demi-plan droit
         a.zeros.x.length === 1 &&
         b.zeros.x.length === 0;
-      return { ok, detail: `pôle ${a.poles.x[0].toFixed(6)}, zéro ${a.zeros.x[0].toFixed(6)}` };
+      return { ok, detail: `pole ${a.poles.x[0].toFixed(6)}, zero ${a.zeros.x[0].toFixed(6)}` };
     },
   },
   standardChecks.determinism(compute, { ...BASE, tz: -0.4 }, 'stepResponse'),

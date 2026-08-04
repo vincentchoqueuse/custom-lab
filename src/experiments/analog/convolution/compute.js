@@ -15,7 +15,7 @@
 // Two shapes are enough to say everything, and the experiment offers them:
 //   gate * gate        → a TRIANGLE, with its four regimes visible to the eye:
 //                        no overlap, entering, full
-//                        recouvrement, sortie ;
+//                        overlap, leaving;
 //   gate * exponential → the charging of an RC, which is the same integral.
 //
 // What is verified, and what is the real trap of this lesson:
@@ -43,7 +43,7 @@ const T0 = -2; // the window shown, in seconds
 const T1 = 6;
 const DT = (T1 - T0) / (N - 1);
 
-/** Les deux signaux d'entrée, et les deux réponses impulsionnelles.
+/** The two input signals, and the two impulse responses.
  *  `edges` lists the breakpoints of each function, as an argument: that is what
  *  makes it possible to integrate between them rather than across them. */
 const SIGNALS = {
@@ -57,7 +57,7 @@ const KERNELS = {
 };
 
 const PANELS = 32; // panneaux de Gauss par morceau
-const G = 0.5 / Math.sqrt(3); // les deux points de Gauss, en demi-largeur
+const G = 0.5 / Math.sqrt(3); // the two Gauss points, in half-widths
 
 /**
  * ∫ x(τ)·h(t−τ) dτ, cut at the breakpoints of both functions.
@@ -90,17 +90,17 @@ export function overlap(x, h, t) {
   return acc;
 }
 
-/** Le trapèze exact : porte(a) * porte(b), en forme close. */
+/** The exact trapezium: gate(a) * gate(b), in closed form. */
 export function gateGate(a, b, t) {
   const lo = Math.min(a, b);
   const hi = Math.max(a, b);
   if (t <= 0 || t >= a + b) return 0;
-  if (t < lo) return t; // entrée : recouvrement croissant
+  if (t < lo) return t; // entering: the overlap grows
   if (t <= hi) return lo; // plateau : la plus étroite est dedans
-  return a + b - t; // sortie
+  return a + b - t; // leaving
 }
 
-/** porte(a) * (e^{−u/b}/b) : la charge d'un RC, en forme close. */
+/** gate(a) * (e^{−u/b}/b): the charging of an RC, in closed form. */
 export function gateExp(a, b, t) {
   if (t <= 0) return 0;
   if (t <= a) return 1 - Math.exp(-t / b);
@@ -116,7 +116,7 @@ export function compute({ sig, ker, a, b, t }) {
   const x = SIGNALS[sig](a);
   const h = KERNELS[ker](b);
 
-  /* ---------- l'espace des τ : c'est LÀ que le calcul se fait ------------- */
+  /* ---------- τ space: THIS is where the computation happens -------------- */
   // x(τ) never moves. h(t−τ) is h FLIPPED (the −τ) and then SLID by t. Their
   // product is the integrand; its area is y(t). These three curves are sampled
   // for the DRAWING; the area itself is computed piecewise.
@@ -133,7 +133,7 @@ export function compute({ sig, ker, a, b, t }) {
   }
   const yNow = overlap(x, h, t);
 
-  /* ---------- le résultat : y(t) sur toute la fenêtre --------------------- */
+  /* ---------- the result: y(t) over the whole window ---------------------- */
   const yOut = new Float64Array(N);
   for (let k = 0; k < N; k++) yOut[k] = overlap(x, h, tau[k]);
 

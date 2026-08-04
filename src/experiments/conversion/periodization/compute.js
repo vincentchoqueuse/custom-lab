@@ -10,7 +10,7 @@
 // Four signals, each with a CLOSED-FORM transform, so nothing here is
 // approximated (all are real, even and non-negative: the copies simply add,
 // which is what makes the overlap readable):
-//   gaussienne   x = exp(−π(t/τ)²)        X = τ·exp(−π(fτ)²)
+//   Gaussian     x = exp(−π(t/τ)²)        X = τ·exp(−π(fτ)²)
 //   triangle     x = max(0, 1−|t|/τ)      X = τ·sinc²(fτ)
 //   sinc         x = sinc(t/τ)            X = τ·rect(fτ)  ← STRICTLY bandlimited
 //   exponentielle x = exp(−|t|/τ)         X = 2τ/(1+(2πfτ)²)
@@ -165,12 +165,12 @@ export function compute({ signal, fe, tau: tauMs }) {
       dcSamples, // checks (Poisson at f = 0)
       aliasErr: {
         value: 100 * errorAt(fe),
-        meta: { label: 'repliement dans la bande', unit: '%', precision: 2 },
+        meta: { label: 'in-band aliasing', unit: '%', precision: 2 },
       },
       nyq: { value: fe / 2, meta: { label: 'Fe/2', unit: 'Hz', precision: 0 } },
       bandEdge: {
         value: signal === 'sinc' ? bandEdge : NaN,
-        meta: { label: 'bord de bande 1/2τ', unit: 'Hz', precision: 0 },
+        meta: { label: 'band edge 1/2τ', unit: 'Hz', precision: 0 },
       },
     },
   };

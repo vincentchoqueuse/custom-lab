@@ -16,7 +16,7 @@ export default {
     'gain proportionnel',
     'abaque de Nichols',
     'contours iso-gain',
-    'erreur statique',
+    'steady-state error',
     'résonance',
   ],
 

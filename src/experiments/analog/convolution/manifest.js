@@ -11,8 +11,8 @@ export default {
   tags: [
     'convolution',
     'produit de convolution',
-    'réponse impulsionnelle',
-    'porte',
+    'impulse response',
+    'gate',
     'triangle',
     'recouvrement',
     'RC',

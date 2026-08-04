@@ -133,7 +133,7 @@ export const checks = [
       return {
         ok: short > -12 && long < -75 && nonMono,
         detail:
-          `M=1 : ${short.toFixed(1)} dB (le filtre n'existe pas) · M=16 : ${long.toFixed(1)} dB · ` +
+          `M=1: ${short.toFixed(1)} dB (there is no filter) · M=16: ${long.toFixed(1)} dB · ` +
           `M=2 → 4 : ${img(2).toFixed(1)} → ${img(4).toFixed(1)} dB, l'ondulation glisse`,
       };
     },

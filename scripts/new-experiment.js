@@ -90,18 +90,18 @@ export default {
   tags: [],
 
   params: {
-    N: int('N', { description: 'nombre de réalisations', min: 10, max: 5000, step: 10, default: 500 }),
-    mu: float('μ', { description: 'moyenne', min: -3, max: 3, step: 0.1, default: 0 }),
+    N: int('N', { description: 'number of realizations', min: 10, max: 5000, step: 10, default: 500 }),
+    mu: float('μ', { description: 'mean', min: -3, max: 3, step: 0.1, default: 0 }),
     // seed is injected by the core, because of random: true above
   },
 
   views: [
     view(
       'histogram',
-      'Histogramme',
+      'Histogram',
       histogram('values', {
         overlays: [vline('mu', { color: '#EDB120', dashed: true, label: 'μ' })],
-        axes: { x: 'x', y: 'densité' },
+        axes: { x: 'x', y: 'density' },
       })
     ),
   ],
@@ -118,13 +118,13 @@ export default {
   tags: [],
 
   params: {
-    a: float('a', { description: 'paramètre de la courbe', min: 0.5, max: 5, step: 0.1, default: 2 }),
+    a: float('a', { description: 'parameter of the curve', min: 0.5, max: 5, step: 0.1, default: 2 }),
     // no random: true — this template draws nothing, so it gets no seed,
     // no dice button and no ?seed= in its URL
   },
 
   views: [
-    view('curve', 'Courbe', line('curve', { axes: { x: 'x', y: 'y' } })),
+    view('curve', 'Curve', line('curve', { axes: { x: 'x', y: 'y' } })),
   ],
 };
 `;
@@ -133,10 +133,10 @@ const scenes = `// Lecture script. Auto-discovered by the registry.
 export default [
   {
     id: 'scene-1',
-    title: 'Scène 1 — TODO',
+    title: 'Scene 1 — TODO',
     params: {},
     visible: ['${isMc ? 'N' : 'a'}'],
-    notes: \`TODO — la question à poser AVANT de toucher au paramètre.\`,
+    notes: \`TODO — the question to ask BEFORE touching the parameter.\`,
   },
 ];
 `;

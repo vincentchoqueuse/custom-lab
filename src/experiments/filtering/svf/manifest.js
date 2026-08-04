@@ -43,7 +43,7 @@ export default {
       default: 2,
       precision: 2,
     }),
-    output: select('sortie', {
+    output: select('output', {
       description: 'output of the SVF (all four exist simultaneously)',
       options: [
         { value: 'lp', label: 'low-pass' },

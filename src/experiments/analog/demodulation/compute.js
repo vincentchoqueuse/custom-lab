@@ -36,9 +36,9 @@ import { fft } from '../../../core/numeric.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 
 const FS = 8000; // Hz
-const N = 1024; // échantillons — 128 ms, et une puissance de deux pour la FFT
+const N = 1024; // samples — 128 ms, and a power of two for the FFT
 
-const EDGE = 48; // échantillons ignorés aux deux bords (voir plus bas)
+const EDGE = 48; // samples ignored at both edges (see below)
 
 /**
  * Analytic signal through the FFT: the negative frequencies are cancelled and
@@ -108,7 +108,7 @@ export function desa2(x) {
   return { omega, amp, clipped };
 }
 
-/** Déroulement de phase : les sauts de plus de π sont des tours, pas des sauts. */
+/** Phase unwrapping: jumps larger than π are turns, not jumps. */
 export function unwrap(p) {
   const out = Float64Array.from(p);
   let off = 0;
@@ -136,7 +136,7 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
   const FC = fc;
   const gauss = gaussFrom(mulberry32(seed));
 
-  /* ---------- le signal déterministe, puis le bruit ---------------------- */
+  /* ---------- the deterministic signal, then the noise -------------------- */
   const t = new Float64Array(N);
   const clean = new Float64Array(N);
   const x = new Float64Array(N);
@@ -198,7 +198,7 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
   const cut = (a) => a.subarray(EDGE, N - EDGE);
   const tc = cut(t);
 
-  /* ---------- le spectre, pour situer le signal -------------------------- */
+  /* ---------- the spectrum, to place the signal --------------------------- */
   const sre = Float64Array.from(x);
   const sim = new Float64Array(N);
   fft(sre, sim);
@@ -225,22 +225,22 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
       freqHilbert: { x: tc, y: cut(fHil) },
       freqTeager: { x: tc, y: cut(fTea) },
       spectrum: { x: sf, y: sy },
-      fCarrier: FC, // vline : la porteuse
+      fCarrier: FC, // vline: the carrier
       errAmpHilbert: {
         value: errAH,
-        meta: { label: 'erreur A — Hilbert', precision: 4 },
+        meta: { label: 'A error — Hilbert', precision: 4 },
       },
       errAmpTeager: {
         value: errAT,
-        meta: { label: 'erreur A — Teager', precision: 4 },
+        meta: { label: 'A error — Teager', precision: 4 },
       },
       errFreqHilbert: {
         value: errFH,
-        meta: { label: 'erreur f — Hilbert', unit: 'Hz', precision: 2 },
+        meta: { label: 'f error — Hilbert', unit: 'Hz', precision: 2 },
       },
       errFreqTeager: {
         value: errFT,
-        meta: { label: 'erreur f — Teager', unit: 'Hz', precision: 2 },
+        meta: { label: 'f error — Teager', unit: 'Hz', precision: 2 },
       },
       clipped: {
         value: d2.clipped,
@@ -249,10 +249,10 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
       verdict: {
         value:
           errFT < errFH
-            ? 'Teager suit mieux la fréquence'
+            ? 'Teager tracks the frequency better'
             : errFT < 4 * errFH
-              ? 'les deux tiennent'
-              : 'Teager a décroché, Hilbert tient',
+              ? 'both hold'
+              : 'Teager has broken down, Hilbert holds',
         meta: { label: 'comparaison' },
       },
     },

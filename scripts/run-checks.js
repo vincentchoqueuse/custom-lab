@@ -141,14 +141,13 @@ function checkRandomness() {
 }
 
 /**
- * Tout axe déclaratif porte un nom.
+ * Every declarative axis carries a name.
  *
- * Un axe sans libellé reste GRADUÉ : il se lit donc comme s'il mesurait
- * quelque chose, et le lecteur cherche un sens qui n'existe pas. C'est
- * arrivé une fois — l'ordonnée d'une vue portait un décalage aléatoire, mis
- * là pour étaler les points, et personne ne pouvait le deviner. La règle est
- * plus forte que « nommer les axes » : si on ne peut pas nommer un axe,
- * c'est qu'il ne faut pas le tracer.
+ * An unlabelled axis is still TICKED: it therefore reads as if it measured
+ * something, and the reader looks for a meaning that does not exist. It happened
+ * once — the ordinate of a view carried a random offset, put there to spread the
+ * points out, and nobody could have guessed it. The rule is stronger than "name
+ * the axes": if an axis cannot be named, it should not be drawn.
  */
 function checkAxisLabels(manifest, key, bad) {
   const text = (a) => (typeof a === 'string' ? a : (a?.label ?? ''));
@@ -157,20 +156,20 @@ function checkAxisLabels(manifest, key, bad) {
     if (!ax) continue;
     for (const k of ['x', 'y']) {
       if (!text(ax[k]).trim())
-        bad.push(`${key}, vue '${v.title ?? v.figure ?? v.id}' : axe ${k} sans nom`);
+        bad.push(`${key}, view '${v.title ?? v.figure ?? v.id}': axis ${k} has no name`);
     }
   }
 }
 
 /**
- * La couche d'appels des computes (core/dsp.js) est vérifiée UNE fois ici,
- * pas une fois par expérience. C'est tout l'intérêt de l'avoir extraite :
- * dix-neuf sinusoïdes écrites à la main, ce sont dix-neuf occasions de se
- * tromper d'indice ; une seule fonction, c'est une identité qu'on épingle.
+ * The call layer of the computes (core/dsp.js) is verified ONCE here, not once
+ * per experiment. That is the whole point of having extracted it: nineteen
+ * hand-written sinusoids are nineteen chances to get an index wrong; a single
+ * function is an identity that can be pinned.
  *
- * Les deux identités qui comptent le plus sont ici : ifft∘fft = identité, et
- * dbAmp(x) = dbPower(x²) — cette dernière parce que confondre les deux
- * échelles a déjà coûté un facteur 2 sur un tracé parfaitement plausible.
+ * The two identities that matter most are here: ifft∘fft = identity, and
+ * dbAmp(x) = dbPower(x²) — the latter because confusing the two scales has
+ * already cost a factor 2 on a perfectly plausible plot.
  */
 function checkDsp() {
   const bad = [];
@@ -178,7 +177,7 @@ function checkDsp() {
   const FS = 1000;
   const worst = (n, f) => Math.max(...Array.from({ length: n }, (_, i) => Math.abs(f(i))));
 
-  // ifft ∘ fft = identité
+  // ifft ∘ fft = identity
   const x = dsp.tone(N, 50, { fs: FS, amp: 1.7, phase: 0.3 });
   const re = Float64Array.from(x);
   const im = new Float64Array(N);
@@ -194,7 +193,7 @@ function checkDsp() {
   });
   if (dbErr > 1e-9) bad.push(`dbAmp/dbPower : ${dbErr.toExponential(1)}`);
 
-  // une raie sur un bin : bonne position, et amplitude A·N/2 (fenêtre rect)
+  // a line on a bin: right position, and amplitude A·N/2 (rectangular window)
   const A = 1.3;
   const fBin = (FS * 8) / N; // pile sur le bin 8
   const mag = dsp.magSpectrum(dsp.tone(N, fBin, { fs: FS, amp: A }), { nfft: N });
@@ -204,7 +203,7 @@ function checkDsp() {
   if (Math.abs(mag[8] - (A * N) / 2) > 1e-9)
     bad.push(`amplitude ${mag[8].toFixed(4)} au lieu de ${(A * N) / 2}`);
 
-  // le demi-spectre va jusqu'à Nyquist INCLUS, et l'axe aussi
+  // the half-spectrum runs to Nyquist INCLUSIVE, and so does the axis
   const f = dsp.freqAxis(N, FS);
   if (f.length !== N / 2 + 1 || f[f.length - 1] !== FS / 2)
     bad.push(`freqAxis : ${f.length} points, dernier ${f[f.length - 1]}`);
@@ -217,7 +216,7 @@ function checkDsp() {
   });
   if (sErr > 1e-15) bad.push(`noiseSigma : ${sErr.toExponential(1)}`);
 
-  // linspace : bornes exactes, pas d'accumulation d'erreur
+  // linspace: exact bounds, no error accumulation
   const g = dsp.linspace(-3, 7, 101);
   if (g[0] !== -3 || g[100] !== 7) bad.push(`linspace : [${g[0]}, ${g[100]}]`);
 
@@ -227,20 +226,19 @@ function checkDsp() {
     fail++;
   } else {
     console.log(
-      `    ${green('✓')} ifft∘fft, dbAmp = dbPower∘carré, raie sur bin, Nyquist inclus, σ(SNR), linspace`
+      `    ${green('✓')} ifft∘fft, dbAmp = dbPower∘square, line on bin, Nyquist included, σ(SNR), linspace`
     );
     pass++;
   }
 }
 
 /**
- * L'algèbre linéaire du cœur (core/linalg.js), vérifiée par ses IDENTITÉS —
- * une fois, ici, plutôt qu'une fois par sujet.
+ * The core's linear algebra (core/linalg.js), verified through its IDENTITIES —
+ * once, here, rather than once per subject.
  *
- * Le module ne contient volontairement que ce que des expériences utilisent
- * (voir son en-tête : ni LU, ni QR, ni SVD). Ce check est la contrepartie de
- * cette règle : chaque fonction qui entre doit arriver avec une identité
- * qu'on peut écrire, sinon elle n'entre pas.
+ * The module deliberately holds only what experiments use (see its header). This
+ * check is the counterpart of that rule: every function that goes in must arrive
+ * with an identity that can be written down, or it does not go in.
  */
 function checkLinalg() {
   const bad = [];
@@ -253,12 +251,12 @@ function checkLinalg() {
   const x = Float64Array.from({ length: n }, (_, i) => 1.7 - 0.4 * i);
   if (worst(n, (i) => la.matvec(I, x, n, n)[i] - x[i]) > 0) bad.push('matvec(I, x) ≠ x');
 
-  // une matrice symétrique de test, définie positive (AᵀA + I)
+  // a symmetric test matrix, positive definite (AᵀA + I)
   const R = new Float64Array(n * n);
   for (let i = 0; i < n; i++)
     for (let j = 0; j < n; j++) R[i * n + j] = 1 / (1 + Math.abs(i - j)) + (i === j ? 1 : 0);
 
-  // quadForm : xᵀRx = Σ x_i (Rx)_i, et Σ λ_k ⟨v_k, x⟩² par la décomposition
+  // quadForm: xᵀRx = Σ x_i (Rx)_i, and Σ λ_k ⟨v_k, x⟩² through the decomposition
   const Rx = la.matvec(R, x, n, n);
   let direct = 0;
   for (let i = 0; i < n; i++) direct += x[i] * Rx[i];
@@ -273,7 +271,7 @@ function checkLinalg() {
   }
   if (Math.abs(spectral - direct) > 1e-12) bad.push(`Σλ⟨v,x⟩² : ${Math.abs(spectral - direct)}`);
 
-  // jacobiSym : VᵀV = I, et Rv = λv
+  // jacobiSym: VᵀV = I, and Rv = λv
   for (let a = 0; a < n; a++)
     for (let b = 0; b < n; b++) {
       let d = 0;
@@ -286,8 +284,8 @@ function checkLinalg() {
     if (worst(n, (i) => Rv[i] - eig.values[k] * v[i]) > 1e-12) bad.push(`Rv ≠ λv (k=${k})`);
   }
 
-  // solveLinearSystem : solve(A, A·x) rend x, y compris quand le premier
-  // pivot est nul — c'est là que l'absence de pivot partiel se verrait
+  // solveLinearSystem: solve(A, A·x) returns x, including when the first pivot
+  // is zero — that is where a missing partial pivot would show
   const A = [
     [0, 2, 1],
     [1, -1, 3],
@@ -298,8 +296,8 @@ function checkLinalg() {
   const sol = la.solveLinearSystem(A.map((r) => r.slice()), b.slice());
   if (worst(3, (i) => sol[i] - xs[i]) > 1e-12) bad.push('solve(A, Ax) ≠ x');
 
-  // normalEquations + ridgeSolve : sur des données EXACTEMENT polynomiales,
-  // λ = 0 retrouve les coefficients ; et λ > 0 rétrécit la solution
+  // normalEquations + ridgeSolve: on EXACTLY polynomial data, λ = 0 recovers the
+  // coefficients; and λ > 0 shrinks the solution
   const xs2 = Array.from({ length: 40 }, (_, i) => -1 + (2 * i) / 39);
   const truth = [0.5, -1.25, 2];
   const ys = xs2.map((t) => truth[0] + truth[1] * t + truth[2] * t * t);
@@ -314,16 +312,16 @@ function checkLinalg() {
     ys
   );
   const w0 = la.ridgeSolve(AtA, Aty, 0);
-  if (worst(3, (i) => w0[i] - truth[i]) > 1e-10) bad.push('moindres carrés exacts ratés');
+  if (worst(3, (i) => w0[i] - truth[i]) > 1e-10) bad.push('exact least squares missed');
   const wR = la.ridgeSolve(AtA, Aty, 5);
   const norm = (w) => Math.hypot(...w);
-  if (!(norm(wR) < norm(w0))) bad.push('ridge ne rétrécit pas');
-  // et la continuité : λ → 0 redonne les moindres carrés
+  if (!(norm(wR) < norm(w0))) bad.push('ridge does not shrink');
+  // and continuity: λ → 0 gives back the least squares
   const wEps = la.ridgeSolve(AtA, Aty, 1e-9);
   if (worst(3, (i) => wEps[i] - w0[i]) > 1e-6) bad.push('ridge discontinue en 0');
-  // les entrées ne sont PAS modifiées : deux appels donnent le même résultat
+  // the inputs are NOT modified: two calls give the same result
   const again = la.ridgeSolve(AtA, Aty, 0);
-  if (worst(3, (i) => again[i] - w0[i]) > 0) bad.push('ridgeSolve modifie ses entrées');
+  if (worst(3, (i) => again[i] - w0[i]) > 0) bad.push('ridgeSolve modifies its inputs');
 
   console.log(`  ${dim('linalg')}`);
   if (bad.length) {
@@ -331,7 +329,7 @@ function checkLinalg() {
     fail++;
   } else {
     console.log(
-      `    ${green('✓')} matvec, xᵀRx = Σλ⟨v,x⟩², VᵀV = I, Rv = λv, solve(A,Ax) = x, ridge exact et continu en 0`
+      `    ${green('✓')} matvec, xᵀRx = Σλ⟨v,x⟩², VᵀV = I, Rv = λv, solve(A,Ax) = x, ridge exact and continuous at 0`
     );
     pass++;
   }
@@ -393,7 +391,7 @@ async function checkCatalogue() {
     for (const b of axisBad) console.log(`    ${red('✗')} ${b}`);
     fail++;
   } else {
-    console.log(`    ${green('✓')} tout axe déclaratif porte un nom`);
+    console.log(`    ${green('✓')} every declarative axis carries a name`);
     pass++;
   }
   console.log(`  ${dim('scenes')}`);

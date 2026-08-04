@@ -149,7 +149,7 @@ export const checks = [
       const b = obs({ sig: 'burst', win: 'rect', tb, T: 200 }).b3.value;
       const want = 0.8858 * (1000 / tb);
       const ok = Math.abs(a - b) / a < 0.02 && Math.abs(a - want) / want < 0.05;
-      return { ok, detail: `T=60 → ${a.toFixed(2)} Hz, T=200 → ${b.toFixed(2)} Hz, 0.886/T_salve = ${want.toFixed(2)} Hz` };
+      return { ok, detail: `T=60 → ${a.toFixed(2)} Hz, T=200 → ${b.toFixed(2)} Hz, 0.886/T_burst = ${want.toFixed(2)} Hz` };
     },
   },
   {

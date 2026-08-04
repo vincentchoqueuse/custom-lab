@@ -56,7 +56,7 @@ export function compute({ mode, fm, ka, beta }) {
   const mag = magSpectrum(x, { nfft: NS, window: 'hann' });
   let sw = 0;
   for (let i = 0; i < NS; i++) sw += windowValue('hann', i, NS);
-  const ref = sw / 2; // gain cohérent de la fenêtre
+  const ref = sw / 2; // coherent gain of the window
   const binHz = FS / NS;
   const nh = NS / 2;
 
@@ -124,7 +124,7 @@ export function compute({ mode, fm, ka, beta }) {
     ? {
         carrierShare: {
           value: 100 / (1 + (ka * ka) / 2),
-          meta: { label: 'puissance dans la porteuse', unit: '%', precision: 1 },
+          meta: { label: 'power in the carrier', unit: '%', precision: 1 },
         },
       }
     : {

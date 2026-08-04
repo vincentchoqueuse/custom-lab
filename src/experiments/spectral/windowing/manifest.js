@@ -10,7 +10,7 @@ export default {
   tags: ['digital', 'DFT', 'window', 'resolution', 'leakage'],
 
   params: {
-    win: select('fenêtre', {
+    win: select('window', {
       description: 'observation window',
       options: [
         { value: 'rect', label: 'rectangular' },

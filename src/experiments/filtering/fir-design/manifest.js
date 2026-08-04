@@ -27,7 +27,7 @@ export default {
       step: 2,
       default: 21,
     }),
-    win: select('fenêtre', {
+    win: select('window', {
       description: 'window applied to the truncation',
       options: [
         { value: 'rect', label: 'rectangular (raw truncation)' },
@@ -40,7 +40,7 @@ export default {
   },
 
   derived: {
-    delay: { label: 'retard (N−1)/2', calc: (p) => `${(p.N - 1) / 2} samples` },
+    delay: { label: 'delay (N−1)/2', calc: (p) => `${(p.N - 1) / 2} samples` },
   },
 
   views: [

@@ -199,8 +199,8 @@ export function timeView(opts = {}) {
     key,
     line('tOut', {
       width: 1.8,
-      label: 'sortie',
-      overlays: [line('tIn', { color: IN_COLOR, dashed: true, label: 'entrée' }), ...overlays],
+      label: 'output',
+      overlays: [line('tIn', { color: IN_COLOR, dashed: true, label: 'input' }), ...overlays],
       axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
     })
   );
@@ -231,11 +231,11 @@ export function spectrumView(opts = {}) {
     x: HERTZ_LIN,
     yLabel: 'amplitude',
     domain,
-    label: 'sortie',
+    label: 'output',
     color: undefined, // the default data colour, as for every output curve
     width: 1.8,
     overlays: [
-      line('specIn', { color: SPEC_IN_COLOR, opacity: 0.45, label: 'entrée' }),
+      line('specIn', { color: SPEC_IN_COLOR, opacity: 0.45, label: 'input' }),
       // SOLID: |H(f)| is not a theoretical reference laid over a measurement —
       // it is the filter's response, the very subject of the view, and dashing
       // it made it read as a secondary guide. The two spectra keep their

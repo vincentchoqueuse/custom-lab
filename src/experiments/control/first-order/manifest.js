@@ -39,10 +39,10 @@ export default {
         p.tz === 0
           ? 'premier ordre pur'
           : p.tz < 0
-            ? 'phase NON minimale (zéro à droite)'
+            ? 'NON-minimum phase (zero in the right half-plane)'
             : p.tz > p.tau
               ? 'avance de phase (τ_z > τ)'
-              : 'retard de phase (τ_z < τ)',
+              : 'phase lag (τ_z < τ)',
     },
     t95: { label: 'rise time to 95 % ≈ 3τ', calc: (p) => `${(3 * p.tau).toFixed(2)} s` },
   },

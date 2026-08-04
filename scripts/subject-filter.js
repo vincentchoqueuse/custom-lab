@@ -1,22 +1,21 @@
 // Build one subject instead of the whole catalogue.
 //
-//   npm run build                              → les 52 expériences
-//   EXPE34_SUBJECT=control npm run build    → l'automatique seule
+//   npm run build                           → the whole catalogue
+//   EXPE34_SUBJECT=control npm run build    → control alone
 //
-// Pourquoi un plugin et pas une condition dans le code : `import.meta.glob`
-// exige un motif LITTÉRAL, évalué par Vite avant que la moindre ligne ne
-// tourne. On ne peut donc pas filtrer à l'exécution sans avoir déjà tout
-// embarqué — c'est exactement le problème qu'on cherche à résoudre. Le seul
-// endroit où le motif peut changer, c'est à la compilation, ici.
+// Why a plugin and not a condition in the code: `import.meta.glob` requires a
+// LITERAL pattern, evaluated by Vite before a single line runs. One therefore
+// cannot filter at runtime without having already bundled everything — which is
+// exactly the problem being solved. The only place the pattern can change is at
+// build time, here.
 //
-// Ce qui rend ce filtre HONNÊTE, c'est que les modules propres à un sujet
-// vivent chez lui (`experiments/<sujet>/_lib/`). Tant que `bode.js` était
-// dans `core/`, un build « automatique » aurait quand même embarqué
-// `codes.js` et `modulation.js` : le core est toujours entier, seul le
-// catalogue se réduit.
+// What makes this filter HONEST is that the modules belonging to one subject
+// live with it (`experiments/<subject>/_lib/`). As long as `bode.js` sat in
+// `core/`, a "control" build would still have bundled `codes.js` and
+// `modulation.js`: the core is always whole, only the catalogue shrinks.
 //
-// Le sujet demandé est vérifié contre le disque : une faute de frappe
-// produirait sinon un build vide, ce qui ne se voit qu'au lancement.
+// The requested subject is checked against the disk: a typo would otherwise
+// produce an empty build, which only shows on launch.
 import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -34,7 +33,7 @@ export function subjectFilter() {
       `EXPE34_SUBJECT='${subject}' is not a subject (known: ${known.join(', ')})`
     );
 
-  // les quatre globs du projet : manifestes, scènes, sujets, et celui du worker
+  // the project's four globs: manifests, scenes, subjects, and the worker's
   const PATTERNS = [
     ['../experiments/*/*/manifest.js', `../experiments/${subject}/*/manifest.js`],
     ['../experiments/*/*/scenes.js', `../experiments/${subject}/*/scenes.js`],

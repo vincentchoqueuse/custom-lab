@@ -53,7 +53,7 @@ const dirichletAmp = (u, N) => {
   return Math.abs(d) < 1e-15 ? N : Math.sin(Math.PI * u) / d;
 };
 
-/** |W(b)| de la fenêtre, b en bins de Fs/N — TFtd exacte, en forme close. */
+/** |W(b)| of the window, b in bins of Fs/N — exact DTFT, in closed form. */
 export function windowSpectrum(win, N, b) {
   const c = WINDOW_COS[win];
   let re = 0;
@@ -226,7 +226,7 @@ export function compute({ N, pad, f1, df, a2, win }) {
         value: th.db,
         meta: { label: 'theory', unit: 'dB', precision: 2 },
       },
-      sidelobeTheoryLine: th.db, // hline sur la vue du noyau
+      sidelobeTheoryLine: th.db, // hline on the kernel view
       sidelobeBinLine: th.bin, // vline : où la théorie place ce sommet
       sidelobeBin: {
         value: th.bin,
@@ -238,7 +238,7 @@ export function compute({ N, pad, f1, df, a2, win }) {
       },
       binWidth: {
         value: FS / N,
-        meta: { label: 'largeur de raie Fs/N', unit: 'Hz', precision: 2 },
+        meta: { label: 'line width Fs/N', unit: 'Hz', precision: 2 },
       },
     },
   };

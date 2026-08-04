@@ -56,7 +56,7 @@ export default {
     // THE view: the copies, their sum, and what the samples actually know
     view(
       'periodize',
-      'Périodisation du spectre',
+      'Periodization of the spectrum',
       line('periodized', {
         width: 2.6,
         label: 'sampled spectrum = Σ copies',

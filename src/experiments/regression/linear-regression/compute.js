@@ -1,4 +1,4 @@
-// Simple linear regression, y = a·x + b + bruit, by ordinary least squares.
+// Simple linear regression, y = a·x + b + noise, by ordinary least squares.
 // The closed form is the whole point, so nothing here is iterated:
 //   â = Sxy / Sxx      b̂ = ȳ − â·x̄      with Sxx = Σ(xᵢ − x̄)², Sxy = Σ(xᵢ − x̄)(yᵢ − ȳ)
 // and the two properties that CHARACTERISE the solution, both checked to

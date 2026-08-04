@@ -4,15 +4,15 @@
 // ≈ 1/T — the duration sets the resolution, the window shape sets the skirts.
 //
 // Four signals, chosen because truncation does something DIFFERENT to each:
-//   sinusoïde        the reference: width ∝ 1/T, forever
+//   sinusoid         the reference: width ∝ 1/T, forever
 //   chirp            sweeps k Hz/s, so a LONGER window sees a WIDER band:
 //                    the width falls as 1/T, then rises as k·T, and the
 //                    interior minimum IS the Gabor compromise — measured, not
 //                    asserted, since the crossover (k·T² of order one) is not
 //                    a clean closed form
-//   sinusoïde amortie the line stops narrowing once T ≫ τ: the signal itself
+//   damped sinusoid  the line stops narrowing once T ≫ τ: the signal itself
 //                    has a natural width 1/(πτ) that no window can beat
-//   salve            once T covers the burst, widening the window adds zeros
+//   burst            once T covers the burst, widening the window adds zeros
 //                    and nothing else — zero-padding interpolates, it does
 //                    not resolve
 //
@@ -150,7 +150,7 @@ export function compute(params) {
       b3: { value: b3, meta: { label: '−3 dB width', unit: 'Hz', precision: 2 } },
       tb3: {
         value: (b3 * T) / 1000,
-        meta: { label: 'produit T·B₃', precision: 3 },
+        meta: { label: 'product T·B₃', precision: 3 },
       },
       resolution: {
         value: 1000 / T,

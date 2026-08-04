@@ -89,7 +89,7 @@ export function compute({ fc, N, win }) {
       },
       delayMs: {
         value: (M / FS) * 1000,
-        meta: { label: 'retard (N−1)/2', unit: 'ms', precision: 2 },
+        meta: { label: 'delay (N−1)/2', unit: 'ms', precision: 2 },
       },
       dcGain: { value: dc, meta: { label: 'H(0) = Σh', precision: 4 } },
     },

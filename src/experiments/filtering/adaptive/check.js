@@ -66,7 +66,7 @@ export const checks = [
       // solution, at every instant. Noise-free and with L independent equations
       // the system is determined — so at iteration L the filter equals w*, up to
       // rounding error and the regularization δ.
-      // Un algorithme de gradient, lui, n'y arrive jamais en temps fini.
+      // A gradient algorithm, by contrast, never gets there in finite time.
       const L = 5;
       const N = 40;
       const gauss = gaussFrom(mulberry32(11));
@@ -83,7 +83,7 @@ export const checks = [
         sigmaV: 0,
         gauss: () => 0,
         keepPath: true,
-        p0: 1e10, // δ = 1e-10 : « aucune information a priori », donc LS exacts
+        p0: 1e10, // δ = 1e-10: "no prior information", hence exact LS
       });
       const errAt = (n) => {
         let s = 0;

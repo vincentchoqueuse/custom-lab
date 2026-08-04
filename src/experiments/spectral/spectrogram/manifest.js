@@ -31,7 +31,7 @@ export default {
       ],
       default: 256,
     }),
-    win: select('fenêtre', {
+    win: select('window', {
       description: 'analysis window',
       options: [
         { value: 'hann', label: 'Hann' },
@@ -112,7 +112,7 @@ export default {
 
     // The two readings the map exists to improve on, under the catalogue's
     // own names so they are recognised for what they are — the same
-    // "Signal temporel" and the same "Spectre" as everywhere else in
+    // "Time signal" and the same "Spectrum" as everywhere else in
     // analyse spectrale. They are not decoration: a chirp and the same tones
     // played backwards have the SAME spectrum, and the time plot says when
     // without saying what. Showing both next to the map is the argument for

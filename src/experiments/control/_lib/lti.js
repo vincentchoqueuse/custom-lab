@@ -118,7 +118,7 @@ export function firstOrderImpulse(K, tau, tz, t) {
  */
 export function polyRoots(coeffs) {
   const c = Array.from(coeffs, Number);
-  while (c.length > 1 && c[0] === 0) c.shift(); // un zéro de tête n'est pas un degré
+  while (c.length > 1 && c[0] === 0) c.shift(); // a leading zero is not a degree
   const out = [];
   while (c.length > 1 && c[c.length - 1] === 0) {
     c.pop();

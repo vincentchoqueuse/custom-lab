@@ -56,7 +56,7 @@ export const checks = [
         const p = compute({ ...BASE, m }).observables;
         return Math.abs(p.phase.y[(p.phase.x.length - 1) / 2] + 90) < 1e-12;
       });
-      return { ok: err < 1e-12 && anyM, detail: `|Δ|=${err.toExponential(2)}, −90° à ω₀ pour tout m` };
+      return { ok: err < 1e-12 && anyM, detail: `|Δ|=${err.toExponential(2)}, −90° at ω₀ for every m` };
     },
   },
   {

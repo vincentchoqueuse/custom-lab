@@ -98,7 +98,7 @@ export default {
           vline((p) => (p.levels === 4 ? 1 / 3 : NaN), { color: '#EDB120', dashed: true, width: 1.6 }),
           vline((p) => (p.levels === 4 ? -1 / 3 : NaN), { color: '#EDB120', dashed: true, width: 1.6 }),
         ],
-        axes: { x: 'valeur échantillonnée', y: 'densité' },
+        axes: { x: 'sampled value', y: 'density' },
       })
     ),
   ],

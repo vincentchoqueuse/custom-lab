@@ -3,14 +3,14 @@
 // FORM (nothing here is estimated by an FFT; the numerical Fourier integral
 // lives in check.js, where it belongs):
 //
-//   porte          Π(t/T)                 T·sinc(fT)
+//   gate           Π(t/T)                 T·sinc(fT)
 //   triangle       Λ(t/T)                 T·sinc²(fT)
-//   gaussienne     e^{−π(t/T)²}           T·e^{−π(fT)²}          ← point fixe
-//   exp. causale   e^{−t/T}·u(t)          T/(1 + j2πfT)          ← seule complexe
-//   exp. bilatér.  e^{−|t|/T}             2T/(1 + (2πfT)²)
+//   Gaussian       e^{−π(t/T)²}           T·e^{−π(fT)²}          ← fixed point
+//   causal exp.    e^{−t/T}·u(t)          T/(1 + j2πfT)          ← the only complex one
+//   two-sided exp. e^{−|t|/T}             2T/(1 + (2πfT)²)
 //   sinc          sinc(t/T)               T·rect(fT)             ← dual of the gate
-//   sinusoïde      cos(2πf₀t)·Π(t/T)      (T/2)[sinc((f−f₀)T) + sinc((f+f₀)T)]
-//     tronquée
+//   truncated      cos(2πf₀t)·Π(t/T)      (T/2)[sinc((f−f₀)T) + sinc((f+f₀)T)]
+//     sinusoid
 //
 // Two lessons the magnitude alone cannot teach, so both are observables:
 //   · a delay t₀ multiplies X by e^{−j2πft₀} — |X| does not move by a single

@@ -207,11 +207,11 @@ export function compute({ num, den, input, f }) {
       dcGain: { value: dc, meta: { label: 'gain statique', precision: 3 } },
       stability: { value: verdict, meta: { label: 'poles' } },
       // Only a bi-proper system (deg num = deg den) carries a Dirac at the
-      // origin. Reporting "poids du Dirac = 0.000" on every strictly proper
+      // origin. Reporting "Dirac weight = 0.000" on every strictly proper
       // system would be a reading that means nothing, on every view: the
       // observable simply does not exist unless there is a Dirac.
       ...(D !== 0
-        ? { diracWeight: { value: D, meta: { label: 'poids du Dirac en t = 0', precision: 3 } } }
+        ? { diracWeight: { value: D, meta: { label: 'Dirac weight at t = 0', precision: 3 } } }
         : {}),
       gainMeas: { value: gainMeas, meta: { label: 'measured gain', precision: 3 } },
       gainTh: { value: gainTh, meta: { label: '|H(jω)|', precision: 3 } },

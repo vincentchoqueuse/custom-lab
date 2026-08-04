@@ -5,7 +5,7 @@ import { view, plane, line, stem, vline, hline } from '../../../core/views.js';
 export default {
   id: 'adaptive',
   order: 6,
-  random: true, // entrée aléatoire et bruit de mesure
+  random: true, // random input and measurement noise
   title: 'Adaptive filtering',
   subtitle: 'LMS, NLMS, RLS — speed, accuracy, complexity: pick two',
   tags: ['adaptive', 'LMS', 'NLMS', 'RLS', 'stochastic gradient', 'identification'],
@@ -160,7 +160,7 @@ export default {
     // eigenvectors of R, and the descent crosses them in a zigzag as they
     // elongate. An equal-aspect plane, otherwise the ellipses would lie about
     // their elongation — exactly the use case of `plane`.
-    plane('weights', 'Plan des poids', {
+    plane('weights', 'The weight plane', {
       curves: [
         { source: 'contour1', color: '#71717a', width: 1, label: 'cost contour' },
         { source: 'contour2', color: '#71717a', width: 1 },

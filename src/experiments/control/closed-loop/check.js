@@ -52,7 +52,7 @@ export const checks = [
     },
   },
   {
-    name: "l'erreur statique vaut exactement 1/(1+K)",
+    name: 'the steady-state error is exactly 1/(1+K)',
     category: 'numeric',
     run() {
       const gap = maxGap(CASES, ({ w0, m, K }) => {

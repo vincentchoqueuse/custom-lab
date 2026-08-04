@@ -132,11 +132,11 @@ export function compute({ Kp, Ki, Kd, sigma, seed }) {
       },
       ess: {
         value: essAcc / essCnt,
-        meta: { label: 'erreur statique (avant perturbation)', precision: 4 },
+        meta: { label: 'steady-state error (before the disturbance)', precision: 4 },
       },
       rejection: {
         value: rejAcc / rejCnt,
-        meta: { label: '|erreur| finale', precision: 4 },
+        meta: { label: 'final |error|', precision: 4 },
       },
       uStd: { value: uStd, meta: { label: 'σ(u) in steady state', precision: 3 } },
     },
