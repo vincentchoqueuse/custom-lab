@@ -178,7 +178,7 @@ export function compute({ f0, L, stage, half }) {
 
       imageLevel: {
         value: stage === 'samples' ? NaN : stage === 'filtered' ? imageFiltered : imageStuffed,
-        meta: { label: 'image à Fs − f₀', unit: 'dB', precision: 1 },
+        meta: { label: 'image at Fs − f₀', unit: 'dB', precision: 1 },
       },
       bandLevel: {
         // Le gain rendu par le filtre, en dB au-dessus du flux à zéros. Il
@@ -190,11 +190,11 @@ export function compute({ f0, L, stage, half }) {
       },
       rejection: {
         value: stage === 'filtered' ? imageStuffed - imageFiltered : NaN,
-        meta: { label: 'réjection du filtre', unit: 'dB', precision: 1 },
+        meta: { label: 'filter rejection', unit: 'dB', precision: 1 },
       },
       interpErr: {
         value: stage === 'filtered' ? worst : NaN,
-        meta: { label: 'écart aux échantillons d’origine', precision: 6 },
+        meta: { label: 'gap to the original samples', precision: 6 },
       },
       nTaps: { value: h.length, meta: { label: 'coefficients' } },
       // niveaux bruts, pour le harnais

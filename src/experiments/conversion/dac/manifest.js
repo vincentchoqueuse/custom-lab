@@ -5,25 +5,25 @@ import { figure, line, stem, vline } from '../../../core/views.js';
 export default {
   id: 'dac',
   order: 4,
-  title: 'Suréchantillonnage et interpolation',
-  subtitle: 'Des zéros, puis un filtre — et ce que chaque geste fait au spectre',
-  tags: ['numérique', 'suréchantillonnage', 'interpolation', 'zéro-stuffing', 'images', 'CNA'],
+  title: 'Upsampling and interpolation',
+  subtitle: 'Zeros, then a filter — and what each step does to the spectrum',
+  tags: ['digital', 'upsampling', 'interpolation', 'zero stuffing', 'images', 'DAC'],
 
   params: {
     // L'ÉTAPE est un paramètre, pas un onglet : les deux figures restent les
     // mêmes et c'est la chaîne qui avance dessus. Une scène s'ouvre donc à
     // l'étape où le cours en est, et son URL la porte.
     stage: select('étape', {
-      description: 'où l’on en est dans la chaîne',
+      description: 'stage reached in the chain',
       options: [
-        { value: 'samples', label: '1 — les échantillons, à Fs' },
-        { value: 'stuffed', label: '2 — après zéro-stuffing, à L·Fs' },
-        { value: 'filtered', label: '3 — après le filtre d’interpolation' },
+        { value: 'samples', label: '1 — the samples, at Fs' },
+        { value: 'stuffed', label: '2 — after zero stuffing, at L·Fs' },
+        { value: 'filtered', label: '3 — after the interpolation filter' },
       ],
       default: 'samples',
     }),
     L: select('L', {
-      description: 'facteur de suréchantillonnage',
+      description: 'upsampling factor',
       options: [
         { value: 2, label: '×2' },
         { value: 4, label: '×4' },
@@ -32,7 +32,7 @@ export default {
       default: 4,
     }),
     f0: float('f₀', {
-      description: 'fréquence du signal (Fs = 8 kHz)',
+      description: 'signal frequency (Fs = 8 kHz)',
       min: 100,
       max: 3500,
       step: 10,
@@ -41,7 +41,7 @@ export default {
       precision: 0,
     }),
     half: int('M', {
-      description: 'demi-longueur du filtre, en périodes de Fs',
+      description: 'half-length of the filter, in periods of Fs',
       min: 1,
       max: 16,
       default: 8,
@@ -49,9 +49,9 @@ export default {
   },
 
   groups: [
-    { title: 'Chaîne', params: ['stage', 'L'] },
+    { title: 'Chain', params: ['stage', 'L'] },
     { title: 'Signal', params: ['f0'] },
-    { title: 'Filtre d’interpolation', params: ['half'] },
+    { title: 'Interpolation filter', params: ['half'] },
   ],
 
   // actions omises → l'expérience ne tire rien : pas de dé, seulement freeze
@@ -64,10 +64,10 @@ export default {
       stem('stems', {
         color: '#0072BD',
         size: 3.4,
-        label: 'flux courant',
+        label: 'current stream',
         overlays: [
-          line('ideal', { color: '#a1a1aa', width: 1.2, label: 'signal continu' }),
-          line('filtered', { color: '#D95319', width: 2, label: 'après filtre' }),
+          line('ideal', { color: '#a1a1aa', width: 1.2, label: 'continuous signal' }),
+          line('filtered', { color: '#D95319', width: 2, label: 'after the filter' }),
         ],
         axes: { x: { label: 't', unit: 'ms' }, y: 'x' },
       })
@@ -81,10 +81,10 @@ export default {
       line('spectrum', {
         color: '#0072BD',
         width: 1.6,
-        label: 'flux courant',
+        label: 'current stream',
         overlays: [
-          line('response', { color: '#D95319', width: 1.8, label: '|H(f)| du filtre' }),
-          vline('nyquistBase', { color: '#EDB120', width: 1.6, label: 'Fs/2 — bande utile' }),
+          line('response', { color: '#D95319', width: 1.8, label: '|H(f)| of the filter' }),
+          vline('nyquistBase', { color: '#EDB120', width: 1.6, label: 'Fs/2 — useful band' }),
         ],
         axes: {
           x: { label: 'f', unit: 'Hz' },

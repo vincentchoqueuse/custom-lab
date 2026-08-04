@@ -92,7 +92,7 @@ export function compute({ b, A, f, dither, seed }) {
       errPower: cur.power, // checks
       errMean: cur.mean, // checks
       maxErr: cur.maxAbs, // checks
-      snrMeas: { value: snrOf(cur.power), meta: { label: 'SNR mesuré', unit: 'dB', precision: 1 } },
+      snrMeas: { value: snrOf(cur.power), meta: { label: 'measured SNR', unit: 'dB', precision: 1 } },
       snrTheory: {
         value: 6.02 * b + 1.76 + 20 * Math.log10(A),
         meta: { label: '6.02b + 1.76 + 20log₁₀A', unit: 'dB', precision: 1 },

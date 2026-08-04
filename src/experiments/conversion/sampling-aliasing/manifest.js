@@ -5,32 +5,32 @@ import { view, line, stem, scatter, vline, figure } from '../../../core/views.js
 export default {
   id: 'sampling-aliasing',
   order: 2,
-  title: 'Échantillonnage & repliement',
-  subtitle: 'Shannon en direct : sous fe/2 tout va bien, au-dessus les fréquences se replient',
-  tags: ['analogique', 'numérique', 'échantillonnage', 'repliement', 'aliasing', 'Shannon', 'Nyquist'],
+  title: 'Sampling & aliasing',
+  subtitle: 'Shannon live: below fe/2 all is well, above it frequencies fold back',
+  tags: ['analog', 'digital', 'sampling', 'aliasing', 'Shannon', 'Nyquist'],
 
   params: {
     source: select('source', {
-      description: 'signal continu échantillonné',
+      description: 'continuous signal being sampled',
       options: [
-        { value: 'sine', label: 'sinusoïde' },
-        { value: 'square', label: 'carré (riche en harmoniques)' },
+        { value: 'sine', label: 'sinusoid' },
+        { value: 'square', label: 'square wave (rich in harmonics)' },
       ],
       default: 'sine',
     }),
-    f: float('f', { description: 'fréquence du signal', min: 0.5, max: 45, step: 0.5, default: 5, unit: 'Hz' }),
-    fe: float('fe', { description: 'fréquence d\'échantillonnage', min: 5, max: 100, step: 1, default: 50, unit: 'Hz' }),
+    f: float('f', { description: 'signal frequency', min: 0.5, max: 45, step: 0.5, default: 5, unit: 'Hz' }),
+    fe: float('fe', { description: 'sampling rate', min: 5, max: 100, step: 1, default: 50, unit: 'Hz' }),
     // no seed here: injected by the core (unused: fully deterministic)
   },
 
   derived: {
     nyquist: { label: 'fe/2 (Nyquist)', calc: (p) => `${(p.fe / 2).toFixed(1)} Hz` },
-    zone: { label: 'condition de Shannon', calc: (p) => (p.f < p.fe / 2 ? 'respectée' : 'VIOLÉE') },
+    zone: { label: 'Shannon condition', calc: (p) => (p.f < p.fe / 2 ? 'met' : 'VIOLATED') },
   },
 
   groups: [
     { title: 'Signal', params: ['source', 'f'] },
-    { title: 'Échantillonnage', params: ['fe'] },
+    { title: 'Sampling', params: ['fe'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -41,10 +41,10 @@ export default {
       'time',
       line('continuous', {
         width: 2,
-        label: 'signal continu',
+        label: 'continuous signal',
         overlays: [
-          line('reconstructed', { color: '#D95319', width: 2.4, label: 'reconstruit (sinc)' }),
-          stem('sampled', { color: '#7E2F8E', size: 3.4, label: 'échantillons' }),
+          line('reconstructed', { color: '#D95319', width: 2.4, label: 'reconstructed (sinc)' }),
+          stem('sampled', { color: '#7E2F8E', size: 3.4, label: 'samples' }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
       })
@@ -56,9 +56,9 @@ export default {
       stem('specTrue', {
         color: '#0072BD',
         opacity: 0.8,
-        label: 'raies vraies',
+        label: 'true lines',
         overlays: [
-          stem('specAlias', { color: '#D95319', opacity: 0.8, label: 'après repliement' }),
+          stem('specAlias', { color: '#D95319', opacity: 0.8, label: 'after aliasing' }),
           vline((p) => p.fe / 2, { color: '#EDB120', dashed: true, width: 2, label: 'fe/2' }),
         ],
         axes: { x: { label: 'f', unit: 'Hz' }, y: 'amplitude' },
@@ -72,13 +72,13 @@ export default {
       line('foldCurve', {
         color: '#7E2F8E',
         width: 2.4,
-        label: 'f apparente',
+        label: 'apparent f',
         overlays: [
-          line('diagonal', { color: '#a1a1aa', width: 1.3, dashed: true, label: 'sans repliement' }),
-          scatter('currentPoint', { color: '#EDB120', size: 6.5, label: 'point courant' }),
+          line('diagonal', { color: '#a1a1aa', width: 1.3, dashed: true, label: 'without aliasing' }),
+          scatter('currentPoint', { color: '#EDB120', size: 6.5, label: 'current point' }),
           vline((p) => p.fe / 2, { color: '#EDB120', dashed: true, width: 1.6, label: 'fe/2' }),
         ],
-        axes: { x: { label: 'f vraie', unit: 'Hz' }, y: { label: 'f apparente', unit: 'Hz' } },
+        axes: { x: { label: 'true f', unit: 'Hz' }, y: { label: 'apparent f', unit: 'Hz' } },
       })
     ),
   ],

@@ -2,45 +2,55 @@
 export default [
   {
     id: 'staircase',
-    title: "Scène 1 · L'escalier",
+    title: 'Scene 1 · The staircase',
     params: { b: 3, A: 0.9, f: 7.3, dither: false },
     visible: ['b'],
-    notes: `b = 3 : 8 niveaux, l'escalier saute aux yeux. Geler (F), monter b
-à 8 : l'escalier disparaît dans le trait. Question : « chaque bit supplémentaire
-gagne combien de dB de SNR ? » (réponse dans la statline — la faire deviner
-avant).`,
+    notes: `At b = 3 there are eight levels and the staircase is impossible to
+miss. Freezing and raising b to 8 makes it disappear into the line.
+
+The question worth putting before showing the answer: how many dB of SNR does
+each additional bit buy? The statline gives it away, so it should be guessed
+first.`,
   },
   {
     id: 'uniform-error',
-    title: "Scène 2 · L'erreur est (presque) uniforme",
+    title: 'Scene 2 · The error is (almost) uniform',
     view: 'error-hist',
     params: { b: 8, A: 0.9, f: 7.3, dither: false },
     visible: ['b'],
-    notes: `À b = 8, l'histogramme colle à la densité uniforme ±Δ/2 : c'est
-l'hypothèse qui donne Δ²/12. Descendre b à 2 : l'histogramme se structure —
-l'erreur n'est plus un « bruit », elle est corrélée au signal. Le modèle
-uniforme est une APPROXIMATION, valable quand Δ est petit devant le signal.`,
+    notes: `At b = 8 the histogram sits on the uniform density over ±Δ/2, which
+is the assumption behind the familiar Δ²/12.
+
+Dropping b to 2 breaks it: the histogram acquires structure, and the error stops
+being a noise at all — it is correlated with the signal. The uniform model is an
+APPROXIMATION, valid when Δ is small compared with the signal, and this is where
+that condition stops being a formality.`,
   },
   {
     id: 'six-db',
-    title: 'Scène 3 · 6 dB par bit',
+    title: 'Scene 3 · 6 dB per bit',
     view: 'snr',
     params: { b: 8, A: 0.9, f: 7.3, dither: false },
     visible: ['b', 'A'],
-    notes: `La droite mesurée épouse 6.02b + 1.76 + 20log₁₀A. Geler (F), passer
-A de 0.9 à 0.45 : la droite descend de 6 dB — un demi-échelle gaspille un bit.
-Moralité de conception : un CAN se remplit (et c'est tout l'art du gain
-d'entrée).`,
+    notes: `The measured line follows 6.02b + 1.76 + 20log₁₀A.
+
+Freezing and taking A from 0.9 to 0.45 drops the line by 6 dB: using half the
+range wastes a whole bit. The design moral is short — an ADC is meant to be
+filled, and getting the input gain right is the entire art.`,
   },
   {
     id: 'dither',
-    title: 'Scène 4 · Le dither, ou le bruit qui aide',
+    title: 'Scene 4 · Dither, or the noise that helps',
     view: 'error',
     params: { b: 3, A: 0.8, f: 7.3, dither: true },
     visible: ['b', 'dither'],
-    notes: `À b = 3 sans dither, l'erreur est un motif périodique accroché au
-signal (distorsion). Geler (F), activer le dither : le motif se dissout en
-bruit blanc — au prix de ~3 dB de SNR. Marteler R : le motif sans dither ne
-change pas, le bruit dithéré si. C'est le compromis de tout CAN audio.`,
+    notes: `At b = 3 without dither the error is a periodic pattern locked to the
+signal, which is distortion rather than noise.
+
+Freezing and switching dither on dissolves the pattern into white noise, at a
+cost of about 3 dB of SNR. Pressing R confirms the difference in nature: the
+undithered pattern does not change, the dithered noise does. This trade is made
+in every audio converter.`,
   },
 ];
+// notes: Teacher Mode only. Never projected by default, never in the URL.

@@ -5,23 +5,23 @@ import { view, line, scatter, vline, stem, figure } from '../../../core/views.js
 export default {
   id: 'periodization',
   order: 1,
-  title: 'Effet de l\'échantillonnage',
-  subtitle: 'Le spectre se recopie tous les Fe — et le repliement, c\'est la somme des copies',
-  tags: ['analogique', 'numérique', 'échantillonnage', 'périodisation', 'Poisson', 'Shannon'],
+  title: 'What sampling does to a spectrum',
+  subtitle: 'The spectrum repeats every Fe — and aliasing is the sum of the copies',
+  tags: ['analog', 'digital', 'sampling', 'periodization', 'Poisson', 'Shannon'],
 
   params: {
     signal: select('signal', {
-      description: 'source (transformée connue en forme close)',
+      description: 'source (transform known in closed form)',
       options: [
-        { value: 'gauss', label: 'gaussienne' },
+        { value: 'gauss', label: 'Gaussian' },
         { value: 'triangle', label: 'triangle' },
-        { value: 'sinc', label: 'sinc (à bande limitée)' },
-        { value: 'expo', label: 'exponentielle e^−|t|/τ' },
+        { value: 'sinc', label: 'sinc (band-limited)' },
+        { value: 'expo', label: 'exponential e^−|t|/τ' },
       ],
       default: 'gauss',
     }),
     fe: float('Fe', {
-      description: "fréquence d'échantillonnage",
+      description: 'sampling rate',
       min: 60,
       max: 700,
       step: 5,
@@ -30,7 +30,7 @@ export default {
       precision: 0,
     }),
     tau: float('τ', {
-      description: 'largeur temporelle du signal',
+      description: 'time width of the signal',
       min: 2,
       max: 12,
       step: 0.5,
@@ -59,11 +59,11 @@ export default {
       'Périodisation du spectre',
       line('periodized', {
         width: 2.6,
-        label: 'spectre échantillonné = Σ copies',
+        label: 'sampled spectrum = Σ copies',
         overlays: [
           line('copies', { color: '#a1a1aa', dashed: true, label: 'copies X(f − k·Fe)' }),
-          line('central', { color: '#D95319', dashed: true, width: 2, label: 'X(f) original' }),
-          scatter('dtft', { color: '#77AC30', size: 1.8, opacity: 0.9, label: 'DTFT des échantillons' }),
+          line('central', { color: '#D95319', dashed: true, width: 2, label: 'original X(f)' }),
+          scatter('dtft', { color: '#77AC30', size: 1.8, opacity: 0.9, label: 'DTFT of the samples' }),
           vline('feHalf', { color: '#EDB120', dashed: true, label: 'Fe/2' }),
           vline('feHalfNeg', { color: '#EDB120', dashed: true }),
         ],
@@ -78,7 +78,7 @@ export default {
         overlays: [vline('fe', { color: '#EDB120', dashed: true, label: 'Fe' })],
         axes: {
           x: { label: 'Fe', unit: 'Hz' },
-          y: { label: 'erreur dans la bande', unit: '%' },
+          y: { label: 'in-band error', unit: '%' },
         },
       })
     ),
