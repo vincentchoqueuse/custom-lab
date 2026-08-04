@@ -18,6 +18,7 @@ import * as dsp from '../src/core/dsp.js';
 import * as la from '../src/core/linalg.js';
 import { fft } from '../src/core/numeric.js';
 import { validateScene } from '../src/core/scenes.js';
+import { castParam, parseHash, decodeQuery, encodeHash } from '../src/core/router.js';
 
 const ROOT = resolve(process.cwd(), 'src/experiments');
 
@@ -335,12 +336,137 @@ function checkLinalg() {
   }
 }
 
+/**
+ * The URL contract (core/router.js), which is the ONE contract nothing else can
+ * catch. A wrong formula fails a numeric check; a wrong URL cast produces a
+ * plausible plot of the wrong thing, in bounds, with nobody to object.
+ *
+ * The header of router.js promises that an out-of-bounds or unparsable value
+ * "silently falls back to the default (a hand-edited URL must never produce an
+ * invalid state or a crash)". That promise had never been tested, and it was
+ * half true: nothing crashed, but `parseFloat`/`parseInt` stop at the first
+ * unreadable character, so '12abc' decoded to 12 and '0x10' to 0 instead of
+ * falling back. Pinned here, both halves.
+ *
+ * Also pinned: encode → decode is the identity on every param type. That is
+ * "one link = one reproducible scene" written as an equation, and it is the
+ * reason the whole instrument can be driven by a URL.
+ */
+function checkRouter() {
+  const bad = [];
+  const N = { type: 'int', min: 2, max: 200 };
+  const A = { type: 'float', min: 0, max: 2 };
+  const SNR = { type: 'log', min: 1e-3, max: 1e3 };
+  const B = { type: 'bool' };
+  const S = { type: 'select', options: [{ value: false }, { value: true }] };
+  const C = { type: 'coeffs', maxLen: 4 };
+
+  // ACCEPTED: what a lecturer legitimately types, exponents and signs included
+  for (const [spec, str, want] of [
+    [N, '30', 30],
+    [N, ' 7 ', 7],
+    [A, '0.5', 0.5],
+    [A, '.5', 0.5],
+    [A, '+1.5', 1.5],
+    [SNR, '1e-3', 1e-3],
+    [B, 'true', true],
+    [B, 'false', false],
+    [S, 'false', false],
+  ]) {
+    const got = castParam(spec, str);
+    if (got !== want) bad.push(`'${str}' → ${JSON.stringify(got)}, expected ${want}`);
+  }
+  const coeffs = castParam(C, '1,-2.5,1e2');
+  if (String(coeffs) !== '1,-2.5,100') bad.push(`coeffs '1,-2.5,1e2' → ${coeffs}`);
+
+  // REJECTED: everything else falls back to the default (undefined), and the
+  // first three are the regressions this check exists for
+  for (const [spec, str] of [
+    [N, '12abc'],
+    [A, '0.5abc'],
+    [A, '0x10'],
+    [N, ''],
+    [A, ''],
+    [A, 'Infinity'],
+    [A, 'NaN'],
+    [N, '30.7'],
+    [N, '1'], // below min
+    [A, '9'], // above max
+    [B, 'TRUE'],
+    [B, '1'],
+    [S, 'maybe'],
+    [C, '1,,2'],
+    [C, '1,0x10'],
+    [C, '1,2,3,4,5'], // longer than maxLen
+  ]) {
+    const got = castParam(spec, str);
+    if (got !== undefined) bad.push(`'${str}' → ${JSON.stringify(got)}, expected fallback`);
+  }
+
+  // NEVER THROWS: a truncated or mangled hash is a state, not a crash
+  for (const h of ['', '#', '#/', '#/a/b?', '#/a/b?=&&x', '#/a/b?N=%E0%A4%A', '#///']) {
+    try {
+      parseHash(h);
+    } catch (e) {
+      bad.push(`parseHash('${h}') threw ${e.message}`);
+    }
+  }
+
+  // encode → decode = identity, on every type at once
+  const specs = { N, A, SNR, B, S, C };
+  const params = { N: 30, A: 0.3, SNR: 0.001, B: true, S: false, C: [1, -2.5] };
+  const manifest = {
+    params: specs,
+    presets: [{ id: 'scene-2' }],
+    views: [{ id: 'time' }, { id: 'spectrum' }],
+  };
+  const hash = encodeHash('stats/demo', {
+    params,
+    base: {}, // nothing equals its base, so every param is serialized
+    paramSpecs: specs,
+    view: 'spectrum',
+    defaultView: 'time',
+    preset: 'scene-2',
+    defaultPreset: 'scene-1',
+    drawer: true,
+    defaultDrawer: false,
+  });
+  const { path, query } = parseHash(hash);
+  if (path !== 'stats/demo') bad.push(`round trip: path '${path}'`);
+  const back = decodeQuery(query, manifest);
+  for (const k of Object.keys(params)) {
+    const a = String(params[k]);
+    const b = String(back.params[k]);
+    if (a !== b) bad.push(`round trip ${k}: ${a} → ${b}`);
+  }
+  if (back.view !== 'spectrum') bad.push(`round trip view: ${back.view}`);
+  if (back.preset !== 'scene-2') bad.push(`round trip preset: ${back.preset}`);
+  if (back.drawer !== true) bad.push(`round trip drawer: ${back.drawer}`);
+
+  // and a hash pointing at a view/preset that no longer exists is dropped,
+  // not carried into the app as a dangling id
+  const stale = decodeQuery({ view: 'gone', preset: 'gone' }, manifest);
+  if ('view' in stale || 'preset' in stale) bad.push('stale view/preset survived decode');
+
+  console.log(`  ${dim('url')}`);
+  if (bad.length) {
+    for (const b of bad) console.log(`    ${red('✗')} ${b}`);
+    fail++;
+  } else {
+    console.log(
+      `    ${green('✓')} strict casts, fallback on anything unparsable, parseHash never throws, encode∘decode = id`
+    );
+    pass++;
+  }
+}
+
 async function checkCatalogue() {
   console.log(bold('catalogue'));
   checkLayering();
   checkRandomness();
   checkDsp();
   checkLinalg();
+  checkRouter();
   console.log(`  ${dim('vocabulary')}`);
   let figuresOk = true;
   let scenesOk = true;
