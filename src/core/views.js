@@ -51,10 +51,21 @@ function validateAxis(axis, where) {
     }
     if (!Array.isArray(axis.domain) || axis.domain.length !== 2)
       throw new ViewError(`${where}: axis domain must be [min, max]`);
+    // UNE SEULE borne peut être figée, l'autre restant automatique : `null`
+    // dit « celle-ci suit les données ». Le cas qui l'a demandé : une loi
+    // uniforme sur [0, θ]: l'abscisse DOIT partir de 0, sinon on ne voit pas
+    // que les estimateurs visent le bord d'un support qui commence là — mais
+    // 2x̄ peut dépasser θ (jusqu'à 2θ à N = 2), et une borne haute figée
+    // l'aurait purement et simplement coupé du cadre.
     const [lo, hi] = axis.domain;
-    if (typeof lo !== 'number' || typeof hi !== 'number' || !(lo < hi))
+    const num = (v) => typeof v === 'number' && Number.isFinite(v);
+    if (!(num(lo) || lo === null) || !(num(hi) || hi === null))
+      throw new ViewError(`${where}: axis domain bounds must be numbers, or null for automatic`);
+    if (lo === null && hi === null)
+      throw new ViewError(`${where}: an axis domain of [null, null] is just the default — omit it`);
+    if (num(lo) && num(hi) && !(lo < hi))
       throw new ViewError(`${where}: axis domain must be two numbers with min < max`);
-    if (axis.scale === 'log' && lo <= 0)
+    if (axis.scale === 'log' && num(lo) && lo <= 0)
       throw new ViewError(`${where}: log axis domain must be strictly positive`);
   }
 }
