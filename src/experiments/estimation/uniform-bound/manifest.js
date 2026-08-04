@@ -54,6 +54,10 @@ export default {
           vline('est3', { color: '#7E2F8E', width: 2, label: '2x̄' }),
           vline((p) => p.theta, { color: '#EDB120', dashed: true, width: 2, label: 'θ' }),
         ],
+        // Légende à GAUCHE : les trois estimateurs tombent forcément près de
+        // θ, donc à droite du cadre, exactement là où la légende se pose par
+        // défaut — elle leur passait dessus. À gauche il n'y a que le rug.
+        legend: 'left',
         // l'ordonnée ne mesure rien : les points sont sur une seule ligne,
         // et la graduer laisserait chercher un sens qui n'existe pas
         axes: { x: 'x', y: { label: 'échantillon', domain: [0, 1], ticks: false } },

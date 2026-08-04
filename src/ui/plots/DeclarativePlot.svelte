@@ -310,6 +310,6 @@
       {/if}
     {/each}
     </g>
-    <Legend entries={legend} {iw} {kt} />
+    <Legend entries={legend} {iw} {kt} side={spec.legend ?? 'right'} />
   </g>
 </svg>

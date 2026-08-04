@@ -83,6 +83,13 @@ function makePlot(type, source, opts = {}) {
     validateAxis(opts.axes.x, `${where} axes.x`);
     validateAxis(opts.axes.y, `${where} axes.y`);
   }
+  // La légende se pose en haut à DROITE par défaut, et c'est le bon coin
+  // presque partout. Presque : quand les couches se pressent à droite — trois
+  // estimateurs qui tombent près de la borne qu'ils estiment — elle leur
+  // passe dessus. `legend: 'left'` la met en face. Liste fermée, comme le
+  // reste du vocabulaire.
+  if (opts.legend != null && opts.legend !== 'left' && opts.legend !== 'right')
+    throw new ViewError(`${where}: legend accepts 'left' or 'right' (got '${opts.legend}')`);
   return { type, source, ...opts };
 }
 

@@ -19,7 +19,16 @@
   import { app, toggleSeries } from '../../core/store.svelte.js';
   import { STR } from '../../core/strings.js';
 
-  let { entries = [], iw, kt = 1 } = $props();
+  let { entries = [], iw, kt = 1, side = 'right' } = $props();
+
+  // Ancrage : à droite le bloc est aligné sur le bord droit du cadre et les
+  // libellés sont alignés à droite ; à gauche, tout est symétrique. Un seul
+  // paramètre de position, le reste du dessin est identique.
+  const left = $derived(side === 'left');
+  // largeur du bloc, partagée par le fond et l'ancrage des pastilles
+  const bw = $derived(
+    entries.length ? Math.max(...entries.map((e) => e.label.length * 6.6 * kt)) + 34 : 0
+  );
 
   const press = (ev, label) => {
     if (ev.key === undefined || ev.key === 'Enter' || ev.key === ' ') {
@@ -36,9 +45,8 @@
        fond de la salle. Le cadre du graphe est clair par contrat
        (lisibilité au vidéoprojecteur), donc un blanc translucide y tient
        dans les deux thèmes. -->
-  {@const bw = Math.max(...entries.map((e) => e.label.length * 6.6 * kt)) + 34}
   <rect
-    x={iw - 4 - bw}
+    x={left ? 4 : iw - 4 - bw}
     y={2 * kt}
     width={bw}
     height={(entries.length - 1) * 18 * kt + 18 * kt}
@@ -52,7 +60,7 @@
   {@const off = app.hidden.includes(e.label)}
   {@const w = Math.max(60, e.label.length * 6.6 * kt)}
   <g
-    transform="translate({iw - 8},{12 + i * 18 * kt})"
+    transform="translate({left ? bw + 4 : iw - 8},{12 + i * 18 * kt})"
     role="button"
     tabindex="0"
     aria-pressed={!off}
