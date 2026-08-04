@@ -1,14 +1,13 @@
-// L'écran d'un téléphone, aux largeurs qui existent vraiment.
+// A phone screen, at the widths that actually exist.
 //
-// Le défaut que cette suite existe pour attraper : à 320 px, la boîte qui
-// contient le ☰ ouvrant la barre latérale a été mesurée à ZÉRO pixel de
-// large, parce qu'un groupe voisin refusait de rétrécir. Rien dans le code
-// ne l'annonçait, et sur un écran de bureau tout allait bien.
+// The defect this suite exists to catch: at 320 px the box holding the ☰ that
+// opens the sidebar measured ZERO pixels wide, because a neighbouring group
+// refused to shrink. Nothing in the code announced it, and on a desktop screen
+// everything was fine.
 //
-// D'où la forme des assertions : on ne regarde pas « est-ce que ça a l'air
-// correct », on MESURE — largeur du toggle, débordement horizontal, hauteur
-// de la barre de vues, largeur du sélecteur contre celle dont son libellé a
-// besoin.
+// Hence the shape of the assertions: not "does this look right" but a
+// MEASUREMENT — width of the toggle, horizontal overflow, height of the view
+// bar, width of the picker against the width its own label needs.
 import { run } from '../harness.mjs';
 
 const DEVICES = [
@@ -18,7 +17,7 @@ const DEVICES = [
   { name: 'Pixel 5', width: 393 },
 ];
 
-// une expérience à onglets longs : c'est là que la place manque
+// an experiment with long tab titles: that is where the room runs out
 const KEY = 'control/lti-response';
 
 export default () =>
@@ -36,7 +35,7 @@ export default () =>
             const bar = box('.viewbar');
             const pick = box('.preset-picker > button');
             const sizer = document.querySelector('.tabs-sizer');
-            // ce que le libellé courant DEMANDE, sans contrainte de largeur
+            // what the current label ASKS for, with no width constraint
             let need = 0;
             if (sizer) {
               const probe = sizer.cloneNode(true);
@@ -66,24 +65,24 @@ export default () =>
             };
           });
 
-          t('le ☰ est visible', m.togW > 10, `${Math.round(m.togW)} px`);
-          t('aucun débordement horizontal', m.scrollW <= m.innerW, `${m.scrollW}/${m.innerW}`);
-          t('aucun bouton hors écran', m.offscreen === 0, `${m.offscreen}`);
-          t('onglets segmentés masqués', !m.tabsVisible);
-          t('le sélecteur natif est là', m.selW > 0, `${Math.round(m.selW)} px`);
+          t('the ☰ is visible', m.togW > 10, `${Math.round(m.togW)} px`);
+          t('no horizontal overflow', m.scrollW <= m.innerW, `${m.scrollW}/${m.innerW}`);
+          t('no button off screen', m.offscreen === 0, `${m.offscreen}`);
+          t('segmented tabs hidden', !m.tabsVisible);
+          t('the native picker is there', m.selW > 0, `${Math.round(m.selW)} px`);
           t(
-            'le sélecteur ne dépasse pas ce que son libellé demande',
+            'the picker is no wider than its label asks for',
             m.selW <= Math.ceil(m.need) + 2,
             `${Math.round(m.selW)} ≤ ${Math.round(m.need)}`
           );
-          t('la barre de vues tient sur une ligne', m.barH > 0 && m.barH < 52, `h=${Math.round(m.barH)}`);
-          t('le titre de scène est tronqué, pas empilé', m.pickW > 40, `${Math.round(m.pickW)} px`);
-          t('le graphe garde de la hauteur', (await h.marks()) > 2);
+          t('the view bar fits on one line', m.barH > 0 && m.barH < 52, `h=${Math.round(m.barH)}`);
+          t('the scene title is truncated, not stacked', m.pickW > 40, `${Math.round(m.pickW)} px`);
+          t('the plot keeps its height', (await h.marks()) > 2);
 
-          // le sélecteur change bien de vue
+          // the picker really does change view
           await page.selectOption('.tabs-select select', { index: 1 });
           await page.waitForTimeout(650);
-          t('sélectionner change la vue', /view=/.test(await page.evaluate(() => location.hash)));
+          t('selecting changes the view', /view=/.test(await page.evaluate(() => location.hash)));
         },
         { viewport: { width: d.width, height: 720 } }
       )
