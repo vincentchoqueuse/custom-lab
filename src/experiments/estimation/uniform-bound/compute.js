@@ -76,12 +76,12 @@ export function compute({ theta, N, M, seed }) {
     rTh3[g] = theta / Math.sqrt(3 * n);
   }
 
-  // L'ordonnée de cette vue ne mesure RIEN : les points sont posés sur une
-  // seule ligne, à mi-hauteur, et c'est l'abscisse seule qui porte
-  // l'information. C'était déjà le cas avant, mais avec un décalage vertical
-  // ALÉATOIRE qui laissait croire à une seconde dimension. Une hauteur
-  // constante le dit franchement, et l'axe est nommé par ce qu'il porte —
-  // l'échantillon — plutôt que par une grandeur qui n'existe pas.
+  // The y coordinate of this view measures NOTHING: the points sit on a
+  // single line at mid-height, and the abscissa alone carries the
+  // information. That was already true before, but with a RANDOM vertical
+  // offset that suggested a second dimension. A constant height says it
+  // plainly, and the axis is named after what it carries — the sample —
+  // rather than after a quantity that does not exist.
   const rugY = new Float64Array(N).fill(0.5);
 
   return {

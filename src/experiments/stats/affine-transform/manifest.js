@@ -6,25 +6,25 @@ export default {
   id: 'affine-transform',
   order: 2,
   random: true,
-  title: 'Transformation affine Y = aX + b',
-  subtitle: 'Comment a et b déplacent, dilatent et retournent une densité',
-  tags: ['transformation', 'variable aléatoire', 'moyenne', 'variance'],
+  title: 'Affine transform Y = aX + b',
+  subtitle: 'How a and b shift, stretch and flip a density',
+  tags: ['transform', 'random variable', 'mean', 'variance'],
 
   params: {
-    law: select('loi', {
-      description: 'loi de la variable de départ X',
+    law: select('distribution', {
+      description: 'distribution of the starting variable X',
       options: [
-        { value: 'gaussian', label: 'Gaussienne N(0, 1)' },
-        { value: 'uniform', label: 'Uniforme U(0, 1)' },
-        { value: 'exponential', label: 'Exponentielle Exp(1)' },
+        { value: 'gaussian', label: 'Gaussian N(0, 1)' },
+        { value: 'uniform', label: 'Uniform U(0, 1)' },
+        { value: 'exponential', label: 'Exponential Exp(1)' },
         { value: 'rayleigh', label: 'Rayleigh(1)' },
       ],
       default: 'gaussian',
     }),
-    a: float('a', { description: 'facteur d\'échelle', min: -3, max: 3, step: 0.1, default: 2 }),
-    b: float('b', { description: 'décalage', min: -5, max: 5, step: 0.1, default: 1 }),
+    a: float('a', { description: 'scale factor', min: -3, max: 3, step: 0.1, default: 2 }),
+    b: float('b', { description: 'shift', min: -5, max: 5, step: 0.1, default: 1 }),
     N: int('N', {
-      description: 'réalisations pour l\'histogramme',
+      description: 'draws for the histogram',
       min: 100,
       max: 20000,
       step: 100,
@@ -34,17 +34,17 @@ export default {
   },
 
   validate: [
-    { when: (q) => q.a === 0, message: 'a = 0 écrase Y en une constante — choisir a ≠ 0' },
+    { when: (q) => q.a === 0, message: 'a = 0 collapses Y to a constant — pick a ≠ 0' },
   ],
 
   derived: {
-    scale: { label: '|a| (largeur ×)', calc: (q) => Math.abs(q.a).toFixed(2) },
+    scale: { label: '|a| (width ×)', calc: (q) => Math.abs(q.a).toFixed(2) },
     varFactor: { label: 'a² (variance ×)', calc: (q) => (q.a * q.a).toFixed(2) },
   },
 
   groups: [
-    { title: 'Variable de départ', params: ['law'] },
-    { title: 'Transformation', params: ['a', 'b'] },
+    { title: 'Starting variable', params: ['law'] },
+    { title: 'Transform', params: ['a', 'b'] },
     { title: 'Simulation', params: ['N'] },
   ],
 
@@ -54,7 +54,7 @@ export default {
     // Fully declarative: the two theoretical densities with their means.
     view(
       'pdfs',
-      'Densités',
+      'Densities',
       line('pdfX', {
         width: 2.5,
         label: 'X',
@@ -63,18 +63,18 @@ export default {
           vline('meanX', { color: '#0072BD', dashed: true, width: 1.4, label: 'E[X]' }),
           vline('meanY', { color: '#D95319', dashed: true, width: 1.4, label: 'E[Y]' }),
         ],
-        axes: { x: 'x', y: 'densité' },
+        axes: { x: 'x', y: 'density' },
       })
     ),
 
     // The transformed samples land exactly on the transformed pdf.
     view(
       'empirical',
-      'Histogramme de Y',
+      'Histogram of Y',
       histogram('ySamples', {
-        label: 'Y empirique',
-        overlays: [density('pdfY', { color: '#D95319', width: 2.5, label: 'pdf de Y' })],
-        axes: { x: 'y', y: 'densité' },
+        label: 'Y, sampled',
+        overlays: [density('pdfY', { color: '#D95319', width: 2.5, label: 'pdf of Y' })],
+        axes: { x: 'y', y: 'density' },
       })
     ),
   ],

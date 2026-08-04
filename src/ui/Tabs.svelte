@@ -5,8 +5,8 @@
   // once — which is what a lecture wants, since the room sees that there ARE
   // four readings before the professor opens any of them.
   //
-  // On a phone: a native <select>. Six tabs the length of "Réponse
-  // impulsionnelle" do not fit in 380 px; they overflow the bar or wrap it
+  // On a phone: a native <select>. Six tabs the length of "Impulse
+  // response" do not fit in 380 px; they overflow the bar or wrap it
   // onto three lines and eat the plot. A native select beats a hand-built
   // dropdown here — it opens the platform's own picker (the iOS wheel, the
   // Android sheet), it is keyboard- and screen-reader-accessible for free, and
@@ -37,8 +37,8 @@
 
 <div class="tabs-select">
   <!-- A <select> is sized by its LONGEST option, never by the one it shows:
-       "Signal temporel" was rendered in a box wide enough for "Ce que ça
-       coûte à la boucle", so the picker ate the bar and the actions got the
+       "Time signal" was rendered in a box wide enough for "What it costs the
+       loop", so the picker ate the bar and the actions got the
        scraps. This ghost carries the CURRENT title and gives the control its
        width; the select is laid over it. Ellipsis when the room runs out. -->
   <span class="tabs-sizer" aria-hidden="true">{current?.title ?? ''}</span>

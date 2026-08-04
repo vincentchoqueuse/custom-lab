@@ -1,28 +1,27 @@
-// Un filtre qui s'ajuste tout seul — et ce que coûte chaque façon de le faire.
+// A filter that adjusts itself — and what each way of doing so costs.
 //
-// Le montage est celui de l'IDENTIFICATION : un système inconnu w* reçoit
-// une entrée u(n) et rend une sortie qu'on n'observe que bruitée. Le filtre
-// adaptatif ne voit que u et d, et remonte à w* une itération à la fois.
-// C'est le montage de l'annulation d'écho, du débruitage par référence et
-// de l'égalisation — à un câblage près, toujours le même schéma.
+// The setup is the IDENTIFICATION one: an unknown system w* receives an input
+// u(n) and returns an output observed only through noise. The adaptive filter
+// sees only u and d, and works its way back to w* one iteration at a time. It is
+// the setup of echo cancellation, of reference-based denoising and of
+// equalization — up to the wiring, always the same diagram.
 //
-// TROIS CHOSES SE LISENT ICI, et chacune a sa vue :
-//   1. la courbe d'apprentissage descend jusqu'à un PALIER, jamais jusqu'à
-//      zéro : le gradient est estimé sur un seul échantillon, donc il
-//      fluctue, donc ŵ danse autour de w*. L'excès s'appelle le
-//      désajustement et vaut μ·tr(R)/2 — il est PROPORTIONNEL au pas, quand
-//      la vitesse de convergence l'est aussi. Tout le réglage est là.
-//   2. le conditionnement de R fixe la vitesse de LMS et RIEN d'autre chez
-//      RLS. Colorer l'entrée (a → 0.95) ralentit LMS d'un facteur qui se
-//      mesure ; RLS ne bouge pas.
-//   3. se tromper de pas ne dégrade pas : ça diverge. La borne est
-//      μ < 2/tr(R), et on la franchit en direct.
+// THREE THINGS ARE READ HERE, and each has its view:
+//   1. the learning curve descends to a PLATEAU, never to zero: the gradient is
+//      estimated from a single sample, so it fluctuates, so ŵ dances around w*.
+//      The excess is called the misadjustment and equals μ·tr(R)/2 — it is
+//      PROPORTIONAL to the step size, just as the convergence speed is. The
+//      whole tuning problem is there.
+//   2. the conditioning of R sets the speed of LMS and NOTHING at all for RLS.
+//      Colouring the input (a → 0.95) slows LMS by a factor that can be
+//      measured; RLS does not budge.
+//   3. getting the step size wrong does not degrade: it diverges. The bound is
+//      μ < 2/tr(R), and it is crossed live.
 //
-// L'ITÉRATION EST UN PARAMÈTRE, ce qui évite tout moteur d'animation : la
-// trajectoire complète est une fonction pure de (params, seed), on la
-// calcule d'un coup et le potard `n` balaie dedans. La scène reste
-// reproductible par son URL, gelable et exportable — ce qu'une animation
-// qui joue toute seule n'est pas.
+// THE ITERATION IS A PARAMETER, which avoids any animation engine: the full
+// trajectory is a pure function of (params, seed), it is computed in one go and
+// the `n` slider sweeps inside it. The scene stays reproducible through its URL,
+// freezable and exportable — which an animation that plays by itself is not.
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { noiseSigma } from '../../../core/dsp.js';
@@ -39,9 +38,9 @@ import {
   msBound,
 } from '../_lib/adaptive.js';
 
-const N_ITER = 3000; // itérations d'adaptation
-const N_RUNS = 24; // réalisations moyennées pour la courbe d'apprentissage
-const SWITCH_AT = 1500; // le canal saute à mi-parcours, en mode poursuite
+const N_ITER = 3000; // adaptation iterations
+const N_RUNS = 24; // realizations averaged for the learning curve
+const SWITCH_AT = 1500; // the channel jumps halfway, in tracking mode
 
 /**
  * @param {{algo: string, mu: number, lambda: number, L: number, a: number,
@@ -54,19 +53,18 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
   const R = toeplitzAR1(a, L);
   const { spread, max: lMax, values: eigVals } = eigSpread(R, L);
 
-  // Puissance du signal utile, EXACTEMENT : w*ᵀRw*. Le bruit s'en déduit,
-  // de sorte que le SNR affiché soit le vrai et pas une approximation
-  // « ‖w*‖² = 1 donc puissance 1 », qui serait fausse dès que l'entrée est
-  // colorée.
+  // Power of the useful signal, EXACTLY: w*ᵀRw*. The noise follows from it, so
+  // that the displayed SNR is the true one and not an approximation "‖w*‖² = 1
+  // hence power 1", which would be wrong as soon as the input is coloured.
   const sigPow = quadForm(R, wTrue, L);
   const sigmaV = noiseSigma(sigPow, snr);
   const noisePow = sigmaV * sigmaV;
 
-  // La courbe d'apprentissage est une MOYENNE D'ENSEMBLE : e²(n) d'une
-  // seule réalisation fluctue sur deux décades et l'œil y lit une
-  // décroissance qui n'a pas eu lieu. La réalisation 0 sert, elle, aux vues
-  // qui montrent un filtre PARTICULIER (coefficients, trajectoire) — c'est
-  // le même partage que dans les expériences d'estimation.
+  // The learning curve is an ENSEMBLE AVERAGE: e²(n) of a single realization
+  // fluctuates over two decades and the eye reads a decay in it that never
+  // happened. Realization 0 serves the views that show a PARTICULAR filter
+  // (coefficients, trajectory) — the same split as in the estimation
+  // experiments.
   const mse = new Float64Array(N_ITER);
   const exc = new Float64Array(N_ITER);
   let wPath = null;
@@ -111,8 +109,8 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
   }
   const floorDb = toDb(Math.sqrt(noisePow));
 
-  /* ---------- ce que la courbe dit, en chiffres ---------------------------- */
-  // Le palier : la moyenne du dernier quart, avant le saut s'il y en a un.
+  /* ---------- what the curve says, as numbers ----------------------------- */
+  // The plateau: the mean of the last quarter, before the jump if there is one.
   const from = track ? Math.floor(SWITCH_AT * 0.75) : Math.floor(N_ITER * 0.75);
   const to = track ? SWITCH_AT : N_ITER;
   let plateau = 0;
@@ -121,51 +119,49 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
     plateau += mse[i] / (to - from);
     plateauEx += exc[i] / (to - from);
   }
-  // Le palier n'en est un que s'il ne descend plus. À très petit pas —
-  // ou à fort conditionnement — 3000 itérations ne suffisent pas, et le
-  // « désajustement » lu serait celui d'une convergence encore en cours.
-  // On compare donc les deux moitiés de la fenêtre : tant qu'elles
-  // diffèrent, la statline affiche « — » plutôt qu'un nombre faux.
+  // A plateau is only one if it stops descending. At a very small step size —
+  // or at strong conditioning — 3000 iterations are not enough, and the
+  // "misadjustment" read would be that of a convergence still in progress. The
+  // two halves of the window are therefore compared: while they differ, the
+  // statline shows "—" rather than a wrong number.
   const mid = Math.floor((from + to) / 2);
   let exEarly = 0;
   let exLate = 0;
   for (let i = from; i < mid; i++) exEarly += exc[i] / (mid - from);
   for (let i = mid; i < to; i++) exLate += exc[i] / (to - mid);
   const settled = exEarly < 1.2 * exLate;
-  // Désajustement : l'excès d'EQM rapporté au plancher. Sa théorie tient en
-  // une ligne, d'où l'intérêt — encore faut-il le MESURER juste. Lu sur
-  // e², il faudrait extraire quelques pour-cent d'excès de la variance du
-  // bruit lui-même : au pas nominal la lecture se trompe alors d'un facteur
-  // 1.5, ce qui est pire que ne rien afficher. Lu sur w̃ᵀRw̃, le bruit
-  // n'entre pas et la mesure tombe sur la théorie (vérifié par le harnais).
-  // Divergé, il n'y a plus de palier : ni le mesuré ni la théorie n'ont de
-  // sens (la formule passerait même NÉGATIVE, μ·tr(R) dépassant 2), et la
-  // statline doit dire « — » plutôt que d'afficher un nombre qui ne veut
-  // rien dire à côté du mot « divergé ».
+  // Misadjustment: the excess MSE relative to the floor. Its theory fits on one
+  // line, which is the interest — provided it is MEASURED correctly. Read off
+  // e², one would have to extract a few percent of excess from the variance of
+  // the noise itself: at the nominal step size the reading is then wrong by a
+  // factor 1.5, which is worse than showing nothing. Read off w̃ᵀRw̃, the noise
+  // does not enter and the measurement lands on the theory (verified by the
+  // harness). Once diverged there is no plateau: neither the measurement nor the
+  // theory means anything (the formula would even go NEGATIVE, μ·tr(R) exceeding
+  // 2), and the statline must say "—" rather than show a number that means
+  // nothing beside the word "diverged".
   const misMeas = diverged || !settled ? NaN : plateauEx / noisePow;
-  const trR = L; // tr(R) = L·σ_u² et σ_u² = 1 par construction
+  const trR = L; // tr(R) = L·σ_u² and σ_u² = 1 by construction
   const misTheo =
     algo === 'lms'
       ? (mu * trR) / (2 - mu * trR)
       : algo === 'nlms'
-        ? // μ̃/(2−μ̃) est un ASYMPTOTIQUE EN L, pas une formule fausse : il
-          // sort de l'approximation E[x xᵀ/‖x‖²] ≈ I/L, vraie quand L est
-          // grand, et les ouvrages l'énoncent comme telle. Ce qui serait
-          // faux est de l'appliquer tel quel à L = 4, où il manque d'un
-          // facteur 2. Le terme que l'approximation jette vaut exactement
-          // E[‖x‖²]·E[1/‖x‖²] = L/(L−2) pour un régresseur blanc gaussien,
-          // puisque E[1/χ²_L] = 1/(L−2).
+        ? // μ̃/(2−μ̃) is an ASYMPTOTIC IN L, not a wrong formula: it comes from
+          // the approximation E[x xᵀ/‖x‖²] ≈ I/L, true when L is large, and the
+          // textbooks state it as such. What would be wrong is applying it as is
+          // at L = 4, where it is short by a factor 2. The term the
+          // approximation discards is exactly E[‖x‖²]·E[1/‖x‖²] = L/(L−2) for a
+          // white Gaussian regressor, since E[1/χ²_L] = 1/(L−2).
           //
-          // Mesuré en run long (N = 60 000, 24 réalisations, μ̃ = 0.5), le
-          // rapport au résultat asymptotique vaut 1.978, 1.321, 1.137 et
-          // 1.061 pour L = 4, 8, 16 et 32 — soit L/(L−2) à 1 % près. Ce
-          // n'est donc pas un artefact de fenêtre de mesure, et rien n'est
-          // converti en décibels ici : le désajustement est un rapport de
-          // puissances.
+          // Measured on a long run (N = 60 000, 24 realizations, μ̃ = 0.5), the
+          // ratio to the asymptotic result is 1.978, 1.321, 1.137 and 1.061 for
+          // L = 4, 8, 16 and 32 — that is L/(L−2) to within 1 %. It is therefore
+          // no artefact of the measurement window, and nothing is converted to
+          // decibels here: the misadjustment is a ratio of powers.
           //
-          // À L = 2 la correction DIVERGE, E[1/χ²₂] étant infinie, et la
-          // statline affiche « — » plutôt qu'un nombre : c'est une
-          // propriété de NLMS, pas un trou dans le calcul.
+          // At L = 2 the correction DIVERGES, E[1/χ²₂] being infinite, and the
+          // statline shows "—" rather than a number: that is a property of NLMS,
+          // not a hole in the computation.
           L > 2
           ? ((mu / (2 - mu)) * L) / (L - 2)
           : NaN
@@ -173,8 +169,8 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
           ? ((1 - lambda) * L) / 2
           : 0;
 
-  // Vitesse : la première itération où la courbe passe à 3 dB du palier.
-  // Mesurée sur la courbe moyennée, donc reproductible.
+  // Speed: the first iteration where the curve comes within 3 dB of the
+  // plateau. Measured on the averaged curve, hence reproducible.
   const target = plateau * 2;
   let n3 = NaN;
   for (let i = 0; i < to; i++)
@@ -183,7 +179,7 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
       break;
     }
 
-  /* ---------- les coefficients à l'itération choisie ----------------------- */
+  /* ---------- the coefficients at the chosen iteration -------------------- */
   const nIdx = Math.min(Math.max(Math.round(n), 1), N_ITER) - 1;
   const taps = new Float64Array(L);
   const tapsTrue = new Float64Array(L);
@@ -197,12 +193,12 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
   for (let k = 0; k < L; k++) wErr += (taps[k] - tapsTrue[k]) ** 2;
   wErr = Math.sqrt(wErr);
 
-  /* ---------- les poids en fonction du temps ------------------------------ */
-  // Les L trajectoires ŵₖ(n) et les L valeurs vraies, en DEUX observables et
-  // pas 2L : un seul tracé, coupé par des NaN, que le tracé générique
-  // interrompt à chaque coupure. C'est la vue qui montre l'adaptation elle-
-  // même — le filtre qui se remplit coefficient par coefficient — quand la
-  // courbe d'apprentissage n'en montre que le résumé quadratique.
+  /* ---------- the weights against time ------------------------------------ */
+  // The L trajectories ŵₖ(n) and the L true values, as TWO observables and not
+  // 2L: a single trace, cut by NaNs, which the generic plot breaks at each cut.
+  // This is the view that shows the adaptation itself — the filter filling in
+  // coefficient by coefficient — where the learning curve shows only its
+  // quadratic summary.
   const dec = Math.max(1, Math.floor((nIdx + 1) / 500));
   const perTrack = Math.floor(nIdx / dec) + 1;
   const trackLen = (perTrack + 1) * L;
@@ -216,9 +212,9 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
       wtX[base + i] = i * dec + 1;
       wtY[base + i] = wPath[i * dec * L + k];
     }
-    wtX[base + perTrack] = NaN; // la coupure entre deux coefficients
+    wtX[base + perTrack] = NaN; // the cut between two coefficients
     wtY[base + perTrack] = NaN;
-    // la valeur vraie, en segment horizontal sur toute la durée
+    // the true value, as a horizontal segment over the whole duration
     wrX[k * 3] = 1;
     wrY[k * 3] = tapsTrue[k];
     wrX[k * 3 + 1] = nIdx + 1;
@@ -227,12 +223,12 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
     wrY[k * 3 + 2] = NaN;
   }
 
-  /* ---------- la descente dans le plan des poids -------------------------- */
-  // Deux coefficients suffisent à voir la géométrie, et c'est la seule
-  // façon de VOIR pourquoi le conditionnement coûte : à L = 2 le tracé est
-  // la surface d'erreur elle-même. Au-delà, c'est la projection sur les
-  // deux premiers axes — encore lisible, mais les iso-contours n'auraient
-  // plus de sens et ne sont donc pas dessinés du tout.
+  /* ---------- the descent in the weight plane ----------------------------- */
+  // Two coefficients are enough to see the geometry, and it is the only way to
+  // SEE why the conditioning costs: at L = 2 the plot is the error surface
+  // itself. Beyond that it is the projection onto the first two axes — still
+  // readable, but the iso-contours would no longer mean anything and are
+  // therefore not drawn at all.
   const stride = Math.max(1, Math.floor((nIdx + 1) / 600));
   const pts = Math.floor(nIdx / stride) + 1;
   const px = new Float64Array(pts);
@@ -244,12 +240,12 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
   const wStart = { x: Float64Array.of(0), y: Float64Array.of(0) };
   const wOpt = { x: Float64Array.of(tapsTrue[0]), y: Float64Array.of(tapsTrue[1]) };
   const empty = { x: new Float64Array(0), y: new Float64Array(0) };
-  // Trois niveaux, en fractions du coût au point de DÉPART ŵ = 0, qui vaut
-  // exactement (0−w*)ᵀR(0−w*) = w*ᵀRw*. Volontairement bien en dessous : un
-  // contour passant par le départ étirerait le cadre sur toute la longueur
-  // de l'ellipse — quatre fois la distance à l'optimum quand l'entrée est
-  // colorée — et le zigzag qu'on vient regarder tiendrait dans dix pixels.
-  // L'allongement des ellipses reste parfaitement lisible à ces niveaux.
+  // Three levels, as fractions of the cost at the STARTING point ŵ = 0, which
+  // is exactly (0−w*)ᵀR(0−w*) = w*ᵀRw*. Deliberately well below: a contour
+  // through the start would stretch the frame over the whole length of the
+  // ellipse — four times the distance to the optimum when the input is coloured
+  // — and the zigzag one came to look at would fit in ten pixels. The elongation
+  // of the ellipses stays perfectly readable at these levels.
   const c0 = L === 2 ? quadForm(R, tapsTrue, 2) : 0;
   const contours =
     L === 2
@@ -258,22 +254,22 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
 
   return {
     observables: {
-      // la courbe d'apprentissage, et ce qu'elle vise
+      // the learning curve, and what it aims at
       learning: { x: iters, y: mseDb },
       floorDb,
       plateauDb: toDb(Math.sqrt(Math.max(plateau, 1e-30))),
       switchLine: track ? SWITCH_AT : NaN,
       nLine: nIdx + 1,
 
-      // les poids en fonction du temps : L trajectoires en un seul tracé
+      // the weights against time: L trajectories in a single trace
       wTracks: { x: wtX, y: wtY },
       wRefs: { x: wrX, y: wrY },
 
-      // les coefficients à l'itération n
+      // the coefficients at iteration n
       tapsTrue: { x: idx, y: tapsTrue },
       taps: { x: idx, y: taps },
 
-      // le plan des poids
+      // the weight plane
       wTrack: { x: px, y: py },
       wStart,
       wOpt,
@@ -283,33 +279,33 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
 
       spread: {
         value: spread,
-        meta: { label: 'conditionnement λmax/λmin', precision: 1 },
+        meta: { label: 'conditioning λmax/λmin', precision: 1 },
       },
       lambdaMax: { value: lMax, meta: { label: 'λmax', precision: 2 } },
       muMax: {
-        // La borne des livres — NÉCESSAIRE seulement : elle fait converger
-        // la moyenne de ŵ, pas sa variance. Le pas réel de divergence est
-        // toujours en dessous, et la scène 2 le fait constater.
+        // The textbook bound — NECESSARY only: it makes the mean of ŵ converge,
+        // not its variance. The real step size of divergence is always below it,
+        // and scene 2 makes that plain.
         value: 2 / L,
-        meta: { label: 'borne en moyenne 2/tr(R)', precision: 4 },
+        meta: { label: 'mean-sense bound 2/tr(R)', precision: 4 },
       },
       muMs: {
-        // Celle qui prédit : Σ μλ/(1−μλ) = 2. Elle tombe sur le seuil mesuré
-        // à 3 % près sur entrée blanche, et devient optimiste d'un facteur
-        // 2.7 à a = 0.9 — l'hypothèse d'indépendance y casse.
+        // The one that predicts: Σ μλ/(1−μλ) = 2. It lands on the measured
+        // threshold to within 3 % on a white input, and becomes optimistic by a
+        // factor 2.7 at a = 0.9 — the independence assumption breaks there.
         value: msBound(eigVals),
-        meta: { label: 'borne quadratique', precision: 4 },
+        meta: { label: 'mean-square bound', precision: 4 },
       },
-      misMeas: { value: misMeas, meta: { label: 'désajustement mesuré', precision: 3 } },
+      misMeas: { value: misMeas, meta: { label: 'measured misadjustment', precision: 3 } },
       misTheo: {
         value: diverged || !(misTheo >= 0) ? NaN : misTheo,
-        meta: { label: 'théorie', precision: 3 },
+        meta: { label: 'theory', precision: 3 },
       },
-      n3: { value: n3, meta: { label: 'itérations pour −3 dB du palier', precision: 0 } },
+      n3: { value: n3, meta: { label: 'iterations to −3 dB of the plateau', precision: 0 } },
       wErrObs: { value: wErr, meta: { label: '‖ŵ(n) − w*‖', precision: 4 } },
       state: {
-        value: diverged ? '⚠ divergé' : settled ? 'palier atteint' : 'convergence en cours',
-        meta: { label: 'régime' },
+        value: diverged ? '⚠ diverged' : settled ? 'plateau reached' : 'still converging',
+        meta: { label: 'regime' },
       },
       excess: { x: iters, y: excDb },
     },

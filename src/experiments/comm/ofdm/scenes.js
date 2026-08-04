@@ -2,52 +2,60 @@
 export default [
   {
     id: 'selective',
-    title: 'Scène 1 · Le canal creuse des trous',
+    title: 'Scene 1 · The channel digs holes',
     params: { Nc: 64, L: 6, cp: 8, snr: 15, M: 50 },
     visible: ['L'],
-    notes: `Six trajets, et le spectre du canal devient un paysage : des crêtes
-et des ÉVANOUISSEMENTS à −20, −30 dB. Marteler R : chaque tirage donne un autre
-canal, mais toujours des trous. Question : « une porteuse au fond d'un trou,
-que peut-elle transmettre ? » — rien, et aucune égalisation ne l'en sortira.
-Descendre L à 1 : le canal redevient plat. La sélectivité vient des ÉCHOS.`,
+    notes: `Six paths, and the channel spectrum becomes a landscape of ridges and
+FADES at −20 or −30 dB. Pressing R gives another channel every time, always with
+holes.
+
+The question to ask: what can a carrier at the bottom of a hole transmit?
+Nothing, and no equalizer will get it out. Dropping L to 1 flattens the channel
+again — the selectivity comes from the ECHOES.`,
   },
   {
     id: 'one-tap',
-    title: 'Scène 2 · Le miracle de la FFT',
+    title: 'Scene 2 · The miracle of the FFT',
     view: 'constellation',
     params: { Nc: 64, L: 6, cp: 8, snr: 20, M: 50 },
     visible: ['snr', 'L'],
-    notes: `Avant égalisation (violet) : un nuage tordu, chaque porteuse tournée
-et comprimée par SON H_k. Après (bleu) : UNE division par porteuse — un seul
-coefficient ! — et la QPSK réapparaît. C'est le théorème central : avec le
-préfixe, la convolution devient circulaire et la FFT DIAGONALISE le canal.
-L'égaliseur de 60 coefficients du single-carrier est devenu 64 divisions.`,
+    notes: `Before equalization, in purple, the cloud is twisted: each carrier
+rotated and compressed by ITS own H_k. After, in blue, ONE division per carrier
+— a single coefficient — and the QPSK reappears.
+
+That is the central theorem: with the prefix in place the convolution becomes
+circular, and the FFT DIAGONALIZES the channel. The sixty-tap equalizer of the
+single-carrier system has become 64 divisions.`,
   },
   {
     id: 'prefix',
-    title: 'Scène 3 · Saboter le préfixe',
+    title: 'Scene 3 · Sabotaging the prefix',
     view: 'constellation',
     params: { Nc: 64, L: 6, cp: 8, snr: 25, M: 50, seed: 5 },
     visible: ['cp'],
-    notes: `SNR = 25 dB, tout va bien. Geler (F), puis descendre L_cp de 8 à 0 :
-des points s'échappent ALORS QUE le bruit n'a pas bougé — l'ISI du symbole
-précédent fuit dans la fenêtre FFT, et l'égalisation ZF l'AMPLIFIE sur les
-porteuses évanouies (statline : BER ≈ 1.7 %, une porteuse à ~40 %). Monter le
-SNR à 30 : rien ne s'arrange — plancher d'erreur. Marteler R : la sévérité
-dépend du canal tiré (l'ISI tue par les évanouissements). Le tiroir Parameters
-affiche « préfixe suffisant ? NON ». Les échantillons « gaspillés » du préfixe
-sont le prix de la diagonalisation.`,
+    notes: `At 25 dB everything is clean. Freezing and then taking L_cp from 8
+down to 0 lets points escape WHILE the noise has not moved: the ISI of the
+previous symbol leaks into the FFT window, and zero-forcing equalization
+AMPLIFIES it on the faded carriers — the statline shows a BER around 1.7 %, with
+one carrier near 40 %.
+
+Raising the SNR to 30 changes nothing: that is an error floor. Pressing R shows
+the severity depending on the channel drawn, since ISI kills through the fades.
+The parameters drawer reads "prefix long enough? NO". The samples "wasted" on
+the prefix are the price of the diagonalization.`,
   },
   {
     id: 'fades',
-    title: 'Scène 4 · Les erreurs habitent les trous',
+    title: 'Scene 4 · The errors live in the holes',
     view: 'ber',
     params: { Nc: 64, L: 6, cp: 8, snr: 12, M: 200 },
     visible: ['snr', 'M'],
-    notes: `Le BER porteuse par porteuse (points) sur la théorie ZF
-Q(√(|H_k|²·SNR)) (orange). Mettre côte à côte avec l'onglet Canal : les pics
-d'erreurs sont EXACTEMENT les évanouissements. Ouverture : c'est pour ça que
-l'OFDM ne vit jamais seul — entrelacement + codage (voir Hamming et décodage
-souple) répartissent l'information entre bonnes et mauvaises porteuses.`,
+    notes: `The BER carrier by carrier, as points, over the zero-forcing theory
+Q(√(|H_k|²·SNR)) in orange. Putting it side by side with the channel tab shows
+the error peaks landing EXACTLY on the fades.
+
+Which is why OFDM never lives alone: interleaving plus coding — see the Hamming
+and soft-decoding experiments — spread the information across good and bad
+carriers alike.`,
   },
 ];

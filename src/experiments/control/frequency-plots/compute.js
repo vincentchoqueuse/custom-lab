@@ -10,9 +10,9 @@
 //
 // Three systems, chosen because their frequency behaviour is the whole first
 // year of the subject:
-//   premier ordre  H = K/(1 + jωτ)        — Nyquist is EXACTLY a half-circle
-//   second ordre   H = Kω₀²/(ω₀²−ω² + 2jmω₀ω)
-//   boucle ouverte H = K/(jω(1+jωτ₁)(1+jωτ₂)),  τ₂ = τ₁/5
+//   first order    H = K/(1 + jωτ)        — Nyquist is EXACTLY a half-circle
+//   second order   H = Kω₀²/(ω₀²−ω² + 2jmω₀ω)
+//   open loop      H = K/(jω(1+jωτ₁)(1+jωτ₂)),  τ₂ = τ₁/5
 // The second order resonates iff m < 1/√2 ≈ 0.707: below that the Bode gain
 // bulges, the Nyquist loop swells past the real axis and the Black curve
 // grows a nose. Above, all three are tame. That threshold is the reason the
@@ -210,19 +210,19 @@ export function compute(params) {
         value: cPhase,
         meta: { label: 'arg H(jω_c)', unit: '°', precision: 1 },
       },
-      cMod: { value: cMod, meta: { label: '|H(jω_c)| linéaire', precision: 4 } },
-      mrDb: { value: mrDb, meta: { label: 'résonance M_r', unit: 'dB', precision: 2 } },
+      cMod: { value: cMod, meta: { label: '|H(jω_c)| linear', precision: 4 } },
+      mrDb: { value: mrDb, meta: { label: 'resonance M_r', unit: 'dB', precision: 2 } },
       wrOut: { value: wr, meta: { label: 'ω_r', unit: 'rad/s', precision: 2 } },
       phaseMargin: {
         value: phaseMargin,
-        meta: { label: 'marge de phase', unit: '°', precision: 1 },
+        meta: { label: 'phase margin', unit: '°', precision: 1 },
       },
       gainMargin: {
         value: gainMargin,
-        meta: { label: 'marge de gain', unit: 'dB', precision: 1 },
+        meta: { label: 'gain margin', unit: 'dB', precision: 1 },
       },
-      wcoOut: { value: wco, meta: { label: 'ω à 0 dB', unit: 'rad/s', precision: 2 } },
-      w180Out: { value: w180, meta: { label: 'ω à −180°', unit: 'rad/s', precision: 2 } },
+      wcoOut: { value: wco, meta: { label: 'ω at 0 dB', unit: 'rad/s', precision: 2 } },
+      w180Out: { value: w180, meta: { label: 'ω at −180°', unit: 'rad/s', precision: 2 } },
       kCrit: { value: kCrit, meta: { label: 'K critique', precision: 2 } },
     },
   };

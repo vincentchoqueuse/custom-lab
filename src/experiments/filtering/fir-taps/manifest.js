@@ -6,10 +6,10 @@ import { timeView, impulseView, spectrumView } from '../../../core/response-view
 export default {
   id: 'fir-taps',
   order: 1,
-  title: 'Filtre RIF',
+  title: 'The FIR filter',
   subtitle:
-    "Tapez les coefficients : la réponse temporelle, l'impulsionnelle et la fréquentielle suivent",
-  tags: ['numérique', 'RIF', 'FIR', 'moyenne glissante', 'convolution'],
+    'Type the coefficients: the time, impulse and frequency responses follow',
+  tags: ['digital', 'FIR', 'moving average', 'convolution'],
 
   params: {
     b: coeffs('b', {
@@ -18,15 +18,15 @@ export default {
       maxLen: 12,
     }),
     source: select('source', {
-      description: "signal périodique d'entrée",
+      description: 'periodic input signal',
       options: [
-        { value: 'square', label: 'carré' },
-        { value: 'saw', label: 'dent de scie' },
+        { value: 'square', label: 'square' },
+        { value: 'saw', label: 'sawtooth' },
       ],
       default: 'square',
     }),
     f0: float('f₀', {
-      description: 'fondamentale du signal',
+      description: 'fundamental of the signal',
       min: 50,
       max: 400,
       step: 1,

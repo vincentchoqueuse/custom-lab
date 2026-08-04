@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-// npm run smoke — les suites navigateur, sur le bundle CONSTRUIT.
+// npm run smoke — the browser suites, run against the BUILT bundle.
 //
-// Sur le bundle et pas sur le serveur de dev, parce que deux des pannes que
-// ces suites ont attrapées ne se produisaient qu'après build : un motif
-// `import.meta.glob` réécrit par le filtre de sujet, et une vue custom dont
-// l'import dynamique ne se résolvait plus. Tester ce qu'on déploie est le
-// seul test qui engage.
+// Against the bundle and not the dev server, because two of the failures these
+// suites have caught only happened after a build: an `import.meta.glob` pattern
+// rewritten by the subject filter, and a custom view whose dynamic import no
+// longer resolved. Testing what gets deployed is the only test that commits to
+// anything.
 //
-// Le serveur est démarré et arrêté ici : une suite ne doit jamais dépendre
-// d'un `vite preview` qu'on aurait lancé à la main dans un autre terminal,
-// sinon elle passe au vert contre un bundle vieux d'une heure.
+// The server is started and stopped here: a suite must never depend on a
+// `vite preview` launched by hand in another terminal, or it goes green against
+// a bundle an hour old.
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -25,11 +25,11 @@ const dim = (s) => `\x1b[2m${s}\x1b[0m`;
 const sh = (cmd, args, opts = {}) =>
   new Promise((ok, ko) => {
     const p = spawn(cmd, args, { stdio: 'inherit', shell: false, ...opts });
-    p.on('exit', (code) => (code === 0 ? ok() : ko(new Error(`${cmd} a rendu ${code}`))));
+    p.on('exit', (code) => (code === 0 ? ok() : ko(new Error(`${cmd} exited with ${code}`))));
     p.on('error', ko);
   });
 
-/** Attend que le serveur réponde, plutôt que de dormir un temps arbitraire. */
+/** Waits for the server to answer, rather than sleeping an arbitrary time. */
 async function waitFor(url, ms = 30000) {
   const t0 = Date.now();
   for (;;) {
@@ -37,9 +37,9 @@ async function waitFor(url, ms = 30000) {
       const r = await fetch(url);
       if (r.ok) return;
     } catch {
-      /* pas encore là */
+      /* not up yet */
     }
-    if (Date.now() - t0 > ms) throw new Error(`${url} ne répond pas après ${ms} ms`);
+    if (Date.now() - t0 > ms) throw new Error(`${url} did not answer within ${ms} ms`);
     await new Promise((r) => setTimeout(r, 200));
   }
 }
@@ -49,7 +49,7 @@ if (!skipBuild) {
   console.log(bold('build'));
   await sh('npx', ['vite', 'build', '--logLevel', 'warn']);
 } else if (!existsSync(resolve('dist/index.html'))) {
-  console.error('--no-build, mais dist/ est vide : lancer npm run build d’abord');
+  console.error('--no-build, but dist/ is empty: run npm run build first');
   process.exit(1);
 }
 
@@ -81,7 +81,7 @@ try {
     }
   }
   console.log(
-    `\n${failed ? red(`${failed} échec(s)`) : green(`${total} assertions, 0 échec`)}\n`
+    `\n${failed ? red(`${failed} failure(s)`) : green(`${total} assertions, 0 failures`)}\n`
   );
 } finally {
   server.kill('SIGTERM');

@@ -7,7 +7,7 @@ const obs = (p) => compute({ ...BASE, ...p }).observables;
 
 export const checks = [
   {
-    name: 'les résidus sont orthogonaux à x et de somme nulle',
+    name: 'the residuals are orthogonal to x and sum to zero',
     category: 'numeric',
     run() {
       // The two normal equations, which CHARACTERISE the least-squares
@@ -28,11 +28,11 @@ export const checks = [
         }
         worst = Math.max(worst, (Math.abs(s) + Math.abs(sx)) / scale);
       }
-      return { ok: worst < 1e-14, detail: `résidu relatif max ${worst.toExponential(2)}` };
+      return { ok: worst < 1e-14, detail: `worst relative residual ${worst.toExponential(2)}` };
     },
   },
   {
-    name: 'â et b̂ résolvent les équations normales (système 2×2 indépendant)',
+    name: 'â and b̂ solve the normal equations (independent 2×2 system)',
     category: 'numeric',
     run() {
       // Same fit, other road: build Σx, Σx², Σy, Σxy and solve the 2×2 system
@@ -56,22 +56,22 @@ export const checks = [
         [sxy, sy]
       );
       const gap = Math.max(Math.abs(aSolve - o.aHat.value), Math.abs(bSolve - o.bHat.value));
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `worst gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'sans bruit, la droite ajustée EST la droite vraie',
+    name: 'with no noise, the fitted line IS the true line',
     category: 'numeric',
     run() {
       const gap = maxGap([-2.4, 0, 1.5], (a) => {
         const o = obs({ a, b: -1.7, sigma: 0 });
         return Math.max(Math.abs(o.aHat.value - a), Math.abs(o.bHat.value + 1.7));
       });
-      return { ok: gap < 1e-13, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-13, detail: `worst gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'R² = 1 − SCR/SCT, et vaut 1 exactement sans bruit',
+    name: 'R² = 1 − SSE/SST, and is exactly 1 with no noise',
     category: 'numeric',
     run() {
       const clean = obs({ sigma: 0 }).r2.value;
@@ -89,7 +89,7 @@ export const checks = [
     },
   },
   {
-    name: 'Sxx, donc l\'écart-type de â, suit exactement l\'étendue des x',
+    name: 'Sxx, hence the standard deviation of â, tracks the range of x exactly',
     category: 'numeric',
     run() {
       // scaling the design by k multiplies Sxx by k² and divides σ/√Sxx by k:
@@ -99,11 +99,11 @@ export const checks = [
         const wide = obs({ spread: k });
         return Math.abs(one.seTh.value / wide.seTh.value - k) / k;
       });
-      return { ok: gap < 1e-12, detail: `écart relatif max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `worst relative gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'un point aberrant déplace la pente de son levier exact',
+    name: 'an outlier moves the slope by exactly its leverage',
     category: 'numeric',
     run() {
       // Adding δ to the last observation moves â by δ·(x_N − x̄)/Sxx — the
@@ -115,11 +115,11 @@ export const checks = [
       const xb = x.reduce((s, v) => s + v, 0) / x.length;
       const want = (delta * (x[x.length - 1] - xb)) / base.sxx.value;
       const got = moved.aHat.value - base.aHat.value;
-      return { ok: Math.abs(got - want) < 1e-13, detail: `Δâ = ${got.toFixed(6)}, levier ${want.toFixed(6)}` };
+      return { ok: Math.abs(got - want) < 1e-13, detail: `Δâ = ${got.toFixed(6)}, leverage ${want.toFixed(6)}` };
     },
   },
   {
-    name: 'la dispersion mesurée de â est celle que σ/√Sxx annonce',
+    name: 'the measured spread of â is the one σ/√Sxx predicts',
     category: 'statistical',
     run() {
       // 400 repeated experiments; the standard error of a standard deviation
@@ -129,12 +129,12 @@ export const checks = [
       const gap = Math.abs(o.seEmp.value - o.seTh.value);
       return {
         ok: gap < tol,
-        detail: `mesuré ${o.seEmp.value.toFixed(4)} vs théorie ${o.seTh.value.toFixed(4)} (tol ${tol.toFixed(4)})`,
+        detail: `measured ${o.seEmp.value.toFixed(4)} vs theory ${o.seTh.value.toFixed(4)} (tol ${tol.toFixed(4)})`,
       };
     },
   },
   {
-    name: 'les 400 pentes sont centrées sur a : l\'estimateur est sans biais',
+    name: 'the 400 slopes center on a: the estimator is unbiased',
     category: 'statistical',
     run() {
       const o = obs({ sigma: 1.4, N: 25 });
@@ -142,12 +142,12 @@ export const checks = [
       const tol = (4 * o.seTh.value) / Math.sqrt(400);
       return {
         ok: Math.abs(m - BASE.a) < tol,
-        detail: `moyenne des â = ${m.toFixed(4)} vs a = ${BASE.a} (tol ${tol.toFixed(4)})`,
+        detail: `mean of â = ${m.toFixed(4)} vs a = ${BASE.a} (tol ${tol.toFixed(4)})`,
       };
     },
   },
   {
-    name: 'les segments de résidus relient bien chaque point à la droite',
+    name: 'the residual segments really join each point to the line',
     category: 'numeric',
     run() {
       // the NaN-separated bundle drawn in the first view must match the fit
@@ -160,7 +160,7 @@ export const checks = [
         (i) => o.residuals.y[i]
       );
       const separated = range(o.residuals.x.length).every((i) => Number.isNaN(rx[3 * i + 2]));
-      return { ok: gap < 1e-15 && separated, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-15 && separated, detail: `worst gap ${gap.toExponential(2)}` };
     },
   },
   standardChecks.determinism(compute, { ...BASE, sigma: 2 }, 'points'),

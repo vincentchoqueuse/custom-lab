@@ -1,69 +1,78 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'harmoniques',
-    title: 'Scène 1 · Un signal carré, harmonique par harmonique',
+    id: 'harmonics',
+    title: 'Scene 1 · A square wave, harmonic by harmonic',
     params: { wave: 'square', N: 1, A: 1 },
     visible: ['N'],
-    notes: `Partir de N = 1 : une simple sinusoïde de même fréquence.
-Monter N cran par cran : 3, 5, 7 — chaque harmonique impaire creuse les
-flancs. Question : « combien d'harmoniques pour un carré parfait ? »
-Réponse : une infinité — et encore (voir scène Gibbs). Passer à la vue
-Spectre : uniquement les rangs impairs, décroissance en 1/n.`,
+    notes: `Starting at N = 1 gives a plain sinusoid of the same frequency.
+Raising N one notch at a time — 3, 5, 7 — lets each odd harmonic sharpen the
+edges a little further.
+
+Asking how many harmonics a perfect square needs has an answer worth stating
+carefully: infinitely many, and even then not quite, as the next scene shows.
+The spectrum view makes the structure explicit — odd orders only, decaying as
+1/n.`,
   },
   {
     id: 'gibbs',
-    title: 'Scène 2 · Le phénomène de Gibbs',
+    title: 'Scene 2 · The Gibbs phenomenon',
     params: { wave: 'square', N: 10, A: 1 },
     visible: ['N'],
     lock: true,
-    notes: `Les axes sont figés d'entrée : le cadre ne bougera pas, seule la
-courbe bouge. Geler (F) à N = 10, puis pousser N à 60 : les oscillations se
-resserrent contre la discontinuité mais le DÉPASSEMENT ne diminue pas —
-la statline reste vers 9 % (8,95 % en théorie), quel que soit N.
-Morale : la convergence est en moyenne quadratique, pas uniforme.
-C'est LA raison des oscillations près des fronts dans tout système
-à bande limitée (filtres raides, troncature spectrale).`,
+    notes: `The axes are pinned from the start, so the frame stays put while the
+curve moves. Freezing at N = 10 and pushing to N = 60 draws the oscillations
+tighter against the discontinuity — but the OVERSHOOT does not shrink, and the
+statline stays near 9 % (8.95 % in theory) whatever N is.
+
+The moral is precise: the convergence is in mean square, not uniform. This is
+the reason for the ringing near edges in every band-limited system, from steep
+filters to spectral truncation.`,
   },
   {
-    id: 'continuite',
-    title: 'Scène 3 · La continuité fait la vitesse',
+    id: 'continuity',
+    title: 'Scene 3 · Continuity sets the rate',
     params: { wave: 'triangle', N: 3, A: 1 },
     visible: ['wave', 'N'],
-    notes: `Triangle, N = 3 : déjà quasi parfait — coefficients en 1/n²,
-car le signal est CONTINU. Basculer sur « carré » à N = 3 : médiocre.
-Vue Erreur vs N (log-log) : pente −3/2 pour le triangle, −1/2 pour le
-carré et la dent de scie. Règle à retenir : plus le signal est régulier,
-plus son spectre décroît vite — la discontinuité se paie en harmoniques.`,
+    notes: `The triangle at N = 3 is already nearly perfect, its coefficients
+falling as 1/n², because the signal is CONTINUOUS. Switching to the square wave
+at the same N is visibly poor.
+
+The error-versus-N view puts numbers on it: a log–log slope of −3/2 for the
+triangle against −1/2 for the square and the sawtooth. The rule worth keeping
+is that the smoother the signal, the faster its spectrum decays — a
+discontinuity is paid for in harmonics.`,
   },
   {
     id: 'pulse',
-    title: 'Scène 4 · Le train d\'impulsions et son enveloppe en sinc',
+    title: 'Scene 4 · The pulse train and its sinc envelope',
     params: { wave: 'pulse', N: 40, A: 1, alpha: 0.25 },
     view: 'spectrum',
     visible: ['alpha'],
     lock: true,
-    notes: `Le signal qui montre D'OÙ viennent les coefficients : les raies
-ÉCHANTILLONNENT une enveloppe (courbe orange), et cette enveloppe est un
-sinus cardinal, 2Aα·sinc(nα).
-Repérer les rangs manquants : α = 0.25 → zéros en n = 4, 8, 12… soit k/α,
-valeur affichée dans le tiroir. Diminuer α : les zéros s'écartent, il faut
-de plus en plus d'harmoniques — une impulsion brève coûte de la bande.
-Question : « à quel α le spectre est-il le plus étalé ? »`,
+    notes: `This is the signal that shows WHERE the coefficients come from: the
+lines SAMPLE an envelope, drawn in orange, and that envelope is a cardinal
+sine, 2Aα·sinc(nα).
+
+The missing orders locate it — at α = 0.25 the zeros fall at n = 4, 8, 12, that
+is at k/α, the value shown in the drawer. Reducing α spreads the zeros apart
+and demands more and more harmonics: a short pulse costs bandwidth. Which α
+gives the widest spectrum is a question the dial answers.`,
   },
   {
     id: 'duty-half',
-    title: 'Scène 5 · α = 1/2 : le carré réapparaît',
+    title: 'Scene 5 · α = 1/2: the square wave returns',
     params: { wave: 'pulse', N: 40, A: 1, alpha: 0.5 },
     view: 'spectrum',
     visible: ['alpha'],
-    notes: `Amener α à 0.50 exactement : tous les rangs PAIRS tombent à zéro et
-il ne reste que les impairs en 1/n — le spectre du carré, à un facteur deux
-près (l'impulsion oscille de A, le carré de 2A) et à la valeur moyenne près,
-la raie n = 0 qui vaut Aα.
-Le carré n'est pas un signal à part : c'est le train d'impulsions au rapport
-cyclique un demi. Repartir de 0.5 vers 0.1 pour voir les rangs pairs
-ressusciter un à un.`,
+    notes: `Setting α to exactly 0.50 sends every EVEN order to zero, leaving the
+odd ones decaying as 1/n — the spectrum of the square wave, up to a factor of
+two (the pulse swings by A, the square by 2A) and up to the mean value, the
+n = 0 line worth Aα.
+
+The square wave is therefore not a separate object: it is the pulse train at
+duty cycle one half. Coming back from 0.5 toward 0.1 resurrects the even orders
+one by one.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

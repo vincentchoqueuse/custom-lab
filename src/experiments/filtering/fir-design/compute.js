@@ -85,11 +85,11 @@ export function compute({ fc, N, win }) {
       hTaps: h, // raw taps (Inspector download, symmetry check)
       sidelobe: {
         value: sidelobe,
-        meta: { label: 'lobe max en bande coupée', unit: 'dB', precision: 1 },
+        meta: { label: 'peak stop-band lobe', unit: 'dB', precision: 1 },
       },
       delayMs: {
         value: (M / FS) * 1000,
-        meta: { label: 'retard (N−1)/2', unit: 'ms', precision: 2 },
+        meta: { label: 'delay (N−1)/2', unit: 'ms', precision: 2 },
       },
       dcGain: { value: dc, meta: { label: 'H(0) = Σh', precision: 4 } },
     },

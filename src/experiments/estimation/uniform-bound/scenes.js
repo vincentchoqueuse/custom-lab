@@ -1,41 +1,50 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'candidats',
-    title: 'Trois candidats pour θ',
+    id: 'candidates',
+    title: 'Three candidates for θ',
     params: { theta: 5, N: 10, M: 3000 },
     visible: ['N'],
-    notes: `Masquer d'abord la ligne jaune mentalement : on ne connaît PAS θ.
-Question : « avec ces 10 points, quelle est votre estimation de la borne ? »
-Les trois réflexes de la salle sortent toujours : le max (on ne peut pas
-faire moins), 2 fois la moyenne (la moyenne vaut θ/2), et corriger le max.
-Marteler R : le max (orange) est TOUJOURS à gauche de θ — il sous-estime
-par construction. max+min (vert) dépasse θ environ une fois sur deux.`,
+    notes: `The yellow line should be ignored for a moment: θ is not known, and
+the question is what estimate these ten points support. A room reliably produces
+the same three answers — the maximum, because nothing smaller can be right;
+twice the sample mean, because the mean of U[0, θ] is θ/2; and some correction
+applied to the maximum.
+
+Pressing R repeatedly shows what separates them. The maximum, in orange, is
+always to the left of θ, since no sample can exceed the bound it came from. The
+max+min estimator, in green, lands above θ about half the time.`,
   },
   {
-    id: 'biais',
-    title: 'Le biais du max',
+    id: 'bias',
+    title: 'The bias of the maximum',
     params: { theta: 5, N: 10, M: 5000 },
     view: 'sampling',
     visible: ['N'],
-    notes: `L'histogramme du max vit entièrement À GAUCHE de θ : biais = −θ/(N+1).
-max+min est centré sur θ : E[min] = θ/(N+1) compense exactement le déficit
-du max. 2x̄ est centré aussi, mais LARGE — regarder l'étalement violet.
-Geler (F) à N = 10, monter N à 100 : les trois se resserrent, mais pas à
-la même vitesse. Les histogrammes orange et vert deviennent des pics.`,
+    notes: `The histogram of the maximum lies entirely to the left of θ, with a
+bias of exactly −θ/(N+1). Adding the minimum corrects it exactly, because
+E[min] = θ/(N+1) makes up the same deficit. The estimator 2x̄ is centered too,
+but its purple spread is much wider than either.
+
+Freezing at N = 10 and raising N to 100 tightens all three, and not at the same
+rate — the orange and green histograms become spikes while the purple one is
+still a distribution.`,
   },
   {
-    id: 'vitesse',
-    title: 'La vitesse : 1/N contre 1/√N',
+    id: 'rate',
+    title: 'The rate: 1/N against 1/√N',
     params: { theta: 5, N: 10, M: 5000 },
     view: 'rmse',
     visible: ['N', 'theta'],
-    notes: `Échelle log-log : les pentes SONT les vitesses de convergence.
-max et max+min : pente −1 (RMSE en 1/N). 2x̄ : pente −1/2 (CLT, 1/√N).
-À N = 100, le max est ~7 fois plus précis que 2x̄ — le tableau de bord
-du chapitre : exploiter la RÉGULARITÉ du support bat le théorème central
-limite. Surprise à souligner : max et max+min ont le MÊME EQM —
-2θ²/((N+1)(N+2)) — corriger le biais n'a rien coûté, mais rien gagné.`,
+    notes: `On log–log axes the slopes are the convergence rates. The maximum and
+max+min fall with slope −1, so their error goes as 1/N; 2x̄ falls with slope
+−1/2, the usual 1/√N of the central limit theorem. At N = 100 the maximum is
+about seven times more precise, which is the headline of the chapter:
+exploiting the regularity of the support beats averaging.
+
+One detail is worth stating because it surprises — the maximum and max+min have
+the SAME mean squared error, 2θ²/((N+1)(N+2)). Correcting the bias cost nothing
+here, and gained nothing either.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

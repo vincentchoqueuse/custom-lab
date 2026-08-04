@@ -2,87 +2,94 @@
 export default [
   {
     id: 'cut',
-    title: 'Scène 1 · Ce que la fenêtre jette',
+    title: 'Scene 1 · What the window throws away',
     params: { sig: 'sine', T: 40, win: 'rect', f0: 300 },
     view: 'time',
     visible: ['T'],
-    notes: `La figure de base : en gris le signal, qui continue ; en bleu ce qui
-est réellement transformé ; le trait jaune marque l'instant où l'on coupe.
-Bouger T et faire dire à voix haute ce qui change : le signal ne change PAS,
-seule l'observation change.
-Question à poser AVANT l'onglet Spectre :
-« la sinusoïde n'a qu'une seule fréquence. Le spectre de ce que j'ai gardé
-aura-t-il une seule raie ? »`,
+    notes: `The basic figure: the signal in grey, which continues; in blue what
+is actually transformed; and a yellow line marking where the cut is made.
+
+Moving T and having the room say what changes is worth the moment — the signal
+does NOT change, only the observation does.
+
+The question to ask before opening the spectrum tab: the sinusoid has a single
+frequency, so will the spectrum of what was kept have a single line?`,
   },
   {
     id: 'lobe',
-    title: 'Scène 2 · Une raie devient un lobe de largeur 1/T',
+    title: 'Scene 2 · A line becomes a lobe of width 1/T',
     params: { sig: 'sine', T: 40, win: 'rect', f0: 300 },
     view: 'spectrum',
     visible: ['T'],
     lock: true,
-    notes: `Réponse à la question précédente : non. Couper dans le temps, c'est
-multiplier par une fenêtre, donc CONVOLUER le spectre par celui de la fenêtre.
-La raie s'étale sur ≈ 1/T (statline : largeur à −3 dB, et 1/T à côté).
-Axes figés : diviser T par deux et regarder le lobe doubler sans que le cadre
-bouge. Le produit T·B₃ affiché reste à 0.886 — c'est la même constante que la
-porte du catalogue de signaux, vue de l'autre côté.`,
+    notes: `The answer is no. Cutting in time is multiplying by a window, and
+therefore CONVOLVING the spectrum with the window's own. The line spreads over
+roughly 1/T — the statline gives the −3 dB width and 1/T beside it.
+
+The axes are pinned, so halving T doubles the lobe without the frame moving.
+The displayed product T·B₃ stays at 0.886, which is the same constant as the
+gate in the signal catalogue, seen from the other side.`,
   },
   {
     id: 'window',
-    title: 'Scène 3 · La forme de la coupure fixe les jupes',
+    title: 'Scene 3 · The shape of the cut sets the skirts',
     params: { sig: 'sine', T: 40, win: 'rect', f0: 300 },
     view: 'spectrum',
     visible: ['win'],
     lock: true,
-    notes: `À durée CONSTANTE, passer rectangulaire → Hann → Blackman.
-Les lobes secondaires s'effondrent (−13 dB, −31 dB, −58 dB) mais le lobe
-principal s'élargit : on n'achète de la dynamique qu'en payant de la
-résolution. Il n'y a pas de fenêtre « meilleure », il y a la question posée.
-Enchaîner sur « Fenêtrage spectral » pour le cas où deux raies voisines
-doivent être séparées.`,
+    notes: `At CONSTANT duration, moving from rectangular to Hann to Blackman
+collapses the sidelobes — −13 dB, −31 dB, −58 dB — while the main lobe widens.
+Dynamic range is only ever bought by paying in resolution.
+
+There is no "best" window, only the question being asked. The spectral-
+windowing experiment takes over for the case where two neighbouring lines must
+be separated.`,
   },
   {
     id: 'law',
-    title: 'Scène 4 · La loi en 1/T, mesurée',
+    title: 'Scene 4 · The 1/T law, measured',
     params: { sig: 'sine', T: 40, win: 'rect', f0: 300 },
     view: 'width',
     visible: ['T', 'win'],
-    notes: `Log-log : une droite de pente −1 exactement. Ce n'est pas un ajustement,
-c'est la largeur mesurée sur le spectre calculé, pour trente durées.
-Changer de fenêtre : la droite se translate vers le haut sans changer de pente
-— la forme change la constante, jamais la loi.
-Le trait jaune repère la durée courante ; la déplacer fait glisser le point le
-long de la droite.`,
+    notes: `On log–log axes, a straight line of slope exactly −1. This is not a
+fit: it is the width measured on the computed spectrum, for thirty durations.
+
+Changing window translates the line upward without changing its slope — the
+shape sets the constant, never the law. The yellow marker locates the current
+duration, and moving it slides the point along the line.`,
   },
   {
     id: 'gabor',
-    title: 'Scène 5 · Le chirp : plus long n\'est plus mieux',
+    title: 'Scene 5 · The chirp: longer is no longer better',
     params: { sig: 'chirp', T: 20, win: 'hann', f0: 300, k: 2000 },
     view: 'width',
     visible: ['T', 'k'],
-    notes: `Le chirp balaie k Hz par seconde. Observer plus longtemps affine la
-résolution (1/T) mais laisse entrer une bande plus large (k·T) : la courbe n'est
-plus une droite, c'est un V, et le creux est la MEILLEURE durée possible.
-Faire lire les deux branches : à gauche la pente −1 de la troncature, à droite
-la pente +1 du balayage. Le produit k·T² affiché dans le tiroir dit dans quel
-régime on est — très petit à gauche, très grand à droite, de l'ordre de
-quelques unités au creux.
-C'est le compromis de Gabor, mesuré au lieu d'être récité, et c'est exactement
-le choix de fenêtre du spectrogramme. Bouger k : le creux se déplace.`,
+    notes: `The chirp sweeps k hertz per second. Observing longer sharpens the
+resolution as 1/T but lets in a wider band as k·T, so the curve is no longer a
+line but a V, and the bottom of the V is the best possible duration.
+
+Both branches are worth reading out: the −1 slope of truncation on the left,
+the +1 slope of the sweep on the right. The k·T² product in the drawer says
+which regime one is in — very small on the left, very large on the right, of
+order a few units at the bottom.
+
+This is the Gabor trade-off measured rather than recited, and it is exactly the
+window choice of the spectrogram. Moving k moves the bottom of the V.`,
   },
   {
     id: 'damped',
-    title: 'Scène 6 · Quand le signal, lui, s\'est déjà tu',
+    title: 'Scene 6 · When the signal has already fallen silent',
     params: { sig: 'damped', T: 20, win: 'rect', f0: 300, tau: 15 },
     view: 'width',
     visible: ['T', 'tau'],
-    notes: `Sinusoïde amortie : tant que T < τ on coupe, et la largeur suit 1/T.
-Au-delà, la courbe s'aplatit — on n'observe plus que du silence, et la raie
-garde la largeur naturelle 1/(πτ) que le signal s'est donnée tout seul.
-Morale : allonger la fenêtre n'améliore la résolution que si le signal est
-encore là. Même leçon avec « salve » : passé la durée de la salve, on ajoute
-des zéros, ce qui interpole le spectre sans rien résoudre.`,
+    notes: `With a damped sinusoid, as long as T < τ the signal is being cut and
+the width follows 1/T. Beyond that the curve flattens: only silence is being
+observed, and the line keeps the natural width 1/(πτ) the signal gave itself.
+
+The moral is that lengthening the window improves resolution only while the
+signal is still there. The burst source makes the same point more bluntly —
+past the burst duration one is adding zeros, which interpolates the spectrum
+without resolving anything.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

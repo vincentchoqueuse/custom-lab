@@ -7,8 +7,8 @@ import { gainView, phaseView, GUIDE, GUIDE_COLOR } from '../../../core/response-
  *  never drift apart. */
 const MARKS = [
   vline((p) => p.wc, { color: '#EDB120', width: 2, label: 'ω_c' }),
-  vline('wco', { color: '#0072BD', dashed: true, width: 1.6, label: 'ω à 0 dB' }),
-  vline('w180', { color: '#D95319', dashed: true, width: 1.6, label: 'ω à −180°' }),
+  vline('wco', { color: '#0072BD', dashed: true, width: 1.6, label: 'ω at 0 dB' }),
+  vline('w180', { color: '#D95319', dashed: true, width: 1.6, label: 'ω at −180°' }),
 ];
 
 /** @type {import('../../../core/types').ExperimentManifest} */
@@ -16,25 +16,25 @@ export default {
   id: 'frequency-plots',
   order: 4,
   title: 'Bode, Nyquist, Black',
-  subtitle: 'Trois diagrammes, un seul H(jω) — et un curseur pour les relier',
+  subtitle: 'Three diagrams, one H(jω) — and a cursor to tie them together',
   tags: [
     'Bode',
     'Nyquist',
     'Black',
     'Nichols',
-    'résonance',
-    'lieu de transfert',
-    'marge de gain',
-    'marge de phase',
-    'stabilité',
+    'resonance',
+    'transfer locus',
+    'gain margin',
+    'phase margin',
+    'stability',
   ],
 
   params: {
-    sys: select('système', {
-      description: 'la fonction de transfert tracée',
-      // the expression IS the name of the system: "premier ordre K/(1+jωτ)"
-      // said the same thing twice, and the prose was the half that did not
-      // fit on a pill
+    sys: select('system', {
+      description: 'the transfer function plotted',
+      // the expression IS the name of the system: "first order K/(1+jωτ)" said
+      // the same thing twice, and the prose was the half that did not fit on a
+      // pill
       options: [
         { value: 'first', label: 'K/(1+jωτ)' },
         { value: 'second', label: 'Kω₀²/(ω₀²−ω²+2jmω₀ω)' },
@@ -43,7 +43,7 @@ export default {
       default: 'first',
     }),
     wc: log('ω_c', {
-      description: 'LE curseur : la pulsation lue simultanément sur les quatre vues',
+      description: 'THE cursor: the frequency read simultaneously on all four views',
       min: 0.01,
       max: 100,
       default: 1,
@@ -53,14 +53,14 @@ export default {
     // log, and up to 30: the open-loop scene has to CROSS K critique = 6/τ,
     // which a linear 0.2…3 slider could never reach
     K: log('K', {
-      description: 'gain — statique, ou gain de boucle',
+      description: 'gain — static, or loop gain',
       min: 0.1,
       max: 30,
       default: 1,
       precision: 2,
     }),
     tau: log('τ', {
-      description: 'constante de temps (τ₂ = τ/5 en boucle ouverte)',
+      description: 'time constant (τ₂ = τ/5 in open loop)',
       min: 0.05,
       max: 5,
       default: 1,
@@ -69,7 +69,7 @@ export default {
       visibleIf: { sys: ['first', 'openloop'] },
     }),
     w0: log('ω₀', {
-      description: 'pulsation propre',
+      description: 'natural frequency',
       min: 0.2,
       max: 20,
       default: 1,
@@ -78,7 +78,7 @@ export default {
       visibleIf: { sys: 'second' },
     }),
     m: float('m', {
-      description: 'amortissement — la résonance apparaît sous 1/√2 ≈ 0.707',
+      description: 'damping — resonance appears below 1/√2 ≈ 0.707',
       min: 0.05,
       max: 2,
       step: 0.05,
@@ -91,33 +91,33 @@ export default {
 
   derived: {
     resonance: {
-      label: 'résonance ?',
+      label: 'resonance?',
       calc: (p) =>
         p.sys === 'first'
-          ? 'non (premier ordre)'
+          ? 'no (first order)'
           : p.sys === 'openloop'
-            ? 'sans objet (boucle ouverte)'
+            ? 'not applicable (open loop)'
             : p.m < Math.SQRT1_2
-              ? `oui : m = ${p.m} < 0.707`
-              : `non : m = ${p.m} ≥ 0.707`,
+              ? `yes: m = ${p.m} < 0.707`
+              : `no: m = ${p.m} ≥ 0.707`,
     },
     // The number the open-loop scene is built around: (τ₁+τ₂)/(τ₁τ₂) = 6/τ.
-    // Below it both marges sont positives, au-dessus la boucle fermée diverge.
+    // Below it both margins are positive, above it the closed loop diverges.
     stability: {
-      label: 'boucle fermée',
+      label: 'closed loop',
       calc: (p) => {
-        if (p.sys !== 'openloop') return 'sans objet (pas de boucle)';
+        if (p.sys !== 'openloop') return 'not applicable (no loop)';
         const kc = 6 / p.tau;
         return p.K < kc
-          ? `stable : K = ${(+p.K).toFixed(2)} < K_crit = ${kc.toFixed(2)}`
-          : `instable : K = ${(+p.K).toFixed(2)} ≥ K_crit = ${kc.toFixed(2)}`;
+          ? `stable: K = ${(+p.K).toFixed(2)} < K_crit = ${kc.toFixed(2)}`
+          : `unstable: K = ${(+p.K).toFixed(2)} ≥ K_crit = ${kc.toFixed(2)}`;
       },
     },
   },
 
   groups: [
-    { title: 'Lecture', params: ['wc'] },
-    { title: 'Système', params: ['sys', 'K', 'tau', 'w0', 'm'] },
+    { title: 'Reading', params: ['wc'] },
+    { title: 'System', params: ['sys', 'K', 'tau', 'w0', 'm'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -125,7 +125,7 @@ export default {
   views: [
     // Bode, split in two as the subject does — gainView/phaseView are the
     // catalogue's shared frequency figures, so this Bode plot IS the analog
-    // filter's réponse fréquentielle with another abscissa.
+    // filter's frequency response with another abscissa.
     // The three verticals are the SAME on both halves: the cursor, and the
     // two margin readings. A margin is a GAP on a plot, not a number in a
     // statline, so both ends of each gap have to be drawn. Every reference is
@@ -152,7 +152,7 @@ export default {
     // which is exactly what the plane view exists for. Hand-written rather
     // than through polesView: a locus is not a pole map.
     plane('nyquist', 'Nyquist', {
-      curves: [{ source: 'locus', color: '#0072BD', width: 2.4, label: 'lieu H(jω)' }],
+      curves: [{ source: 'locus', color: '#0072BD', width: 2.4, label: 'locus H(jω)' }],
       clouds: [{ source: 'critical', color: GUIDE_COLOR, r: 4, opacity: 1, label: 'point −1' }],
       markers: { source: 'cursorPt', color: '#EDB120', label: 'H(jω_c)' },
       // the unit circle is the phase-margin construction: it only means
@@ -161,7 +161,7 @@ export default {
       circle: {
         radius: (p) => (p.sys === 'openloop' ? 1 : NaN),
         color: GUIDE_COLOR,
-        label: 'cercle unité',
+        label: 'unit circle',
       },
       axes: { x: 'Re H(jω)', y: 'Im H(jω)' },
       // the locus sits under the real axis: framing it on the origin would
@@ -183,10 +183,10 @@ export default {
       line('black', {
         color: '#0072BD',
         width: 2.4,
-        label: 'lieu de Black',
+        label: 'Black locus',
         overlays: [
           scatter('cursorBlack', { color: '#EDB120', size: 7, label: 'ω_c' }),
-          scatter('criticalBlack', { color: GUIDE_COLOR, size: 6, label: 'point critique' }),
+          scatter('criticalBlack', { color: GUIDE_COLOR, size: 6, label: 'critical point' }),
           hline(() => 0, { color: GUIDE_COLOR, width: 1 }),
           vline(() => -180, { ...GUIDE, label: '−180°' }),
         ],

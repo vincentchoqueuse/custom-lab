@@ -36,7 +36,7 @@ export const checks = [
       const slope = (r.y[1] - r.y[0]) / (r.x[1] - r.x[0]);
       const expected = (BASE.rho * BASE.sigmay) / BASE.sigmax;
       const err = Math.abs(slope - expected);
-      return { ok: err < 1e-12, detail: `|Δpente|=${err.toExponential(2)}` };
+      return { ok: err < 1e-12, detail: `|Δslope|=${err.toExponential(2)}` };
     },
   },
   {

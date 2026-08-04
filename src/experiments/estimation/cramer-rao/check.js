@@ -59,7 +59,7 @@ export const checks = [
       const last = o.effMidrange.y.length - 1;
       return {
         ok: o.effMidrange.y[last] < 0.5 * o.effMedian.y[last],
-        detail: `mi-étendue=${o.effMidrange.y[last].toFixed(3)} vs médiane=${o.effMedian.y[last].toFixed(3)}`,
+        detail: `midrange=${o.effMidrange.y[last].toFixed(3)} vs median=${o.effMedian.y[last].toFixed(3)}`,
       };
     },
   },

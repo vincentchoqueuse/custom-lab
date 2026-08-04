@@ -59,7 +59,7 @@ export const checks = [
     },
   },
   {
-    name: 'Monte Carlo decomposition holds exactly: EQM = biais² + variance',
+    name: 'Monte Carlo decomposition holds exactly: MSE = bias² + variance',
     category: 'numeric',
     run() {
       const { observables: o } = compute({ ...BASE, d: 9, N: 20, sigma: 0.4 });

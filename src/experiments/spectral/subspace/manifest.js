@@ -1,20 +1,20 @@
 import { float, int, select } from '../../../core/fields.js';
 import { view, figure, line, scatter, stem, vline, hline, band } from '../../../core/views.js';
-// le cadrage figé et la base du cadre, partagés avec le calcul : les
-// rectangles de bruit descendent exactement jusqu'à cette base
+// the pinned framing and the base of the frame, shared with the computation:
+// the noise rectangles reach exactly down to that base
 import { fWindow, MODEL_FLOOR } from './frame.js';
 
-/** L'axe des fréquences, FIGÉ, et le même sur les trois vues qui en portent
- *  un : le périodogramme, le spectre estimé et le pseudo-spectre se lisent
- *  l'un après l'autre, et un cadre qui bouge d'un onglet à l'autre — ou
- *  quand N change — fait croire à un déplacement des raies. Les bornes
- *  viennent de frame.js, partagées avec la grille de calcul. */
+/** The frequency axis, PINNED, and the same on the three views that carry one:
+ *  the periodogram, the estimated spectrum and the pseudo-spectrum are read one
+ *  after another, and a frame that moves from tab to tab — or when N changes —
+ *  makes the lines look as if they moved. The bounds come from frame.js, shared
+ *  with the computation grid. */
 const F_AXIS = { label: 'f', unit: 'Hz', domain: fWindow };
 
-/** Les fréquences vraies, en verticales — les mêmes sur les trois vues,
- *  déclarées une fois pour qu'elles ne puissent pas diverger. */
+/** The true frequencies, as verticals — the same on all three views, declared
+ *  once so that they cannot drift apart. */
 const TRUTH = [
-  vline('fTrue1', { color: '#EDB120', dashed: true, width: 1.6, label: 'vraies fréquences' }),
+  vline('fTrue1', { color: '#EDB120', dashed: true, width: 1.6, label: 'true frequencies' }),
   vline('fTrue2', { color: '#EDB120', dashed: true, width: 1.6 }),
   vline('fTrue3', { color: '#EDB120', dashed: true, width: 1.6 }),
 ];
@@ -23,26 +23,25 @@ const TRUTH = [
 export default {
   id: 'subspace',
   order: 4,
-  random: true, // bruit gaussien complexe
-  title: 'Techniques haute résolution',
-  subtitle: 'MUSIC, root-MUSIC, ESPRIT — ce qu’un modèle achète, et ce qu’il coûte',
-  tags: ['haute résolution', 'MUSIC', 'ESPRIT', 'sous-espace', 'valeurs propres'],
+  random: true, // complex Gaussian noise
+  title: 'High-resolution methods',
+  subtitle: 'MUSIC, root-MUSIC, ESPRIT — what a model buys, and what it costs',
+  tags: ['high resolution', 'MUSIC', 'ESPRIT', 'subspace', 'eigenvalues'],
 
   params: {
     df: float('Δf', {
-      description: 'écart des deux raies, en unités de la limite de Fourier Fs/N',
+      description: 'gap between the two lines, in units of the Fourier limit Fs/N',
       min: 0.05,
       max: 3,
       step: 0.05,
-      // 0.5 : le périodogramme ne sépare pas (il lui faut 1), MUSIC oui à
-      // partir de 20 dB — mesuré, pas supposé. Descendre plus bas est
-      // possible et c'est l'objet de la scène 3, mais il faut alors monter
-      // le SNR, ce qui EST le propos.
+      // 0.5: the periodogram does not separate (it needs 1), MUSIC does from
+      // 20 dB up — measured, not assumed. Going lower is possible and is the
+      // subject of scene 3, but the SNR must then rise, which IS the point.
       default: 0.5,
       precision: 2,
     }),
     snr: float('SNR', {
-      description: 'rapport signal à bruit par raie',
+      description: 'signal-to-noise ratio per line',
       min: -10,
       max: 50,
       step: 1,
@@ -51,21 +50,21 @@ export default {
       precision: 0,
     }),
     d: int('d', {
-      description: 'valeurs propres retenues comme SIGNAL — le paramètre qu’il faut deviner',
+      description: 'eigenvalues kept as SIGNAL — the parameter that has to be guessed',
       min: 1,
       max: 8,
       default: 2,
     }),
     sources: select('sources', {
-      description: 'nombre de raies réellement présentes',
+      description: 'number of lines actually present',
       options: [
-        { value: 2, label: '2 (deux raies proches)' },
-        { value: 3, label: '3 (+ une raie à l’écart)' },
+        { value: 2, label: '2 (two close lines)' },
+        { value: 3, label: '3 (+ one line further off)' },
       ],
       default: 2,
     }),
     N: select('N', {
-      description: "longueur de l'enregistrement (Fs = 1 kHz)",
+      description: 'record length (Fs = 1 kHz)',
       options: [
         { value: 128, label: '128' },
         { value: 256, label: '256' },
@@ -75,121 +74,120 @@ export default {
       default: 256,
     }),
     M: int('M', {
-      description: 'ordre de la covariance — le nombre de vecteurs propres disponibles',
+      description: 'covariance order — the number of eigenvectors available',
       min: 4,
       max: 32,
-      // la résolution de MUSIC croît avec M : à M = 12 il ne sépare plus
-      // 0.5 × Fs/N, à M = 32 oui. C'est le second levier du marché.
+      // the resolution of MUSIC grows with M: at M = 12 it no longer separates
+      // 0.5 × Fs/N, at M = 32 it does. That is the second lever of the bargain.
       default: 32,
     }),
-    // seed injecté par le cœur, parce que random: true
+    // seed injected by the core, because random: true
   },
 
   validate: [
-    { when: (p) => p.d >= p.M, message: 'd doit rester strictement inférieur à M' },
-    { when: (p) => p.M > p.N / 2, message: 'M ne peut pas dépasser N/2 (pas assez d’instantanés)' },
+    { when: (p) => p.d >= p.M, message: 'd must stay strictly below M' },
+    { when: (p) => p.M > p.N / 2, message: 'M cannot exceed N/2 (not enough snapshots)' },
   ],
 
   derived: {
-    limite: { label: 'limite de Fourier Fs/N', calc: (p) => `${(1000 / p.N).toFixed(2)} Hz` },
+    fourierLimit: { label: 'Fourier limit Fs/N', calc: (p) => `${(1000 / p.N).toFixed(2)} Hz` },
     ecart: {
-      label: 'écart demandé',
-      calc: (p) => `${((p.df * 1000) / p.N).toFixed(2)} Hz (${p.df}× la limite)`,
+      label: 'requested gap',
+      calc: (p) => `${((p.df * 1000) / p.N).toFixed(2)} Hz (${p.df}× the limit)`,
     },
   },
 
   groups: [
     { title: 'Signal', params: ['sources', 'df', 'snr', 'N'] },
-    { title: 'Modèle', params: ['d', 'M'] },
+    { title: 'Model', params: ['d', 'M'] },
   ],
 
   views: [
-    // LA référence, et le point de départ : le périodogramme ne sépare pas.
-    // C'est le même « Spectre » que partout ailleurs dans le sujet, sous le
-    // même nom, parce que c'est exactement le même objet.
+    // THE reference, and the starting point: the periodogram does not separate.
+    // It is the same "Spectrum" as everywhere else in the subject, under the
+    // same name, because it is exactly the same object.
     figure(
       'spectrum',
       line('periodogram', {
         width: 2,
-        label: 'périodogramme',
+        label: 'periodogram',
         overlays: TRUTH,
         axes: { x: F_AXIS, y: { label: '|X(f)|', unit: 'dB' } },
       })
     ),
 
-    // La vue qui sert à CHOISIR d — et la seule information dont on dispose
-    // pour le faire en pratique. Les d retenues sont marquées ; la verticale
-    // est la coupure ; l'horizontale est le vrai σ², que l'on connaît ici
-    // parce qu'on fabrique le signal et jamais dans la vraie vie.
+    // The view used to CHOOSE d — and the only information available for doing
+    // so in practice. The d that are kept are marked; the vertical is the
+    // cutoff; the horizontal is the true σ², known here because the signal is
+    // manufactured and never in real life.
     view(
       'eigen',
-      'Valeurs propres',
+      'Eigenvalues',
       line('eigenvalues', {
         width: 2,
-        label: 'λ_k (décroissantes)',
+        label: 'λ_k (decreasing)',
         overlays: [
-          scatter('eigenSelected', { color: '#D95319', size: 9, label: 'retenues comme signal' }),
-          vline('dLine', { color: '#D95319', dashed: true, width: 1.6, label: 'coupure d' }),
-          // 2σ² et non σ² : le bruit est complexe circulaire, il porte σ²
-          // par quadrature. L'étiquette dit donc le niveau réel.
-          hline('noiseLine', { color: '#77AC30', dashed: true, width: 1.6, label: 'bruit 2σ² (vrai)' }),
+          scatter('eigenSelected', { color: '#D95319', size: 9, label: 'kept as signal' }),
+          vline('dLine', { color: '#D95319', dashed: true, width: 1.6, label: 'cutoff d' }),
+          // 2σ² and not σ²: the noise is circular complex, it carries σ² per
+          // quadrature. The label therefore states the real level.
+          hline('noiseLine', { color: '#77AC30', dashed: true, width: 1.6, label: 'noise 2σ² (true)' }),
         ],
         axes: { x: { label: 'k' }, y: { label: 'λ_k / λ₁', unit: 'dB' } },
       })
     ),
 
-    // Le MODÈLE, une fois complet. Les méthodes à sous-espace rendent des
-    // fréquences et rien d'autre ; les amplitudes viennent d'un moindres
-    // carrés aux fréquences trouvées, et la variance du bruit de ce qui
-    // reste. C'est cette vue qui dit si le modèle EXPLIQUE la mesure, et
-    // pas seulement s'il a trouvé des raies au bon endroit.
+    // The MODEL, once complete. Subspace methods return frequencies and nothing
+    // else; the amplitudes come from a least squares at the frequencies found,
+    // and the noise variance from what is left. This is the view that says
+    // whether the model EXPLAINS the measurement, and not merely whether it
+    // found lines in the right place.
     //
-    // TROIS spectres dans la MÊME représentation — des raies pour les
-    // sinusoïdes, une ligne pour le niveau de bruit — parce que c'est cette
-    // identité de forme qui permet de les comparer d'un regard au lieu de
-    // traduire mentalement d'un dessin à l'autre. Les couleurs sont celles
-    // du pseudo-spectre : orange root-MUSIC, violet ESPRIT, jaune la vérité,
-    // d'une vue à l'autre sans réapprentissage.
+    // THREE spectra in the SAME representation — stems for the sinusoids, a
+    // line for the noise level — because it is that identity of form which
+    // allows comparing them at a glance instead of translating mentally from one
+    // drawing to another. The colours are those of the pseudo-spectrum: orange
+    // root-MUSIC, purple ESPRIT, yellow the truth, from one view to the next
+    // with nothing to relearn.
     //
-    // En régime nominal les trois se confondent, et c'est LE résultat, pas
-    // un défaut de lisibilité. Ils se séparent exactement quand le modèle
-    // cesse d'expliquer la mesure.
+    // In nominal conditions the three coincide, and that is THE result, not a
+    // legibility defect. They separate exactly when the model stops explaining
+    // the measurement.
     view(
       'model',
-      'Spectre estimé',
+      'Estimated spectrum',
       stem('linesTrue', {
         color: '#EDB120',
         size: 7,
         baseline: -60,
-        label: 'vérité',
+        label: 'ground truth',
         overlays: [
           stem('linesRoot', { color: '#D95319', size: 4.5, baseline: -60, label: 'root-MUSIC' }),
           stem('linesEsprit', { color: '#7E2F8E', size: 4.5, baseline: -60, label: 'ESPRIT' }),
-          // Un SOCLE par spectre, dans sa couleur, et pas une ligne : le
-          // bruit est une puissance étalée sur toute la bande, les raies
-          // montent au-dessus de lui. C'est le modèle « d exponentielles
-          // PLUS du bruit blanc » dessiné tel qu'il est écrit, et c'est
-          // aussi ce qui rend visible d'un coup d'œil qu'un socle est
-          // remonté. Le bord supérieur reste tracé par-dessus : un aplat
-          // translucide ne se lit pas au décibel près.
-          band('bandTrue', { color: '#EDB120', opacity: 0.16, label: 'vérité' }),
+          // One FLOOR per spectrum, in its colour, and not a line: the noise is
+          // a power spread over the whole band, and the lines rise above it.
+          // That is the model "d exponentials PLUS white noise" drawn as it is
+          // written, and it is also what makes a raised floor visible at a
+          // glance. The upper edge is still drawn on top: a translucent wash
+          // cannot be read to the decibel.
+          band('bandTrue', { color: '#EDB120', opacity: 0.16, label: 'ground truth' }),
           band('bandRoot', { color: '#D95319', opacity: 0.16, label: 'root-MUSIC' }),
           band('bandEsprit', { color: '#7E2F8E', opacity: 0.16, label: 'ESPRIT' }),
-          hline('nsTrue', { color: '#EDB120', width: 1.6, label: 'vérité' }),
+          hline('nsTrue', { color: '#EDB120', width: 1.6, label: 'ground truth' }),
           hline('nsRoot', { color: '#D95319', dashed: true, width: 1.6, label: 'root-MUSIC' }),
           hline('nsEsprit', { color: '#7E2F8E', dashed: true, width: 1.6, label: 'ESPRIT' }),
         ],
-        axes: { x: F_AXIS, y: { label: 'puissance', unit: 'dB', domain: [MODEL_FLOOR, 8] } },
+        axes: { x: F_AXIS, y: { label: 'power', unit: 'dB', domain: [MODEL_FLOOR, 8] } },
       })
     ),
 
-    // Le résultat. Le pseudo-spectre n'est PAS une densité spectrale — c'est
-    // l'inverse d'une distance au sous-espace bruit, sans unité physique —
-    // et les deux estimateurs sans grille sont posés dessus comme des
-    // points : root-MUSIC et ESPRIT donnent des NOMBRES, pas des courbes.
+    // The result. The pseudo-spectrum is NOT a spectral density — it is the
+    // inverse of a distance to the noise subspace, with no physical unit — and
+    // the two grid-free estimators are laid on it as points: root-MUSIC and
+    // ESPRIT give NUMBERS, not curves.
     view(
       'pseudo',
-      'Pseudo-spectre',
+      'Pseudo-spectrum',
       line('pseudo', {
         width: 2.2,
         label: 'MUSIC',
@@ -198,7 +196,7 @@ export default {
           scatter('rootMusicMarks', { color: '#D95319', size: 10, label: 'root-MUSIC' }),
           scatter('espritMarks', { color: '#7E2F8E', size: 10, label: 'ESPRIT' }),
         ],
-        axes: { x: F_AXIS, y: { label: 'pseudo-spectre', unit: 'dB' } },
+        axes: { x: F_AXIS, y: { label: 'pseudo-spectrum', unit: 'dB' } },
       })
     ),
   ],

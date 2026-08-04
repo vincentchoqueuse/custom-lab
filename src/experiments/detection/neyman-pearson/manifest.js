@@ -6,28 +6,28 @@ export default {
   id: 'neyman-pearson',
   order: 1,
   random: true,
-  title: 'Détecteur de Neyman-Pearson',
-  subtitle: 'Signal connu dans un bruit gaussien : seuil, ROC et P_D vs SNR',
-  tags: ['détection', 'Neyman-Pearson', 'ROC', 'fausse alarme', 'SNR'],
+  title: 'The Neyman–Pearson detector',
+  subtitle: 'A known signal in Gaussian noise: threshold, ROC and P_D vs SNR',
+  tags: ['detection', 'Neyman–Pearson', 'ROC', 'false alarm', 'SNR'],
 
   params: {
     // log sliders — MANDATORY for parameters spanning several orders of
     // magnitude (this experiment exists to stress-test exactly that)
     snr: log('SNR', {
-      description: 'rapport signal à bruit (linéaire)',
+      description: 'signal-to-noise ratio (linear)',
       min: 0.05,
       max: 50,
       default: 1,
     }),
     pfa: log('P_FA', {
-      description: 'probabilité de fausse alarme visée',
+      description: 'target false-alarm probability',
       min: 1e-4,
       max: 0.5,
       default: 0.05,
     }),
-    N: int('N', { description: "taille de l'échantillon intégré", min: 1, max: 100, default: 10 }),
+    N: int('N', { description: 'number of samples integrated', min: 1, max: 100, default: 10 }),
     M: int('M', {
-      description: 'tirages Monte Carlo par hypothèse',
+      description: 'Monte Carlo draws per hypothesis',
       min: 500,
       max: 20000,
       step: 500,
@@ -54,7 +54,7 @@ export default {
     // decision areas — the whole story of the trade-off in one picture.
     view(
       'densities',
-      'Densités & seuil',
+      'Densities & threshold',
       line('pdfH0', {
         width: 2.5,
         label: 'p(T | H₀)',
@@ -64,7 +64,7 @@ export default {
           band('pdZone', { color: '#D95319', opacity: 0.18, label: 'P_D' }),
           vline('gamma', { color: '#7E2F8E', width: 2, label: 'γ' }),
         ],
-        axes: { x: 'T', y: 'densité' },
+        axes: { x: 'T', y: 'density' },
       })
     ),
 
@@ -72,13 +72,13 @@ export default {
     // actually lives, and the chance line P_D = P_FA stays the diagonal.
     view(
       'roc',
-      'Courbe ROC',
+      'ROC curve',
       line('rocCurve', {
         width: 2.5,
-        label: 'ROC (théorie)',
+        label: 'ROC (theory)',
         overlays: [
-          line('chanceLine', { color: '#a1a1aa', width: 1.4, dashed: true, label: 'hasard' }),
-          scatter('opTheory', { color: '#EDB120', size: 5.5, label: 'point de fonctionnement' }),
+          line('chanceLine', { color: '#a1a1aa', width: 1.4, dashed: true, label: 'chance' }),
+          scatter('opTheory', { color: '#EDB120', size: 5.5, label: 'operating point' }),
           scatter('opEmp', { color: '#7E2F8E', size: 4.5, label: 'Monte Carlo' }),
         ],
         axes: {
@@ -93,7 +93,7 @@ export default {
       'P_D vs SNR',
       line('pdVsSnr', {
         width: 2.5,
-        label: 'P_D (théorie)',
+        label: 'P_D (theory)',
         overlays: [
           hline((q) => q.pfa, { color: '#a1a1aa', width: 1.2, dashed: true, label: 'P_FA' }),
           vline((q) => 10 * Math.log10(q.snr), { color: '#EDB120', dashed: true, label: 'SNR' }),

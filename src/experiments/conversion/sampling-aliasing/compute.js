@@ -96,7 +96,7 @@ export function compute({ source, f, fe }) {
         value: fApp,
         meta: { label: 'f apparente (fondamental)', unit: 'Hz', precision: 1 },
       },
-      nSamples: { value: n, meta: { label: 'échantillons', precision: 0 } },
+      nSamples: { value: n, meta: { label: 'samples', precision: 0 } },
     },
   };
 }

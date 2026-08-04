@@ -1,34 +1,42 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'translation',
-    title: 'Translater : b (a = 1)',
+    id: 'shift',
+    title: 'Shifting: b (a = 1)',
     params: { law: 'gaussian', a: 1, b: 2 },
     visible: ['a', 'b', 'law'],
-    notes: `a = 1 : bouger b déplace la courbe orange EN BLOC.
-Regarder le statline : E[Y] = E[X] + b suit, Var(Y) ne bouge PAS.
-Question : « pourquoi la variance est-elle insensible à b ? »
-(la variance mesure l'écart à la moyenne — qui se translate avec).`,
+    notes: `With a = 1, moving b slides the orange curve as a whole. The statline
+follows: E[Y] = E[X] + b moves with it, while Var(Y) does not move at all.
+
+The question worth asking here is why the variance is blind to b. The answer is
+in the definition rather than in the picture: variance measures spread about the
+mean, and the mean has shifted along with everything else.`,
   },
   {
-    id: 'dilatation',
-    title: 'Dilater : a (b = 0)',
+    id: 'stretch',
+    title: 'Stretching: a (b = 0)',
     params: { law: 'gaussian', a: 2, b: 0 },
     visible: ['a', 'b'],
-    notes: `Monter a : la courbe s'élargit ET s'aplatit — l'aire reste 1.
-Var(Y) = a²·Var(X) : passer a de 1 à 2 quadruple la variance (statline).
-Question piège : « et E[Y] ? » — nulle tant que E[X] = 0 et b = 0.
-Avec la loi uniforme, l'effet plateau se voit encore mieux.`,
+    notes: `Raising a widens the curve and flattens it at the same time, because
+the area under a density is always 1. The statline shows the price: taking a
+from 1 to 2 quadruples the variance, since Var(Y) = a²·Var(X).
+
+Asking what happens to E[Y] is a fair trap — it stays at zero as long as
+E[X] = 0 and b = 0, which is exactly the case on screen. The uniform
+distribution makes the stretching easier to see, its plateau being a ruler.`,
   },
   {
-    id: 'miroir',
-    title: 'Retourner : a < 0',
+    id: 'flip',
+    title: 'Flipping: a < 0',
     params: { law: 'exponential', a: -1, b: 0 },
     visible: ['a', 'b', 'law'],
-    notes: `a = −1 sur une exponentielle : la densité se retourne en miroir,
-E[Y] = −1. La formule f_Y(y) = f_X((y−b)/a)/|a| exige |a|, pas a —
-c'est exactement ce que montre cette scène.
-Vue « Histogramme de Y » : les réalisations transformées tombent dessus.`,
+    notes: `Taking a = −1 on an exponential mirrors the density about the origin
+and puts E[Y] at −1. The formula f_Y(y) = f_X((y−b)/a)/|a| needs the absolute
+value, not a, and this scene is where that detail stops being a typographic
+convention: with a negative, the density would come out negative.
+
+The "Histogram of Y" view is worth a moment as confirmation — the transformed
+draws land on the transformed density, having never been told about it.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

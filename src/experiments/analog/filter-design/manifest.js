@@ -7,23 +7,23 @@ import { requiredOrder } from './compute.js';
 export default {
   id: 'filter-design',
   order: 7,
-  title: 'Design de filtres analogiques',
-  subtitle: "Un gabarit, quatre familles — l'ordre est un résultat, pas un choix",
-  tags: ['analogique', 'filtre', 'Butterworth', 'Chebyshev', 'elliptique', 'gabarit'],
+  title: 'Analog filter design',
+  subtitle: 'One specification, four families — the order is a result, not a choice',
+  tags: ['analog', 'filter', 'Butterworth', 'Chebyshev', 'elliptic', 'specification'],
 
   params: {
     family: select('famille', {
-      description: "famille d'approximation",
+      description: 'approximation family',
       options: [
         { value: 'butter', label: 'Butterworth' },
         { value: 'cheby1', label: 'Chebyshev 1' },
         { value: 'cheby2', label: 'Chebyshev 2' },
-        { value: 'ellip', label: 'elliptique (Cauer)' },
+        { value: 'ellip', label: 'elliptic (Cauer)' },
       ],
       default: 'butter',
     }),
     fp: float('f_p', {
-      description: 'bord de bande passante',
+      description: 'pass-band edge',
       min: 200,
       max: 2000,
       step: 10,
@@ -32,7 +32,7 @@ export default {
       precision: 0,
     }),
     fstop: float('f_a', {
-      description: "bord de bande d'arrêt",
+      description: 'stop-band edge',
       min: 400,
       max: 8000,
       step: 10,
@@ -41,7 +41,7 @@ export default {
       precision: 0,
     }),
     Amax: float('A_max', {
-      description: 'ondulation maximale en bande passante',
+      description: 'maximum pass-band ripple',
       min: 0.1,
       max: 3,
       step: 0.1,
@@ -50,7 +50,7 @@ export default {
       precision: 1,
     }),
     Amin: float('A_min', {
-      description: "atténuation minimale en bande d'arrêt",
+      description: 'minimum stop-band attenuation',
       min: 20,
       max: 80,
       step: 1,
@@ -61,15 +61,15 @@ export default {
   },
 
   validate: [
-    { when: (p) => p.fstop <= 1.15 * p.fp, message: 'f_a doit dépasser 1.15·f_p (bande de transition)' },
+    { when: (p) => p.fstop <= 1.15 * p.fp, message: 'f_a must exceed 1.15·f_p (transition band)' },
     {
       when: (p) => requiredOrder(p) > 16,
-      message: 'gabarit trop exigeant pour cette famille (n > 16) — desserrer le gabarit ou changer de famille',
+      message: 'specification too demanding for this family (n > 16) — relax it or change family',
     },
   ],
 
   derived: {
-    selectivity: { label: 'sélectivité f_a/f_p', calc: (p) => (p.fstop / p.fp).toFixed(2) },
+    selectivity: { label: 'selectivity f_a/f_p', calc: (p) => (p.fstop / p.fp).toFixed(2) },
   },
 
   views: [
@@ -83,15 +83,15 @@ export default {
       color: undefined,
       width: 2,
       overlays: [
-        band('zone1', { color: '#EDB120', opacity: 0.18, label: 'gabarit' }),
+        band('zone1', { color: '#EDB120', opacity: 0.18, label: 'specification' }),
         band('zone2', { color: '#EDB120', opacity: 0.18 }),
         vline('fp', { color: '#EDB120', dashed: true, label: 'f_p' }),
         vline('fstop', { color: '#EDB120', dashed: true, label: 'f_a' }),
       ],
     }),
     polesView({
-      zeroLabel: 'zéros (sur jω)',
-      circle: { radius: 1, label: 'cercle |s| = ωp' },
+      zeroLabel: 'zeros (on jω)',
+      circle: { radius: 1, label: 'circle |s| = ωp' },
       segments: [{ x1: 0, y1: -5, x2: 0, y2: 5 }],
       axes: { x: 'Re(s)/ωp', y: 'Im(s)/ωp' },
       minHalf: 1.4,
@@ -99,7 +99,7 @@ export default {
     }),
     view(
       'delay',
-      'Retard de groupe',
+      'Group delay',
       line('delay', {
         overlays: [vline('fp', { color: '#EDB120', dashed: true, label: 'f_p' })],
         axes: { x: { label: 'f', unit: 'Hz' }, y: { label: 'τg', unit: 'ms' } },

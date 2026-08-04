@@ -175,7 +175,7 @@ export const checks = [
           worst = Math.max(worst, best);
         }
       }
-      return { ok: worst < 1e-9, detail: `max|Δpôle|=${worst.toExponential(2)}` };
+      return { ok: worst < 1e-9, detail: `max|Δpole|=${worst.toExponential(2)}` };
     },
   },
   {

@@ -1,42 +1,46 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'p-seul',
-    title: 'P seul : vite, mais à côté',
+    id: 'p-alone',
+    title: 'P alone: fast, but off target',
     params: { Kp: 3, Ki: 0, Kd: 0, sigma: 0 },
     visible: ['Kp'],
-    notes: `Ki = Kd = 0. La sortie monte… et s'arrête SOUS la consigne : erreur
-statique 1/(1+Kp) — le tiroir affiche la valeur exacte, la statline la
-mesure. Monter Kp : l'erreur diminue mais n'atteint JAMAIS zéro, et les
-oscillations enflent. À t = 10, la perturbation de charge décale tout :
-P la subit, définitivement. Question : « pourquoi P ne peut-il pas
-finir le travail ? » — à erreur nulle, u = 0 : plus personne ne pousse.`,
+    notes: `With Ki = Kd = 0 the output rises and then stops BELOW the setpoint:
+a steady-state error of 1/(1+Kp), which the drawer computes exactly and the
+statline measures.
+
+Raising Kp shrinks the error without ever reaching zero, while the oscillations
+grow. At t = 10 the load disturbance shifts everything, and P suffers it
+permanently. The question that explains it: why can P never finish the job?
+Because at zero error u = 0, so nobody is pushing any more.`,
   },
   {
-    id: 'integrale',
-    title: 'I efface tout',
+    id: 'integral',
+    title: 'I erases everything',
     params: { Kp: 3, Ki: 1.5, Kd: 0, sigma: 0 },
     visible: ['Ki'],
-    notes: `Geler (F) la courbe P seul, ajouter Ki : l'erreur statique DISPARAÎT —
-l'intégrateur accumule jusqu'à ce que l'erreur soit exactement nulle.
-Et à t = 10, regarder la perturbation : encaissée puis EFFACÉE, la
-sortie revient sur la consigne. C'est la vraie raison d'être du terme I
-(le régime permanent, pas la vitesse). Trop de Ki : l'accumulation
-sur-vire, les oscillations reviennent — l'intégrale est une mémoire,
-et la mémoire a de l'inertie.`,
+    notes: `Freezing the P-only curve and adding Ki makes the steady-state error
+DISAPPEAR: the integrator accumulates until the error is exactly zero.
+
+At t = 10 the disturbance is absorbed and then ERASED, with the output returning
+to the setpoint. That is the real reason the I term exists — steady state, not
+speed. Too much Ki and the accumulation overshoots and the oscillations come
+back: an integral is a memory, and memory has inertia.`,
   },
   {
-    id: 'derivee',
-    title: 'D calme — et amplifie le bruit',
+    id: 'derivative',
+    title: 'D calms — and amplifies noise',
     params: { Kp: 6, Ki: 1.5, Kd: 1.5, sigma: 0 },
     visible: ['Kd', 'sigma'],
-    notes: `Kp poussé à 6 : ça oscille. Monter Kd : la dérivée freine AVANT
-l'impact — le dépassement fond (statline). Puis le revers : mettre
-σ = 0.02 de bruit de mesure et ouvrir la vue Commande. Avec Kd, u
-devient une scie folle (σ(u) dans la statline) : la dérivée amplifie
-le bruit d'un facteur ~Kd/τf. Marteler R : le bruit change, la scie
-reste. C'est pourquoi D est filtré, réduit, ou absent (PI) dans 90%
-des boucles industrielles.`,
+    notes: `With Kp pushed to 6 the loop oscillates. Raising Kd makes the
+derivative brake BEFORE the impact and the overshoot melts, as the statline
+reports.
+
+Then the other side: set σ = 0.02 of measurement noise and open the control
+view. With Kd, u becomes a wild sawtooth — σ(u) in the statline — because the
+derivative amplifies noise by roughly Kd/τf. Pressing R changes the noise and
+leaves the sawtooth. This is why D is filtered, reduced, or simply absent in
+90 % of industrial loops.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

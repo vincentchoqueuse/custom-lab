@@ -2,64 +2,71 @@
 export default [
   {
     id: 'through',
-    title: 'Scène 1 · Le signal entre, le signal sort',
+    title: 'Scene 1 · The signal goes in, the signal comes out',
     view: 'response',
     params: { fc: 1000, N: 21, win: 'hann' },
     visible: ['fc'],
-    notes: `Le filtre à l'œuvre, avant toute théorie : un signal entre, sa version
-filtrée sort — et sort EN RETARD, décalé de (N−1)/2 échantillons. Ce retard
-n'est pas un défaut de réglage, il est la contrepartie de la causalité, et la
-scène 5 le mesure.
-Question à poser : « où est passé le contenu au-dessus de f_c ? »
-Bouger f_c et regarder la sortie se lisser. Les onglets suivants montrent
-d'où vient ce comportement : les coefficients, puis la réponse fréquentielle.`,
+    notes: `The filter at work, before any theory: a signal goes in and its
+filtered version comes out — LATE, shifted by (N−1)/2 samples. That delay is not
+a misconfiguration but the price of causality, and scene 5 measures it.
+
+The question to ask is where the content above f_c went. Moving f_c smooths the
+output further. The next tabs show where the behaviour comes from: first the
+coefficients, then the frequency response.`,
   },
   {
     id: 'truncate',
-    title: "Scène 2 · Tronquer l'infini",
+    title: 'Scene 2 · Truncating the infinite',
     view: 'impulse',
     params: { fc: 1000, N: 21, win: 'rect' },
     visible: ['N'],
-    notes: `La réponse idéale (orange) est un sinc INFINI et non causal : on n'en
-garde que N coefficients, recentrés en (N−1)/2 — le retard est né ici, avant
-tout calcul. Monter N : les barres épousent de mieux en mieux le sinc.
-Question : « que coûte chaque coefficient de plus ? » (une multiplication par
-échantillon… et du retard — scène 4).`,
+    notes: `The ideal response, in orange, is an INFINITE and non-causal sinc.
+Only N coefficients are kept, recentred at (N−1)/2 — the delay was born there,
+before any calculation. Raising N makes the bars follow the sinc more and more
+closely.
+
+What each extra coefficient costs is worth asking: one multiplication per
+sample, and more delay, which is scene 5.`,
   },
   {
     id: 'gibbs',
-    title: 'Scène 3 · Gibbs ne cède pas',
+    title: 'Scene 3 · Gibbs does not give way',
     view: 'response',
     params: { fc: 1000, N: 21, win: 'rect' },
     visible: ['N'],
-    notes: `Troncature brute : le premier lobe en bande coupée est à −21 dB.
-Geler (F), monter N de 21 à 101 : la transition RAIDIT… mais le lobe reste
-à −21 dB — le phénomène de Gibbs ne cède pas au nombre de coefficients.
-C'est l'échec instructif : ajouter du calcul ne suffit pas, il faut changer
-de méthode.`,
+    notes: `With raw truncation the first stop-band lobe sits at −21 dB.
+
+Freezing and taking N from 21 to 101 STEEPENS the transition — and leaves the
+lobe at −21 dB. The Gibbs phenomenon does not yield to the number of
+coefficients. This is the instructive failure: adding computation is not enough,
+the method has to change.`,
   },
   {
     id: 'windows',
-    title: 'Scène 4 · La fenêtre achète des décibels',
+    title: 'Scene 4 · The window buys decibels',
     view: 'response',
     params: { fc: 1000, N: 45, win: 'rect' },
     visible: ['win', 'N'],
-    notes: `Même N, autre fenêtre : rect −21 dB → Hann −44 → Hamming −53 →
-Blackman −74 (statline). Le prix : la transition s'élargit d'autant. C'est
-EXACTEMENT le compromis de l'expérience « Fenêtrage spectral » — même
-mathématique, appliquée cette fois à la synthèse. Choisir une fenêtre, c'est
-choisir où mettre ses décibels.`,
+    notes: `Same N, different window: rectangular −21 dB, Hann −44, Hamming −53,
+Blackman −74, all in the statline. The price is a transition band that widens by
+as much.
+
+This is EXACTLY the trade-off of the spectral-windowing experiment — the same
+mathematics, applied this time to synthesis. Choosing a window is choosing where
+to spend one's decibels.`,
   },
   {
     id: 'delay',
-    title: 'Scène 5 · Propre, mais en retard',
+    title: 'Scene 5 · Clean, but late',
     view: 'response',
     params: { fc: 500, N: 81, win: 'hamming' },
     visible: ['N'],
-    notes: `Le carré entre, une version lissée sort — décalée d'EXACTEMENT
-(N−1)/2 échantillons (statline : 5 ms à N = 81). Phase linéaire : toutes les
-fréquences attendent le même temps, la forme est préservée. Descendre N : le
-retard fond, le lissage aussi. Question de fin : « pourquoi un musicien
-refuse-t-il un filtre de 4001 coefficients ? » (250 ms de latence…).`,
+    notes: `A square wave goes in and a smoothed version comes out, shifted by
+EXACTLY (N−1)/2 samples — 5 ms at N = 81, in the statline. The phase is linear,
+so every frequency waits the same time and the shape is preserved.
+
+Lowering N melts the delay away, and the smoothing with it. The closing question:
+why would a musician refuse a filter with 4001 coefficients? Because that is
+250 ms of latency.`,
   },
 ];

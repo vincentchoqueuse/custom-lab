@@ -3,10 +3,10 @@
 //   H(s) = ────────────
 //         (1 + τ·s)
 // Everything below is a closed form, none of it integrated numerically:
-//   indicielle    y(t) = K[1 − (1 − τ_z/τ)·e^{−t/τ}]
-//   impulsion     h(t) = K·(τ_z/τ)·δ(t) + (K/τ)(1 − τ_z/τ)·e^{−t/τ}
-//   pôle          s = −1/τ          zéro  s = −1/τ_z  (aucun si τ_z = 0)
-//   fréquentiel   H(jω) = K(1 + jωτ_z)/(1 + jωτ)
+//   step          y(t) = K[1 − (1 − τ_z/τ)·e^{−t/τ}]
+//   impulse       h(t) = K·(τ_z/τ)·δ(t) + (K/τ)(1 − τ_z/τ)·e^{−t/τ}
+//   pole          s = −1/τ          zero  s = −1/τ_z  (none if τ_z = 0)
+//   frequency     H(jω) = K(1 + jωτ_z)/(1 + jωτ)
 //
 // τ_z is a single slider that produces the three textbook behaviours:
 //   τ_z = 0    no zero, the pure exponential rise
@@ -98,19 +98,19 @@ export function compute({ K, tau, tz }) {
       wc, // vline: the cut-off 1/τ
       // −3 dB below the static gain: an hline in the SAME dB unit as the plot
       gain3dB: toDb((K * Math.hypot(1, tz / tau)) / Math.SQRT2),
-      initial: { value: y0, meta: { label: 'valeur initiale y(0⁺)', precision: 3 } },
-      t5: { value: t5, meta: { label: 'temps de réponse à 5 %', unit: 's', precision: 3 } },
+      initial: { value: y0, meta: { label: 'initial value y(0⁺)', precision: 3 } },
+      t5: { value: t5, meta: { label: 'settling time to 5 %', unit: 's', precision: 3 } },
       undershoot: {
         value: trough < -EPS ? (100 * trough) / K : 0,
-        meta: { label: 'dépassement inverse', unit: '%', precision: 1 },
+        meta: { label: 'inverse overshoot', unit: '%', precision: 1 },
       },
       dirac: {
         value: (K * tz) / tau,
-        meta: { label: 'poids du Dirac K·τ_z/τ', precision: 3 },
+        meta: { label: 'Dirac weight K·τ_z/τ', precision: 3 },
       },
       fc: {
         value: wc / (2 * Math.PI),
-        meta: { label: 'fréquence de coupure', unit: 'Hz', precision: 3 },
+        meta: { label: 'cutoff frequency', unit: 'Hz', precision: 3 },
       },
     },
   };

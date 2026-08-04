@@ -134,11 +134,11 @@ export function compute({ wave, N, A, alpha }) {
       envelope: { x: ex, y: ev },
       errorVsN: { x: gx, y: errN },
       currentN: N,
-      dc: { value: a[0], meta: { label: 'valeur moyenne a₀', precision: 3 } },
-      rmsError: { value: rmsError, meta: { label: 'erreur RMS', precision: 4 } },
+      dc: { value: a[0], meta: { label: 'mean value a₀', precision: 3 } },
+      rmsError: { value: rmsError, meta: { label: 'RMS error', precision: 4 } },
       overshoot: {
         value: 100 * overshoot,
-        meta: { label: 'dépassement', unit: '%', precision: 1 },
+        meta: { label: 'overshoot', unit: '%', precision: 1 },
       },
     },
   };

@@ -84,11 +84,11 @@ export function compute({ source, f1, df, fm, fmod, fdev, N, win, tcut }) {
     }
     fft(re, im);
     let specEnergy = 0;
-    // Cette boucle de trames garde ses tampons `re`/`im` alloués UNE fois et
-    // les réutilise : passer par core/dsp.js allouerait deux Float64Array par
-    // trame, soit des centaines par calcul. La couche d'appels sert la
-    // lisibilité d'un compute, pas les boucles chaudes — et c'est le seul
-    // endroit du catalogue où l'arbitrage penche de ce côté.
+    // This frame loop allocates its `re`/`im` buffers ONCE and reuses them:
+    // going through core/dsp.js would allocate two Float64Arrays per frame,
+    // hundreds per compute. That call layer serves the readability of a
+    // compute, not hot loops — and this is the only place in the catalogue
+    // where the trade-off falls on this side.
     for (let k = 0; k < N; k++) specEnergy += re[k] * re[k] + im[k] * im[k];
     if (frameEnergy > 0) {
       parsevalGap = Math.max(

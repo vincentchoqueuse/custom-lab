@@ -5,23 +5,23 @@ import { view, figure, line, vline, hline } from '../../../core/views.js';
 export default {
   id: 'periodogram',
   order: 3,
-  random: true, // du bruit gaussien : l'expérience tire, donc elle a un seed
-  title: 'Périodogramme',
-  subtitle: 'Estimer un spectre dans du bruit — et pourquoi allonger le signal ne suffit pas',
-  tags: ['DSP', 'périodogramme', 'Welch', 'Bartlett', 'consistance', 'bruit'],
+  random: true, // Gaussian noise: the experiment draws, so it has a seed
+  title: 'The periodogram',
+  subtitle: 'Estimating a spectrum in noise — and why a longer record is not enough',
+  tags: ['PSD', 'periodogram', 'Welch', 'Bartlett', 'consistency', 'noise'],
 
   params: {
-    method: select('méthode', {
-      description: "estimateur de densité spectrale",
+    method: select('method', {
+      description: 'power spectral density estimator',
       options: [
-        { value: 'raw', label: 'périodogramme brut' },
-        { value: 'bartlett', label: 'Bartlett — segments disjoints' },
-        { value: 'welch', label: 'Welch — 50 % de recouvrement' },
+        { value: 'raw', label: 'raw periodogram' },
+        { value: 'bartlett', label: 'Bartlett — disjoint segments' },
+        { value: 'welch', label: 'Welch — 50 % overlap' },
       ],
       default: 'raw',
     }),
     N: select('N', {
-      description: "longueur de l'enregistrement (Fs = 1 kHz)",
+      description: 'record length (Fs = 1 kHz)',
       options: [
         { value: 512, label: '512' },
         { value: 1024, label: '1024' },
@@ -32,7 +32,7 @@ export default {
       default: 2048,
     }),
     L: select('L', {
-      description: 'longueur de segment — LE compromis variance / résolution',
+      description: 'segment length — THE variance against resolution trade-off',
       options: [
         { value: 64, label: '64' },
         { value: 128, label: '128' },
@@ -43,10 +43,10 @@ export default {
       default: 256,
       visibleIf: { method: ['bartlett', 'welch'] },
     }),
-    win: select('fenêtre', {
-      description: 'fenêtre appliquée à chaque segment',
+    win: select('window', {
+      description: 'window applied to each segment',
       options: [
-        { value: 'rect', label: 'rectangulaire' },
+        { value: 'rect', label: 'rectangular' },
         { value: 'hann', label: 'Hann' },
         { value: 'hamming', label: 'Hamming' },
         { value: 'blackman', label: 'Blackman' },
@@ -54,7 +54,7 @@ export default {
       default: 'rect',
     }),
     snr: float('SNR', {
-      description: 'rapport signal à bruit de la raie forte',
+      description: 'signal-to-noise ratio of the strong line',
       min: -20,
       max: 40,
       step: 1,
@@ -63,7 +63,7 @@ export default {
       precision: 0,
     }),
     a2: float('A₂', {
-      description: 'niveau de la raie faible, celle qu’on cherche',
+      description: 'level of the weak line, the one being looked for',
       min: -60,
       max: 0,
       step: 1,
@@ -72,7 +72,7 @@ export default {
       precision: 0,
     }),
     df: float('Δf', {
-      description: 'écart entre les deux raies (la forte est à 150 Hz)',
+      description: 'gap between the two lines (the strong one is at 150 Hz)',
       min: 5,
       max: 200,
       step: 1,
@@ -80,118 +80,119 @@ export default {
       unit: 'Hz',
       precision: 0,
     }),
-    // seed injecté par le cœur, parce que random: true
+    // seed injected by the core, because random: true
   },
 
   validate: [
     {
       when: (p) => p.method !== 'raw' && p.L > p.N,
-      message: 'Le segment ne peut pas être plus long que l’enregistrement (L ≤ N)',
+      message: 'A segment cannot be longer than the record (L ≤ N)',
     },
   ],
 
   derived: {
-    duree: { label: "durée de l'enregistrement", calc: (p) => `${(p.N / 1000).toFixed(3)} s` },
+    duration: { label: 'record duration', calc: (p) => `${(p.N / 1000).toFixed(3)} s` },
     resolution: {
-      label: 'Δf du périodogramme brut',
+      label: 'Δf of the raw periodogram',
       calc: (p) => `${(1000 / p.N).toFixed(2)} Hz`,
     },
   },
 
   groups: [
     { title: 'Signal', params: ['snr', 'a2', 'df', 'N'] },
-    { title: 'Estimateur', params: ['method', 'L', 'win'] },
+    { title: 'Estimator', params: ['method', 'L', 'win'] },
   ],
 
   views: [
-    // Le signal brut : on n'y voit RIEN, et c'est le point de départ.
+    // The raw signal: NOTHING is visible in it, and that is the starting point.
     figure(
       'time',
       line('signal', {
         width: 1,
-        label: 'x[n] = deux raies + bruit',
+        label: 'x[n] = two lines + noise',
         axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
       })
     ),
 
-    // Le découpage lui-même, en vue séparée : les fenêtres posées là où
-    // elles tombent, et LEUR SOMME. C'est la vue qui explique pourquoi les
+    // The segmentation itself, as a separate view: the windows laid where they
+    // fall, and THEIR SUM. This is the view that explains why the
     // deux autres donnent ce qu'elles donnent, et elle se lit en quatre
-    // cas — rect/disjoint plate à 1, Hann/disjoint qui ondule jusqu'à 0
-    // (les bords sont jetés), Hann/50 % plate à 1 (COLA, reconstruction
-    // parfaite), rect/50 % plate à 2 (tout compté deux fois, d'où des
-    // segments corrélés). Elle porte donc, à elle seule, la raison d'être
-    // de la fenêtre de Welch.
+    // cases — rect/disjoint flat at 1, Hann/disjoint rippling down to 0 (the
+    // edges are thrown away), Hann/50 % flat at 1 (COLA, perfect
+    // reconstruction), rect/50 % flat at 2 (everything counted twice, hence
+    // correlated segments). It therefore carries, on its own, the reason
+    // Welch's window exists.
     view(
       'segments',
-      'Découpage et recouvrement',
+      'Segmentation and overlap',
       line('windowSum', {
         color: '#D95319',
         width: 2.6,
-        label: 'somme des fenêtres',
+        label: 'sum of the windows',
         overlays: [
-          // estompé, et volontairement : il est là pour rappeler qu'on
-          // découpe QUELQUE CHOSE, pas pour être lu en ordonnée. À pleine
-          // opacité il écrasait les fenêtres, qui sont le sujet.
+          // faded, and deliberately: it is there to recall that SOMETHING is
+          // being cut up, not to be read on the ordinate. At full opacity it
+          // crushed the windows, which are the subject.
           line('zoomSignal', {
             color: '#a1a1aa',
             width: 0.8,
             opacity: 0.3,
-            label: 'signal (échelle libre)',
+            label: 'signal (free scale)',
           }),
-          // une seule série, segments séparés par des NaN : le tracé
-          // générique casse le chemin, donc pas de vue sur mesure
-          line('segWindows', { color: '#0072BD', width: 1.6, label: 'fenêtres' }),
+          // a single series, segments separated by NaNs: the generic plot
+          // breaks the path, so no bespoke view
+          line('segWindows', { color: '#0072BD', width: 1.6, label: 'windows' }),
           hline(() => 1, { color: '#a1a1aa', width: 1, dashed: true, label: '1' }),
         ],
-        axes: { x: { label: 't', unit: 's' }, y: 'poids' },
+        axes: { x: { label: 't', unit: 's' }, y: 'weight' },
       })
     ),
 
-    // LA vue. Le périodogramme brut reste en gris derrière l'estimateur
-    // choisi : « regardez l'herbe, et regardez ce que Welch en fait » ne se
-    // dit qu'en voyant les deux en même temps.
+    // THE view. The raw periodogram stays in grey behind the chosen estimator:
+    // "look at the grass, and look at what Welch does to it" can only be said
+    // while seeing both at once.
     figure(
       'spectrum',
       line('psd', {
         width: 2,
-        label: 'estimation',
+        label: 'estimate',
         overlays: [
-          line('psdRaw', { color: '#a1a1aa', width: 0.9, label: 'périodogramme brut' }),
-          hline('noiseFloor', { color: '#D95319', dashed: true, width: 1.8, label: 'σ²/Fs — le vrai niveau' }),
+          line('psdRaw', { color: '#a1a1aa', width: 0.9, label: 'raw periodogram' }),
+          hline('noiseFloor', { color: '#D95319', dashed: true, width: 1.8, label: 'σ²/Fs — the true level' }),
           vline('f1', { color: '#EDB120', dashed: true, width: 1.6, label: 'f₁' }),
           vline('f2', { color: '#77AC30', dashed: true, width: 1.6, label: 'f₂' }),
         ],
         axes: {
           x: { label: 'f', unit: 'Hz' },
-          y: { label: 'DSP', unit: 'dB/Hz' },
+          y: { label: 'PSD', unit: 'dB/Hz' },
         },
       })
     ),
 
-    // La leçon, en droite : moyenner K segments divise la fluctuation par
-    // √K, et le périodogramme brut est le point K = 1 où l'on reste tant
-    // qu'on ne moyenne pas. Log-log, donc pente −1/2 lisible à la règle.
+    // The lesson, as a straight line: averaging K segments divides the
+    // fluctuation by √K, and the raw periodogram is the K = 1 point one stays at
+    // as long as one does not average. Log-log, so the slope −1/2 can be read
+    // with a ruler.
     view(
       'consistency',
       'Fluctuation vs K',
       line('fluctVsK', {
         width: 2.4,
-        label: 'dispersion mesurée d’un bin à l’autre',
-        // 1/√K est la loi des segments INDÉPENDANTS. Bartlett la suit ; Welch,
-          // dont les segments partagent la moitié de leurs échantillons, se tient
-          // légèrement AU-DESSUS — et c'est vérifié plutôt que promis.
+        label: 'measured spread from bin to bin',
+        // 1/√K is the law of INDEPENDENT segments. Bartlett follows it; Welch,
+          // whose segments share half their samples, sits slightly ABOVE — and
+          // that is verified rather than promised.
           overlays: [
             line('fluctTheory', {
               color: '#D95319',
               dashed: true,
               width: 1.8,
-              label: '1/√K — segments indépendants',
+              label: '1/√K — independent segments',
             }),
           ],
         axes: {
-          x: { label: 'K — segments moyennés', scale: 'log' },
-          y: { label: 'σ / moyenne, d’un bin à l’autre', scale: 'log' },
+          x: { label: 'K — segments averaged', scale: 'log' },
+          y: { label: 'σ / mean, bin to bin', scale: 'log' },
         },
       })
     ),

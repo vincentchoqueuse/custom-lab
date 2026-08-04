@@ -26,15 +26,15 @@ const BASE = {
 
 export const checks = [
   {
-    name: 'NLMS à μ̃ = 1 annule EXACTEMENT l’erreur a posteriori',
+    name: 'NLMS at μ̃ = 1 cancels the a posteriori error EXACTLY',
     category: 'numeric',
     run() {
-      // L'identité qui DÉFINIT NLMS, et la raison de la normalisation : le
-      // pas est choisi pour que le filtre mis à jour explique exactement
-      // l'échantillon qu'il vient de voir. Rien de statistique là-dedans —
-      // c'est une projection orthogonale, donc c'est exact à la précision
-      // machine, et à μ̃ = 2 l'erreur est exactement l'opposée de l'erreur
-      // a priori (le pas double franchit la cible, symétriquement).
+      // The identity that DEFINES NLMS, and the reason for the normalization:
+      // the step size is chosen so that the updated filter explains exactly the
+      // sample it has just seen. Nothing statistical in that — it is an
+      // orthogonal projection, hence exact to machine precision, and at μ̃ = 2
+      // the error is exactly the opposite of the a priori error (the double step
+      // overshoots the target, symmetrically).
       const gauss = gaussFrom(mulberry32(7));
       const L = 6;
       let worst1 = 0;
@@ -59,14 +59,14 @@ export const checks = [
     },
   },
   {
-    name: 'RLS sans bruit retrouve le système en EXACTEMENT L itérations',
+    name: 'RLS with no noise recovers the system in EXACTLY L iterations',
     category: 'numeric',
     run() {
-      // RLS n'approche pas la solution des moindres carrés : il EST cette
-      // solution, à chaque instant. Sans bruit et avec L équations
-      // indépendantes, le système est déterminé — donc à l'itération L le
-      // filtre vaut w*, à l'erreur d'arrondi et à la régularisation δ près.
-      // Un algorithme de gradient, lui, n'y arrive jamais en temps fini.
+      // RLS does not approximate the least-squares solution: it IS that
+      // solution, at every instant. Noise-free and with L independent equations
+      // the system is determined — so at iteration L the filter equals w*, up to
+      // rounding error and the regularization δ.
+      // A gradient algorithm, by contrast, never gets there in finite time.
       const L = 5;
       const N = 40;
       const gauss = gaussFrom(mulberry32(11));
@@ -83,14 +83,14 @@ export const checks = [
         sigmaV: 0,
         gauss: () => 0,
         keepPath: true,
-        p0: 1e10, // δ = 1e-10 : « aucune information a priori », donc LS exacts
+        p0: 1e10, // δ = 1e-10: "no prior information", hence exact LS
       });
       const errAt = (n) => {
         let s = 0;
         for (let k = 0; k < L; k++) s += (res.wPath[(n - 1) * L + k] - wTrue[k]) ** 2;
         return Math.sqrt(s);
       };
-      // avant L, le système est sous-déterminé : l'erreur ne peut pas être nulle
+      // before L the system is underdetermined: the error cannot be zero
       return {
         ok: errAt(L) < 1e-6 && errAt(L - 1) > 1e-3,
         detail: `n=L−1 : ${errAt(L - 1).toExponential(1)} · n=L : ${errAt(L).toExponential(1)}`,
@@ -98,20 +98,20 @@ export const checks = [
     },
   },
   {
-    name: 'le pas critique est celui de la MOYENNE QUADRATIQUE, pas 2/tr(R)',
+    name: 'the critical step is the MEAN-SQUARE one, not 2/tr(R)',
     category: 'numeric',
     run() {
-      // μ < 2/tr(R) est la borne des livres : elle fait converger la MOYENNE
-      // de ŵ, et pas sa variance. C'est la seconde qui décide. Le seuil de
-      // divergence mesuré (dichotomie sur 3000 itérations) doit donc rester
-      // sous 2/tr(R) et coller à la racine de Σ μλ/(1−μλ) = 2.
+      // μ < 2/tr(R) is the textbook bound: it makes the MEAN of ŵ converge, not
+      // its variance. The second is what decides. The measured divergence
+      // threshold (bisection over 3000 iterations) must therefore stay below
+      // 2/tr(R) and stick to the root of Σ μλ/(1−μλ) = 2.
       const bad = [];
       const thr = (L, a) => {
         let lo = 1e-3;
         let hi = 2 / L;
         for (let i = 0; i < 16; i++) {
           const m = (lo + hi) / 2;
-          const div = compute({ ...BASE, L, a, mu: m }).observables.state.value === '⚠ divergé';
+          const div = compute({ ...BASE, L, a, mu: m }).observables.state.value === '⚠ diverged';
           if (div) hi = m;
           else lo = m;
         }
@@ -123,26 +123,26 @@ export const checks = [
         const ms = msBound(eigSpread(toeplitzAR1(0, L), L).values);
         rows.push(`L=${L} : ${measured.toFixed(3)} vs ${ms.toFixed(3)}`);
         if (measured > 2 / L) bad.push(`L=${L} : diverge au-dessus de 2/tr(R)`);
-        // 15 % : l'hypothèse d'indépendance est d'autant plus lâche que L
-        // est petit (L = 4 arrive à 1.12) et, tout près du seuil, la
-        // divergence est si lente que 3000 itérations ne suffisent pas
-        // toujours à la déclarer — les deux biais vont dans le même sens.
-        if (Math.abs(measured / ms - 1) > 0.15) bad.push(`L=${L} : ${(measured / ms).toFixed(2)}× la borne`);
+        // 15 %: the independence assumption is the looser the smaller L is
+        // (L = 4 reaches 1.12) and, very close to the threshold, the divergence
+        // is so slow that 3000 iterations do not always suffice to declare it —
+        // both biases pull the same way.
+        if (Math.abs(measured / ms - 1) > 0.15) bad.push(`L=${L}: ${(measured / ms).toFixed(2)}× the bound`);
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : `seuil mesuré vs borne quadratique — ${rows.join(' · ')}`,
+        detail: bad.length ? bad.join(' · ') : `measured threshold vs mean-square bound — ${rows.join(' · ')}`,
       };
     },
   },
   {
-    name: 'sur entrée colorée, la borne théorique devient franchement optimiste',
+    name: 'on a coloured input, the theoretical bound turns frankly optimistic',
     category: 'numeric',
     run() {
-      // Le corollaire, et il vaut d'être projeté : toutes ces bornes
-      // supposent le régresseur indépendant du filtre. Corrélez l'entrée et
-      // l'hypothèse casse — le pas critique tombe à moins de la moitié de
-      // ce qu'annonce la théorie. Un réglage « dans les clous » y diverge.
+      // The corollary, and it is worth projecting: all these bounds assume the
+      // regressor independent of the filter. Correlate the input and the
+      // assumption breaks — the critical step size falls to less than half what
+      // the theory announces. A setting "within the rules" diverges there.
       const L = 8;
       const a = 0.9;
       const ms = msBound(eigSpread(toeplitzAR1(a, L), L).values);
@@ -150,24 +150,24 @@ export const checks = [
       let hi = 2 / L;
       for (let i = 0; i < 16; i++) {
         const m = (lo + hi) / 2;
-        const div = compute({ ...BASE, L, a, mu: m }).observables.state.value === '⚠ divergé';
+        const div = compute({ ...BASE, L, a, mu: m }).observables.state.value === '⚠ diverged';
         if (div) hi = m;
         else lo = m;
       }
       return {
         ok: lo < 0.6 * ms,
-        detail: `seuil réel ${lo.toFixed(4)} contre ${ms.toFixed(4)} annoncés (×${(ms / lo).toFixed(1)} d'optimisme)`,
+        detail: `real threshold ${lo.toFixed(4)} against ${ms.toFixed(4)} announced (×${(ms / lo).toFixed(1)} optimism)`,
       };
     },
   },
   {
-    name: 'désajustement mesuré = μ·tr(R)/(2−μ·tr(R)), sur trois pas',
+    name: 'measured misadjustment = μ·tr(R)/(2−μ·tr(R)), over three step sizes',
     category: 'statistical',
     run() {
-      // La loi du marché vitesse/précision, celle que la scène 2 projette.
-      // Tolérance à 12 % : la mesure est une moyenne d'ensemble sur 24
-      // réalisations et 750 itérations corrélées, et la théorie elle-même
-      // suppose l'indépendance du régresseur et du filtre. Les trois pas
+      // The speed/accuracy trade-off law, the one scene 2 projects. Tolerance
+      // at 12 %: the measurement is an ensemble average over 24 realizations and
+      // 750 correlated iterations, and the theory itself assumes the regressor
+      // independent of the filter. The three step sizes
       // doivent tomber dessus, pas seulement un.
       const bad = [];
       for (const mu of [0.005, 0.01, 0.02]) {
@@ -177,41 +177,41 @@ export const checks = [
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : 'mesuré/théorie ∈ [0.88, 1.12] pour μ = 0.005, 0.01, 0.02',
+        detail: bad.length ? bad.join(' · ') : 'measured/theory ∈ [0.88, 1.12] for μ = 0.005, 0.01, 0.02',
       };
     },
   },
   {
-    name: 'NLMS : le désajustement porte la correction L/(L−2), pas l’asymptotique',
+    name: 'NLMS: the misadjustment carries the L/(L−2) correction, not the asymptotic form',
     category: 'statistical',
     run() {
-      // μ̃/(2−μ̃) est le résultat ASYMPTOTIQUE des ouvrages — exact quand L
-      // est grand, et court d'un facteur 2 à L = 4. Le terme manquant est
-      // E[‖x‖²]·E[1/‖x‖²] = L/(L−2) pour un régresseur blanc gaussien.
-      // Vérifié ici de L = 4 à L = 16, où l'asymptotique seul se tromperait
-      // de 98 %, 32 % et 14 % ; un run long (N = 60 000) donne les mêmes
-      // rapports à 1 % près, donc ce n'est pas la fenêtre de mesure.
+      // μ̃/(2−μ̃) is the ASYMPTOTIC textbook result — exact when L is large, and
+      // short by a factor 2 at L = 4. The missing term is
+      // E[‖x‖²]·E[1/‖x‖²] = L/(L−2) for a white Gaussian regressor. Verified here
+      // from L = 4 to L = 16, where the asymptotic alone would be wrong by 98 %,
+      // 32 % and 14 %; a long run (N = 60 000) gives the same ratios to within
+      // 1 %, so it is not the measurement window.
       const bad = [];
       for (const L of [4, 8, 16]) {
         const o = compute({ ...BASE, algo: 'nlms', mu: 0.5, L }).observables;
         const r = o.misMeas.value / o.misTheo.value;
         const naive = o.misMeas.value / (0.5 / 1.5);
-        if (!(r > 0.9 && r < 1.1)) bad.push(`L=${L} : corrigé ${r.toFixed(3)}, brut ${naive.toFixed(2)}`);
+        if (!(r > 0.9 && r < 1.1)) bad.push(`L=${L}: corrected ${r.toFixed(3)}, raw ${naive.toFixed(2)}`);
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : 'mesuré/théorie ∈ [0.9, 1.1] pour L = 4, 8, 16',
+        detail: bad.length ? bad.join(' · ') : 'measured/theory ∈ [0.9, 1.1] for L = 4, 8, 16',
       };
     },
   },
   {
-    name: 'RLS ne subit pas le conditionnement, LMS le subit tout entier',
+    name: 'RLS does not suffer the conditioning, LMS suffers all of it',
     category: 'statistical',
     run() {
-      // LE résultat de l'expérience, et il ne s'illustre pas : il se
-      // mesure. Colorer l'entrée à puissance constante multiplie le
-      // conditionnement par 113 et le temps de convergence de LMS par
-      // 3.5 ; RLS ne bouge pas d'une itération.
+      // THE result of the experiment, and it is not illustrated: it is
+      // measured. Colouring the input at constant power multiplies the
+      // conditioning by 113 and the convergence time of LMS by 3.5; RLS does not
+      // budge by one iteration.
       const lmsW = compute({ ...BASE, a: 0 }).observables;
       const lmsC = compute({ ...BASE, a: 0.9 }).observables;
       const rlsW = compute({ ...BASE, algo: 'rls', a: 0 }).observables;
@@ -231,15 +231,15 @@ export const checks = [
     },
   },
   {
-    name: 'le conditionnement mesuré reste sous sa limite de Szegő et y monte',
+    name: 'the measured conditioning stays below its Szegő limit and climbs to it',
     category: 'numeric',
     run() {
-      // Les valeurs propres d'une Toeplitz sont encadrées par les extrêmes
-      // de la densité spectrale qui l'engendre, et y tendent quand la
-      // taille croît (Grenander–Szegő). Pour une AR(1) cela donne
-      // λmax/λmin ≤ ((1+a)/(1−a))², atteint seulement à la limite : c'est
-      // ce qui rend honnête la phrase « le conditionnement tend vers 361 »
-      // des notes de la scène 3, où l'on n'en mesure que 113.
+      // The eigenvalues of a Toeplitz matrix are bracketed by the extremes of
+      // the spectral density that generates it, and tend to them as the size
+      // grows (Grenander–Szegő). For an AR(1) that gives
+      // λmax/λmin ≤ ((1+a)/(1−a))², reached only in the limit: which is what
+      // makes the sentence "the conditioning tends to 361" in the scene-3 notes
+      // honest, where only 113 is measured.
       const a = 0.9;
       const limit = ((1 + a) / (1 - a)) ** 2;
       const s = [4, 8, 16, 32].map((L) => eigSpread(toeplitzAR1(a, L), L).spread);
@@ -252,14 +252,14 @@ export const checks = [
     },
   },
   {
-    name: 'l’entrée colorée garde EXACTEMENT sa puissance',
+    name: 'the coloured input keeps EXACTLY its power',
     category: 'statistical',
     run() {
-      // Le détail sans lequel toute la scène 3 serait un artefact : si
-      // colorer l'entrée en changeait aussi la puissance, le ralentissement
-      // de LMS s'expliquerait par un pas devenu inadapté et non par le
-      // conditionnement. Le facteur √(1−a²) est là pour ça — vérifié à
-      // 4 écarts-types, SE = √(2/N) pour une variance empirique gaussienne.
+      // The detail without which the whole of scene 3 would be an artefact: if
+      // colouring the input also changed its power, the slowdown of LMS would be
+      // explained by a step size become unsuitable and not by the conditioning.
+      // The factor √(1−a²) is there for that — verified to 4 standard
+      // deviations, SE = √(2/N) for an empirical Gaussian variance.
       const N = 200000;
       const tol = 4 * Math.sqrt(2 / N);
       const bad = [];
@@ -271,17 +271,17 @@ export const checks = [
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : `puissance = 1 ± ${tol.toFixed(4)} pour a = 0…0.95`,
+        detail: bad.length ? bad.join(' · ') : `power = 1 ± ${tol.toFixed(4)} for a = 0…0.95`,
       };
     },
   },
   {
-    name: 'la puissance utile annoncée est bien w*ᵀRw*',
+    name: 'the announced useful power really is w*ᵀRw*',
     category: 'statistical',
     run() {
-      // Le SNR affiché doit être le vrai : la puissance du signal utile
-      // n'est ‖w*‖² que sur une entrée blanche, et vaut w*ᵀRw* en général.
-      // On compare la forme quadratique exacte à une mesure directe.
+      // The displayed SNR must be the true one: the power of the useful signal
+      // is ‖w*‖² only on a white input, and is w*ᵀRw* in general. The exact
+      // quadratic form is compared with a direct measurement.
       const L = 8;
       const a = 0.9;
       const N = 200000;
@@ -297,7 +297,7 @@ export const checks = [
       const tol = 4 * exact * Math.sqrt(2 / (N / L)); // échantillons corrélés sur L retards
       return {
         ok: Math.abs(p - exact) < tol,
-        detail: `mesuré ${p.toFixed(4)} vs exact ${exact.toFixed(4)} (tol ${tol.toFixed(4)})`,
+        detail: `measured ${p.toFixed(4)} vs exact ${exact.toFixed(4)} (tol ${tol.toFixed(4)})`,
       };
     },
   },

@@ -13,12 +13,12 @@ const CASES = [
 
 export const checks = [
   {
-    name: 'la boucle fermée EST un second ordre : ω₀√(1+K), m/√(1+K), K/(1+K)',
+    name: 'the closed loop IS a second order: ω₀√(1+K), m/√(1+K), K/(1+K)',
     category: 'numeric',
     run() {
-      // L'identité qui porte toute l'expérience : la réponse calculée en
-      // bouclant doit être, point par point, celle d'un second ordre dont les
-      // trois paramètres sont donnés en forme close.
+      // The identity that carries the whole experiment: the response computed by
+      // closing the loop must be, point by point, that of a second order whose
+      // three parameters are given in closed form.
       const gap = maxGap(CASES, ({ w0, m, K }) => {
         const o = obs({ w0, m, K });
         const bf = closedParams(K, m, w0);
@@ -28,36 +28,36 @@ export const checks = [
           (i) => stepValue(bf.K, bf.m, bf.w0, o.stepClosed.x[i])
         );
       });
-      return { ok: gap < 1e-13, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-13, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'le retour proportionnel NE DÉPLACE PAS la partie réelle des pôles',
+    name: 'proportional feedback DOES NOT MOVE the real part of the poles',
     category: 'numeric',
     run() {
-      // m'ω₀' = (m/√(1+K))·(ω₀√(1+K)) = mω₀ : le coefficient en s est le même
-      // des deux côtés. L'enveloppe décroît donc exactement aussi vite en
-      // boucle fermée qu'en boucle ouverte — ce que personne ne prédit.
+      // m'ω₀' = (m/√(1+K))·(ω₀√(1+K)) = mω₀: the coefficient of s is the same on
+      // both sides. The envelope therefore decays exactly as fast closed-loop as
+      // open-loop — which nobody predicts.
       const gap = maxGap(CASES, ({ w0, m, K }) => {
         const bf = closedParams(K, m, w0);
         const o = obs({ w0, m, K });
         return Math.max(Math.abs(bf.m * bf.w0 - m * w0), Math.abs(o.envelope.value - m * w0));
       });
-      // et la pulsation propre, elle, monte bien de √(1+K)
+      // and the natural frequency does rise by √(1+K)
       const grows = [0.1, 1, 4, 20].every((K, i, a) => {
         const v = closedParams(K, 0.5, 1).w0;
         return Math.abs(v - Math.sqrt(1 + K)) < 1e-13 && (i === 0 || v > closedParams(a[i - 1], 0.5, 1).w0);
       });
-      return { ok: gap < 1e-13 && grows, detail: `écart max ${gap.toExponential(2)}, ω₀′ = ω₀√(1+K) croissante` };
+      return { ok: gap < 1e-13 && grows, detail: `max gap ${gap.toExponential(2)}, ω₀′ = ω₀√(1+K) increasing` };
     },
   },
   {
-    name: "l'erreur statique vaut exactement 1/(1+K)",
+    name: 'the steady-state error is exactly 1/(1+K)',
     category: 'numeric',
     run() {
       const gap = maxGap(CASES, ({ w0, m, K }) => {
         const o = obs({ w0, m, K });
-        // la valeur finale de la réponse indicielle bouclée, et le nombre annoncé
+        // the final value of the closed-loop step response, and the announced number
         const yInf = o.stepClosed.y[o.stepClosed.y.length - 1];
         return Math.max(
           Math.abs(o.staticError.value - 1 / (1 + K)),
@@ -66,11 +66,11 @@ export const checks = [
           Math.abs(yInf - K / (1 + K)) // 9/(mω₀) : le régime est établi
         );
       });
-      return { ok: gap < 2e-4, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 2e-4, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'Bode : la courbe fermée est bien L/(1+L), point par point',
+    name: 'Bode: the closed-loop curve really is L/(1+L), point by point',
     category: 'numeric',
     run() {
       const gap = maxGap(CASES, ({ w0, m, K }) => {
@@ -81,19 +81,19 @@ export const checks = [
           (i) => Math.hypot(...closeIt(openLoop(o.gain.x[i], { K, m, w0 })))
         );
       });
-      return { ok: gap < 1e-13, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-13, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: "l'abaque mesure la résonance que la forme close prédit",
+    name: 'the chart measures the resonance the closed form predicts',
     category: 'numeric',
     run() {
-      // Le contour mis en avant vaut M_r = K′/(2m′√(1−m′²)), calculé sur la
-      // boucle fermée. Deux affirmations EXACTES plutôt qu'une approchée : le maximum lu sur
-      // la grille tracée ne peut pas être plus près que le pas de grille, ce
-      // qui n'apprendrait rien. Ce qui est exact, c'est (a) que |T| évalué à
-      // la pulsation de résonance en forme close vaut exactement M, et (b)
-      // qu'aucun point tracé ne dépasse M — la tangence, pas la sécante.
+      // The highlighted contour is M_r = K′/(2m′√(1−m′²)), computed on the
+      // closed loop. Two EXACT claims rather than one approximate: the maximum
+      // read off the drawn grid cannot be closer than the grid step, which would
+      // teach nothing. What is exact is (a) that |T| evaluated at the
+      // closed-form resonant frequency equals M exactly, and (b) that no drawn
+      // point exceeds M — tangency, not secancy.
       let worst = 0;
       let below = true;
       let touches = true;
@@ -104,8 +104,8 @@ export const checks = [
         // (a) exact : |T(jω_r)| = M_r
         const atWr = Math.hypot(...closeIt(openLoop(o.wrOut.value, { K, m, w0 })));
         worst = Math.max(worst, Math.abs(atWr - M) / M);
-        // (b) aucun point de la courbe fermée ne dépasse le contour, et le
-        //     lieu de Black en approche un point à la résolution de la grille
+        // (b) no point of the closed-loop curve exceeds the contour, and the
+        //     Black locus approaches one to the resolution of the grid
         let closest = Infinity;
         for (let i = 0; i < o.gain.x.length; i++) {
           if (10 ** (o.gainClosed.y[i] / 20) > M * (1 + 1e-12)) below = false;
@@ -117,19 +117,19 @@ export const checks = [
       }
       return {
         ok: worst < 1e-13 && below && touches,
-        detail: `|T(jω_r)| = M_r à ${worst.toExponential(2)}, rien au-dessus, lieu tangent`,
+        detail: `|T(jω_r)| = M_r to ${worst.toExponential(2)}, nothing above, locus tangent`,
       };
     },
   },
   {
-    name: 'seuil de résonance : m/√(1+K) < 1/√2, et pas de pic au-dessus',
+    name: 'resonance threshold: m/√(1+K) < 1/√2, and no peak above it',
     category: 'numeric',
     run() {
-      // Fermer la boucle DÉSAMORTIT : un procédé qui ne résonne pas peut se
-      // mettre à résonner une fois bouclé.
+      // Closing the loop DE-DAMPS: a plant that does not resonate can start
+      // resonating once the loop is closed.
       //   m/√(1+K) < 1/√2  ⟺  1 + K > 2m²  ⟺  K > 2m² − 1
-      // Le seuil n'est positif que pour m > 1/√2, c'est-à-dire justement pour
-      // les procédés qui ne résonnaient pas tout seuls.
+      // The threshold is positive only for m > 1/√2, that is, precisely for the
+      // plants that did not resonate on their own.
       const gap = maxGap([0.75, 0.8, 0.9, 1.2], (m) => {
         const kCrit = 2 * m * m - 1;
         const below = obs({ m, K: kCrit * 0.95 });
@@ -138,18 +138,18 @@ export const checks = [
         const right = Number.isNaN(below.mrDb.value) && Number.isFinite(above.mrDb.value);
         return Math.max(exact, right ? 0 : 1);
       });
-      // et sous 1/√2 le procédé résonne déjà seul : aucun K ne peut l'éteindre
+      // and below 1/√2 the plant already resonates alone: no K can switch it off
       const already = [0.2, 0.5, 0.7].every((m) =>
         [0.1, 1, 10].every((K) => Number.isFinite(obs({ m, K }).mrDb.value))
       );
       return {
         ok: gap < 1e-13 && already,
-        detail: `seuil K = 2m²−1 exact (0.125 à m = 0.75, 0.62 à m = 0.9)`,
+        detail: `threshold K = 2m²−1 exact (0.125 at m = 0.75, 0.62 at m = 0.9)`,
       };
     },
   },
   {
-    name: 'les contours tracés vérifient |L/(1+L)| = M à la machine',
+    name: 'the drawn contours satisfy |L/(1+L)| = M to machine precision',
     category: 'numeric',
     run() {
       const gap = maxGap([-12, -6, -3, -1, 0, 1, 3, 6, 12], (db) => {
@@ -164,7 +164,7 @@ export const checks = [
         }
         return w;
       });
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   standardChecks.determinism(compute, BASE, 'stepClosed'),

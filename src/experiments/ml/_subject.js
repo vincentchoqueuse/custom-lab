@@ -1,16 +1,15 @@
-// Le sujet arrive APRÈS la régression et le filtrage, et c'est voulu : ni
-// une ACP ni un réseau de neurones ne sont des objets nouveaux pour qui
-// vient du signal. L'une est une décomposition propre de matrice de
-// covariance — la même qu'en haute résolution ; l'autre est une composition
-// de produits matrice-vecteur et d'une non-linéarité.
+// The subject comes AFTER regression and filtering, deliberately: neither PCA
+// nor a neural network is a new object for someone arriving from signal
+// processing. The first is an eigendecomposition of a covariance matrix — the
+// same one as in high-resolution spectral analysis; the second is a
+// composition of matrix–vector products and a nonlinearity.
 //
-// Les expériences prennent donc l'angle du traitement du signal plutôt que
-// celui de l'informatique : ce qu'une activation fait à un SPECTRE, ce
-// qu'une matrice de Toeplitz est vraiment, ce qu'une valeur propre de
-// covariance mesure, et pourquoi une couche cachée change la nature d'un
-// problème.
+// The experiments therefore take the signal-processing angle rather than the
+// computer-science one: what an activation does to a SPECTRUM, what a Toeplitz
+// matrix really is, what an eigenvalue of a covariance measures, and why a
+// hidden layer changes the nature of a problem.
 //
-// « Apprentissage automatique » et non « réseaux de neurones » : l'ACP n'en
-// est pas un, et le sujet a vocation à accueillir aussi les k plus proches
-// voisins, les SVM et les arbres, qui sont du même cours.
-export default { title: 'Apprentissage automatique', order: 12 };
+// "Machine learning" and not "neural networks": PCA is not one, and the
+// subject is meant to host k nearest neighbours, SVMs and trees as well, which
+// belong to the same course.
+export default { title: 'Machine learning', order: 12 };

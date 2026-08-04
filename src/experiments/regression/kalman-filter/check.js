@@ -60,7 +60,7 @@ export const checks = [
       const { observables: o } = compute({ sigw: 0.1, sigv: 1, N: 500, seed: 4 });
       return {
         ok: o.rmseF.value < o.rmseZ.value,
-        detail: `filtre=${o.rmseF.value.toFixed(3)} < capteur=${o.rmseZ.value.toFixed(3)}`,
+        detail: `filter=${o.rmseF.value.toFixed(3)} < sensor=${o.rmseZ.value.toFixed(3)}`,
       };
     },
   },

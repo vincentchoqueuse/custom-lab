@@ -6,13 +6,13 @@ export default {
   id: 'ofdm',
   order: 6,
   random: true,
-  title: 'OFDM et canal sélectif',
-  subtitle: 'Le canal creuse des trous ; la FFT le rend plat, porteuse par porteuse',
-  tags: ['OFDM', 'multitrajets', 'préfixe cyclique', 'égalisation'],
+  title: 'OFDM and the selective channel',
+  subtitle: 'The channel digs holes; the FFT flattens it, carrier by carrier',
+  tags: ['OFDM', 'multipath', 'cyclic prefix', 'equalization'],
 
   params: {
     Nc: select('N', {
-      description: 'nombre de sous-porteuses',
+      description: 'number of subcarriers',
       options: [
         { value: 16, label: '16' },
         { value: 32, label: '32' },
@@ -22,19 +22,19 @@ export default {
       default: 64,
     }),
     L: int('L', {
-      description: 'longueur du canal multitrajets (échantillons)',
+      description: 'length of the multipath channel (samples)',
       min: 1,
       max: 12,
       default: 6,
     }),
     cp: int('L_cp', {
-      description: 'longueur du préfixe cyclique (doit couvrir L − 1)',
+      description: 'length of the cyclic prefix (must cover L − 1)',
       min: 0,
       max: 16,
       default: 8,
     }),
     snr: float('SNR', {
-      description: 'rapport signal à bruit par sous-porteuse',
+      description: 'signal-to-noise ratio per subcarrier',
       min: 0,
       max: 30,
       step: 0.5,
@@ -43,7 +43,7 @@ export default {
       precision: 1,
     }),
     M: int('M', {
-      description: 'nombre de symboles OFDM simulés',
+      description: 'number of OFDM symbols simulated',
       min: 10,
       max: 200,
       default: 50,
@@ -52,48 +52,48 @@ export default {
 
   derived: {
     cpOk: {
-      label: 'préfixe suffisant ?',
+      label: 'prefix long enough?',
       calc: (p) => (p.cp >= p.L - 1 ? 'oui (L_cp ≥ L−1)' : 'NON — ISI'),
     },
   },
 
   groups: [
-    { title: 'Canal', params: ['L', 'snr'] },
+    { title: 'Channel', params: ['L', 'snr'] },
     { title: 'OFDM', params: ['Nc', 'cp', 'M'] },
   ],
 
   views: [
     view(
       'channel',
-      'Le canal vu des porteuses',
+      'The channel seen by the carriers',
       line('channel', {
         width: 2,
         axes: {
-          x: 'sous-porteuse k',
+          x: 'subcarrier k',
           y: { label: '|H_k|²', unit: 'dB', domain: [-40, 12] },
         },
       })
     ),
     plane('constellation', 'Constellation', {
       clouds: [
-        { source: 'rxRaw', color: '#7E2F8E', r: 1.5, opacity: 0.18, label: 'avant égalisation' },
-        { source: 'rxEq', color: '#0072BD', r: 1.7, opacity: 0.4, label: 'après ZF (1 coeff/porteuse)' },
+        { source: 'rxRaw', color: '#7E2F8E', r: 1.5, opacity: 0.18, label: 'before equalization' },
+        { source: 'rxEq', color: '#0072BD', r: 1.7, opacity: 0.4, label: 'after ZF (1 tap per carrier)' },
       ],
-      markers: { source: 'ideal', color: '#EDB120', label: 'QPSK idéale' },
+      markers: { source: 'ideal', color: '#EDB120', label: 'ideal QPSK' },
       minHalf: 1.6,
       maxHalf: 2.5,
     }),
     view(
       'ber',
-      'Erreurs par porteuse',
+      'Errors per carrier',
       scatter('berMeasured', {
         size: 3,
         opacity: 0.85,
-        label: 'BER mesuré',
+        label: 'measured BER',
         overlays: [
           line('berTheory', { color: '#D95319', width: 2, label: 'Q(√(|H_k|²·SNR))' }),
         ],
-        axes: { x: 'sous-porteuse k', y: 'BER' },
+        axes: { x: 'subcarrier k', y: 'BER' },
       })
     ),
   ],

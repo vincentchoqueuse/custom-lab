@@ -6,31 +6,31 @@ import { timeView, impulseView, polesView } from '../../../core/response-views.j
 export default {
   id: 'iir-design',
   order: 5,
-  title: 'Design IIR par discrétisation',
-  subtitle: "Bilinéaire, pre-warping, invariance impulsionnelle — l'analogique passe au numérique",
-  tags: ['numérique', 'IIR', 'RII', 'bilinéaire', 'invariance impulsionnelle', 'warping'],
+  title: 'IIR design by discretization',
+  subtitle: 'Bilinear, pre-warping, impulse invariance — analog becomes digital',
+  tags: ['digital', 'IIR', 'bilinear', 'impulse invariance', 'warping'],
 
   params: {
     method: select('méthode', {
-      description: 'discrétisation du prototype analogique (Fs = 8 kHz)',
+      description: 'discretization of the analog prototype (Fs = 8 kHz)',
       options: [
-        { value: 'bilinear', label: 'bilinéaire avec pre-warping' },
-        { value: 'naive', label: 'bilinéaire sans pre-warping' },
-        { value: 'impulse', label: 'invariance impulsionnelle' },
+        { value: 'bilinear', label: 'bilinear with pre-warping' },
+        { value: 'naive', label: 'bilinear without pre-warping' },
+        { value: 'impulse', label: 'impulse invariance' },
       ],
       default: 'bilinear',
     }),
     family: select('famille', {
-      description: 'prototype analogique (tout-pôles)',
+      description: 'analog prototype (all-pole)',
       options: [
         { value: 'butter', label: 'Butterworth' },
         { value: 'cheby1', label: 'Chebyshev 1' },
       ],
       default: 'butter',
     }),
-    n: int('n', { description: 'ordre du prototype', min: 2, max: 8, default: 4 }),
+    n: int('n', { description: 'order of the prototype', min: 2, max: 8, default: 4 }),
     fc: float('f_c', {
-      description: 'fréquence de coupure visée (à −A_max)',
+      description: 'target cutoff frequency (at −A_max)',
       min: 200,
       max: 3500,
       step: 10,
@@ -39,15 +39,15 @@ export default {
       precision: 0,
     }),
     source: select('signal', {
-      description: 'signal envoyé dans le filtre',
+      description: 'signal fed into the filter',
       options: [
-        { value: 'square', label: 'carré' },
-        { value: 'saw', label: 'dent de scie' },
+        { value: 'square', label: 'square' },
+        { value: 'saw', label: 'sawtooth' },
       ],
       default: 'square',
     }),
     f0: float('f₀', {
-      description: 'fondamentale du signal d\'entrée',
+      description: 'fundamental of the input signal',
       min: 50,
       max: 800,
       step: 10,
@@ -56,7 +56,7 @@ export default {
       precision: 0,
     }),
     Amax: float('A_max', {
-      description: 'ondulation / niveau définissant la coupure',
+      description: 'ripple / level defining the cutoff',
       min: 0.1,
       max: 3,
       step: 0.1,
@@ -67,23 +67,23 @@ export default {
   },
 
   groups: [
-    { title: 'Prototype analogique', params: ['family', 'n', 'Amax'] },
-    { title: 'Discrétisation', params: ['method', 'fc'] },
-    { title: 'Signal de test', params: ['source', 'f0'] },
+    { title: 'Analog prototype', params: ['family', 'n', 'Amax'] },
+    { title: 'Discretization', params: ['method', 'fc'] },
+    { title: 'Test signal', params: ['source', 'f0'] },
   ],
 
   views: [
     timeView(),
-    impulseView({ source: 'impulseDig', label: 'h[n] du filtre numérique' }),
+    impulseView({ source: 'impulseDig', label: 'h[n] of the digital filter' }),
 
     figure(
       'gain',
       line('respDig', {
         width: 2,
-        label: 'numérique',
+        label: 'digital',
         overlays: [
-          line('respAna', { color: '#D95319', dashed: true, label: 'analogique' }),
-          vline('fc', { color: '#EDB120', dashed: true, label: 'f_c visée' }),
+          line('respAna', { color: '#D95319', dashed: true, label: 'analog' }),
+          vline('fc', { color: '#EDB120', dashed: true, label: 'target f_c' }),
         ],
         axes: {
           x: { label: 'f', unit: 'Hz' },
@@ -93,7 +93,7 @@ export default {
     ),
     polesView({
       variable: 'z',
-      circle: { radius: 1, label: 'cercle unité (stabilité)' },
+      circle: { radius: 1, label: 'unit circle (stability)' },
       segments: [
         { x1: -1.6, y1: 0, x2: 1.6, y2: 0 },
         { x1: 0, y1: -1.6, x2: 0, y2: 1.6 },
@@ -103,17 +103,17 @@ export default {
     }),
     view(
       'warp',
-      'Warping fréquentiel',
+      'Frequency warping',
       line('warp', {
         width: 2,
         label: 'warping Ω(f) = 2Fs·tan(πf/Fs)',
         overlays: [
-          line('warpIdent', { color: '#D95319', dashed: true, label: 'identité (2πf)' }),
+          line('warpIdent', { color: '#D95319', dashed: true, label: 'identity (2πf)' }),
           vline('fc', { color: '#EDB120', dashed: true, label: 'f_c' }),
         ],
         axes: {
-          x: { label: 'f numérique', unit: 'Hz' },
-          y: { label: 'f analogique équivalente', unit: 'Hz', domain: [0, 16000] },
+          x: { label: 'digital f', unit: 'Hz' },
+          y: { label: 'equivalent analog f', unit: 'Hz', domain: [0, 16000] },
         },
       })
     ),

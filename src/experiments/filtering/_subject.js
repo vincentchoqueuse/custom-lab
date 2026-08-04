@@ -4,7 +4,7 @@
 // The pole map comes AFTER the frequency response here: a digital filter is
 // met through what it does, and only then through where its poles sit.
 export default {
-  title: 'Filtrage numérique',
+  title: 'Digital filtering',
   order: 8,
   figureOrder: ['response', 'impulse', 'gain', 'poles', 'spectrum'],
 };

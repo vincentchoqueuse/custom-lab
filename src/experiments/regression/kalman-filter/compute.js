@@ -101,7 +101,7 @@ export function compute({ sigw, sigv, N, seed }) {
       kInf: { value: kInf, meta: { label: 'K∞ (Riccati)', precision: 3 } },
       rmseF: {
         value: Math.sqrt(seF / N),
-        meta: { label: 'RMSE filtre', precision: 3 },
+        meta: { label: 'filter RMSE', precision: 3 },
       },
       rmseZ: {
         value: Math.sqrt(seZ / N),

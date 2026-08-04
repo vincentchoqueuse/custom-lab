@@ -111,15 +111,15 @@ export function compute({ K, m, w0 }) {
       wr,
       overshoot: {
         value: overshoot,
-        meta: { label: 'dépassement', unit: '%', precision: 1 },
+        meta: { label: 'overshoot', unit: '%', precision: 1 },
       },
       overshootTh: {
         value: overshootTh,
-        meta: { label: 'théorie e^(−mπ/√(1−m²))', unit: '%', precision: 1 },
+        meta: { label: 'theory e^(−mπ/√(1−m²))', unit: '%', precision: 1 },
       },
-      t5: { value: t5, meta: { label: 'temps de réponse à 5%', unit: 's', precision: 2 } },
+      t5: { value: t5, meta: { label: 'settling time to 5%', unit: 's', precision: 2 } },
       tPeak: { value: m < 1 - EPS ? tMax : NaN, meta: { label: 't du 1er max', unit: 's', precision: 2 } },
-      Mr: { value: Mr, meta: { label: 'résonance Mr', precision: 2 } },
+      Mr: { value: Mr, meta: { label: 'resonance Mr', precision: 2 } },
     },
   };
 }

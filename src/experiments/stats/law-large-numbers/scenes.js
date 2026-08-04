@@ -2,37 +2,44 @@
 export default [
   {
     id: 'convergence',
-    title: 'Chaque trajectoire converge',
+    title: 'Every path converges',
     params: { law: 'dice', n: 2000, K: 5 },
     visible: ['law', 'K'],
-    notes: `K trajectoires de la moyenne de n dés : elles serpentent puis rentrent
-TOUTES dans l'entonnoir jaune μ ± 2σ/√n (~95 % de chaque trajectoire).
-Marteler R : nouvelles trajectoires, même destin. C'est la LGN — pas de hasard
-sur la destination, seulement sur le chemin.
-Lien avec le TCL : à n fixé, la dispersion verticale des trajectoires est
-gaussienne — c'est l'expérience précédente vue de profil.`,
+    notes: `The K paths are running means of n dice. They wander early, then all
+of them settle inside the yellow funnel μ ± 2σ/√n, which holds about 95 % of
+each path. Pressing R gives new paths and the same fate — the law of large
+numbers leaves nothing to chance about the destination, only about the road.
+
+The link with the previous experiment is worth making out loud: at a fixed n,
+the vertical spread of the paths is Gaussian. This figure is the central limit
+theorem seen edge-on.`,
   },
   {
-    id: 'lenteur',
-    title: 'La convergence est lente (1/√n)',
+    id: 'slowness',
+    title: 'Convergence is slow (1/√n)',
     params: { law: 'dice', n: 10000, K: 5 },
     visible: ['n'],
-    notes: `L'axe est LOGARITHMIQUE : l'entonnoir se resserre d'un facteur 10
-tous les DEUX ordres de grandeur — un chiffre de précision en plus coûte
-cent fois plus de tirages (1/√n).
-Question : « combien de lancers pour trois décimales sur μ = 3.5 ? »
-(≈ 3×10⁶ — hors de portée du slider, et c'est le message.)`,
+    notes: `The horizontal axis is logarithmic, and that is what makes the cost
+readable: the funnel narrows by a factor of ten every two orders of magnitude,
+so one more digit of precision costs a hundred times more draws.
+
+Asking how many tosses three decimals on μ = 3.5 would take gives roughly three
+million — beyond the slider, which is the message rather than a limitation of
+the experiment.`,
   },
   {
-    id: 'pile-ou-face',
-    title: 'Pile ou face : la fréquence converge',
+    id: 'coin',
+    title: 'Coin tossing: the frequency converges',
     params: { law: 'bernoulli', p: 0.5, n: 5000, K: 10 },
     visible: ['law', 'p'],
-    notes: `La fréquence des « pile » converge vers p — l'expérience historique
-(Buffon : 4040 lancers ; Pearson : 24 000). Ici : 10 trajectoires de 5000
-lancers en un clic de R.
-Baisser p à 0.05 : la convergence relative est bien plus lente — les
-événements rares demandent beaucoup de données.`,
+    notes: `The frequency of heads converges to p, which is the experiment
+history actually ran: Buffon with 4040 tosses, Pearson with 24 000. Ten paths of
+five thousand tosses now cost one keystroke, and the comparison of effort is
+part of the lesson.
+
+Dropping p to 0.05 shows that relative convergence is far slower for a rare
+event. Estimating something that almost never happens takes a great deal of
+data, and this is where that becomes concrete.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

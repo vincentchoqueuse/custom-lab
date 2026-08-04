@@ -1,6 +1,6 @@
 // Descent algorithms on a 2D landscape, three trajectories on the SAME
 // function from the SAME start:
-//   gradient à pas fixe   xₖ₊₁ = xₖ − α∇f        (rate max(|1−α|,|1−ακ|)²)
+//   fixed-step gradient   xₖ₊₁ = xₖ − α∇f        (rate max(|1−α|,|1−ακ|)²)
 //   momentum              v ← βv − α∇f, x ← x+v
 //   Newton                x ← x − H⁻¹∇f          (one step on a quadratic)
 // Landscapes: an ill-conditioned quadratic f = (x² + κy²)/2 (the zigzag

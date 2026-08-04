@@ -1,50 +1,55 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'plancher',
-    title: 'Scène 1 · Le problème, puis le plancher',
+    id: 'floor',
+    title: 'Scene 1 · The problem, then the floor',
     params: { mu: 2, sigma: 1.5, N: 20, M: 3000 },
     view: 'variance',
     visible: ['sigma'],
-    notes: `Poser l'énoncé AVANT de montrer quoi que ce soit, au tableau :
-« on tire N valeurs indépendantes d'une loi N(μ, σ²) avec σ CONNU ;
-on cherche à estimer μ. » Tout ce qui suit répond à cette question, et à
-aucune autre — trois recettes pour fabriquer un μ̂ à partir des N tirages :
-la moyenne, la médiane, la mi-étendue (le milieu du min et du max).
-Le tiroir rappelle le modèle et l'information de Fisher I(μ) = N/σ².
-La ligne jaune pointillée est σ²/N : AUCUN estimateur sans biais ne
-peut descendre dessous — c'est un théorème, pas une observation.
-x̄ (bleu) est POSÉ sur le plancher : il est efficace, inutile de
-chercher mieux. La médiane (verte) est parallèle, π/2 au-dessus.
-La mi-étendue (violette) DÉCROCHE : sa variance ne descend qu'en
-1/ln N — collecter plus de données ne l'aide presque plus. Monter σ :
-tout le plancher monte en σ².`,
+    notes: `The statement belongs on the board before anything is shown: N
+independent values are drawn from N(μ, σ²) with σ known, and μ is to be
+estimated. Everything on this screen answers that question and no other. Three
+recipes turn the N draws into a μ̂ — the mean, the median, and the midrange,
+which is the midpoint of the smallest and largest value. The drawer carries the
+model and the Fisher information I(μ) = N/σ².
+
+The dashed yellow line is σ²/N, and no unbiased estimator can go below it. That
+is a theorem, not an observation about this particular figure. The mean sits on
+the floor: it is efficient, and looking for something better is wasted effort.
+The median runs parallel to it, a factor π/2 above. The midrange comes away
+from both, its variance falling only as 1/ln N, so collecting more data barely
+helps it. Raising σ lifts the whole floor as σ².`,
   },
   {
-    id: 'prix',
-    title: 'Scène 2 · Trois largeurs pour un même N',
+    id: 'price',
+    title: 'Scene 2 · Three widths for one N',
     params: { mu: 2, sigma: 1.5, N: 50, M: 5000 },
     view: 'sampling',
     visible: ['N'],
-    notes: `Le même budget de données, trois précisions. La courbe jaune est la
-MEILLEURE distribution possible — N(μ, σ²/N), dictée par Cramér-Rao —
-et l'histogramme de x̄ la remplit exactement. Question : « que jette la
-médiane ? » — les valeurs, elle ne garde que les rangs. « Et la
-mi-étendue ? » — tout sauf deux points, les pires (les extrêmes).
-L'efficacité, c'est l'information de Fisher réellement consommée.`,
+    notes: `The same data budget buys three different precisions. The yellow
+curve is the best distribution available — N(μ, σ²/N), dictated by Cramér–Rao —
+and the histogram of x̄ fills it exactly.
+
+What each estimator throws away is the useful question. The median discards the
+values and keeps only the ranks. The midrange discards everything except two
+points, and keeps the two worst ones. Efficiency is the Fisher information an
+estimator actually consumes.`,
   },
   {
-    id: 'efficacite',
-    title: 'Scène 3 · L\'efficacité, chiffrée',
+    id: 'efficiency',
+    title: 'Scene 3 · Efficiency, as a number',
     params: { mu: 2, sigma: 1.5, N: 100, M: 5000 },
     view: 'efficiency',
     visible: ['N', 'M'],
-    notes: `CRB/Var : x̄ vaut 1 à tout N. La médiane converge vers 2/π ≈ 0.637
-(ligne verte pointillée) : 36% de l'information jetée, POUR TOUJOURS —
-mais c'est le prix de la robustesse (revoir la cible biais-variance).
-La mi-étendue glisse vers 0. Lien MV : l'estimateur du maximum de
-vraisemblance est asymptotiquement efficace — c'est LE théorème qui
-justifie tout le chapitre maximum de vraisemblance.`,
+    notes: `The ratio CRB/Var puts the mean at 1 for every N. The median settles
+at 2/π ≈ 0.637, the dashed green line: 36 % of the information discarded, and
+discarded permanently rather than for small samples only — that is the price of
+its robustness, which the bias–variance target experiment argues is often worth
+paying. The midrange slides toward zero.
+
+The link to the next chapter is the theorem that justifies it: the maximum
+likelihood estimator is asymptotically efficient, which is to say it eventually
+reaches this floor.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

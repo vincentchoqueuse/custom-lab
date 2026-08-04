@@ -1,36 +1,34 @@
-// Démoduler : retrouver A(t) et f(t) dans x(t) = A(t)·cos(φ(t)).
+// Demodulating: recovering A(t) and f(t) from x(t) = A(t)·cos(φ(t)).
 //
-// Le signal est modulé EN AMPLITUDE ET EN FRÉQUENCE en même temps, ce qui
-// est le cas intéressant : chaque méthode doit séparer deux informations
-// mélangées dans une seule courbe. Deux méthodes, aussi différentes qu'on
-// peut l'être :
+// The signal is modulated IN AMPLITUDE AND IN FREQUENCY at the same time, which
+// is the interesting case: each method must separate two pieces of information
+// mixed into one curve. Two methods, about as different as they come:
 //
-//   HILBERT est GLOBAL. On fabrique le signal analytique z = x + j·H{x} en
-//   annulant les fréquences négatives du spectre, puis A = |z| et
-//   f = (1/2π)·dφ/dt. Il faut donc une FFT sur tout l'enregistrement : le
-//   résultat à l'instant t dépend de TOUS les échantillons, y compris ceux
-//   qui viennent après. Aucune démodulation en temps réel là-dedans.
+//   HILBERT is GLOBAL. One builds the analytic signal z = x + j·H{x} by
+//   cancelling the negative frequencies of the spectrum, then A = |z| and
+//   f = (1/2π)·dφ/dt. It therefore needs an FFT over the whole record: the
+//   result at instant t depends on ALL the samples, including those that come
+//   after. No real-time demodulation in that.
 //
-//   TEAGER–KAISER est LOCAL. L'opérateur Ψ(x)[n] = x[n]² − x[n+1]·x[n−1]
-//   vaut A²sin²Ω sur une sinusoïde : trois échantillons, deux
-//   multiplications, et il porte déjà le produit amplitude × fréquence. Le
-//   couple (A, Ω) s'en extrait par DESA-2, encore trois échantillons. Pas
-//   de transformée, pas de retard, un coût par point qui ne dépend pas de
-//   la longueur du signal.
+//   TEAGER–KAISER is LOCAL. The operator Ψ(x)[n] = x[n]² − x[n+1]·x[n−1] is
+//   A²sin²Ω on a sinusoid: three samples, two multiplications, and it already
+//   carries the product amplitude × frequency. The pair (A, Ω) is extracted from
+//   it by DESA-2, three more samples. No transform, no delay, a per-point cost
+//   that does not depend on the length of the signal.
 //
-// L'algorithme DESA-2, avec y[n] = x[n+1] − x[n−1] :
+// The DESA-2 algorithm, with y[n] = x[n+1] − x[n−1]:
 //
 //   Ω[n] = ½·arccos( 1 − Ψ(y)[n] / (2·Ψ(x)[n]) )
 //   A[n] = 2·Ψ(x)[n] / √(Ψ(y)[n])
 //
-// et sur une sinusoïde pure ces deux formules sont EXACTES, pas
-// approchées — c'est la première vérification du harnais.
+// and on a pure sinusoid these two formulas are EXACT, not approximate — that is
+// the first verification of the harness.
 //
-// Le prix de la localité se paie sur le bruit, et c'est tout l'objet des
-// scènes : Ψ est un produit d'échantillons voisins, donc le bruit y entre
-// au carré et sans aucun moyennage. Hilbert, lui, fait une FFT, qui EST un
-// moyennage sur tout l'enregistrement. Les chiffres sont dans les notes,
-// mesurés et non supposés.
+// The price of locality is paid on the noise, and that is the whole subject of
+// the scenes: Ψ is a product of neighbouring samples, so the noise enters it
+// squared and with no averaging at all. Hilbert does an FFT, which IS an
+// averaging over the whole record. The figures are in the notes, measured and not
+// assumed.
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { ifft, noiseSigma } from '../../../core/dsp.js';
@@ -38,17 +36,17 @@ import { fft } from '../../../core/numeric.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 
 const FS = 8000; // Hz
-const N = 1024; // échantillons — 128 ms, et une puissance de deux pour la FFT
+const N = 1024; // samples — 128 ms, and a power of two for the FFT
 
-const EDGE = 48; // échantillons ignorés aux deux bords (voir plus bas)
+const EDGE = 48; // samples ignored at both edges (see below)
 
 /**
- * Signal analytique par la FFT : on annule les fréquences négatives et on
- * double les positives. Exact au sens de la TFD, avec la réserve d'usage —
- * l'enregistrement est traité comme PÉRIODIQUE, donc les deux bords sont
- * pollués par la discontinuité de raccord. On les écarte de la lecture
- * plutôt que de les fenêtrer : fenêtrer changerait l'amplitude, qui est
- * précisément ce qu'on cherche à mesurer.
+ * Analytic signal through the FFT: the negative frequencies are cancelled and
+ * the positive ones doubled. Exact in the DFT sense, with the usual caveat — the
+ * record is treated as PERIODIC, so both edges are polluted by the wrap-around
+ * discontinuity. They are left out of the reading rather than windowed:
+ * windowing would change the amplitude, which is precisely what is being
+ * measured.
  */
 export function analytic(x) {
   const n = x.length;
@@ -79,13 +77,13 @@ export function teager(x) {
 }
 
 /**
- * DESA-2 : amplitude et pulsation instantanées, à partir de Ψ seul.
- * Exact sur une sinusoïde pure — vérifié à 1e-12 par le harnais.
+ * DESA-2: instantaneous amplitude and angular frequency, from Ψ alone.
+ * Exact on a pure sinusoid — verified to 1e-12 by the harness.
  *
- * L'argument de l'arccos est BORNÉ à [−1, 1]. Ce n'est pas une précaution
- * cosmétique : sous le bruit, Ψ(y)/(2Ψ(x)) sort régulièrement de
- * l'intervalle, et c'est exactement la manière dont Teager décroche. On
- * compte ces sorties et on les affiche, plutôt que de les faire disparaître.
+ * The argument of the arccos is CLAMPED to [−1, 1]. That is no cosmetic
+ * precaution: under noise, Ψ(y)/(2Ψ(x)) regularly leaves the interval, and that
+ * is exactly how Teager breaks down. Those excursions are counted and displayed,
+ * rather than made to disappear.
  */
 export function desa2(x) {
   const n = x.length;
@@ -110,7 +108,7 @@ export function desa2(x) {
   return { omega, amp, clipped };
 }
 
-/** Déroulement de phase : les sauts de plus de π sont des tours, pas des sauts. */
+/** Phase unwrapping: jumps larger than π are turns, not jumps. */
 export function unwrap(p) {
   const out = Float64Array.from(p);
   let off = 0;
@@ -138,13 +136,13 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
   const FC = fc;
   const gauss = gaussFrom(mulberry32(seed));
 
-  /* ---------- le signal déterministe, puis le bruit ---------------------- */
+  /* ---------- the deterministic signal, then the noise -------------------- */
   const t = new Float64Array(N);
   const clean = new Float64Array(N);
   const x = new Float64Array(N);
   const aTrue = new Float64Array(N);
   const fTrue = new Float64Array(N);
-  // puissance du signal : ⟨A²⟩/2 = (1 + ka²/2)/2
+  // signal power: ⟨A²⟩/2 = (1 + ka²/2)/2
   const sigPow = (1 + (ka * ka) / 2) / 2;
   const sigma = noiseSigma(sigPow, snr);
   for (let i = 0; i < N; i++) {
@@ -179,9 +177,9 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
   for (let i = 0; i < N; i++) fTea[i] = (d2.omega[i] * FS) / (2 * Math.PI);
 
   /* ---------- ce que ça donne, en chiffres ------------------------------- */
-  // Les EDGE premiers et derniers échantillons sont écartés : Hilbert y
-  // souffre du raccord périodique et Teager y manque de voisins. Les
-  // comparer sur la même plage est la seule façon honnête de les comparer.
+  // The first and last EDGE samples are left out: Hilbert suffers there from the
+  // periodic wrap-around and Teager lacks neighbours. Comparing them over the
+  // same range is the only honest way to compare them.
   const rms = (a, b) => {
     let s = 0;
     let n = 0;
@@ -200,7 +198,7 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
   const cut = (a) => a.subarray(EDGE, N - EDGE);
   const tc = cut(t);
 
-  /* ---------- le spectre, pour situer le signal -------------------------- */
+  /* ---------- the spectrum, to place the signal --------------------------- */
   const sre = Float64Array.from(x);
   const sim = new Float64Array(N);
   fft(sre, sim);
@@ -227,22 +225,22 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
       freqHilbert: { x: tc, y: cut(fHil) },
       freqTeager: { x: tc, y: cut(fTea) },
       spectrum: { x: sf, y: sy },
-      fCarrier: FC, // vline : la porteuse
+      fCarrier: FC, // vline: the carrier
       errAmpHilbert: {
         value: errAH,
-        meta: { label: 'erreur A — Hilbert', precision: 4 },
+        meta: { label: 'A error — Hilbert', precision: 4 },
       },
       errAmpTeager: {
         value: errAT,
-        meta: { label: 'erreur A — Teager', precision: 4 },
+        meta: { label: 'A error — Teager', precision: 4 },
       },
       errFreqHilbert: {
         value: errFH,
-        meta: { label: 'erreur f — Hilbert', unit: 'Hz', precision: 2 },
+        meta: { label: 'f error — Hilbert', unit: 'Hz', precision: 2 },
       },
       errFreqTeager: {
         value: errFT,
-        meta: { label: 'erreur f — Teager', unit: 'Hz', precision: 2 },
+        meta: { label: 'f error — Teager', unit: 'Hz', precision: 2 },
       },
       clipped: {
         value: d2.clipped,
@@ -251,10 +249,10 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
       verdict: {
         value:
           errFT < errFH
-            ? 'Teager suit mieux la fréquence'
+            ? 'Teager tracks the frequency better'
             : errFT < 4 * errFH
-              ? 'les deux tiennent'
-              : 'Teager a décroché, Hilbert tient',
+              ? 'both hold'
+              : 'Teager has broken down, Hilbert holds',
         meta: { label: 'comparaison' },
       },
     },

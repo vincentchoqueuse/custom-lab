@@ -6,13 +6,13 @@ import { at, GUIDE_COLOR } from '../../../core/response-views.js';
 export default {
   id: 'convolution',
   order: 3,
-  title: 'Convolution, décomposée',
-  subtitle: 'Retourner, glisser, intégrer — et le curseur t fait le reste',
+  title: 'Convolution, taken apart',
+  subtitle: 'Flip, slide, integrate — and the t dial does the rest',
   tags: [
     'convolution',
     'produit de convolution',
-    'réponse impulsionnelle',
-    'porte',
+    'impulse response',
+    'gate',
     'triangle',
     'recouvrement',
     'RC',
@@ -20,7 +20,7 @@ export default {
 
   params: {
     t: float('t', {
-      description: "l'instant calculé — LE curseur : le glisser, c'est faire l'animation",
+      description: 'the instant being computed — THE dial: sliding it IS the animation',
       min: -1,
       max: 5,
       step: 0.01,
@@ -29,24 +29,24 @@ export default {
       precision: 2,
     }),
     sig: select('x(t)', {
-      description: 'le signal d’entrée',
+      description: 'the input signal',
       options: [
-        { value: 'gate', label: 'porte de largeur a' },
-        { value: 'ramp', label: 'rampe de largeur a' },
+        { value: 'gate', label: 'gate of width a' },
+        { value: 'ramp', label: 'ramp of width a' },
       ],
       default: 'gate',
     }),
     ker: select('h(t)', {
-      description: 'la réponse impulsionnelle',
+      description: 'the impulse response',
       options: [
-        { value: 'gate', label: 'porte de largeur b' },
-        { value: 'exp', label: 'exponentielle e^(−t/b)/b — un RC' },
+        { value: 'gate', label: 'gate of width b' },
+        { value: 'exp', label: 'exponential e^(−t/b)/b — an RC' },
       ],
       default: 'gate',
     }),
-    a: float('a', { description: 'largeur de x', min: 0.2, max: 3, step: 0.1, default: 1, unit: 's' }),
+    a: float('a', { description: 'width of x', min: 0.2, max: 3, step: 0.1, default: 1, unit: 's' }),
     b: float('b', {
-      description: 'largeur de h, ou sa constante de temps',
+      description: 'width of h, or its time constant',
       min: 0.1,
       max: 3,
       step: 0.1,
@@ -58,11 +58,11 @@ export default {
 
   derived: {
     formula: {
-      label: 'ce qui est calculé',
+      label: 'what is being computed',
       calc: (p) => `y(${(+p.t).toFixed(2)}) = ∫ x(τ)·h(${(+p.t).toFixed(2)} − τ) dτ`,
     },
     widths: {
-      label: 'les largeurs s’ajoutent',
+      label: 'the widths add up',
       calc: (p) =>
         p.ker === 'gate'
           ? `supp(x) = ${p.a} s, supp(h) = ${p.b} s → supp(y) = ${(+p.a + +p.b).toFixed(1)} s`
@@ -71,24 +71,24 @@ export default {
   },
 
   groups: [
-    { title: 'Le curseur', params: ['t'] },
-    { title: 'Les deux fonctions', params: ['sig', 'ker', 'a', 'b'] },
+    { title: 'The dial', params: ['t'] },
+    { title: 'The two functions', params: ['sig', 'ker', 'a', 'b'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
-    // LA vue. Tout le calcul se passe dans l'espace des τ, et rien d'autre :
-    // x(τ) ne bouge jamais, h(t−τ) est h retournée puis glissée de t, et
-    // l'aire bleue sous leur produit EST y(t). Le curseur t est le seul
-    // paramètre qui bouge, et le glisser fait l'animation à la main.
+    // THE view. The whole computation happens in τ space and nowhere else:
+    // x(τ) never moves, h(t−τ) is h flipped and then slid by t, and the blue
+    // area under their product IS y(t). The cursor t is the only parameter that
+    // moves, and sliding it does the animation by hand.
     view(
       'overlap',
-      'Le calcul, à t figé',
+      'The computation, at frozen t',
       band('shade', {
         color: '#0072BD',
         opacity: 0.28,
-        label: 'aire = y(t)',
+        label: 'area = y(t)',
         overlays: [
           line('xTau', { color: '#7E2F8E', width: 2.4, label: 'x(τ)' }),
           line('hFlip', { color: '#D95319', width: 2.4, label: 'h(t − τ)' }),
@@ -100,8 +100,8 @@ export default {
       })
     ),
 
-    // Le résultat, où le point courant se reporte : la courbe se remplit à
-    // mesure qu'on glisse t sur la vue précédente.
+    // The result, where the current point is carried over: the curve fills in as
+    // t is slid on the previous view.
     figure(
       'response',
       line('yOut', {
@@ -109,7 +109,7 @@ export default {
         width: 2.8,
         label: 'y(t) = (x * h)(t)',
         overlays: [
-          scatter('marker', { color: '#EDB120', size: 10, label: 'y(t) courant' }),
+          scatter('marker', { color: '#EDB120', size: 10, label: 'current y(t)' }),
           vline('tNow', { color: '#EDB120', width: 2, label: 't' }),
           at(0),
         ],

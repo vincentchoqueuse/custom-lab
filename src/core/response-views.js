@@ -1,8 +1,8 @@
 // The figures a RESPONSE experiment draws, declared once for the whole
 // catalogue — analog, digital and control alike.
 //
-// The observation this module is built on: the "réponse fréquentielle" of a
-// filter and the "diagramme de Bode" of a system are THE SAME FIGURE. Same
+// The observation this module is built on: the "frequency response" of a
+// filter and the "Bode diagram" of a system are THE SAME FIGURE. Same
 // magnitude of the same transfer function against the same frequency axis;
 // what differs is the letter on the abscissa (f in Hz, ω in rad/s), whether
 // that axis is logarithmic, and whether the ordinate is in dB or in decades.
@@ -35,17 +35,17 @@ export const POLE_COLOR = '#D95319';
 export const ZERO_COLOR = '#0072BD';
 export const GUIDE_COLOR = '#a1a1aa'; // chrome-grey construction lines
 
-/** Le style d'un trait de construction — copié dans sept manifestes avant
- *  d'atterrir ici. Un repère ne porte jamais de donnée : il est fin, gris et
- *  pointillé, partout, pour ne pas se disputer l'attention avec la courbe. */
+/** The style of a construction line — copied into seven manifests before
+ *  landing here. A guide never carries data: it is thin, grey and dashed,
+ *  everywhere, so as not to compete with the curve for attention. */
 export const GUIDE = Object.freeze({ color: GUIDE_COLOR, width: 1, dashed: true });
 
-/** Un repère horizontal à une valeur FIXE : `at(-180, '−180°')`. Les trois
- *  quarts des hlines du catalogue sont de cette forme. */
+/** A horizontal guide at a FIXED value: `at(-180, '−180°')`. Three quarters of
+ *  the catalogue's hlines have this shape. */
 export const at = (value, label) => hline(() => value, { ...GUIDE, label });
 
-/** Le même, mais qui n'existe que pour certains paramètres : la valeur est
- *  NaN ailleurs, et un repère non fini n'est pas tracé. */
+/** The same, but existing only for some parameters: the value is NaN
+ *  elsewhere, and a non-finite guide is not drawn. */
 export const atIf = (fn, label) => hline(fn, { ...GUIDE, label });
 
 /* ------------------------------------------------------- frequency abscissa
@@ -58,12 +58,12 @@ export const HERTZ = { label: 'f', unit: 'Hz', scale: 'log' };
 export const HERTZ_LIN = { label: 'f', unit: 'Hz' };
 
 /**
- * Les options d'un builder sont une liste FERMÉE. Sans ça, une clé morte —
- * un `title:` laissé après un renommage, un `id:` qui ne veut plus rien dire —
- * est silencieusement ignorée, et le manifeste continue d'affirmer quelque
- * chose que le code ne fait plus. C'est arrivé dans neuf manifestes d'un
- * coup, dont un qui portait encore `title: 'Plan des pôles'` alors que ce nom
- * était précisément ce qu'on venait de supprimer du catalogue.
+ * A builder's options are a CLOSED list. Without that, a dead key — a `title:`
+ * left behind after a rename, an `id:` that no longer means anything — is
+ * silently ignored, and the manifest goes on asserting something the code no
+ * longer does. It happened in nine manifests at once, one of which still
+ * carried `title: 'Pole map'` when that very name had just been removed from
+ * the catalogue.
  */
 function checkOpts(opts, allowed, where) {
   for (const k of Object.keys(opts ?? {}))
@@ -82,8 +82,8 @@ function magnitudeAxis(y, yLabel, domain) {
 }
 
 /**
- * |H| against frequency: Bode gain in automatique, réponse fréquentielle in
- * traitement du signal, spectre when the source is a signal — one figure.
+ * |H| against frequency: Bode gain in control, frequency response in signal
+ * processing, spectrum when the source is a signal — one figure.
  *   x       OMEGA | HERTZ | HERTZ_LIN, or any axis object
  *   y       'dB' (default) | 'log' (decades) | a full axis object
  *   domain  [min, max] on the ordinate, when the figure needs a fixed frame
@@ -162,8 +162,8 @@ export function polesView(opts = {}) {
   const {
     poles = 'poles',
     zeros = 'zeros',
-    poleLabel = 'pôles',
-    zeroLabel = 'zéros',
+    poleLabel = 'poles',
+    zeroLabel = 'zeros',
     variable = 's',
     axes,
     circle,
@@ -172,8 +172,8 @@ export function polesView(opts = {}) {
     maxHalf,
   } = opts;
   return figurePlane('poles', {
-    // Re(s) = 0 is the line the whole subject turns on — "le pôle passe à
-    // droite" needs the right to be drawn. Not an option: a pole map that
+    // Re(s) = 0 is the line the whole subject turns on — "the pole crosses to
+    // the right" needs the right to be drawn. Not an option: a pole map that
     // hides the imaginary axis is a pole map missing its point.
     axisLines: true,
     markers: { source: poles, color: POLE_COLOR, label: poleLabel },
@@ -199,8 +199,8 @@ export function timeView(opts = {}) {
     key,
     line('tOut', {
       width: 1.8,
-      label: 'sortie',
-      overlays: [line('tIn', { color: IN_COLOR, dashed: true, label: 'entrée' }), ...overlays],
+      label: 'output',
+      overlays: [line('tIn', { color: IN_COLOR, dashed: true, label: 'input' }), ...overlays],
       axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
     })
   );
@@ -231,15 +231,15 @@ export function spectrumView(opts = {}) {
     x: HERTZ_LIN,
     yLabel: 'amplitude',
     domain,
-    label: 'sortie',
+    label: 'output',
     color: undefined, // the default data colour, as for every output curve
     width: 1.8,
     overlays: [
-      line('specIn', { color: SPEC_IN_COLOR, opacity: 0.45, label: 'entrée' }),
-      // TRAIT PLEIN : |H(f)| n'est pas une référence théorique posée sur une
-      // mesure — c'est la réponse du filtre, l'objet même de la vue, et le
-      // tiret la faisait lire comme un repère secondaire. Les deux spectres
-      // gardent leurs couleurs, la réponse prend la sienne, pleine.
+      line('specIn', { color: SPEC_IN_COLOR, opacity: 0.45, label: 'input' }),
+      // SOLID: |H(f)| is not a theoretical reference laid over a measurement —
+      // it is the filter's response, the very subject of the view, and dashing
+      // it made it read as a secondary guide. The two spectra keep their
+      // colours, the response takes its own, solid.
       line(resp, { color: RESP_COLOR, width: 1.8, label: '|H(f)|' }),
       ...overlays,
     ],

@@ -6,23 +6,23 @@ export default {
   id: 'constellations',
   order: 1,
   random: true,
-  title: 'Constellations dans le bruit',
-  subtitle: 'QPSK, 16-QAM… : décision au plus proche voisin et prix du débit',
-  tags: ['modulation', 'QPSK', 'QAM', 'SER', 'AWGN', 'décision'],
+  title: 'Constellations in noise',
+  subtitle: 'QPSK, 16-QAM…: nearest-neighbour decision and the price of rate',
+  tags: ['modulation', 'QPSK', 'QAM', 'SER', 'AWGN', 'decision'],
 
   params: {
     mod: select('modulation', {
-      description: 'constellation émise (énergie moyenne unité)',
+      description: 'transmitted constellation (unit average energy)',
       options: [
-        { value: 'bpsk', label: 'BPSK (1 bit/symbole)' },
-        { value: 'qpsk', label: 'QPSK (2 bits/symbole)' },
-        { value: '8psk', label: '8-PSK (3 bits/symbole)' },
-        { value: '16qam', label: '16-QAM (4 bits/symbole)' },
+        { value: 'bpsk', label: 'BPSK (1 bit/symbol)' },
+        { value: 'qpsk', label: 'QPSK (2 bits/symbol)' },
+        { value: '8psk', label: '8-PSK (3 bits/symbol)' },
+        { value: '16qam', label: '16-QAM (4 bits/symbol)' },
       ],
       default: 'qpsk',
     }),
     snrDb: float('SNR', {
-      description: 'rapport signal à bruit par symbole Es/N₀',
+      description: 'signal-to-noise ratio per symbol Es/N₀',
       min: 0,
       max: 30,
       step: 0.5,
@@ -31,7 +31,7 @@ export default {
       precision: 1,
     }),
     N: int('N', {
-      description: 'nombre de symboles transmis',
+      description: 'number of symbols transmitted',
       min: 100,
       max: 20000,
       step: 100,
@@ -46,7 +46,7 @@ export default {
 
   groups: [
     { title: 'Modulation', params: ['mod'] },
-    { title: 'Canal', params: ['snrDb', 'N'] },
+    { title: 'Channel', params: ['snrDb', 'N'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -58,10 +58,10 @@ export default {
     // promotion candidate if a third equal-aspect view appears.
     plane('iq', 'Plan I/Q', {
       clouds: [
-        { source: 'rxOk', color: '#0072BD', r: 1.7, opacity: 0.3, label: 'décidé juste' },
-        { source: 'rxErr', color: '#D95319', r: 2.4, opacity: 0.85, label: 'erreur' },
+        { source: 'rxOk', color: '#0072BD', r: 1.7, opacity: 0.3, label: 'decided correctly' },
+        { source: 'rxErr', color: '#D95319', r: 2.4, opacity: 0.85, label: 'error' },
       ],
-      markers: { source: 'idealPoints', color: '#EDB120', label: 'symboles émis' },
+      markers: { source: 'idealPoints', color: '#EDB120', label: 'transmitted symbols' },
       segments: 'boundaries',
     }),
 
@@ -72,7 +72,7 @@ export default {
       line('serTheoryCurve', {
         color: '#7E2F8E',
         width: 2.4,
-        label: 'théorie',
+        label: 'theory',
         overlays: [
           scatter('serEmpCurve', { color: '#D95319', size: 5, label: 'Monte Carlo' }),
         ],

@@ -2,128 +2,119 @@
 export default [
   {
     id: 'grass',
-    title: 'Scène 1 · L’herbe qui ne se couche jamais',
+    title: 'Scene 1 · The grass that never lies down',
     view: 'spectrum',
     params: { method: 'raw', N: 512, L: 256, win: 'rect', snr: 10, a2: -20, df: 40 },
     visible: ['N', 'snr'],
-    notes: `Le périodogramme brut d'un signal bruité. La raie forte sort, la
-faible aussi, mais entre les deux : de l'herbe, sur 15 dB.
+    notes: `The raw periodogram of a noisy signal. The strong line comes out, the
+weak one too, and between them there is grass, some 15 dB of it.
 
-LA question, à poser AVANT de toucher à N :
-« Je multiplie la longueur du signal par seize. L'herbe se couche ? »
-Réponse attendue de la salle : oui, évidemment, plus de données =
-moins de bruit. Geler (F), puis passer N de 512 à 8192.
+The question belongs before any dial is touched: if the record length is
+multiplied by sixteen, does the grass lie down? The room answers yes — more
+data, less noise. Freezing and then taking N from 512 to 8192 settles it.
 
-L'herbe ne bouge pas d'un décibel. Il y a seize fois plus de points,
-tous aussi bruités. Lire à voix haute la statline : « fluctuation
-σ/moyenne » reste collée à 1.
+The grass does not move by a decibel. There are sixteen times more points, all
+of them just as noisy, and the statline confirms it: the σ/mean fluctuation
+stays pinned at 1.
 
-C'est LE résultat du chapitre : le périodogramme n'est pas consistant.
-Chaque point suit une loi du χ² à 2 degrés de liberté, dont l'écart-type
-égale la moyenne — et ça ne dépend pas de N. Allonger l'enregistrement
-affine la RÉSOLUTION, jamais la variance.`,
+That is the result of the chapter: the periodogram is not consistent. Each
+point follows a χ² law with two degrees of freedom, whose standard deviation
+equals its mean, and that does not depend on N. A longer record buys
+RESOLUTION, never variance.`,
   },
   {
     id: 'cutting',
-    title: 'Scène 2 · Où passent les échantillons',
+    title: 'Scene 2 · Where the samples go',
     view: 'segments',
     params: { method: 'bartlett', N: 4096, L: 256, win: 'rect', snr: 10, a2: -20, df: 40 },
     visible: ['method', 'win'],
-    notes: `Avant de parler de variance, regarder le découpage. En bleu les
-fenêtres posées là où elles tombent, en orange LEUR SOMME : le poids
-total que chaque échantillon reçoit dans l'estimation.
+    notes: `Before discussing variance it is worth looking at the segmentation.
+In blue, the windows where they fall; in orange, THEIR SUM — the total weight
+each sample receives in the estimate.
 
-Quatre cas à parcourir dans cet ordre, en faisant lire la courbe orange
-à voix haute (la statline la résume aussi) :
+Four cases, in this order, reading the orange curve out loud:
 
-  1. Bartlett + rectangulaire  → somme plate à 1.
-     Chaque échantillon compte une fois. Rien de perdu, rien de compté
-     deux fois.
-  2. Bartlett + Hann           → la somme ONDULE et retombe à 0 entre
-     les segments. Les échantillons du bord de chaque segment sont
-     purement et simplement jetés. Question à la salle : « on a payé
-     ces mesures, où sont-elles passées ? »
-  3. Welch + Hann              → somme plate à 1 de nouveau. Le
-     recouvrement remet exactement le poids que la fenêtre enlevait :
-     c'est la condition COLA, et c'est vérifié à 1e-12 par le harnais.
-     Voilà l'information récupérée.
-  4. Welch + rectangulaire     → somme plate à 2. Chaque échantillon est
-     compté DEUX fois, sans aucune atténuation. Les segments voisins
-     partagent la moitié de leurs données brutes : ils sont corrélés,
-     et c'est exactement pourquoi ce réglage perd 20 % de variance
-     (scène suivante).
+  1. Bartlett with a rectangular window gives a flat sum at 1. Every sample
+     counts once. Nothing lost, nothing counted twice.
+  2. Bartlett with Hann makes the sum RIPPLE and fall to zero between
+     segments. The samples at each segment edge are simply discarded, and the
+     question to put to the room is where those measurements went.
+  3. Welch with Hann is flat at 1 again. The overlap puts back exactly the
+     weight the window removed — that is the COLA condition, verified to 1e-12
+     by the harness, and it is how the information comes back.
+  4. Welch with a rectangular window is flat at 2. Every sample is counted
+     TWICE with no attenuation at all: neighbouring segments share half their
+     raw data, so they are correlated, which is exactly why this setting loses
+     20 % of the expected variance reduction.
 
-Cette vue seule justifie la fenêtre de Welch. La suite ne fait que la
-mesurer.`,
+This view alone justifies the Welch window. Everything that follows only
+measures it.`,
   },
   {
     id: 'welch',
-    title: 'Scène 3 · Moyenner, et payer en résolution',
+    title: 'Scene 3 · Averaging, and paying in resolution',
     view: 'spectrum',
     params: { method: 'welch', N: 2048, L: 256, win: 'hann', snr: 10, a2: -20, df: 40 },
     visible: ['method', 'L'],
-    notes: `Mêmes données, autre lecture. Welch découpe l'enregistrement en
-segments recouverts, fenêtre chacun, et moyenne les périodogrammes.
-L'herbe se couche : σ/moyenne tombe vers 1/√K, et K est dans la statline.
+    notes: `The same data, read differently. Welch cuts the record into
+overlapping segments, windows each one, and averages the periodograms. The
+grass lies down: σ/mean falls toward 1/√K, and K is in the statline.
 
-Le prix se voit en glissant L de 1024 à 64 :
-  L grand  → peu de segments, spectre fin mais toujours bruité
-  L petit  → beaucoup de segments, spectre lisse mais raies élargies
-Le produit ne s'améliore pas — on ne fait que choisir où mettre
-l'information. C'est le même compromis que le fenêtrage, vu du côté
-de la VARIANCE au lieu de la résolution.
+The price appears when L slides from 1024 down to 64. A large L gives few
+segments and a sharp but still noisy spectrum; a small L gives many segments
+and a smooth spectrum with broadened lines. The product does not improve — the
+information is only being moved. It is the same trade as windowing, seen from
+the VARIANCE side rather than the resolution side.
 
-Comparer method = Bartlett et Welch à L égal : Welch obtient presque
-deux fois plus de segments des mêmes données.
+Comparing Bartlett and Welch at equal L shows Welch getting nearly twice as
+many segments from the same data.
 
-Et LA question qui donne son sens à la fenêtre — passer Welch de Hann à
-rectangulaire, à L égal. Le gain fond. Deux segments recouverts à 50 %
-partagent la moitié de leurs échantillons : sans atténuation sur les
-bords ils sont fortement corrélés, et moyenner des choses corrélées ne
-divise pas la variance par leur nombre. Mesuré au harnais : Welch+Hann
-tient la loi à 1.0, Welch+rectangulaire la rate de 20 %.
-Le recouvrement de Welch ne paie qu'avec une fenêtre qui s'efface sur
-les bords — c'est la raison d'être de cette fenêtre, pas un détail.`,
+And the question that gives the window its meaning: switch Welch from Hann to
+rectangular at equal L, and the gain evaporates. Two segments overlapping by
+50 % share half their samples; without attenuation at the edges they are
+strongly correlated, and averaging correlated things does not divide the
+variance by their number. Measured by the harness: Welch with Hann meets the
+law at 1.0, Welch with a rectangular window misses it by 20 %. The overlap only
+pays with a window that fades at the edges, which is that window's reason for
+existing rather than a detail.`,
   },
   {
     id: 'buried',
-    title: 'Scène 4 · Deux façons de perdre une raie',
+    title: 'Scene 4 · Two ways to lose a line',
     view: 'spectrum',
     params: { method: 'welch', N: 4096, L: 512, win: 'rect', snr: 10, a2: -35, df: 12 },
     visible: ['win', 'a2', 'df'],
-    notes: `La raie faible (verte) est à −35 dB et à 12 Hz de la forte. Elle est
-invisible — mais POURQUOI ? Deux causes, qu'il faut faire nommer
-séparément par la salle avant de les traiter :
+    notes: `The weak green line is at −35 dB and 12 Hz from the strong one, and
+it is invisible. Why is the useful question, and the room should name the two
+causes separately before either is treated.
 
-  1. elle est sous l'HERBE  → c'est la variance. Remède : moyenner.
-     Baisser L, regarder l'herbe descendre.
-  2. elle est sous les LOBES de la voisine → c'est la fuite. Aucun
-     moyennage n'y fera rien : passer win de rectangulaire à Hann,
-     puis Blackman, et la voir sortir d'un coup.
+It may be under the GRASS, which is variance, and the remedy is averaging:
+lowering L brings the grass down. Or it may be under the LOBES of its
+neighbour, which is leakage, and no amount of averaging will help — switching
+the window from rectangular to Hann and then Blackman brings it out at once.
 
-Le diagnostic est la compétence : moyenner un problème de fuite ne
-sert à rien, changer de fenêtre pour un problème de variance non plus.`,
+The diagnosis is the skill. Averaging a leakage problem achieves nothing, and
+so does changing window for a variance problem.`,
   },
   {
     id: 'law',
-    title: 'Scène 5 · La pente −1/2',
+    title: 'Scene 5 · The −1/2 slope',
     view: 'consistency',
     params: { method: 'welch', N: 4096, L: 256, win: 'hann', snr: 10, a2: -20, df: 40 },
     visible: ['method', 'N'],
-    notes: `La même mesure, répétée pour des segments de plus en plus courts, en
-log-log. La courbe bleue est la fluctuation mesurée, la pointillée est
-1/√K. Elles se superposent sur deux décades.
+    notes: `The same measurement repeated for shorter and shorter segments, on
+log–log axes. The blue curve is the measured fluctuation, the dashed one is
+1/√K, and they lie on each other over two decades.
 
-À faire remarquer : le point tout à gauche, K = 1, EST le périodogramme
-brut de la scène 1. Il n'est pas une méthode à part — c'est le cas
-dégénéré de celle-ci, celui où l'on ne moyenne rien.
+Worth pointing out: the leftmost point, at K = 1, IS the raw periodogram of
+scene 1. It is not a separate method but the degenerate case of this one, where
+nothing is averaged.
 
-Basculer method entre Bartlett et Welch, et regarder par rapport à la
-pointillée : Bartlett colle à 1/√K, Welch se tient légèrement AU-DESSUS.
-Ce n'est pas un défaut de la mesure — 1/√K est la loi de segments
-INDÉPENDANTS, et ceux de Welch partagent la moitié de leurs échantillons.
-Ce que Welch gagne n'est donc pas de battre la loi, c'est d'atteindre un
-K deux fois plus grand à longueur de segment — donc à résolution — égale.`,
+Switching between Bartlett and Welch against the dashed line is instructive:
+Bartlett sits on 1/√K, Welch slightly ABOVE it. That is not a measurement
+defect — 1/√K is the law for INDEPENDENT segments, and Welch's share half their
+samples. What Welch gains is not beating the law but reaching a K twice as
+large at equal segment length, and therefore at equal resolution.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

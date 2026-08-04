@@ -44,12 +44,12 @@
     color: dataColor(s.color ?? KIND_DEFAULTS[kind] ?? '#0072BD'),
   });
 
-  // `domain` accepte une FONCTION des paramètres, même grammaire que
-  // vline/hline qui prennent déjà `p => …`. Résolue ici, une seule fois :
-  // tout l'aval — auto-échelle, verrou d'axes, Axes — ne voit qu'un
-  // tableau. Une expérience dont le cadrage doit rester fixe MAIS dépend
-  // d'une configuration (une troisième raie à l'écart, présente ou non)
-  // n'a alors pas à choisir entre un cadre qui saute et une raie hors champ.
+  // `domain` accepts a FUNCTION of the params, the same grammar vline/hline
+  // already take with `p => …`. It is resolved here, once: everything
+  // downstream — auto-scaling, axis lock, Axes — only ever sees an array. An
+  // experiment whose framing must stay fixed BUT depends on a configuration
+  // (a third spectral line off to the side, present or not) then has to
+  // choose neither a jumping frame nor a line out of shot.
   const resolveDomain = (a, p) =>
     typeof a.domain === 'function' ? { ...a, domain: a.domain(p) } : a;
 
@@ -117,7 +117,7 @@
     });
   });
 
-  /** Une borne `null` suit les données ; l'autre, si elle est un nombre, tient. */
+  /** A `null` bound follows the data; the other, if it is a number, holds. */
   const fixedEnds = (domain) => (Array.isArray(domain) ? domain : [null, null]);
   const merge = (auto, domain) => {
     const [lo, hi] = fixedEnds(domain);
@@ -243,27 +243,26 @@
   const xs = $derived(mkScale(xAxis, xDomain, [0, iw]));
   const ys = $derived(mkScale(yAxis, yDomain, [ih, 0]));
 
-  // TOUTE couche étiquetée a une pastille, lignes de repère comprises.
-  // Elles écrivaient leur nom au sommet du trait : lisible pour un seuil
-  // isolé, illisible dès que trois estimateurs tombent au même endroit —
-  // les noms se recouvrent entre eux et recouvrent la légende. Un seul
-  // endroit où lire le nom d'une couche, et les traits deviennent
-  // extinguibles au clic comme les courbes.
+  // EVERY labelled layer gets a chip, reference lines included. They used to
+  // write their name at the top of the stroke: readable for an isolated
+  // threshold, unreadable as soon as three estimators land in the same place
+  // — the names overlap each other and overlap the legend. One place to read
+  // a layer's name, and the strokes become switchable by click like the
+  // curves.
   //
-  // Dédoublonnage par libellé : une même grandeur peut être dessinée par
-  // deux couches — les raies en stems ET son plancher de bruit en ligne,
-  // même nom, même couleur (spectral/subspace). C'est UNE entrée de
-  // légende, et la pastille éteint les deux, puisque `hidden` porte sur le
-  // libellé.
+  // Deduplicated by label: one and the same quantity may be drawn by two
+  // layers — the spectral lines as stems AND its noise floor as a line, same
+  // name, same color (spectral/subspace). That is ONE legend entry, and the
+  // chip switches off both, since `hidden` keys on the label.
   //
   // A layer that resolved to NO point is a layer the current params do not
   // have — it is not advertised, same rule as a non-finite vline.
   const DEFAULT_COLORS = { density: '#D95319' };
-  // Les couches éteintes depuis la légende ne sont pas rendues du tout —
-  // pas juste transparentes. C'est ce qui fait que l'export SVG et le
-  // fantôme du gel emportent EXACTEMENT ce que la salle voit, puisque tous
-  // deux clonent le DOM. Seules les couches étiquetées sont concernées :
-  // une couche sans libellé n'a pas de pastille, donc rien à cliquer.
+  // Layers switched off from the legend are not rendered at all — not merely
+  // made transparent. That is what makes the SVG export and the freeze ghost
+  // carry EXACTLY what the room sees, since both clone the DOM. Only
+  // labelled layers are concerned: a layer without a label has no chip, so
+  // there is nothing to click.
   const shown = $derived(layers.filter((l) => !l.s.label || !app.hidden.includes(l.s.label)));
 
   const legend = $derived.by(() => {
@@ -272,7 +271,7 @@
     for (const l of layers) {
       if (!l.s.label || l.kind === 'none') continue;
       if (l.pts && l.pts.length === 0) continue;
-      // une ligne de repère hors domaine n'est pas tracée : ne pas l'annoncer
+      // a reference line outside the domain is not drawn: do not advertise it
       if ((l.kind === 'vline' || l.kind === 'hline') && !Number.isFinite(l.v)) continue;
       if (seen.has(l.s.label)) continue;
       seen.add(l.s.label);

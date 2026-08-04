@@ -1,72 +1,69 @@
-// Estimer un spectre à partir d'un enregistrement BRUITÉ — et découvrir que
-// la méthode évidente ne marche pas.
+// Estimating a spectrum from a NOISY record — and discovering that the obvious
+// method does not work.
 //
-// Le périodogramme P(f) = |X(f)|²/(Fs·Σw²) est l'estimateur naturel de la
-// densité spectrale de puissance. Il a une propriété que tout le monde
-// suppose et que personne ne vérifie :
+// The periodogram P(f) = |X(f)|²/(Fs·Σw²) is the natural estimator of the power
+// spectral density. It has a property everyone assumes and nobody verifies:
 //
-//   IL N'EST PAS CONSISTANT. Sa variance NE DÉCROÎT PAS avec N.
+//   IT IS NOT CONSISTENT. Its variance DOES NOT DECREASE with N.
 //
-// Sur du bruit blanc, chaque point du périodogramme suit une loi
-// σ⁴·χ²₂/2 : son écart-type ÉGALE sa moyenne, quel que soit le nombre
-// d'échantillons. Multiplier N par seize divise la largeur des raies par
-// seize et ne calme pas l'herbe d'un décibel — on obtient seize fois plus
-// de points, tout aussi bruités. C'est le résultat contre-intuitif de tout
-// le chapitre, et il se voit en une seconde : `stdRatio` reste collé à 1.
+// On white noise every point of the periodogram follows a σ⁴·χ²₂/2
+// distribution: its standard deviation EQUALS its mean, whatever the number of
+// samples. Multiplying N by sixteen divides the width of the lines by sixteen
+// and does not quiet the grass by one decibel — one gets sixteen times more
+// points, just as noisy. That is the counter-intuitive result of the whole
+// chapter, and it shows in a second: `stdRatio` stays glued to 1.
 //
-// Ce qui marche, c'est de MOYENNER des périodogrammes indépendants, en
-// payant la résolution :
+// What works is AVERAGING independent periodograms, paying in resolution:
 //
-//   BARTLETT  K segments disjoints de longueur L, moyennés.
-//             Variance / K, résolution Fs/L au lieu de Fs/N.
-//   WELCH     mêmes segments, recouverts à 50 % et fenêtrés. À longueur de
-//             segment égale on en obtient presque deux fois plus, donc
-//             moins de variance pour la même résolution — le recouvrement
-//             récupère l'information que la fenêtre atténue sur les bords.
+//   BARTLETT  K disjoint segments of length L, averaged. Variance / K,
+//             resolution Fs/L instead of Fs/N.
+//   WELCH     same segments, overlapped 50 % and windowed. At equal segment
+//             length one gets nearly twice as many, hence less variance for the
+//             same resolution — the overlap recovers the information the window
+//             attenuates at the edges.
 //
-// Le signal est deux sinusoïdes dans du bruit : une forte, et une FAIBLE
-// que l'on cherche. Elle se perd de deux façons distinctes, et il faut les
-// nommer séparément en cours — sous l'herbe du bruit (c'est la variance,
-// que Welch soigne) ou sous les lobes secondaires de la voisine (c'est la
-// fuite, que seule la fenêtre soigne).
+// The signal is two sinusoids in noise: a strong one, and a WEAK one being
+// looked for. It is lost in two distinct ways, and they must be named separately
+// in class — under the grass of the noise (that is the variance, which Welch
+// cures) or under the sidelobes of its neighbour (that is the leakage, which
+// only the window cures).
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { fft, windowValue, dbToLin } from '../../../core/numeric.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 
 const FS = 1000; // Hz
-const F1 = 150; // raie forte (Hz)
+const F1 = 150; // strong line (Hz)
 const DB_FLOOR = -120;
-// La raie forte est à 150 Hz et l'écart maximal est de 200 Hz : au-dessus de
-// 400 Hz il n'y a jamais de raie, quelle que soit la scène. C'est là qu'on
-// mesure la fluctuation de l'estimateur.
+// The strong line is at 150 Hz and the maximum gap is 200 Hz: above 400 Hz
+// there is never a line, whatever the scene. That is where the fluctuation of
+// the estimator is measured.
 const MEAS_LO = 400;
 
 /**
- * dB d'une PUISSANCE : 10·log10, pas 20.
+ * dB of a POWER: 10·log10, not 20.
  *
- * `core/numeric.js` expose `toDb`, qui vaut 20·log10 — la convention des
- * AMPLITUDES, correcte partout ailleurs dans le catalogue parce qu'on l'y
- * applique à des modules |X|. Une densité spectrale est déjà une puissance :
- * l'y passer doublait tous les décibels de l'expérience en silence, et
- * l'écart entre les deux raies affichait 2·A₂ au lieu de A₂. Le check
- * « la raie faible est exactement A₂ dB sous la forte » existe pour que
- * cela ne puisse pas repasser.
+ * `core/numeric.js` exposes `toDb`, which is 20·log10 — the AMPLITUDE
+ * convention, correct everywhere else in the catalogue because it is applied
+ * there to moduli |X|. A spectral density is already a power: passing it through
+ * that silently doubled every decibel of the experiment, and the gap between the
+ * two lines showed 2·A₂ instead of A₂. The check "the weak line is exactly A₂ dB
+ * below the strong one" exists so that this cannot happen again.
  */
 const powerDb = (v) => Math.max(DB_FLOOR, 10 * Math.log10(v + 1e-300));
 
 /**
- * Périodogramme moyenné d'un enregistrement.
+ * Averaged periodogram of a record.
  *
- * Normalisation DENSITÉ : P = |X|² / (Fs · Σw²). C'est celle qui rend
- * E[P] = σ²/Fs sur du bruit blanc de variance σ², indépendamment de la
- * fenêtre et de la longueur — donc celle dont on peut vérifier la valeur
- * exacte plutôt que la forme.
+ * DENSITY normalization: P = |X|² / (Fs · Σw²). It is the one that makes
+ * E[P] = σ²/Fs on white noise of variance σ², independently of the window and of
+ * the length — hence the one whose exact value can be verified rather than its
+ * shape.
  *
- * @param {Float64Array} x  l'enregistrement
- * @param {number} L        longueur de segment (puissance de 2)
- * @param {number} hop      décalage entre segments (L = disjoint, L/2 = 50 %)
- * @param {string} win      fenêtre appliquée à chaque segment
+ * @param {Float64Array} x  the record
+ * @param {number} L        segment length (a power of 2)
+ * @param {number} hop      shift between segments (L = disjoint, L/2 = 50 %)
+ * @param {string} win      window applied to each segment
  * @returns {{f: Float64Array, psd: Float64Array, segments: number}}
  */
 export function averagedPeriodogram(x, L, hop, win) {
@@ -97,7 +94,7 @@ export function averagedPeriodogram(x, L, hop, win) {
   return { f, psd, segments };
 }
 
-/** Longueur de segment et décalage effectifs de chaque méthode. */
+/** Effective segment length and shift for each method. */
 export function segmentation(method, N, L) {
   if (method === 'raw') return { L: N, hop: N };
   const eff = Math.min(L, N);
@@ -105,18 +102,18 @@ export function segmentation(method, N, L) {
 }
 
 /**
- * Fluctuation relative de l'estimateur, mesurée SUR UNE BANDE SANS RAIE.
- * C'est le nombre qui porte toute la leçon : ≈ 1 pour le périodogramme brut
- * quel que soit N, ≈ 1/√K après moyennage de K segments.
+ * Relative fluctuation of the estimator, measured OVER A BAND WITH NO LINE.
+ * This is the number that carries the whole lesson: ≈ 1 for the raw periodogram
+ * whatever N, ≈ 1/√K after averaging K segments.
  *
- * La bande, et pas une garde de quelques bins autour des raies : une garde
- * en BINS rétrécit en hertz quand N grandit, si bien que la fuite de la raie
- * forte rentrait dans la mesure et faisait dériver le nombre de 1.03 à 2.05
- * quand on allongeait l'enregistrement — exactement la conclusion inverse de
- * celle que l'expérience enseigne, et pour une raison qui n'avait rien à voir
- * avec l'estimateur. Mesuré sur [MEAS_LO, Fs/2], où aucune raie ne peut
- * tomber, le résultat recoupe une référence bruit-seul à 2 % près sur toute
- * la plage des paramètres, fenêtre rectangulaire et SNR de 40 dB compris.
+ * The band, and not a guard of a few bins around the lines: a guard in BINS
+ * shrinks in hertz as N grows, so much so that the leakage of the strong line
+ * entered the measurement and made the number drift from 1.03 to 2.05 as the
+ * record was lengthened — exactly the opposite of the conclusion the experiment
+ * teaches, and for a reason that had nothing to do with the estimator. Measured
+ * over [MEAS_LO, Fs/2], where no line can fall, the result matches a noise-only
+ * reference to within 2 % across the whole parameter range, rectangular window
+ * and 40 dB SNR included.
  */
 export function fluctuation(f, psd, fLo = MEAS_LO) {
   let s = 0;
@@ -142,14 +139,14 @@ export function fluctuation(f, psd, fLo = MEAS_LO) {
 export function compute({ method, win, N, L, snr, a2, df, seed }) {
   const gauss = gaussFrom(mulberry32(seed));
 
-  // σ est fixé par le SNR de la raie FORTE : puissance A₁²/2 = 0.5
+  // σ is set by the SNR of the STRONG line: power A₁²/2 = 0.5
   const sigma = Math.sqrt(0.5 / dbToLin(snr));
   const f2 = F1 + df;
-  // A₂ est un niveau en dB, donc un rapport de PUISSANCES : l'amplitude est
-  // la racine. dbToLin rend 10^(dB/10), une puissance — s'en servir tel quel
-  // comme amplitude descendait la raie de 2·A₂ dB au lieu de A₂, et à −20 dB
-  // elle sortait à 0.6 dB du plancher au lieu de 20 dB au-dessous de sa
-  // voisine. Le check « la raie faible est A₂ dB sous la forte » l'épingle.
+  // A₂ is a level in dB, hence a ratio of POWERS: the amplitude is its square
+  // root. dbToLin returns 10^(dB/10), a power — using it as an amplitude pushed
+  // the line down by 2·A₂ dB instead of A₂, and at −20 dB it came out 0.6 dB
+  // from the floor instead of 20 dB below its neighbour. The check "the weak
+  // line is A₂ dB below the strong one" pins it.
   const a2Lin = Math.sqrt(dbToLin(a2));
 
   const t = new Float64Array(N);
@@ -162,23 +159,23 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
       sigma * gauss();
   }
 
-  /* ---------- l'estimateur choisi, et le périodogramme brut derrière ----- */
+  /* ---------- the chosen estimator, with the raw periodogram behind ------- */
   const seg = segmentation(method, N, L);
   const est = averagedPeriodogram(x, seg.L, seg.hop, win);
-  // toujours calculé, toujours tracé en gris : c'est le point de comparaison,
-  // et « regardez ce que Welch fait à cette herbe » ne se dit qu'en la voyant
+  // always computed, always drawn in grey: it is the point of comparison, and
+  // "look at what Welch does to that grass" can only be said while seeing it
   const raw = averagedPeriodogram(x, N, N, win);
 
-  const noiseLevel = (sigma * sigma) / FS; // E[P] sur du bruit blanc
+  const noiseLevel = (sigma * sigma) / FS; // E[P] on white noise
   const fl = fluctuation(est.f, est.psd);
   const flRaw = fluctuation(raw.f, raw.psd);
 
   const toDbArr = (a) => Float64Array.from(a, powerDb);
 
-  /* ---------- la loi en 1/√K, balayée ----------------------------------- */
-  // La même mesure répétée pour des segments de plus en plus courts : c'est
-  // la vue qui transforme « la moyenne réduit la variance » en une droite
-  // de pente −1/2 sur un log-log.
+  /* ---------- the 1/√K law, swept ----------------------------------------- */
+  // The same measurement repeated for shorter and shorter segments: this is the
+  // view that turns "averaging reduces the variance" into a line of slope −1/2
+  // on a log-log plot.
   const ks = [];
   const ratios = [];
   const theory = [];
@@ -194,29 +191,28 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
   }
   const order = ks.map((_, i) => i).sort((i, j) => ks[i] - ks[j]);
 
-  /* ---------- le découpage, dessiné ------------------------------------- */
-  // Les fenêtres elles-mêmes, posées là où elles tombent. Plusieurs tracés
-  // dans une seule série, séparés par des NaN : le tracé générique casse le
-  // chemin sur un NaN, donc pas de vue sur mesure pour un plat de
-  // spaghettis.
+  /* ---------- the segmentation, drawn ------------------------------------- */
+  // The windows themselves, laid where they fall. Several traces in a single
+  // series, separated by NaNs: the generic plot breaks the path on a NaN, so no
+  // bespoke view for a plate of spaghetti.
   //
-  // Et surtout LA SOMME des fenêtres décalées, qui raconte les quatre cas
-  // d'un seul coup d'œil et explique tout le reste de l'expérience :
+  // And above all THE SUM of the shifted windows, which tells the four cases at
+  // a glance and explains all the rest of the experiment:
   //
-  //   rect  disjoint   somme = 1 partout    chaque échantillon compté une fois
-  //   Hann  disjoint   somme ondule 0…1     les BORDS des segments sont
-  //                                          quasiment jetés — c'est
-  //                                          l'information que le
-  //                                          recouvrement va récupérer
-  //   Hann  50 %       somme = 1 partout    reconstruction parfaite (COLA) :
-  //                                          poids total 1 pour tous, et des
-  //                                          segments presque indépendants
-  //   rect  50 %       somme = 2 partout    chaque échantillon compté DEUX
-  //                                          fois, sans atténuation : d'où les
-  //                                          segments corrélés et les 20 %
-  //                                          de variance que Welch perd
-  //                                          avec une fenêtre rectangulaire
-  const SHOW = 6; // segments dessinés — au-delà, le dessin ne dit plus rien
+  //   rect  disjoint   sum = 1 everywhere   every sample counted once
+  //   Hann  disjoint   sum ripples 0…1      the EDGES of the segments are
+  //                                          nearly thrown away — that is the
+  //                                          information the overlap will
+  //                                          recover
+  //   Hann  50 %       sum = 1 everywhere   perfect reconstruction (COLA):
+  //                                          total weight 1 for all, and nearly
+  //                                          independent segments
+  //   rect  50 %       sum = 2 everywhere   every sample counted TWICE, with no
+  //                                          attenuation: hence the correlated
+  //                                          segments and the 20 % of variance
+  //                                          Welch loses with a rectangular
+  //                                          window
+  const SHOW = 6; // segments drawn — beyond that the drawing says nothing
   const shown = Math.min(SHOW, est.segments);
   const zoomEnd = Math.min(N, (shown - 1) * seg.hop + seg.L);
   const wShape = new Float64Array(seg.L);
@@ -230,11 +226,11 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
       wx.push((start + n) / FS);
       wy.push(wShape[n]);
     }
-    wx.push(NaN); // sépare ce segment du suivant
+    wx.push(NaN); // separates this segment from the next
     wy.push(NaN);
   }
 
-  // la somme, sur TOUS les segments, restreinte à la fenêtre dessinée
+  // the sum, over ALL segments, restricted to the drawn window
   const sum = new Float64Array(zoomEnd);
   for (let s = 0; s < est.segments; s++) {
     const start = s * seg.hop;
@@ -246,8 +242,8 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
   }
   const sx = new Float64Array(zoomEnd);
   for (let i = 0; i < zoomEnd; i++) sx[i] = i / FS;
-  // le régime INTÉRIEUR : le premier et le dernier segment n'ont pas de
-  // voisin d'un côté, leur bord n'est donc pas censé être compensé
+  // the INTERIOR regime: the first and last segments have no neighbour on one
+  // side, so their edge is not meant to be compensated
   let wMin = Infinity;
   let wMax = -Infinity;
   for (let i = seg.L; i < zoomEnd - seg.L; i++) {
@@ -256,8 +252,8 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
   }
   const flat = Number.isFinite(wMin) && wMax - wMin < 1e-9;
 
-  // le signal, réduit à la même plage et remis à l'échelle des fenêtres :
-  // il est là pour le contexte, pas pour être lu en ordonnée
+  // the signal, restricted to the same range and rescaled to the windows: it is
+  // there for context, not to be read on the ordinate
   const zx = new Float64Array(zoomEnd);
   const zy = new Float64Array(zoomEnd);
   let amp = 1e-12;
@@ -272,9 +268,9 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
       signal: { x: t, y: x },
       psd: { x: est.f, y: toDbArr(est.psd) },
       psdRaw: { x: raw.f, y: toDbArr(raw.psd) },
-      noiseFloor: powerDb(noiseLevel), // hline : le vrai niveau σ²/Fs
-      f1: F1, // vline : la raie forte
-      f2, // vline : la raie faible, celle qu'on cherche
+      noiseFloor: powerDb(noiseLevel), // hline: the true level σ²/Fs
+      f1: F1, // vline: the strong line
+      f2, // vline: the weak line, the one being looked for
       fluctVsK: {
         x: Float64Array.from(order, (i) => ks[i]),
         y: Float64Array.from(order, (i) => ratios[i]),
@@ -283,7 +279,7 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
         x: Float64Array.from(order, (i) => ks[i]),
         y: Float64Array.from(order, (i) => theory[i]),
       },
-      // le découpage
+      // the segmentation
       segWindows: { x: Float64Array.from(wx), y: Float64Array.from(wy) },
       windowSum: { x: sx, y: sum },
       zoomSignal: { x: zx, y: zy },
@@ -291,30 +287,30 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
       coverage: {
         value: flat
           ? wMin > 1.5
-            ? `plate à ${wMin.toFixed(2)} — chaque échantillon compté deux fois`
-            : 'plate à 1 — recouvrement parfait, chaque échantillon pèse 1'
-          : `ondule de ${wMin.toFixed(2)} à ${wMax.toFixed(2)} — les bords des segments sont sous-pondérés`,
-        meta: { label: 'somme des fenêtres' },
+            ? `flat at ${wMin.toFixed(2)} — every sample counted twice`
+            : 'flat at 1 — perfect overlap, every sample weighs 1'
+          : `ripples from ${wMin.toFixed(2)} to ${wMax.toFixed(2)} — segment edges are underweighted`,
+        meta: { label: 'sum of the windows' },
       },
-      segments: { value: est.segments, meta: { label: 'segments moyennés K' } },
+      segments: { value: est.segments, meta: { label: 'segments averaged K' } },
       fRes: {
         value: FS / seg.L,
-        meta: { label: 'résolution Fs/L', unit: 'Hz', precision: 2 },
+        meta: { label: 'resolution Fs/L', unit: 'Hz', precision: 2 },
       },
       stdRatio: {
         value: fl.ratio,
-        meta: { label: 'fluctuation d’un bin à l’autre', precision: 3 },
+        meta: { label: 'fluctuation from bin to bin', precision: 3 },
       },
       stdRatioRaw: {
         value: flRaw.ratio,
-        meta: { label: 'la même, sans moyenner', precision: 3 },
+        meta: { label: 'the same, without averaging', precision: 3 },
       },
       verdict: {
         value:
           est.segments === 1
-            ? 'non consistant : σ/moyenne ≈ 1 quel que soit N'
-            : `variance divisée par ≈ ${est.segments}`,
-        meta: { label: 'estimateur' },
+            ? 'not consistent: σ/mean ≈ 1 whatever N'
+            : `variance divided by ≈ ${est.segments}`,
+        meta: { label: 'estimator' },
       },
     },
   };

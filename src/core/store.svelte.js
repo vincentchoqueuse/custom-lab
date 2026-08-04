@@ -23,11 +23,10 @@ export const app = $state({
   // it was switched on, so moving a parameter moves the CURVE, not the frame.
   // Display state ONLY — never in the URL, like the ghost.
   axisLock: false,
-  // séries masquées par un clic sur leur pastille de légende. Un tableau de
-  // LIBELLÉS, parce que c'est ce que la légende affiche et donc ce sur quoi
-  // l'utilisateur clique. Display state ONLY — comme le fantôme et le
-  // verrou d'axes : montrer une courbe seule est un geste de démonstration,
-  // pas un état à retrouver dans un lien.
+  // series hidden by a click on their legend chip. An array of LABELS, because
+  // that is what the legend displays and therefore what the user clicks.
+  // Display state ONLY — like the ghost and the axis lock: showing one curve
+  // alone is a demonstration gesture, not a state to find again in a link.
   hidden: [],
   ui: {
     sidebar: true,
@@ -225,12 +224,12 @@ export function toggleAxisLock() {
 }
 
 /**
- * Masquer / réafficher une série depuis sa pastille de légende.
+ * Hide or show a series from its legend chip.
  *
- * Par LIBELLÉ et non par index : deux courbes portant le même nom sont la
- * même grandeur, et les éteindre ensemble est ce qu'on veut. C'est aussi ce
- * qui rend le geste stable quand une couche disparaît parce que les
- * paramètres courants ne la produisent pas.
+ * By LABEL and not by index: two curves carrying the same name are the same
+ * quantity, and switching them off together is what is wanted. It is also what
+ * keeps the gesture stable when a layer disappears because the current
+ * parameters do not produce it.
  */
 export function toggleSeries(label) {
   app.hidden = app.hidden.includes(label)
@@ -238,7 +237,7 @@ export function toggleSeries(label) {
     : [...app.hidden, label];
 }
 
-/** Tout réafficher — appelé quand la vue change, et par Échap. */
+/** Show everything again — called when the view changes, and by Esc. */
 export function showAllSeries() {
   if (app.hidden.length) app.hidden = [];
 }
@@ -247,7 +246,7 @@ export function setView(id) {
   app.view = id;
   app.ghost = null; // a ghost from another view would be a misleading overlay
   app.axisLock = false; // another view's frame means nothing here
-  app.hidden = []; // les libellés d'une autre vue n'ont rien à masquer ici
+  app.hidden = []; // another view's labels have nothing to hide here
   syncUrl(true);
 }
 

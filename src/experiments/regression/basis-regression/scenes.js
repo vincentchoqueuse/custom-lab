@@ -1,46 +1,52 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'bosses',
-    title: 'Une somme de bosses',
+    id: 'bumps',
+    title: 'A sum of bumps',
     params: { basis: 'rbf', target: 'damped', M: 8, ell: 0.15, lambda: 1e-8, N: 60, sigma: 0.1 },
     view: 'basis',
     visible: ['ell', 'M'],
-    notes: `Le modèle est LINÉAIRE — en les poids wⱼ, pas en x : mêmes moindres
-carrés que la régression polynomiale, formule fermée, rien de neuf.
-Mais regarder la vue : l'ajustement orange EST la somme des huit bosses
-vertes. Bouger ℓ : trop large → les bosses se fondent, le fit est
-rigide (sous-ajustement) ; trop étroit → des picots entre les points,
-et ‖w‖ explose (statline) — c'est λ qui sauve la résolution (revoir
-ridge !). Le bon ℓ se voit à l'œil : les bosses se recouvrent à moitié.`,
+    notes: `The model is linear — in the weights wⱼ, not in x. It is the same
+least squares as polynomial regression, the same closed form, and nothing new
+in the algebra. What the view adds is that the orange fit IS the sum of the
+eight green bumps, drawn one on top of the other.
+
+Moving ℓ shows both failure modes. Too wide and the bumps merge into one rigid
+shape that underfits; too narrow and spikes appear between the data points
+while ‖w‖ explodes in the statline — which is where λ rescues the solution,
+exactly as ridge did. A good ℓ is visible to the eye: neighbouring bumps
+overlap at about half height.`,
   },
   {
-    id: 'creneau',
-    title: 'Le créneau départage les bases',
+    id: 'square-wave',
+    title: 'The square wave separates the bases',
     params: { basis: 'fourier', target: 'square', M: 19, ell: 0.05, lambda: 1e-8, N: 150, sigma: 0.02 },
     visible: ['basis', 'M'],
-    notes: `La même cible, quatre philosophies. Fourier : les oscillations de
-GIBBS — revoir l'expérience séries de Fourier, le dépassement ~9% est
-LE MÊME, et le check le vérifie. Polynômes : catastrophe globale, un
-polynôme ne sait pas être plat. RBF : propre, l'erreur reste locale.
-Sigmoïdes avec M = 1 : UNE SEULE marche suffit — un neurone est un
-détecteur de front. Moralité : la base doit ressembler au signal ;
-c'est tout l'art (et le sens du mot « a priori »).`,
+    notes: `One target, four philosophies. Fourier produces the Gibbs
+oscillations, and the overshoot is the same ~9 % as in the Fourier series
+experiment — the harness checks that the two agree. Polynomials fail globally,
+because a polynomial cannot be flat. The RBFs stay clean, their error remaining
+local.
+
+The sigmoid basis is the one worth dwelling on: a single function, M = 1, is
+enough, because one neuron is an edge detector. The moral is that the basis
+must resemble the signal, which is the whole art, and the precise meaning of
+the phrase "a prior".`,
   },
   {
     id: 'train-test',
-    title: 'La courbe qui vaut un chapitre de ML',
+    title: 'The curve that is worth a chapter of ML',
     params: { basis: 'rbf', target: 'damped', M: 8, ell: 0.12, lambda: 1e-8, N: 40, sigma: 0.15 },
     view: 'complexity',
     visible: ['M', 'sigma'],
-    notes: `L'erreur d'APPRENTISSAGE (bleue) descend toujours : ajouter des
-fonctions ne peut qu'aider à coller aux points déjà vus. L'erreur de
-TEST (orange, données fraîches) fait un U : au creux, le bon M ; après,
-le modèle apprend le bruit. Le plancher gris est σ² — on ne peut pas
-faire mieux que le bruit. Marteler R : le creux bouge un peu, le
-message jamais. C'est la même courbe en U que ridge (en λ) et que la
-cible (en λ aussi) : TOUT le chapitre converge ici — et le machine
-learning commence exactement à cette page.`,
+    notes: `The training error falls forever, because adding functions can only
+help fit points that have already been seen. The test error, measured on fresh
+data, is U-shaped: the bottom of the U is the right M, and past it the model is
+learning the noise. The grey floor is σ², below which nothing can go.
+
+Pressing R moves the bottom of the U a little and the message not at all. This
+is the same U as ridge in λ, and as the shrinkage target in λ: the whole
+chapter converges here, and machine learning starts on this page.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

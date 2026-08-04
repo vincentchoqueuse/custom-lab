@@ -5,23 +5,23 @@ import { view, custom, figure, line, vline, hline } from '../../../core/views.js
 export default {
   id: 'spectrogram',
   order: 5,
-  title: 'Spectrogramme',
-  subtitle: 'Voir le temps ET la fréquence — au prix du compromis de Gabor',
-  tags: ['numérique', 'STFT', 'temps-fréquence', 'chirp', 'Gabor'],
+  title: 'The spectrogram',
+  subtitle: 'Seeing time AND frequency — at the price of the Gabor trade-off',
+  tags: ['digital', 'STFT', 'time–frequency', 'chirp', 'Gabor'],
 
   params: {
     source: select('source', {
-      description: 'signal analysé',
+      description: 'signal analysed',
       options: [
-        { value: 'chirp', label: 'chirp linéaire' },
-        { value: 'tones', label: 'deux tons proches' },
-        { value: 'am', label: 'AM (battement)' },
-        { value: 'fm', label: 'chirp + sinusoïde modulée en fréquence' },
+        { value: 'chirp', label: 'linear chirp' },
+        { value: 'tones', label: 'two close tones' },
+        { value: 'am', label: 'AM (beat)' },
+        { value: 'fm', label: 'chirp + frequency-modulated sinusoid' },
       ],
       default: 'chirp',
     }),
     N: select('N', {
-      description: 'longueur de fenêtre (Fs = 2 kHz) — LE compromis',
+      description: 'window length (Fs = 2 kHz) — THE trade-off',
       options: [
         { value: 64, label: '64' },
         { value: 128, label: '128' },
@@ -31,16 +31,16 @@ export default {
       ],
       default: 256,
     }),
-    win: select('fenêtre', {
-      description: "fenêtre d'analyse",
+    win: select('window', {
+      description: 'analysis window',
       options: [
         { value: 'hann', label: 'Hann' },
-        { value: 'rect', label: 'rectangulaire' },
+        { value: 'rect', label: 'rectangular' },
       ],
       default: 'hann',
     }),
     f1: float('f₁', {
-      description: 'fréquence finale du chirp (Nyquist = 1000 Hz)',
+      description: 'final frequency of the chirp (Nyquist = 1000 Hz)',
       min: 200,
       max: 3000,
       step: 10,
@@ -50,7 +50,7 @@ export default {
       visibleIf: { source: ['chirp', 'fm'] },
     }),
     df: float('Δf', {
-      description: 'écart entre les deux tons (300 Hz et 300 + Δf)',
+      description: 'gap between the two tones (300 Hz and 300 + Δf)',
       min: 5,
       max: 100,
       step: 1,
@@ -60,7 +60,7 @@ export default {
       visibleIf: { source: 'tones' },
     }),
     fm: float('f_m', {
-      description: 'fréquence de modulation AM (porteuse 400 Hz)',
+      description: 'AM modulation frequency (400 Hz carrier)',
       min: 2,
       max: 30,
       step: 0.5,
@@ -70,7 +70,7 @@ export default {
       visibleIf: { source: 'am' },
     }),
     fmod: float('f_mod', {
-      description: 'fréquence de la modulation de fréquence (lente)',
+      description: 'frequency of the (slow) frequency modulation',
       min: 0.2,
       max: 5,
       step: 0.1,
@@ -80,7 +80,7 @@ export default {
       visibleIf: { source: 'fm' },
     }),
     fdev: float('Δ', {
-      description: 'excursion en fréquence de la sinusoïde modulée',
+      description: 'frequency deviation of the modulated sinusoid',
       min: 20,
       max: 400,
       step: 10,
@@ -89,7 +89,7 @@ export default {
       visibleIf: { source: 'fm' },
     }),
     tcut: float('t', {
-      description: 'instant de la coupe spectrale et du zoom temporel',
+      description: 'instant of the spectral slice and the time zoom',
       min: 0,
       max: 2,
       step: 0.02,
@@ -101,7 +101,7 @@ export default {
 
   groups: [
     { title: 'Signal', params: ['source', 'f1', 'df', 'fm', 'fmod', 'fdev'] },
-    { title: 'Analyse', params: ['N', 'win', 'tcut'] },
+    { title: 'Analysis', params: ['N', 'win', 'tcut'] },
   ],
 
   views: [
@@ -112,7 +112,7 @@ export default {
 
     // The two readings the map exists to improve on, under the catalogue's
     // own names so they are recognised for what they are — the same
-    // "Signal temporel" and the same "Spectre" as everywhere else in
+    // "Time signal" and the same "Spectrum" as everywhere else in
     // analyse spectrale. They are not decoration: a chirp and the same tones
     // played backwards have the SAME spectrum, and the time plot says when
     // without saying what. Showing both next to the map is the argument for
@@ -131,7 +131,7 @@ export default {
       'spectrum',
       line('spectrum', {
         width: 1.6,
-        label: '|X(f)| sur les 2 s',
+        label: '|X(f)| over the 2 s',
         overlays: [vline('nyquist', { color: '#EDB120', dashed: true, label: 'Fs/2' })],
         axes: {
           x: { label: 'f', unit: 'Hz' },
@@ -142,7 +142,7 @@ export default {
 
     view(
       'slice',
-      'Coupe à t',
+      'Slice at t',
       line('slice', {
         overlays: [vline('nyquist', { color: '#EDB120', dashed: true, label: 'Fs/2' })],
         axes: {
@@ -153,7 +153,7 @@ export default {
     ),
     view(
       'zoom',
-      'Signal autour de t',
+      'Signal around t',
       line('zoom', {
         axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
       })

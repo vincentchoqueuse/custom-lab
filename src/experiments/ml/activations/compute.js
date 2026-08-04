@@ -1,41 +1,39 @@
-// Ce qu'une activation fait à un SIGNAL — et pas seulement à un nombre.
+// What an activation does to a SIGNAL — and not merely to a number.
 //
-// Un cours de réseaux présente les activations par leur courbe, et s'arrête
-// là. Pour qui vient du traitement du signal il manque l'essentiel : une
-// activation est une NON-LINÉARITÉ SANS MÉMOIRE, donc elle crée des
-// fréquences qui n'étaient pas dans l'entrée. C'est tout ce qu'elle sait
-// faire, et c'est exactement ce qui rend un réseau plus expressif qu'une
-// matrice.
+// A neural-network course introduces activations through their curve and stops
+// there. For someone arriving from signal processing the essential is missing:
+// an activation is a MEMORYLESS NONLINEARITY, so it creates frequencies that
+// were not in the input. That is all it knows how to do, and it is exactly what
+// makes a network more expressive than a matrix.
 //
-// Trois lectures, sur les mêmes deux figures que partout ailleurs :
+// Three readings, on the same two figures as everywhere else:
 //
-//   · LA COURBE, avec sa dérivée. La dérivée n'est pas un ornement : une
-//     sigmoïde sature à 1/4 au mieux et à ~0 partout ailleurs, ce qui est
-//     le gradient qui disparaît, en une image.
-//   · LE TEMPOREL, où l'on voit écrêter, redresser, ou ne rien faire.
-//   · LE SPECTRE, où le prix se lit. Une non-linéarité IMPAIRE (tanh,
-//     identité) ne crée que des harmoniques impaires ; une non-linéarité
-//     quelconque (ReLU, sigmoïde) en crée aussi des paires ET une composante
-//     continue. Sur deux tons, elle crée en plus des produits
-//     d'intermodulation à 2f₁ − f₂ — la raie qui tombe DANS la bande utile
-//     et qu'aucun filtre ne rattrape.
+//   · THE CURVE, with its derivative. The derivative is no ornament: a sigmoid
+//     saturates at 1/4 at best and at ~0 everywhere else, which is the
+//     vanishing gradient, in one picture.
+//   · THE TIME VIEW, where one sees clipping, rectifying, or nothing at all.
+//   · THE SPECTRUM, where the price is read. An ODD nonlinearity (tanh,
+//     identity) creates only odd harmonics; an arbitrary nonlinearity (ReLU,
+//     sigmoid) creates even ones too AND a DC component. On two tones it also
+//     creates intermodulation products at 2f₁ − f₂ — the spectral line that
+//     lands INSIDE the useful band and that no filter can undo.
 //
-// Le harnais épingle le cas exactement calculable : le redressement simple
-// d'une sinusoïde par ReLU a une série de Fourier fermée, connue depuis
-// 1822, et les raies mesurées doivent tomber dessus à 1e-12.
+// The harness pins the exactly computable case: half-wave rectification of a
+// sinusoid by ReLU has a closed-form Fourier series, known since 1822, and the
+// measured lines must fall on it to 1e-12.
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { tone, timeAxis, magSpectrum, freqAxis, dbAmp, linspace } from '../../../core/dsp.js';
 import { ACTIVATIONS, applyAct } from '../_lib/nn.js';
 
-const FS = 1024; // Hz — puissance de deux : toutes les harmoniques sur un bin
-const N = 1024; // échantillons (1 s)
-const F1 = 16; // Hz — bin 16, ses harmoniques aux bins 32, 48, 64…
-const F2 = 21; // Hz — le second ton, pour l'intermodulation
-const N_PLOT = 256; // échantillons tracés (un quart de seconde)
+const FS = 1024; // Hz — a power of two: every harmonic lands on a bin
+const N = 1024; // samples (1 s)
+const F1 = 16; // Hz — bin 16, its harmonics at bins 32, 48, 64…
+const F2 = 21; // Hz — the second tone, for the intermodulation
+const N_PLOT = 256; // samples plotted (a quarter of a second)
 const DB_FLOOR = -90;
-const X_MAX = 4; // demi-largeur de la courbe de transfert
+const X_MAX = 4; // half-width of the transfer curve
 
 /**
  * @param {{act: string, signal: string, gain: number, bias: number,
@@ -46,7 +44,7 @@ export function compute({ act, signal, gain, bias, seed }) {
   const { f, df } = ACTIVATIONS[act];
   const gauss = gaussFrom(mulberry32(seed));
 
-  /* ---------- l'entrée ---------------------------------------------------- */
+  /* ---------- the input --------------------------------------------------- */
   let x;
   if (signal === 'sine') x = tone(N, F1, { fs: FS });
   else if (signal === 'two') {
@@ -56,53 +54,52 @@ export function compute({ act, signal, gain, bias, seed }) {
   } else if (signal === 'square') {
     x = Float64Array.from(tone(N, F1, { fs: FS }), (v) => Math.sign(v) || 1);
   } else {
-    // bruit blanc de puissance 1/2, celle d'une sinusoïde unité : les deux
-    // entrées se comparent alors à niveau égal
+    // white noise of power 1/2, that of a unit sinusoid: the two inputs then
+    // compare at equal level
     x = Float64Array.from({ length: N }, () => gauss() / Math.SQRT2);
   }
   const xin = Float64Array.from(x, (v) => gain * v + bias);
   const y = applyAct(xin, act);
 
-  /* ---------- la courbe de transfert et sa dérivée ------------------------ */
+  /* ---------- the transfer curve and its derivative ----------------------- */
   const xs = linspace(-X_MAX, X_MAX, 401);
   const curve = Float64Array.from(xs, f);
   const deriv = Float64Array.from(xs, df);
 
-  // Les dérivées de TOUTES les activations, sur la même figure : c'est le
-  // dessin des manuels, et c'est celui qui répond à « laquelle choisir ».
-  // Un observable par courbe plutôt qu'un tracé coupé par des NaN, parce
-  // qu'ici chacune doit porter son nom dans la légende et pouvoir être
-  // éteinte au clic.
+  // The derivatives of ALL the activations, on one figure: this is the textbook
+  // drawing, and the one that answers "which one to choose". One observable per
+  // curve rather than a single trace cut by NaNs, because here each must carry
+  // its name in the legend and be switchable off by click.
   const dOf = (name) => ({ x: xs, y: Float64Array.from(xs, ACTIVATIONS[name].df) });
 
-  /* ---------- spectres ---------------------------------------------------- */
+  /* ---------- spectra ------------------------------------------------------ */
   const specIn = dbOf(magSpectrum(xin, { nfft: N }));
   const specOut = dbOf(magSpectrum(y, { nfft: N }));
   const fx = freqAxis(N, FS);
 
-  // Les raies se lisent AU BIN : F1 tombe pile dessus par construction, donc
-  // aucune fuite, aucune fenêtre, et les niveaux sont les vraies amplitudes.
+  // The lines are read AT THE BIN: F1 falls exactly on one by construction, so
+  // no leakage, no window, and the levels are the true amplitudes.
   const magOut = magSpectrum(y, { nfft: N });
   const magIn = magSpectrum(xin, { nfft: N });
   const binOf = (fHz) => Math.round((fHz * N) / FS);
-  const ampAt = (mag, fHz) => (2 * mag[binOf(fHz)]) / N; // amplitude crête
+  const ampAt = (mag, fHz) => (2 * mag[binOf(fHz)]) / N; // peak amplitude
   const dcOf = (mag) => mag[0] / N;
 
   const fund = ampAt(magOut, F1);
   const fundIn = ampAt(magIn, F1);
 
-  // Distorsion harmonique totale : l'énergie de tout ce qui n'est ni la
-  // continue ni le fondamental, rapportée au fondamental. C'est LA mesure
-  // de « combien de fréquences la non-linéarité a inventées ».
+  // Total harmonic distortion: the energy of everything that is neither DC nor
+  // the fundamental, normalized by the fundamental. THE measure of "how many
+  // frequencies the nonlinearity invented".
   let harm2 = 0;
   for (let k = 2; k * F1 < FS / 2; k++) harm2 += ampAt(magOut, k * F1) ** 2;
   const thd = fund > 1e-12 ? Math.sqrt(harm2) / fund : 0;
 
-  // Intermodulation d'ordre 3 (deux tons) : 2f₁ − f₂, la raie qui tombe
-  // dans la bande et qu'aucun filtre ne peut retirer.
+  // Third-order intermodulation (two tones): 2f₁ − f₂, the line that lands in
+  // band and that no filter can remove.
   const imd = signal === 'two' ? ampAt(magOut, 2 * F1 - F2) : NaN;
 
-  /* ---------- tracés temporels -------------------------------------------- */
+  /* ---------- time plots ---------------------------------------------------- */
   const t = timeAxis(N_PLOT, FS);
   const ms = Float64Array.from(t, (v) => 1000 * v);
 
@@ -126,22 +123,22 @@ export function compute({ act, signal, gain, bias, seed }) {
 
       gainFund: {
         value: fundIn > 1e-12 ? fund / fundIn : NaN,
-        meta: { label: 'gain du fondamental', precision: 3 },
+        meta: { label: 'fundamental gain', precision: 3 },
       },
-      dcOut: { value: dcOf(magOut), meta: { label: 'continue créée', precision: 4 } },
-      thd: { value: 100 * thd, meta: { label: 'distorsion harmonique', unit: '%', precision: 2 } },
+      dcOut: { value: dcOf(magOut), meta: { label: 'DC created', precision: 4 } },
+      thd: { value: 100 * thd, meta: { label: 'harmonic distortion', unit: '%', precision: 2 } },
       imd3: { value: imd, meta: { label: 'intermodulation 2f₁−f₂', precision: 4 } },
       dMax: {
         value: Math.max(...deriv),
-        meta: { label: 'dérivée maximale', precision: 3 },
+        meta: { label: 'maximum derivative', precision: 3 },
       },
       dEnd: {
-        // La dérivée au bord du domaine tracé : c'est ELLE qui dit si le
-        // gradient survit à la saturation. 1 pour ReLU, 4e-4 pour la
-        // sigmoïde à x = 4 — trois décades et demie d'écart, et toute
-        // l'histoire du gradient qui disparaît.
+        // The derivative at the edge of the plotted domain: THIS is what says
+        // whether the gradient survives saturation. 1 for ReLU, 4e-4 for the
+        // sigmoid at x = 4 — three and a half decades apart, and the whole
+        // story of the vanishing gradient.
         value: df(X_MAX),
-        meta: { label: `dérivée en x = ${X_MAX}`, precision: 5 },
+        meta: { label: `derivative at x = ${X_MAX}`, precision: 5 },
       },
     },
   };

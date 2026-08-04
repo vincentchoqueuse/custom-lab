@@ -2,153 +2,146 @@
 export default [
   {
     id: 'wall',
-    title: 'Scène 1 · Le mur de Fourier',
+    title: 'Scene 1 · The Fourier wall',
     view: 'spectrum',
     params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2 },
     visible: ['df', 'N'],
-    notes: `Deux exponentielles séparées de 0.5 × Fs/N, dans du bruit à 25 dB.
-Le périodogramme n'en montre qu'UNE, et les deux verticales jaunes
-disent où elles sont vraiment.
+    notes: `Two exponentials separated by 0.5 × Fs/N, in noise at 25 dB. The
+periodogram shows only ONE, and the two yellow verticals say where they really
+are.
 
-Faire monter Δf jusqu'à 1 : à 1 × Fs/N la bosse se dédouble, tout juste.
-Redescendre à 0.5, puis faire la question qui ouvre le chapitre :
-« que faut-il changer pour les séparer ? » La salle répondra N —
-allonger l'enregistrement. C'est vrai, et c'est cher : séparer 0.5 ×
-Fs/N demande de doubler la durée d'acquisition.
+Raising Δf to 1 splits the hump, just barely. Coming back to 0.5 sets up the
+question that opens the chapter: what has to change to separate them? The room
+will answer N — a longer record. That is true, and it is expensive: separating
+0.5 × Fs/N means doubling the acquisition time.
 
-Il existe une autre monnaie. Onglet suivant.`,
+There is another currency. Next tab.`,
   },
   {
     id: 'eigen',
-    title: 'Scène 2 · Compter les sources',
+    title: 'Scene 2 · Counting the sources',
     view: 'eigen',
     params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2 },
     visible: ['d', 'snr'],
-    notes: `Les 20 valeurs propres de la covariance, décroissantes, en dB. La
-structure saute aux yeux : quelques grandes, puis un plateau. Le
-plateau EST le bruit — toutes ces valeurs propres valent σ², et la
-ligne verte le confirme.
+    notes: `The twenty eigenvalues of the covariance, decreasing, in dB. The
+structure is immediate: a few large ones, then a plateau. The plateau IS the
+noise — all those eigenvalues equal σ², and the green line confirms it.
 
-Le nombre de valeurs propres au-dessus du plateau est le nombre de
-sources. C'est la seule information dont on dispose en pratique pour
-choisir d, et la statline chiffre le saut à la coupure.
+The number of eigenvalues above the plateau is the number of sources. In
+practice that is the only information available for choosing d, and the
+statline measures the jump at the cutoff.
 
-Faire descendre le SNR de 20 dB à 0, puis à −5 : le plateau remonte,
-le saut se referme, et à un moment on ne peut plus compter. C'est le
-SEUIL des méthodes à haute résolution — elles ne se dégradent pas
-doucement, elles décrochent.
+Lowering the SNR from 20 dB to 0 and then to −5 raises the plateau and closes
+the gap until counting becomes impossible. That is the THRESHOLD of
+high-resolution methods: they do not degrade gently, they break.
 
-Remarque à faire remarquer : à Δf = 0.5, la SECONDE valeur propre
-signal est déjà bien plus petite que la première. Deux raies très
-proches ont des vecteurs directeurs presque colinéaires ; c'est
-géométriquement la même difficulté que celle de Fourier, mais ici elle
-se lit sur un nombre au lieu de se deviner sur une bosse.`,
+One remark worth making: at Δf = 0.5 the SECOND signal eigenvalue is already
+much smaller than the first. Two very close lines have nearly collinear
+steering vectors, which is geometrically the same difficulty as Fourier's — but
+here it is read off a number instead of guessed from a hump.`,
   },
   {
     id: 'resolve',
-    title: 'Scène 3 · Le modèle achète la résolution',
+    title: 'Scene 3 · The model buys the resolution',
     view: 'pseudo',
     params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2 },
     visible: ['df', 'snr'],
-    notes: `Le même enregistrement, la même seconde de signal, le même bruit —
-et deux pics là où le périodogramme n'en montrait qu'un.
+    notes: `The same record, the same second of signal, the same noise — and two
+peaks where the periodogram showed one.
 
-Les trois estimateurs sont sur l'écran : la courbe MUSIC (balayée),
-les points orange root-MUSIC et violets ESPRIT. Ces deux-là ne
-balaient rien : ils résolvent une équation. Aucune grille, donc
-aucune résolution limitée par un pas — la statline donne leur erreur
-en hertz, et elle est de l'ordre du centième.
+All three estimators are on screen: the swept MUSIC curve, the orange
+root-MUSIC points and the purple ESPRIT ones. The latter two sweep nothing;
+they solve an equation. With no grid there is no resolution limited by a step,
+and the statline gives their error in hertz, of the order of a hundredth.
 
-Descendre Δf et regarder jusqu'où ça tient — puis comprendre que la
-réponse dépend de DEUX autres réglages, et que c'est là tout le sujet :
-  Δf = 0.3 exige d'aller chercher 30 dB de SNR
-  Δf = 0.2 en exige 40
-  et à M = 12 au lieu de 32, même 0.5 ne passe plus.
-Ces trois nombres sont mesurés, pas illustratifs. Le périodogramme,
-lui, ne s'effondre jamais — il reste médiocre, quoi qu'on fasse.
+Lowering Δf shows how far it holds — and the answer depends on two other
+settings, which is the whole subject:
 
-C'est le marché : Fourier ne suppose rien et ne résout rien de mieux
-que Fs/N ; MUSIC suppose « d exponentielles dans du bruit blanc » et
-résout bien mieux TANT QUE le modèle est vrai.`,
+    Δf = 0.3 needs 30 dB of SNR
+    Δf = 0.2 needs 40
+    and at M = 12 instead of 32, even 0.5 stops working.
+
+These three numbers are measured, not illustrative. The periodogram, for its
+part, never collapses — it stays mediocre whatever is done to it.
+
+That is the bargain: Fourier assumes nothing and resolves nothing better than
+Fs/N; MUSIC assumes "d exponentials in white noise" and resolves far better AS
+LONG AS the model is true.`,
   },
   {
     id: 'wrong-d',
-    title: 'Scène 4 · Se tromper de d',
+    title: 'Scene 4 · Getting d wrong',
     view: 'pseudo',
     params: { sources: 3, df: 0.5, snr: 25, N: 256, M: 32, d: 3 },
     visible: ['d', 'sources'],
-    notes: `Trois sources maintenant : les deux proches et une à l'écart. Avec
-d = 3, les trois pics sont là.
+    notes: `Three sources now: the two close ones and one further off. With
+d = 3 all three peaks are there.
 
-Puis casser le modèle dans les deux sens, en faisant prédire AVANT.
+Then the model gets broken in both directions, with a prediction collected
+first.
 
-  d = 2  → « laquelle disparaît ? » Une des deux proches : le
-           sous-espace signal est trop petit pour les contenir toutes.
-           C'est franc, et ça se voit sur la courbe.
+At d = 2 the question is which one disappears. One of the two close ones: the
+signal subspace is too small to hold them all. That failure is blunt and
+visible on the curve.
 
-  d = 5  → et là, une surprise qui vaut d'être vécue. La courbe MUSIC
-           ne bouge presque pas ; les ondulations parasites restent
-           cinquante décibels plus bas. Balayé, MUSIC est INDULGENT à
-           une surestimation de d.
-           Mais COMPTER les points : root-MUSIC et ESPRIT rendent
-           exactement d valeurs, donc cinq, et il n'y en a que trois à
-           l'écran. Les deux autres sont à 444 et 840 Hz — hors du
-           cadre, qui ne bouge pas. La statline les chiffre :
-           « invention root-MUSIC = 509.7 Hz », c'est-à-dire la plus
-           grande distance entre une estimation et la vraie raie la
-           plus proche. À d juste elle vaut 0.1 Hz ; à d = 4, 113.8.
+At d = 5 comes a surprise worth living through. The MUSIC curve barely moves,
+its spurious ripples staying fifty decibels down — swept MUSIC is FORGIVING of
+an overestimated d. But COUNT the points: root-MUSIC and ESPRIT return exactly
+d values, so five, and only three are on screen. The other two sit at 444 and
+840 Hz, outside a frame that does not move. The statline names them —
+"root-MUSIC invention = 509.7 Hz", the largest distance between an estimate and
+the nearest true line. At the right d it is 0.1 Hz; at d = 4, 113.8.
 
-La leçon pratique est là : un pic bas se remarque, un CHIFFRE inventé
-non — il a l'air d'un résultat, et il ne se voit même pas s'il tombe
-hors du cadre. Et c'est pourquoi on ne choisit pas d au jugé : revenir
-à l'onglet des valeurs propres et montrer que c'est LÀ, et seulement
-là, qu'on pouvait le lire.`,
+The practical lesson is there: a low peak gets noticed, an invented NUMBER does
+not. It looks like a result, and it is not even visible if it falls outside the
+frame. Which is why d is not chosen by eye — going back to the eigenvalue tab
+shows that THERE, and only there, was it readable.`,
   },
   {
     id: 'model',
-    title: 'Scène 5 · Le modèle complet',
+    title: 'Scene 5 · The complete model',
     view: 'model',
     params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2 },
     visible: ['snr', 'd'],
-    notes: `Les méthodes à sous-espace rendent des FRÉQUENCES et rien d'autre.
-On sait donc où sont les raies, et pas ce qu'elles valent — on ne peut ni
-reconstruire le signal, ni dire si le modèle explique la mesure.
+    notes: `Subspace methods return FREQUENCIES and nothing else. One knows where
+the lines are and not what they are worth, so the signal cannot be
+reconstructed and there is no way to say whether the model explains the
+measurement.
 
-Une fois les fréquences connues, le modèle devient LINÉAIRE en ses
-amplitudes : x ≈ Σ a_k·e^{j2πf_k n}. Un moindres carrés 2×2 rend les a_k,
-et ce qu'il reste — le résidu — EST l'estimation de la variance du bruit.
+Once the frequencies are known the model becomes LINEAR in its amplitudes:
+x ≈ Σ a_k·e^{j2πf_k n}. A 2×2 least squares returns the a_k, and what is left —
+the residual — IS the estimate of the noise variance.
 
-TROIS spectres sont tracés, dans exactement la MÊME forme : des raies pour
-les sinusoïdes, une ligne pour le niveau de bruit.
-    jaune   la vérité (amplitude 1, donc 0 dB)
-    orange  root-MUSIC
-    violet  ESPRIT
-Ce sont les couleurs du pseudo-spectre, pour ne rien avoir à réapprendre
-d'une vue à l'autre.
+THREE spectra are drawn in exactly the same form, lines for the sinusoids and a
+level for the noise floor: yellow for the truth (amplitude 1, so 0 dB), orange
+for root-MUSIC, purple for ESPRIT. These are the colours of the pseudo-spectrum
+view, so nothing has to be relearned between tabs.
 
-En régime nominal les trois se confondent, et c'est LE résultat : deux
-estimateurs qui ne partagent pas leur calcul, plus la vérité, tombent au
-même endroit ET au même niveau. Le modèle explique la mesure. Un tracé
-confus veut dire ici « tout va bien », ce qui est rare et qu'il faut dire
-à la salle.
+In the nominal regime all three coincide, and that IS the result: two
+estimators that share no arithmetic, plus the truth, landing in the same place
+AND at the same level. The model explains the measurement. Here a cluttered
+plot means "all is well", which is rare enough to say out loud.
 
-Puis casser, et regarder les spectres SE SÉPARER — c'est ce qui rend cette
-vue utile plutôt que décorative :
-  SNR à 6 dB → ESPRIT invente une raie à 441 Hz — hors du cadre, qui est
-    figé sur la zone utile : à l'écran il ne reste qu'UNE raie violette
-    au lieu de deux, et la ligne de bruit correspondante remonte
-    AU-DESSUS du vrai niveau. Le résidu contient maintenant ce que le
-    modèle n'explique pas, et la statline dit où est passée l'autre.
-  d = 1     → une source entière tombe dans le résidu, qui explose (de
-    −30 dB à +1.4 dB, mesuré).
-  d = 4     → deux raies inventées, à 444 et 840 Hz : elles sortent du
-    cadre et ne se voient PAS. Seule la statline les dénonce
-    (« invention root-MUSIC = 637.7 Hz »). C'est le mode de panne le
-    plus dangereux, parce qu'il est silencieux.
+Then break it, and watch the spectra SEPARATE — which is what makes this view
+useful rather than decorative.
 
-Le point à faire dire : on n'a PAS eu besoin de connaître la vérité pour
-voir que le modèle était faux. La ligne de bruit qui remonte suffit — et
-c'est exactement la situation d'un vrai signal, où le jaune n'existe pas.`,
+At 6 dB of SNR, ESPRIT invents a line at 441 Hz, outside a frame pinned on the
+useful band: only ONE purple line remains on screen instead of two, and the
+corresponding noise level rises ABOVE the true one. The residual now contains
+what the model fails to explain, and the statline says where the other line
+went.
+
+At d = 1 an entire source falls into the residual, which explodes — from
+−30 dB to +1.4 dB, measured.
+
+At d = 4 two invented lines appear at 444 and 840 Hz. They fall outside the
+frame and are NOT visible. Only the statline denounces them ("root-MUSIC
+invention = 637.7 Hz"). This is the most dangerous failure mode, because it is
+silent.
+
+The point to draw out: knowing the truth was never needed to see that the model
+was wrong. The rising noise line is enough — and that is exactly the situation
+with a real signal, where the yellow curve does not exist.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

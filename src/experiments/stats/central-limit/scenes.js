@@ -1,32 +1,43 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'des',
-    title: 'La moyenne de n dés',
+    id: 'dice',
+    title: 'The mean of n dice',
     params: { law: 'dice', n: 1, M: 5000 },
     visible: ['law', 'n'],
-    notes: `n=1 : un peigne plat à 6 dents — rien de gaussien.
-Monter n en direct : 2 (triangle), 5 (cloche), 30 (gaussienne parfaite).
-La courbe orange N(μ, σ²/n) a TOUJOURS la bonne moyenne et la bonne variance :
-seule la FORME de l'histogramme la rejoint quand n croît. C'est ça, le TCL.`,
+    notes: `At n = 1 the histogram is a flat comb with six teeth, and nothing
+about it is Gaussian. Raising n gives a triangle at 2, a bell at 5, and by 30 a
+curve the eye cannot tell from the orange one.
+
+The orange curve N(μ, σ²/n) always carries the right mean and the right
+variance, whatever n is. Only the SHAPE of the histogram comes to meet it as n
+grows, and that shape is the whole content of the central limit theorem.`,
   },
   {
-    id: 'asymetrique',
-    title: 'Même une loi très asymétrique',
+    id: 'skewed',
+    title: 'Even a badly skewed distribution',
     params: { law: 'exponential', n: 1, M: 5000 },
     visible: ['law', 'n'],
-    notes: `n=1 : l'exponentielle, brutalement asymétrique — la gaussienne est à côté.
-n=5 : la bosse se recentre. n=30 : symétrique. n=100 : gaussienne.
-Faire remarquer σ/√n dans le tiroir : la cloche se resserre en même temps.`,
+    notes: `The exponential is brutally skewed, and at n = 1 the Gaussian sits
+well beside it rather than on it. The bump recenters by n = 5, becomes symmetric
+by 30, and is Gaussian by 100 — the theorem asks nothing of the underlying
+distribution beyond a finite variance.
+
+Worth pointing at σ/√n in the drawer while n moves: the bell narrows at the same
+time as it becomes a bell, and these are two different statements.`,
   },
   {
-    id: 'pile-ou-face',
-    title: 'Pile ou face biaisé (p=0.1)',
+    id: 'coin',
+    title: 'A biased coin (p = 0.1)',
     params: { law: 'bernoulli', p: 0.1, n: 100, M: 5000 },
     visible: ['law', 'n', 'p'],
-    notes: `Des 0 et des 1, presque toujours 0 — et pourtant la moyenne de 100 lancers
-est déjà gaussienne (Moivre-Laplace). Descendre n à 10 : la structure discrète
-réapparaît (multiples de 1/10). La règle np(1−p) ≳ 10 se voit à l'œil.`,
+    notes: `The draws are zeros and ones, almost always zero, and yet the mean of
+a hundred tosses is already Gaussian — the de Moivre–Laplace theorem, which
+history met a century before the general case.
+
+Dropping n to 10 brings the discrete structure back: the means can only land on
+multiples of 1/10, and the histogram becomes a comb again. This is where the
+np(1−p) ≳ 10 rule of thumb becomes visible rather than asserted.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

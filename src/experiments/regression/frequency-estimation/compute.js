@@ -87,7 +87,7 @@ export function compute({ f, A, phi, sigma, step, seed }) {
         value: Math.abs(fHat - f),
         meta: { label: '|f̂ − f|', unit: 'Hz', precision: 3 },
       },
-      nEvals: { value: nEvals, meta: { label: 'évaluations de J', precision: 0 } },
+      nEvals: { value: nEvals, meta: { label: 'evaluations of J', precision: 0 } },
     },
   };
 }

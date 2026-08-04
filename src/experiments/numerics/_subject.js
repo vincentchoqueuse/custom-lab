@@ -1,1 +1,1 @@
-export default { title: 'Méthodes numériques', order: 11 };
+export default { title: 'Numerical methods', order: 11 };

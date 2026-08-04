@@ -1,33 +1,31 @@
-// Boucler un second ordre avec un gain proportionnel K, et lire la même
-// opération de quatre façons.
+// Closing the loop on a second-order plant with a proportional gain K, and
+// reading the same operation four ways.
 //
-//   procédé      G(s) = ω₀²/(s² + 2mω₀s + ω₀²)      gain statique 1
-//   boucle ouv.  L(s) = K·G(s)
-//   boucle fer.  T(s) = L/(1+L) = Kω₀²/(s² + 2mω₀s + ω₀²(1+K))
+//   plant        G(s) = ω₀²/(s² + 2mω₀s + ω₀²)      DC gain 1
+//   open loop    L(s) = K·G(s)
+//   closed loop  T(s) = L/(1+L) = Kω₀²/(s² + 2mω₀s + ω₀²(1+K))
 //
-// TOUT est en forme close, et trois identités portent la leçon :
+// EVERYTHING is in closed form, and three identities carry the lesson:
 //
-//  1. LA BOUCLE FERMÉE EST ENCORE UN SECOND ORDRE, avec
+//  1. THE CLOSED LOOP IS STILL A SECOND ORDER, with
 //        ω₀' = ω₀√(1+K)      m' = m/√(1+K)      gain statique K/(1+K)
-//     Fermer la boucle accélère le système et le désamortit — les deux
-//     ensemble, et dans un rapport fixé par le même √(1+K).
+//     Closing the loop speeds the system up and de-damps it — both at once, and
+//     in a ratio set by the same √(1+K).
 //
-//  2. LES PÔLES GARDENT LEUR PARTIE RÉELLE. Le coefficient en s vaut 2mω₀
-//     des deux côtés, donc m'ω₀' = mω₀ : l'enveloppe décroît exactement
-//     aussi vite en boucle fermée qu'en boucle ouverte. Ce qui change, c'est
-//     la pulsation propre amortie et donc le DÉPASSEMENT, pas le temps
-//     d'établissement. C'est la chose que personne ne prédit correctement,
-//     et elle est exacte : le harnais la vérifie à 1e-13.
+//  2. THE POLES KEEP THEIR REAL PART. The coefficient of s is 2mω₀ on both
+//     sides, so m'ω₀' = mω₀: the envelope decays exactly as fast closed-loop as
+//     open-loop. What changes is the damped natural frequency and hence the
+//     OVERSHOOT, not the settling time. This is the thing nobody predicts
+//     correctly, and it is exact: the harness verifies it to 1e-13.
 //
-//  3. L'ERREUR STATIQUE VAUT 1/(1+K), exactement. Monter K la réduit, et
-//     paye en dépassement : le compromis du cours, en un potard.
+//  3. THE STEADY-STATE ERROR IS 1/(1+K), exactly. Raising K reduces it, and pays
+//     in overshoot: the trade-off of the course, on one slider.
 //
-// L'abaque de Nichols (contours iso-gain |L/(1+L)| = M) est ici à sa place :
-// le contour que le lieu de Black de la BOUCLE OUVERTE touche donne la
-// résonance de la BOUCLE FERMÉE — et comme la boucle fermée est un second
-// ordre connu, cette lecture graphique a une réponse exacte à laquelle la
-// comparer. C'est tout l'intérêt : l'abaque n'est pas une décoration, c'est
-// une mesure, et on peut la vérifier.
+// The Nichols chart (iso-gain contours |L/(1+L)| = M) belongs here: the contour
+// the OPEN-LOOP Black locus touches gives the resonance of the CLOSED LOOP — and
+// since the closed loop is a known second order, that graphical reading has an
+// exact answer to compare it with. That is the whole interest: the chart is not
+// decoration, it is a measurement, and it can be verified.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { toDb } from '../../../core/numeric.js';
 import { bodeSweep } from '../_lib/bode.js';
@@ -37,7 +35,7 @@ const NT = 700; // time samples
 const NW = 361; // frequency grid
 const DECADES = 2;
 
-/** Les paramètres de la boucle fermée, en forme close. */
+/** The closed-loop parameters, in closed form. */
 export function closedParams(K, m, w0) {
   const root = Math.sqrt(1 + K);
   return { K: K / (1 + K), m: m / root, w0: w0 * root };
@@ -60,21 +58,21 @@ export function closeIt([lr, li]) {
 }
 
 /* ------------------------------ l'abaque ---------------------------------
- * Les contours iso-gain |L/(1+L)| = M, tracés sur le plan de Black. Résoudre
- * l'identité pour le module de boucle ouverte à une phase donnée :
+ * The iso-gain contours |L/(1+L)| = M, drawn on the Black plane. Solving the
+ * identity for the open-loop magnitude at a given phase:
  *   r²(1−M²) − 2M² r cos φ − M² = 0
  *   ⇒ r = [M² cos φ ± M√(1 − M² sin²φ)] / (1 − M²)
- * qui n'existe que là où |sin φ| ≤ 1/M — d'où les contours fermés autour de
- * −180° pour M > 1 et les courbes ouvertes en dessous pour M < 1.
- * La phase d'un second ordre ne parcourt que (−180°, 0°), donc l'abaque
- * n'est tracée que là : la moitié atteignable, et le cadre reste celui du
+ * which exists only where |sin φ| ≤ 1/M — hence the closed contours around
+ * −180° for M > 1 and the open curves below for M < 1.
+ * The phase of a second order only sweeps (−180°, 0°), so the chart is drawn
+ * only there: the reachable half, and the frame stays that of the
  * lieu.
  */
 const ISO_DB = [-12, -6, -3, -1, 0, 1, 3, 6, 12];
 const ISO_CLIP_DB = 28;
 const N_PHI = 481;
 
-/** Modules de boucle ouverte situés sur |L/(1+L)| = M à la phase φ (degrés). */
+/** Open-loop magnitudes lying on |L/(1+L)| = M at phase φ (degrees). */
 export function isoModulus(M, phiDeg) {
   const c = Math.cos((phiDeg * Math.PI) / 180);
   const s = Math.sin((phiDeg * Math.PI) / 180);
@@ -86,7 +84,7 @@ export function isoModulus(M, phiDeg) {
   return [(M * M * c + root) / den, (M * M * c - root) / den].filter((r) => r > 0);
 }
 
-/** Polylignes séparées par des NaN : un contour par niveau, en (φ°, dB). */
+/** Polylines separated by NaNs: one contour per level, in (φ°, dB). */
 function abaque(levelsDb) {
   const x = [];
   const y = [];
@@ -119,9 +117,9 @@ function abaque(levelsDb) {
 export function compute({ w0, m, K }) {
   const bf = closedParams(K, m, w0);
 
-  /* ---------- temporel : le même échelon, deux systèmes ------------------- */
-  // m'ω₀' = mω₀ : les deux enveloppes décroissent à la même vitesse, donc une
-  // seule durée d'observation suffit aux deux — ce qui est déjà la leçon.
+  /* ---------- time domain: the same step, two systems --------------------- */
+  // m'ω₀' = mω₀: both envelopes decay at the same speed, so a single observation
+  // window suffices for both — which is already the lesson.
   const T = 9 / (m * w0);
   const t = new Float64Array(NT);
   const yOpen = new Float64Array(NT);
@@ -136,7 +134,7 @@ export function compute({ w0, m, K }) {
     peakClosed = Math.max(peakClosed, yClosed[i]);
   }
 
-  /* ---------- fréquentiel : la boucle ouverte ET la boucle fermée --------- */
+  /* ---------- frequency domain: the open loop AND the closed loop --------- */
   const L = bodeSweep((w) => openLoop(w, { K, m, w0 }), { center: w0, decades: DECADES, n: NW });
   const Tf = bodeSweep((w) => closeIt(openLoop(w, { K, m, w0 })), {
     center: w0,
@@ -144,11 +142,11 @@ export function compute({ w0, m, K }) {
     n: NW,
   });
 
-  /* ---------- l'abaque, et la résonance qu'elle mesure -------------------- */
-  // La boucle fermée étant un second ordre connu, sa résonance a une forme
-  // close : elle n'est PAS lue sur la courbe, elle est calculée — et le
-  // contour mis en avant est celui-là. La tangence devient donc une
-  // vérification visuelle d'un nombre exact, pas une estimation.
+  /* ---------- the chart, and the resonance it measures -------------------- */
+  // The closed loop being a known second order, its resonance has a closed form:
+  // it is NOT read off the curve, it is computed — and the highlighted contour is
+  // that one. The tangency therefore becomes a visual verification of an exact
+  // number, not an estimate.
   const resonant = bf.m < Math.SQRT1_2 - 1e-12;
   const mr = resonant ? bf.K / (2 * bf.m * Math.sqrt(1 - bf.m * bf.m)) : NaN;
   const mrDb = resonant ? toDb(mr) : NaN;
@@ -158,32 +156,32 @@ export function compute({ w0, m, K }) {
 
   return {
     observables: {
-      // temporel
+      // time domain
       stepOpen: { x: t, y: yOpen },
       stepClosed: { x: t, y: yClosed },
-      // fréquentiel : deux courbes par diagramme
+      // frequency domain: two curves per diagram
       gain: { x: L.w, y: L.gainDb },
       gainClosed: { x: Tf.w, y: Tf.gainDb },
       phase: { x: L.w, y: L.phaseDeg },
       phaseClosed: { x: Tf.w, y: Tf.phaseDeg },
-      // Black : le lieu de la BOUCLE OUVERTE, sur l'abaque
+      // Black: the OPEN-LOOP locus, on the chart
       black: { x: L.phaseDeg, y: L.gainDb },
       isoGain: abaque(ISO_DB),
       isoPeak: resonant ? abaque([mrDb]) : { x: new Float64Array(0), y: new Float64Array(0) },
       criticalBlack: { x: Float64Array.from([-180]), y: Float64Array.from([0]) },
-      // les nombres de la boucle fermée, tous en forme close
-      w0bf: { value: bf.w0, meta: { label: "ω₀ en boucle fermée", unit: 'rad/s', precision: 3 } },
-      mbf: { value: bf.m, meta: { label: 'm en boucle fermée', precision: 3 } },
-      staticGain: { value: bf.K, meta: { label: 'gain statique BF', precision: 4 } },
-      staticError: { value: 1 / (1 + K), meta: { label: 'erreur statique 1/(1+K)', precision: 4 } },
-      overshoot: { value: overshoot, meta: { label: 'dépassement BF', unit: '%', precision: 1 } },
-      mrDb: { value: mrDb, meta: { label: 'résonance BF', unit: 'dB', precision: 2 } },
-      wrOut: { value: wr, meta: { label: 'ω de résonance BF', unit: 'rad/s', precision: 3 } },
+      // the closed-loop numbers, all in closed form
+      w0bf: { value: bf.w0, meta: { label: 'closed-loop ω₀', unit: 'rad/s', precision: 3 } },
+      mbf: { value: bf.m, meta: { label: 'closed-loop m', precision: 3 } },
+      staticGain: { value: bf.K, meta: { label: 'closed-loop DC gain', precision: 4 } },
+      staticError: { value: 1 / (1 + K), meta: { label: 'steady-state error 1/(1+K)', precision: 4 } },
+      overshoot: { value: overshoot, meta: { label: 'closed-loop overshoot', unit: '%', precision: 1 } },
+      mrDb: { value: mrDb, meta: { label: 'closed-loop resonance', unit: 'dB', precision: 2 } },
+      wrOut: { value: wr, meta: { label: 'closed-loop resonance ω', unit: 'rad/s', precision: 3 } },
       envelope: {
         value: m * w0,
-        meta: { label: 'mω₀ — identique en BO et en BF', unit: 'rad/s', precision: 3 },
+        meta: { label: 'mω₀ — the same open- and closed-loop', unit: 'rad/s', precision: 3 },
       },
-      setpoint: 1, // hline : la consigne
+      setpoint: 1, // hline: the setpoint
     },
   };
 }

@@ -3,17 +3,17 @@
   // by DeclarativePlot (layers carrying a `label`), the plane views and
   // custom views.
   //
-  // Cliquables : une pastille éteint ou rallume sa courbe. Sur une vue qui
-  // superpose trois estimateurs — la vérité, Hilbert et Teager — « regardez
-  // celle-ci toute seule » est le geste qu'on fait avec la main devant
-  // l'écran, et qui ne se fait pas autrement. L'état est de l'AFFICHAGE :
-  // jamais dans l'URL, remis à zéro quand la vue change (store.svelte.js),
-  // comme le fantôme du gel et le verrou d'axes.
+  // Clickable: a chip switches its curve off or back on. On a view that
+  // stacks three estimators — the truth, Hilbert and Teager — "look at this
+  // one alone" is the gesture a hand makes in front of the screen, and
+  // nothing else replaces it. The state is DISPLAY state: never in the URL,
+  // cleared when the view changes (store.svelte.js), like the freeze ghost
+  // and the axis lock.
   //
-  // Un <g role="button"> plutôt qu'un <foreignObject> contenant un vrai
-  // bouton : le fantôme du gel et l'export SVG reposent tous deux sur le
-  // fait que le graphe est du SVG pur et clonable. Le rôle et le tabindex
-  // donnent le clavier et le lecteur d'écran sans casser cela.
+  // A <g role="button"> rather than a <foreignObject> holding a real button:
+  // the freeze ghost and the SVG export both rely on the plot being pure,
+  // clonable SVG. The role and the tabindex buy the keyboard and the screen
+  // reader without breaking that.
   import { FONT_UI } from './frame.js';
   import { dataColor } from '../../core/palette.svelte.js';
   import { app, toggleSeries } from '../../core/store.svelte.js';
@@ -21,11 +21,11 @@
 
   let { entries = [], iw, kt = 1, side = 'right' } = $props();
 
-  // Ancrage : à droite le bloc est aligné sur le bord droit du cadre et les
-  // libellés sont alignés à droite ; à gauche, tout est symétrique. Un seul
-  // paramètre de position, le reste du dessin est identique.
+  // Anchoring: on the right the block is aligned with the right edge of the
+  // frame and the labels are right-aligned; on the left everything is
+  // mirrored. One position parameter, the rest of the drawing is identical.
   const left = $derived(side === 'left');
-  // largeur du bloc, partagée par le fond et l'ancrage des pastilles
+  // width of the block, shared by the background and the chip anchoring
   const bw = $derived(
     entries.length ? Math.max(...entries.map((e) => e.label.length * 6.6 * kt)) + 34 : 0
   );
@@ -39,12 +39,11 @@
 </script>
 
 {#if entries.length}
-  <!-- Un fond, parce que la légende est POSÉE SUR le tracé : depuis que les
-       lignes de repère y portent leur nom, elle en compte plus, et un nom
-       qui traverse une courbe de la même couleur ne se lit plus depuis le
-       fond de la salle. Le cadre du graphe est clair par contrat
-       (lisibilité au vidéoprojecteur), donc un blanc translucide y tient
-       dans les deux thèmes. -->
+  <!-- A background, because the legend sits ON TOP OF the plot: since the
+       reference lines carry their names here, it holds more entries, and a
+       name crossing a curve of the same color stops being readable from the
+       back of the room. The plot frame is light by contract (projector
+       legibility), so a translucent white works in both themes. -->
   <rect
     x={left ? 4 : iw - 4 - bw}
     y={2 * kt}
@@ -70,13 +69,12 @@
     onkeydown={(ev) => press(ev, e.label)}
   >
     <title>{e.label} — {STR.LEGEND_TOGGLE}</title>
-    <!-- cible de clic généreuse : la pastille seule fait 14 px de large et
-         serait invisable depuis un pupitre, a fortiori au doigt -->
+    <!-- generous click target: the chip alone is 14 px wide and would be
+         unaimable from a lectern, let alone with a finger -->
     <rect x={-w - 8} y={-11 * kt} width={w + 8} height={16 * kt} fill="transparent" />
     {#if e.dashed}
-      <!-- une pastille tiretée pour une couche tiretée : c'est ce qui
-           distingue la théorie de la mesure quand les deux portent la
-           même couleur -->
+      <!-- a dashed chip for a dashed layer: this is what tells theory from
+           measurement when the two carry the same color -->
       <line
         x1="-14"
         x2="0"
@@ -88,11 +86,11 @@
         opacity={off ? 0.85 : 1}
       />
     {:else}
-      <!-- Éteinte, la pastille passe au GRIS PLEIN : un carré vidé se lisait
-           comme une case à cocher, donc comme « pas encore choisi », quand
-           il veut dire « couche masquée ». Une pastille grise dit la même
-           chose que le libellé barré, et le dit à la couleur — ce qui se
-           voit de loin. -->
+      <!-- Switched off, the chip turns SOLID GRAY: a hollowed square read as
+           a checkbox, hence as "not chosen yet", when it means "layer
+           hidden". A gray chip says the same thing as the struck-through
+           label, and says it in color — which is what carries at a
+           distance. -->
       <rect
         x="-14"
         y="-4"

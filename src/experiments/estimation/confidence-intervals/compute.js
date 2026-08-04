@@ -79,8 +79,8 @@ export function compute({ mu, sigma, N, M, conf, known, seed }) {
     observables: {
       means,
       intervals,
-      coverage: { value: hits / M, meta: { label: 'couverture', precision: 3 } },
-      meanHalfWidth: { value: hwSum / M, meta: { label: 'demi-largeur', precision: 2 } },
+      coverage: { value: hits / M, meta: { label: 'coverage', precision: 3 } },
+      meanHalfWidth: { value: hwSum / M, meta: { label: 'half-width', precision: 2 } },
       theoreticalDensity: { x: dx, y: dy },
       coverageVsN: { x: cx, y: cy },
     },

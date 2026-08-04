@@ -4,7 +4,7 @@
 // Automatique reads a magnitude-and-phase pair as a diagramme de Bode, and
 // meets the poles BEFORE the frequency response.
 export default {
-  title: 'Automatique',
+  title: 'Control',
   order: 10,
   figures: { gain: 'bode', phase: 'bode' },
   figureOrder: ['time', 'response', 'step', 'impulse', 'poles', 'gain', 'phase'],

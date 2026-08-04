@@ -1,38 +1,46 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'biais',
-    title: 'Le biais de σ̂² (÷N)',
+    id: 'bias',
+    title: 'The bias of σ̂² (÷N)',
     params: { N: 5, M: 2000 },
     visible: ['N'],
-    notes: `M = 2000 expériences, chacune estime σ² avec N = 5 points.
-L'histogramme orange (division par N) est décalé À GAUCHE de σ² :
-sa moyenne vaut σ²(N−1)/N — il sous-estime systématiquement.
-Le bleu (÷N−1) est centré sur σ². Marteler R : le décalage ne part jamais.
-Question : « pourquoi ÷N sous-estime-t-il ? » — x̄ colle mieux aux données
-que μ : les écarts à x̄ sont trop petits, il manque un degré de liberté.`,
+    notes: `Two thousand experiments, each estimating σ² from five points. The
+orange histogram, which divides by N, sits to the left of σ²: its mean is
+σ²(N−1)/N, so it underestimates every time on average rather than occasionally.
+The blue one, dividing by N−1, is centered on σ². Pressing R never removes the
+shift, which is what distinguishes a bias from bad luck.
+
+Why ÷N underestimates is worth asking rather than asserting: x̄ fits the data
+better than μ does, so the deviations measured from it are too small. One degree
+of freedom has already been spent.`,
   },
   {
-    id: 'evanouissement',
-    title: 'Le biais s\'évanouit en 1/N',
+    id: 'vanishing',
+    title: 'The bias vanishes as 1/N',
     params: { N: 5, M: 5000 },
     view: 'bias',
     visible: ['sigma'],
-    notes: `Le biais empirique de σ̂² (orange) suit la courbe théorique −σ²/N
-(pointillée) ; celui de s² reste collé à zéro à toute taille N.
-Axe log : à N = 100 le débat ÷N contre ÷(N−1) ne se voit plus.
-Monter σ : le biais est en −σ²/N, il quadruple quand σ double.`,
+    notes: `The empirical bias of σ̂² follows the theoretical curve −σ²/N, and
+the bias of s² stays on zero at every sample size. On a logarithmic axis the
+argument settles itself: by N = 100 the difference between ÷N and ÷(N−1) is no
+longer visible.
+
+Raising σ is a reminder that the bias is −σ²/N and not a fixed quantity — it
+quadruples when σ doubles.`,
   },
   {
-    id: 'prix',
-    title: 'Le prix à payer : la dispersion',
+    id: 'price',
+    title: 'What it costs: the spread',
     params: { N: 5, M: 20000 },
     visible: ['N', 'M'],
-    notes: `Regarder la LARGEUR des histogrammes : les deux estimateurs fluctuent
-énormément à N = 5 — être sans biais ne veut pas dire être précis.
-Monter N : les deux distributions se resserrent (en σ⁴·2/(N−1)) et se
-confondent. Morale : à petit N le vrai problème n'est pas le biais,
-c'est la variance — et il n'y a pas de bouton pour la supprimer.`,
+    notes: `The width of the histograms deserves as much attention as their
+position. At N = 5 both estimators fluctuate enormously, which says plainly that
+being unbiased is not the same as being accurate.
+
+Raising N tightens both, as σ⁴·2/(N−1), and brings them together. The moral is
+worth stating as such: at small N the real problem is not the bias but the
+variance, and there is no button that removes it.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

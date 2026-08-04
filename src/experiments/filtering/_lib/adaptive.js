@@ -1,46 +1,44 @@
-// Le filtrage adaptatif : trois algorithmes, une seule question.
+// Adaptive filtering: three algorithms, one question.
 //
-// Un système inconnu w* transforme une entrée u(n) en une sortie qu'on
-// n'observe que bruitée, d(n) = w*ᵀu(n) + v(n). Le filtre adaptatif ne
-// connaît que u et d, et doit retrouver w* en avançant — une itération par
-// échantillon, sans jamais résoudre de système global.
+// An unknown system w* turns an input u(n) into an output observed only
+// through noise, d(n) = w*ᵀu(n) + v(n). The adaptive filter knows only u and d,
+// and must recover w* as it goes — one iteration per sample, without ever
+// solving a global system.
 //
-//   LMS    ŵ ← ŵ + μ·e·u          le gradient stochastique, deux lignes,
-//                                 une multiplication par coefficient
-//   NLMS   ŵ ← ŵ + μ̃·e·u/‖u‖²     le même, avec le pas rendu sans unité :
-//                                 μ̃ ∈ ]0, 2[ quelle que soit la puissance
-//                                 d'entrée, ce qui est TOUTE la différence
-//                                 en pratique
-//   RLS    ŵ ← ŵ + k·e            les moindres carrés exacts à chaque
-//                                 instant, L² opérations au lieu de L
+//   LMS    ŵ ← ŵ + μ·e·u          the stochastic gradient, two lines, one
+//                                 multiplication per coefficient
+//   NLMS   ŵ ← ŵ + μ̃·e·u/‖u‖²     the same, with the step made dimensionless:
+//                                 μ̃ ∈ ]0, 2[ whatever the input power, which
+//                                 is THE whole difference in practice
+//   RLS    ŵ ← ŵ + k·e            exact least squares at every instant, L²
+//                                 operations instead of L
 //
-// Le prix et le gain se lisent sur une seule grandeur : la matrice
-// d'autocorrélation R de l'entrée. LMS suit ses valeurs propres — chaque
-// mode converge à sa vitesse, donc le plus lent tient tout le monde, et le
-// rapport λmax/λmin dit combien on attend. RLS blanchit implicitement par
-// R⁻¹ et ne voit plus ce rapport du tout. C'est cela qu'on achète avec les
-// L² multiplications.
+// The price and the gain are read off a single quantity: the autocorrelation
+// matrix R of the input. LMS follows its eigenvalues — each mode converges at
+// its own rate, so the slowest holds everyone up, and the ratio λmax/λmin says
+// how long the wait is. RLS implicitly whitens by R⁻¹ and stops seeing that
+// ratio at all. That is what the L² multiplications buy.
 //
-// PURE : pas de DOM, pas d'état, générateur passé en argument. Importable
-// depuis compute.js ET check.js.
+// PURE: no DOM, no state, generator passed as an argument. Importable from
+// compute.js AND check.js.
 
 import { jacobiSym, quadForm } from '../../../core/linalg.js';
 
 /**
- * Le système à identifier : une réponse impulsionnelle oscillante et
- * amortie, de norme 1 pour que la puissance du signal utile ne dépende pas
- * de L. Déterministe — ce n'est pas elle qu'on tire au sort.
+ * The system to identify: an oscillating, damped impulse response of unit
+ * norm, so that the useful signal power does not depend on L. Deterministic —
+ * it is not the thing being drawn at random.
  *
- * @param {number} L longueur
- * @param {number} variant 0 = le canal nominal, 1 = celui d'après le saut
+ * @param {number} L length
+ * @param {number} variant 0 = the nominal channel, 1 = the one after the jump
  */
 export function trueChannel(L, variant = 0) {
   const w = new Float64Array(L);
   let norm = 0;
   for (let k = 0; k < L; k++) {
-    // le second canal n'est pas un bruit : c'est le MÊME système avec une
-    // oscillation plus rapide et le premier coefficient inversé, de sorte
-    // que le saut se voie sur le tracé des coefficients
+    // the second channel is not noise: it is the SAME system with a faster
+    // oscillation and the first coefficient flipped, so that the jump shows
+    // on the coefficient plot
     w[k] = variant === 0
       ? Math.cos(0.4 * Math.PI * k) * Math.exp(-0.25 * k)
       : -Math.cos(0.75 * Math.PI * k) * Math.exp(-0.2 * k);
@@ -52,12 +50,12 @@ export function trueChannel(L, variant = 0) {
 }
 
 /**
- * Entrée AR(1) de variance UNITÉ : u(n) = a·u(n−1) + √(1−a²)·g(n).
+ * A UNIT-variance AR(1) input: u(n) = a·u(n−1) + √(1−a²)·g(n).
  *
- * Le facteur √(1−a²) n'est pas cosmétique — sans lui, colorer l'entrée en
- * augmenterait aussi la puissance, et le ralentissement de LMS qu'on veut
- * attribuer au conditionnement viendrait pour partie d'un pas devenu trop
- * grand. À variance fixée, il ne reste qu'une explication possible.
+ * The √(1−a²) factor is not cosmetic — without it, colouring the input would
+ * also raise its power, and the slowdown of LMS one wants to attribute to the
+ * conditioning would partly come from a step grown too large. At fixed
+ * variance, only one explanation remains.
  */
 export function ar1Input(N, a, gauss) {
   const u = new Float64Array(N);
@@ -70,14 +68,14 @@ export function ar1Input(N, a, gauss) {
   return u;
 }
 
-/** Autocorrélation EXACTE d'une AR(1) de variance 1 : R[i][j] = a^|i−j|. */
+/** EXACT autocorrelation of a variance-1 AR(1): R[i][j] = a^|i−j|. */
 export function toeplitzAR1(a, L) {
   const R = new Float64Array(L * L);
   for (let i = 0; i < L; i++) for (let j = 0; j < L; j++) R[i * L + j] = a ** Math.abs(i - j);
   return R;
 }
 
-/** Valeurs propres extrêmes et conditionnement d'une matrice symétrique. */
+/** Extreme eigenvalues and conditioning of a symmetric matrix. */
 export function eigSpread(R, L) {
   const eig = jacobiSym(Float64Array.from(R), L);
   let lo = Infinity;
@@ -90,19 +88,19 @@ export function eigSpread(R, L) {
 }
 
 /**
- * La borne de stabilité de LMS en MOYENNE QUADRATIQUE : le plus grand pas
- * tel que Σ_i μλ_i/(1−μλ_i) < 2.
+ * The MEAN-SQUARE stability bound of LMS: the largest step such that
+ * Σ_i μλ_i/(1−μλ_i) < 2.
  *
- * Ce n'est pas la borne des livres. μ < 2/tr(R) assure la convergence de la
- * MOYENNE de ŵ, ce qui n'empêche pas sa variance d'exploser — et c'est bien
- * la variance qui décide, comme le montre la mesure : à L = 8, entrée
- * blanche, on diverge à 0.195 quand 2/tr(R) annonce 0.25 et que cette
- * borne-ci annonce 0.200.
+ * This is not the textbook bound. μ < 2/tr(R) guarantees convergence of the
+ * MEAN of ŵ, which does not stop its variance from exploding — and the variance
+ * is what decides, as the measurement shows: at L = 8 with a white input,
+ * divergence happens at 0.195 where 2/tr(R) announces 0.25 and this bound
+ * announces 0.200.
  *
- * Elle suppose encore le régresseur indépendant du filtre, et cette
- * hypothèse casse quand l'entrée est corrélée : à a = 0.9 le seuil réel
- * tombe à 0.038 contre 0.104 annoncés. Une borne théorique optimiste d'un
- * facteur 2.7 est une chose que l'expérience doit MONTRER, pas cacher.
+ * It still assumes the regressor independent of the filter, and that assumption
+ * breaks when the input is correlated: at a = 0.9 the real threshold falls to
+ * 0.038 against 0.104 announced. A theoretical bound optimistic by a factor of
+ * 2.7 is something an experiment must SHOW, not hide.
  */
 export function msBound(values) {
   const lMax = Math.max(...values);
@@ -118,36 +116,35 @@ export function msBound(values) {
   return lo;
 }
 
-// xᵀRx — la puissance d'un filtre à l'entrée — vient du cœur : trois sujets
-// la calculent, chacun pour une raison différente (puissance de signal ici,
-// excès d'EQM plus bas, variance projetée en ACP). Ré-exportée pour que le
-// harnais de ce sujet la trouve où il l'a toujours trouvée.
+// xᵀRx — the power of a filter at its input — comes from the core: three
+// subjects compute it, each for a different reason (signal power here, excess
+// MSE below, projected variance in PCA). Re-exported so that this subject's
+// harness finds it where it has always found it.
 export { quadForm };
 
 /**
- * UNE réalisation de l'adaptation.
+ * ONE realization of the adaptation.
  *
- * Rend l'erreur instantanée au CARRÉ à chaque itération — c'est elle qu'on
- * moyenne sur des réalisations indépendantes pour obtenir une courbe
- * d'apprentissage. Une seule réalisation est illisible : e²(n) fluctue sur
- * deux décades autour de sa moyenne, et l'œil y voit une décroissance là
- * où il n'y en a pas encore.
+ * Returns the instantaneous SQUARED error at each iteration — that is what gets
+ * averaged over independent realizations to obtain a learning curve. A single
+ * realization is unreadable: e²(n) fluctuates over two decades around its mean,
+ * and the eye sees a decay there where there is none yet.
  *
  * @param {object} o
  * @param {'lms'|'nlms'|'rls'} o.algo
- * @param {number} o.mu     pas (μ pour LMS, μ̃ normalisé pour NLMS)
- * @param {number} o.lambda facteur d'oubli (RLS)
- * @param {number} o.L      longueur du filtre
- * @param {number} o.N      nombre d'itérations
- * @param {Float64Array} o.u      entrée
- * @param {Float64Array} o.wTrue  système à identifier
- * @param {Float64Array} [o.wAfter] système après le saut (poursuite)
- * @param {number} [o.switchAt]   instant du saut, ou 0
- * @param {number} o.sigmaV       écart-type du bruit de mesure
+ * @param {number} o.mu     step (μ for LMS, normalized μ̃ for NLMS)
+ * @param {number} o.lambda forgetting factor (RLS)
+ * @param {number} o.L      filter length
+ * @param {number} o.N      number of iterations
+ * @param {Float64Array} o.u      input
+ * @param {Float64Array} o.wTrue  system to identify
+ * @param {Float64Array} [o.wAfter] system after the jump (tracking)
+ * @param {number} [o.switchAt]   instant of the jump, or 0
+ * @param {number} o.sigmaV       measurement-noise standard deviation
  * @param {() => number} o.gauss
- * @param {boolean} [o.keepPath]  garder la trajectoire des coefficients
- * @param {Float64Array} [o.R]    autocorrélation L×L — si fournie, l'excès
- *   d'EQM w̃ᵀRw̃ est rendu à chaque itération
+ * @param {boolean} [o.keepPath]  keep the coefficient trajectory
+ * @param {Float64Array} [o.R]    L×L autocorrelation — if given, the excess
+ *   MSE w̃ᵀRw̃ is returned at each iteration
  * @returns {{e2: Float64Array, ex: Float64Array|null, wPath: Float64Array|null,
  *            wFinal: Float64Array, diverged: boolean}}
  */
@@ -167,25 +164,24 @@ export function runAdaptive({
   R = null,
   p0 = 1e4,
 }) {
-  const w = new Float64Array(L); // ŵ(0) = 0 : on ne suppose rien
-  const x = new Float64Array(L); // le régresseur, du plus récent au plus vieux
+  const w = new Float64Array(L); // ŵ(0) = 0: nothing is assumed
+  const x = new Float64Array(L); // the regressor, most recent to oldest
   const e2 = new Float64Array(N);
   const wPath = keepPath ? new Float64Array(N * L) : null;
-  // L'EXCÈS d'EQM, w̃ᵀRw̃ : la seule grandeur du montage qui mesure
-  // l'adaptation SANS le bruit de mesure. e²(n) contient σ² plus quelques
-  // pour-cent d'excès, et estimer ces quelques pour-cent à travers la
-  // variance de σ² demanderait des dizaines de milliers d'itérations — au
-  // pas nominal, la lecture faite sur e² se trompe d'un facteur 1.5. Ici le
-  // bruit n'entre pas : ŵ est ce qu'il est, et son écart à w* se calcule.
+  // The EXCESS MSE, w̃ᵀRw̃: the only quantity in this setup that measures the
+  // adaptation WITHOUT the measurement noise. e²(n) holds σ² plus a few per
+  // cent of excess, and estimating those few per cent through the variance of
+  // σ² would take tens of thousands of iterations — at the nominal step, the
+  // reading taken from e² is off by a factor of 1.5. Here the noise does not
+  // enter: ŵ is what it is, and its distance to w* is computed.
   const ex = R ? new Float64Array(N) : null;
   const wErrVec = R ? new Float64Array(L) : null;
 
-  // RLS : P = δ⁻¹I. δ = 1/p0 est la régularisation de départ — « aucune
-  // information a priori » quand elle tend vers zéro, ce qui rend les L
-  // premières itérations équivalentes à une résolution exacte du système.
-  // La valeur par défaut reste modérée (δ = 1e-4) pour que les toutes
-  // premières itérations ne soient pas numériquement folles à l'écran ; le
-  // harnais, lui, la pousse à 1e-10 pour épingler l'identité EXACTE.
+  // RLS: P = δ⁻¹I. δ = 1/p0 is the initial regularization — "no prior
+  // information" as it tends to zero, which makes the first L iterations
+  // equivalent to solving the system exactly. The default stays moderate
+  // (δ = 1e-4) so that the very first iterations are not numerically wild on
+  // screen; the harness pushes it to 1e-10 to pin the EXACT identity.
   const P = algo === 'rls' ? new Float64Array(L * L) : null;
   const Px = algo === 'rls' ? new Float64Array(L) : null;
   const kg = algo === 'rls' ? new Float64Array(L) : null;
@@ -194,8 +190,8 @@ export function runAdaptive({
   let diverged = false;
 
   for (let n = 0; n < N; n++) {
-    // régresseur : u(n), u(n−1), … (zéros avant le début, comme un vrai
-    // filtre qui démarre)
+    // regressor: u(n), u(n−1), … (zeros before the start, like a real filter
+    // powering up)
     for (let k = 0; k < L; k++) x[k] = n - k >= 0 ? u[n - k] : 0;
 
     const wRef = wAfter && switchAt && n >= switchAt ? wAfter : wTrue;
@@ -209,9 +205,9 @@ export function runAdaptive({
     e2[n] = e * e;
 
     if (!Number.isFinite(e) || e2[n] > 1e12) {
-      // Une divergence est un RÉSULTAT (μ au-dessus de la borne), pas une
-      // panne : on la note, on gèle la courbe à une valeur énorme mais
-      // finie, et le tracé reste lisible au lieu de disparaître.
+      // A divergence is a RESULT (μ above the bound), not a failure: it is
+      // recorded, the curve is frozen at a huge but finite value, and the plot
+      // stays readable instead of disappearing.
       diverged = true;
       for (let m = n; m < N; m++) e2[m] = 1e12;
       if (ex) for (let m = n; m < N; m++) ex[m] = 1e12;
@@ -227,7 +223,7 @@ export function runAdaptive({
       const g = (mu * e) / nx;
       for (let k = 0; k < L; k++) w[k] += g * x[k];
     } else {
-      // P·x, puis le gain de Kalman k = Px / (λ + xᵀPx)
+      // P·x, then the Kalman gain k = Px / (λ + xᵀPx)
       let xpx = 0;
       for (let i = 0; i < L; i++) {
         let s = 0;
@@ -238,9 +234,9 @@ export function runAdaptive({
       const den = lambda + xpx;
       for (let i = 0; i < L; i++) kg[i] = Px[i] / den;
       for (let i = 0; i < L; i++) w[i] += kg[i] * e;
-      // P ← (P − k·(Px)ᵀ)/λ — symétrisée en fin de mise à jour, sans quoi
-      // l'arrondi la fait dériver vers une matrice non symétrique et
-      // l'algorithme finit par exploser après quelques milliers d'itérations
+      // P ← (P − k·(Px)ᵀ)/λ — symmetrized at the end of the update, without
+      // which rounding drifts it toward a non-symmetric matrix and the
+      // algorithm eventually explodes after a few thousand iterations
       for (let i = 0; i < L; i++)
         for (let j = 0; j < L; j++) P[i * L + j] = (P[i * L + j] - kg[i] * Px[j]) / lambda;
       for (let i = 0; i < L; i++)
@@ -262,9 +258,9 @@ export function runAdaptive({
 }
 
 /**
- * L'erreur a posteriori : ce que le filtre AURAIT donné sur le même
- * échantillon, une fois la mise à jour faite. C'est la grandeur qui définit
- * NLMS — à μ̃ = 1 elle est exactement nulle, et le harnais l'épingle.
+ * The a posteriori error: what the filter WOULD have given on the same sample,
+ * once the update is done. It is the quantity that defines NLMS — at μ̃ = 1 it
+ * is exactly zero, and the harness pins it.
  */
 export function posterioriError({ x, d, w, mu, L }) {
   let y = 0;
@@ -280,14 +276,14 @@ export function posterioriError({ x, d, w, mu, L }) {
 }
 
 /**
- * Iso-contours de la surface d'erreur, pour L = 2 : J(w) = σ² + (w−w*)ᵀR(w−w*)
- * est un paraboloïde, donc ses niveaux sont des ELLIPSES d'axes les vecteurs
- * propres de R et de demi-longueurs √(c/λ). C'est la figure qui explique
- * tout le reste : à entrée blanche R = I, les ellipses sont des cercles et
- * le gradient pointe vers le fond ; colorée, elles s'allongent dans le
- * rapport λmax/λmin et la descente zigzague au lieu de descendre.
+ * Level curves of the error surface, for L = 2: J(w) = σ² + (w−w*)ᵀR(w−w*) is
+ * a paraboloid, so its levels are ELLIPSES whose axes are the eigenvectors of R
+ * and whose half-lengths are √(c/λ). This is the figure that explains all the
+ * rest: with a white input R = I, the ellipses are circles and the gradient
+ * points at the bottom; coloured, they stretch in the ratio λmax/λmin and the
+ * descent zigzags instead of descending.
  *
- * Calculé ICI et pas dans la vue : une vue ne fait pas de science.
+ * Computed HERE and not in the view: a view does no science.
  */
 export function costContour(R, wTrue, level, points = 128) {
   const { values, vectors } = eigSpread(R, 2);
@@ -297,7 +293,7 @@ export function costContour(R, wTrue, level, points = 128) {
     const t = (2 * Math.PI * i) / points;
     const r0 = Math.sqrt(level / Math.max(values[0], 1e-12)) * Math.cos(t);
     const r1 = Math.sqrt(level / Math.max(values[1], 1e-12)) * Math.sin(t);
-    // retour dans la base des coefficients : w = w* + Q·r
+    // back into the coefficient basis: w = w* + Q·r
     x[i] = wTrue[0] + vectors[0] * r0 + vectors[1] * r1;
     y[i] = wTrue[1] + vectors[2] * r0 + vectors[3] * r1;
   }

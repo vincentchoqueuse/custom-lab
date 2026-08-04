@@ -2,7 +2,7 @@
 //
 // The code behind the figures was already shared (core/response-views.js,
 // _lib/bode.js). What kept drifting was the NAME: the same pole map was
-// "Pôles et zéros" in one experiment and "Plan des pôles" in the next, and
+// "Poles and zeros" in one experiment and "Pole map" in the next, and
 // `?view=gain` meant a Bode gain here and a Kalman gain there. A name is a
 // thing that repeats, so it is declared once, here, and nowhere else.
 //
@@ -12,10 +12,10 @@
 //   the catalogue, so a link, a scene and a habit all carry over.
 //
 //   THE TITLE AND THE ORDER BELONG TO THE SUBJECT. The magnitude figure is
-//   honestly called "Bode — gain" in automatique and "Réponse fréquentielle"
-//   in filtrage — same plot, two legitimate names, because two courses speak
+//   honestly called "Bode — gain" in control and "Frequency response" in
+//   filtering — same plot, two legitimate names, because two courses speak
 //   two ways. And the pole map comes BEFORE the frequency response in
-//   automatique and AFTER it in filtrage, because that is the order each
+//   control and AFTER it in filtering, because that is the order each
 //   course meets them. Both live in the subject's own `_subject.js`, next to
 //   its own name: `figures` for the variants, `figureOrder` for the grammar.
 //
@@ -24,8 +24,8 @@
 // drift impossible rather than merely discouraged — you cannot mistype a name
 // you do not type.
 //
-// An experiment whose figure is genuinely its own ("L'oscillo", "Le canal vu
-// des porteuses", "Diagramme de l'œil") declares an ordinary view with its
+// An experiment whose figure is genuinely its own ("The scope", "The channel
+// seen by the carriers", "Eye diagram") declares an ordinary view with its
 // own id and its own title, and none of this applies. The rule is only: a
 // standard figure carries the standard id AND the standard title — never one
 // without the other.
@@ -46,22 +46,22 @@ export class FigureError extends Error {
  */
 export const FIGURES = Object.freeze({
   /* --- what happens in time ---------------------------------------------- */
-  time: { id: 'time', titles: { default: 'Signal temporel' } },
-  response: { id: 'response', titles: { default: 'Réponse temporelle' } },
-  step: { id: 'step', titles: { default: 'Réponse indicielle' } },
-  impulse: { id: 'impulse', titles: { default: 'Réponse impulsionnelle' } },
+  time: { id: 'time', titles: { default: 'Time signal' } },
+  response: { id: 'response', titles: { default: 'Time response' } },
+  step: { id: 'step', titles: { default: 'Step response' } },
+  impulse: { id: 'impulse', titles: { default: 'Impulse response' } },
 
   /* --- what an estimation or a regression experiment leads with ----------- */
-  fit: { id: 'fit', titles: { default: 'Ajustement' } },
-  sampling: { id: 'sampling', titles: { default: 'Distribution des estimateurs' } },
+  fit: { id: 'fit', titles: { default: 'Fit' } },
+  sampling: { id: 'sampling', titles: { default: 'Sampling distribution' } },
 
   /* --- the plane ---------------------------------------------------------- */
-  poles: { id: 'poles', titles: { default: 'Pôles et zéros' } },
+  poles: { id: 'poles', titles: { default: 'Poles and zeros' } },
 
   /* --- what happens in frequency ------------------------------------------ */
-  gain: { id: 'gain', titles: { default: 'Réponse fréquentielle', bode: 'Bode — gain' } },
+  gain: { id: 'gain', titles: { default: 'Frequency response', bode: 'Bode — gain' } },
   phase: { id: 'phase', titles: { default: 'Phase', bode: 'Bode — phase' } },
-  spectrum: { id: 'spectrum', titles: { default: 'Spectre' } },
+  spectrum: { id: 'spectrum', titles: { default: 'Spectrum' } },
 });
 
 /**
@@ -123,8 +123,8 @@ export function resolveFigure(key, subject = {}, where = '', own) {
  * take a canonical id and put its own title on it. Either a view IS the
  * standard figure — declared with the `figure` factory, so its title comes
  * from the subject and cannot be mistyped — or it is the experiment's own
- * figure and must carry its own id. A pole map called "Plan des pôles" while
- * every other one says "Pôles et zéros" now fails at the first `npm run dev`
+ * figure and must carry its own id. A pole map called "Pole map" while
+ * every other one says "Poles and zeros" now fails at the first `npm run dev`
  * instead of quietly teaching two names for one thing.
  */
 export function normalizeViews(views, subject, key) {

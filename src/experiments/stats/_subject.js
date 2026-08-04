@@ -1,1 +1,1 @@
-export default { title: 'Probabilités & lois', order: 1 };
+export default { title: 'Probability & distributions', order: 1 };

@@ -5,36 +5,36 @@ import { view, figure, line, vline, hline } from '../../../core/views.js';
 export default {
   id: 'activations',
   order: 1,
-  random: true, // l'entrée « bruit » tire
-  title: 'Fonctions d’activation',
-  subtitle: 'Une non-linéarité sans mémoire : ce qu’elle fait à une courbe, et au spectre',
-  tags: ['réseaux', 'activation', 'ReLU', 'tanh', 'non-linéarité', 'harmoniques'],
+  random: true, // the "noise" input draws
+  title: 'Activation functions',
+  subtitle: 'A memoryless nonlinearity: what it does to a curve, and to a spectrum',
+  tags: ['networks', 'activation', 'ReLU', 'tanh', 'nonlinearity', 'harmonics'],
 
   params: {
     act: select('σ', {
-      description: 'fonction d’activation',
+      description: 'activation function',
       options: [
-        { value: 'identity', label: 'identité — aucune' },
+        { value: 'identity', label: 'identity — none' },
         { value: 'relu', label: 'ReLU' },
         { value: 'leaky', label: 'leaky ReLU (0.01)' },
         { value: 'tanh', label: 'tanh' },
-        { value: 'sigmoid', label: 'sigmoïde' },
+        { value: 'sigmoid', label: 'sigmoid' },
         { value: 'gelu', label: 'GELU' },
       ],
       default: 'relu',
     }),
-    signal: select('entrée', {
-      description: 'signal présenté à l’activation',
+    signal: select('input', {
+      description: 'signal fed to the activation',
       options: [
-        { value: 'sine', label: 'sinusoïde (16 Hz)' },
-        { value: 'two', label: 'deux tons (16 + 21 Hz)' },
-        { value: 'square', label: 'carré' },
-        { value: 'noise', label: 'bruit blanc' },
+        { value: 'sine', label: 'sinusoid (16 Hz)' },
+        { value: 'two', label: 'two tones (16 + 21 Hz)' },
+        { value: 'square', label: 'square wave' },
+        { value: 'noise', label: 'white noise' },
       ],
       default: 'sine',
     }),
     gain: float('g', {
-      description: 'gain avant l’activation — c’est lui qui pousse dans la saturation',
+      description: 'gain before the activation — this is what drives it into saturation',
       min: 0.1,
       max: 8,
       step: 0.1,
@@ -42,7 +42,7 @@ export default {
       precision: 1,
     }),
     bias: float('b', {
-      description: 'biais avant l’activation',
+      description: 'bias before the activation',
       min: -3,
       max: 3,
       step: 0.1,
@@ -53,24 +53,24 @@ export default {
 
   groups: [
     { title: 'Activation', params: ['act'] },
-    { title: 'Entrée', params: ['signal', 'gain', 'bias'] },
+    { title: 'Input', params: ['signal', 'gain', 'bias'] },
   ],
 
   views: [
-    // La courbe D'ABORD, parce que c'est l'objet lui-même — et sa dérivée
-    // avec elle : une activation se choisit autant pour ce qu'elle laisse
-    // passer du gradient que pour sa forme.
+    // The curve FIRST, because it is the object itself — and its derivative
+    // with it: an activation is chosen as much for what it lets through of the
+    // gradient as for its shape.
     view(
       'transfer',
-      'σ(x) et sa dérivée',
+      'σ(x) and its derivative',
       line('transfer', {
         color: '#0072BD',
         width: 2.4,
         label: 'σ(x)',
         overlays: [
           line('derivative', { color: '#D95319', width: 2, label: 'σ′(x)' }),
-          line('identity', { color: '#a1a1aa', width: 1.2, dashed: true, label: 'identité' }),
-          vline((p) => p.bias, { color: '#EDB120', dashed: true, width: 1.4, label: 'biais' }),
+          line('identity', { color: '#a1a1aa', width: 1.2, dashed: true, label: 'identity' }),
+          vline((p) => p.bias, { color: '#EDB120', dashed: true, width: 1.4, label: 'bias' }),
           hline(() => 0, { color: '#e4e4e7', width: 1 }),
         ],
         legend: 'left',
@@ -78,14 +78,14 @@ export default {
       })
     ),
 
-    // LES DÉRIVÉES, toutes ensemble — la figure de manuel, et la seule qui
-    // réponde à « laquelle choisir ». On y lit d'un regard les trois faits
-    // qui décident : ReLU rend 1 ou 0 sans nuance, tanh part de 1 et
-    // s'effondre, la sigmoïde plafonne à 1/4. Cliquer une pastille éteint
-    // sa courbe, pour les comparer deux à deux.
+    // THE DERIVATIVES, all together — the textbook figure, and the only one
+    // that answers "which to choose". At a glance one reads the three deciding
+    // facts: ReLU returns 1 or 0 with no nuance, tanh starts at 1 and collapses,
+    // the sigmoid caps at 1/4. Clicking a chip switches its curve off, to
+    // compare them two at a time.
     view(
       'derivatives',
-      'Dérivées comparées',
+      'Derivatives compared',
       line('dRelu', {
         color: '#0072BD',
         width: 2,
@@ -93,40 +93,40 @@ export default {
         overlays: [
           line('dLeaky', { color: '#77AC30', width: 1.6, dashed: true, label: 'leaky ReLU′' }),
           line('dTanh', { color: '#D95319', width: 2, label: 'tanh′' }),
-          line('dSigmoid', { color: '#7E2F8E', width: 2, label: 'sigmoïde′' }),
+          line('dSigmoid', { color: '#7E2F8E', width: 2, label: 'sigmoid′' }),
           line('dGelu', { color: '#EDB120', width: 2, label: 'GELU′' }),
         ],
         legend: 'left',
-        // le cadre descend à −0.2 pour montrer que GELU′ passe SOUS zéro
-        // (minimum −0.13) : elle n'est pas monotone, contrairement aux
-        // quatre autres, et c'est une propriété qu'il ne faut pas rogner
+        // the frame goes down to −0.2 to show that GELU′ goes BELOW zero
+        // (minimum −0.13): it is not monotone, unlike the other four, and that
+        // is a property not to be cropped away
         axes: { x: { label: 'x' }, y: { label: 'σ′(x)', domain: [-0.2, 1.2] } },
       })
     ),
 
-    // Le temporel : écrêter, redresser, ou ne rien faire.
+    // The time view: clipping, rectifying, or doing nothing at all.
     figure(
       'time',
       line('xTime', {
         color: '#7E2F8E',
         width: 1.6,
-        label: 'entrée g·x + b',
+        label: 'input g·x + b',
         overlays: [line('yTime', { color: '#0072BD', width: 2, label: 'σ(g·x + b)' })],
         axes: { x: { label: 't', unit: 'ms' }, y: { label: 'amplitude' } },
       })
     ),
 
-    // Et le spectre, qui est le propos : une non-linéarité CRÉE des
-    // fréquences. Les deux spectres sont normalisés à leur propre maximum,
-    // donc ce qui se compare est la RICHESSE, pas le niveau.
+    // And the spectrum, which is the point: a nonlinearity CREATES
+    // frequencies. Both spectra are normalized to their own maximum, so what is
+    // compared is the RICHNESS, not the level.
     figure(
       'spectrum',
       line('specOut', {
         color: '#0072BD',
         width: 1.6,
-        label: 'après σ',
+        label: 'after σ',
         overlays: [
-          line('specIn', { color: '#7E2F8E', width: 1.4, opacity: 0.55, label: 'avant' }),
+          line('specIn', { color: '#7E2F8E', width: 1.4, opacity: 0.55, label: 'before' }),
         ],
         axes: {
           x: { label: 'f', unit: 'Hz', domain: [0, 200] },

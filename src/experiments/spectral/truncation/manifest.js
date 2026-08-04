@@ -5,23 +5,23 @@ import { view, line, vline, figure } from '../../../core/views.js';
 export default {
   id: 'truncation',
   order: 1,
-  title: 'Troncature temporelle',
-  subtitle: 'Observer pendant T, c\'est multiplier par une fenêtre — et convoluer le spectre',
-  tags: ['analogique', 'numérique', 'troncature', 'fenêtre', 'résolution', 'Gabor'],
+  title: 'Time truncation',
+  subtitle: 'Observing for T is multiplying by a window — and convolving the spectrum',
+  tags: ['analog', 'digital', 'truncation', 'window', 'resolution', 'Gabor'],
 
   params: {
     sig: select('signal', {
-      description: 'signal observé (défini indépendamment de la durée)',
+      description: 'signal observed (defined independently of the duration)',
       options: [
-        { value: 'sine', label: 'sinusoïde' },
-        { value: 'chirp', label: 'chirp linéaire' },
-        { value: 'damped', label: 'sinusoïde amortie' },
-        { value: 'burst', label: 'salve' },
+        { value: 'sine', label: 'sinusoid' },
+        { value: 'chirp', label: 'linear chirp' },
+        { value: 'damped', label: 'damped sinusoid' },
+        { value: 'burst', label: 'burst' },
       ],
       default: 'sine',
     }),
     T: float('T', {
-      description: 'durée d\'observation',
+      description: 'observation duration',
       min: 3,
       max: 250,
       step: 1,
@@ -29,10 +29,10 @@ export default {
       unit: 'ms',
       precision: 0,
     }),
-    win: select('fenêtre', {
-      description: 'forme de la troncature',
+    win: select('window', {
+      description: 'shape of the truncation',
       options: [
-        { value: 'rect', label: 'rectangulaire (troncature nue)' },
+        { value: 'rect', label: 'rectangular (bare truncation)' },
         { value: 'hann', label: 'Hann' },
         { value: 'hamming', label: 'Hamming' },
         { value: 'blackman', label: 'Blackman' },
@@ -40,7 +40,7 @@ export default {
       default: 'rect',
     }),
     f0: float('f₀', {
-      description: 'fréquence du signal',
+      description: 'signal frequency',
       min: 100,
       max: 800,
       step: 5,
@@ -49,7 +49,7 @@ export default {
       precision: 0,
     }),
     k: log('k', {
-      description: 'vitesse de balayage du chirp',
+      description: 'sweep rate of the chirp',
       min: 200,
       max: 4000,
       default: 2000,
@@ -58,7 +58,7 @@ export default {
       visibleIf: { sig: 'chirp' },
     }),
     tau: log('τ', {
-      description: 'constante d\'amortissement',
+      description: 'damping constant',
       min: 1,
       max: 100,
       default: 15,
@@ -66,8 +66,8 @@ export default {
       precision: 1,
       visibleIf: { sig: 'damped' },
     }),
-    tb: float('T_salve', {
-      description: 'durée de la salve',
+    tb: float('T_burst', {
+      description: 'burst duration',
       min: 5,
       max: 200,
       step: 1,
@@ -82,7 +82,7 @@ export default {
     // which regime the chirp is in: k·T² ≪ 1 the truncation dominates,
     // k·T² ≫ 1 the sweep does, and the trough of the V sits in between
     regime: {
-      label: 'produit k·T² du chirp',
+      label: 'k·T² product of the chirp',
       calc: (p) => (p.sig === 'chirp' ? (p.k * (p.T / 1000) ** 2).toFixed(2) : '—'),
     },
   },
@@ -99,10 +99,10 @@ export default {
       line('xFull', {
         color: '#a1a1aa',
         width: 1,
-        label: 'signal complet',
+        label: 'full signal',
         overlays: [
-          line('gate', { color: '#D95319', width: 2, dashed: true, label: 'fenêtre w(t)' }),
-          line('windowed', { color: '#0072BD', width: 2, label: 'ce qui est transformé' }),
+          line('gate', { color: '#D95319', width: 2, dashed: true, label: 'window w(t)' }),
+          line('windowed', { color: '#0072BD', width: 2, label: 'what is transformed' }),
           vline('T', { color: '#EDB120', dashed: true, width: 2, label: 'T' }),
         ],
         axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
@@ -126,15 +126,15 @@ export default {
     // a plateau for the damped sine and the burst.
     view(
       'width',
-      'Largeur vs durée',
+      'Width vs duration',
       line('widthVsT', {
         color: '#7E2F8E',
         width: 2.2,
-        label: 'largeur à −3 dB mesurée',
+        label: 'measured −3 dB width',
         overlays: [vline('T', { color: '#EDB120', dashed: true, width: 2, label: 'T' })],
         axes: {
-          x: { label: 'durée T', unit: 'ms', scale: 'log' },
-          y: { label: 'largeur à −3 dB', unit: 'Hz', scale: 'log' },
+          x: { label: 'duration T', unit: 'ms', scale: 'log' },
+          y: { label: '−3 dB width', unit: 'Hz', scale: 'log' },
         },
       })
     ),

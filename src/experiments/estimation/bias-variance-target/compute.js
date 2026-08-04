@@ -2,19 +2,19 @@
 // an isotropic 2D Gaussian, each applied coordinate-wise to the SAME N-point
 // sample, over M repeated experiments ("shots"):
 //   x̄        sample mean        unbiased,            Var = 2σ²/N   (2D trace)
-//   médiane  coordinate median  unbiased,            Var ≈ πσ²/N   (asymptotic)
+//   median   coordinate median  unbiased,            Var ≈ πσ²/N   (asymptotic)
 //   λx̄      shrunk mean        bias ‖(1−λ)μ‖√2,     Var = 2λ²σ²/N
 //   x₁       first point alone  unbiased,            Var = 2σ²
 // Empirical decomposition per estimator (exact identity at finite M):
-//   EQM = ‖biais‖² + variance
-// plus the exact EQM(λ) curve of the shrunk mean — the U that shows the best
+//   MSE = ‖bias‖² + variance
+// plus the exact MSE(λ) curve of the shrunk mean — the U that shows the best
 // estimator is biased whenever σ²/N is not negligible against μ².
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { median } from '../../../core/numeric.js';
 
-const NAMES = ['x̄', 'médiane', 'λx̄', 'x₁'];
-const L_GRID = 101; // λ grid for the EQM(λ) curves
+const NAMES = ['x̄', 'median', 'λx̄', 'x₁'];
+const L_GRID = 101; // λ grid for the MSE(λ) curves
 
 /**
  * @param {{mu: number, sigma: number, N: number, lambda: number, M: number,
@@ -52,7 +52,7 @@ export function compute({ mu, sigma, N, lambda, M, seed }) {
     shots[3].y[m] = by[0];
   }
 
-  // empirical 2D decomposition: EQM = ‖biais‖² + variance (exact at finite M)
+  // empirical 2D decomposition: MSE = ‖bias‖² + variance (exact at finite M)
   const estStats = shots.map((s, e) => {
     let cx = 0;
     let cy = 0;
@@ -69,7 +69,7 @@ export function compute({ mu, sigma, N, lambda, M, seed }) {
     return { name: NAMES[e], bias2: b2, variance: v, mse: b2 + v };
   });
 
-  // exact EQM(λ) decomposition of the shrunk mean, and its minimizer λ*
+  // exact MSE(λ) decomposition of the shrunk mean, and its minimizer λ*
   const lx = new Float64Array(L_GRID);
   const lb = new Float64Array(L_GRID);
   const lv = new Float64Array(L_GRID);
@@ -102,8 +102,8 @@ export function compute({ mu, sigma, N, lambda, M, seed }) {
         value: lambdaStar,
         meta: { label: 'λ*', precision: 3 },
       },
-      mseMean: { value: estStats[0].mse, meta: { label: 'EQM x̄', precision: 3 } },
-      mseShrink: { value: estStats[2].mse, meta: { label: 'EQM λx̄', precision: 3 } },
+      mseMean: { value: estStats[0].mse, meta: { label: 'MSE x̄', precision: 3 } },
+      mseShrink: { value: estStats[2].mse, meta: { label: 'MSE λx̄', precision: 3 } },
     },
   };
 }

@@ -17,7 +17,7 @@ export const checks = [
     },
   },
   {
-    name: 'empirical decomposition is an identity: EQM = biais² + variance',
+    name: 'empirical decomposition is an identity: MSE = bias² + variance',
     category: 'numeric',
     run() {
       const { observables: o } = compute({ ...BASE });
@@ -29,7 +29,7 @@ export const checks = [
     },
   },
   {
-    name: 'EQM(λ) curve: minimum at λ* = μ²/(μ²+σ²/N), exact on the grid',
+    name: 'MSE(λ) curve: minimum at λ* = μ²/(μ²+σ²/N), exact on the grid',
     category: 'numeric',
     run() {
       const { observables: o } = compute({ ...BASE });
@@ -53,7 +53,7 @@ export const checks = [
     },
   },
   {
-    name: 'shrunk-mean EQM matches the closed form 2(1−λ)²μ² + 2λ²σ²/N',
+    name: 'shrunk-mean MSE matches the closed form 2(1−λ)²μ² + 2λ²σ²/N',
     category: 'statistical',
     run() {
       const { observables: o } = compute({ ...BASE });
@@ -65,7 +65,7 @@ export const checks = [
     },
   },
   {
-    name: 'ordering: Var(x̄) < Var(médiane) < Var(x₁), and Var(x₁) ≈ 2σ²',
+    name: 'ordering: Var(x̄) < Var(median) < Var(x₁), and Var(x₁) ≈ 2σ²',
     category: 'statistical',
     run() {
       const { observables: o } = compute({ ...BASE, N: 25 });

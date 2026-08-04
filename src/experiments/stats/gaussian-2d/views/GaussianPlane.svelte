@@ -63,9 +63,9 @@
   const cloud = $derived(obs.samples.value);
 
   const legend = [
-    { label: 'réalisations', color: '#0072BD' },
-    { label: 'iso-densité 1·2·3σ', color: '#D95319' },
-    { label: 'axes principaux', color: '#7E2F8E' },
+    { label: 'draws', color: '#0072BD' },
+    { label: 'iso-density 1·2·3σ', color: '#D95319' },
+    { label: 'principal axes', color: '#7E2F8E' },
     { label: 'E[Y|X=x]', color: '#77AC30' },
   ];
 </script>

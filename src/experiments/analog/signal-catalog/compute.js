@@ -3,14 +3,14 @@
 // FORM (nothing here is estimated by an FFT; the numerical Fourier integral
 // lives in check.js, where it belongs):
 //
-//   porte          Π(t/T)                 T·sinc(fT)
+//   gate           Π(t/T)                 T·sinc(fT)
 //   triangle       Λ(t/T)                 T·sinc²(fT)
-//   gaussienne     e^{−π(t/T)²}           T·e^{−π(fT)²}          ← point fixe
-//   exp. causale   e^{−t/T}·u(t)          T/(1 + j2πfT)          ← seule complexe
-//   exp. bilatér.  e^{−|t|/T}             2T/(1 + (2πfT)²)
-//   sinus cardinal sinc(t/T)              T·rect(fT)             ← dual de la porte
-//   sinusoïde      cos(2πf₀t)·Π(t/T)      (T/2)[sinc((f−f₀)T) + sinc((f+f₀)T)]
-//     tronquée
+//   Gaussian       e^{−π(t/T)²}           T·e^{−π(fT)²}          ← fixed point
+//   causal exp.    e^{−t/T}·u(t)          T/(1 + j2πfT)          ← the only complex one
+//   two-sided exp. e^{−|t|/T}             2T/(1 + (2πfT)²)
+//   sinc          sinc(t/T)               T·rect(fT)             ← dual of the gate
+//   truncated      cos(2πf₀t)·Π(t/T)      (T/2)[sinc((f−f₀)T) + sinc((f+f₀)T)]
+//     sinusoid
 //
 // Two lessons the magnitude alone cannot teach, so both are observables:
 //   · a delay t₀ multiplies X by e^{−j2πft₀} — |X| does not move by a single
@@ -172,19 +172,19 @@ export function compute({ signal, T: Tms, f0, t0: t0ms }) {
       peak: { value: peak, meta: { label: '|X| max', precision: 4 } },
       energy: {
         value: energyOf(signal, T, f0) * 1000,
-        meta: { label: 'énergie', unit: 'ms', precision: 3 },
+        meta: { label: 'energy', unit: 'ms', precision: 3 },
       },
       b3: {
         value: b3,
-        meta: { label: 'bande à −3 dB (unilatérale)', unit: 'Hz', precision: 0 },
+        meta: { label: '−3 dB bandwidth (one-sided)', unit: 'Hz', precision: 0 },
       },
       tb: {
         value: b3 * T,
-        meta: { label: 'produit T·B₃ (invariant d’échelle)', precision: 4 },
+        meta: { label: 'product T·B₃ (scale invariant)', precision: 4 },
       },
       firstNull: {
         value: firstNullOf(signal, T),
-        meta: { label: 'premier zéro', unit: 'Hz', precision: 0 },
+        meta: { label: 'first zero', unit: 'Hz', precision: 0 },
       },
       sidelobe: {
         value: sidelobeDbOf(signal, T, f0, fp, peak),

@@ -231,10 +231,10 @@ export function compute({ family, n, fc, Amax, method, source, f0 }) {
       hAna,
       maxPole, // checks: stability
       nyqDb: rd[NR - 1], // checks: bilinear zeros at Nyquist
-      fMeas: { value: fMeas, meta: { label: 'coupure obtenue', unit: 'Hz', precision: 0 } },
+      fMeas: { value: fMeas, meta: { label: 'cutoff obtained', unit: 'Hz', precision: 0 } },
       warpErr: {
         value: fc - fMeas,
-        meta: { label: 'écart à la cible', unit: 'Hz', precision: 0 },
+        meta: { label: 'gap to the target', unit: 'Hz', precision: 0 },
       },
     },
   };

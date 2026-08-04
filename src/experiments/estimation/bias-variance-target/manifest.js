@@ -6,16 +6,16 @@ export default {
   id: 'bias-variance-target',
   order: 1,
   random: true,
-  title: 'Cible : biais, variance, EQM',
-  subtitle: 'Quatre estimateurs du centre — centré n\'est pas groupé, et l\'EQM tranche',
-  tags: ['estimateur', 'biais', 'variance', 'EQM', 'rétrécissement'],
+  title: 'The target: bias, variance, MSE',
+  subtitle: 'Four estimators of the center — on target is not tight, and the MSE decides',
+  tags: ['estimator', 'bias', 'variance', 'MSE', 'shrinkage'],
 
   params: {
-    mu: float('μ', { description: 'centre de la cible (deux coordonnées)', min: 0, max: 5, step: 0.1, default: 2 }),
-    sigma: float('σ', { description: 'écart-type de chaque tir', min: 0.5, max: 3, step: 0.1, default: 1.5 }),
-    N: int('N', { description: 'taille de chaque échantillon', min: 2, max: 100, default: 5 }),
+    mu: float('μ', { description: 'center of the target (both coordinates)', min: 0, max: 5, step: 0.1, default: 2 }),
+    sigma: float('σ', { description: 'standard deviation of each shot', min: 0.5, max: 3, step: 0.1, default: 1.5 }),
+    N: int('N', { description: 'size of each sample', min: 2, max: 100, default: 5 }),
     lambda: float('λ', {
-      description: 'rétrécissement de λx̄ vers 0',
+      description: 'shrinkage of λx̄ toward 0',
       min: 0,
       max: 1,
       step: 0.01,
@@ -23,7 +23,7 @@ export default {
       precision: 2,
     }),
     M: int('M', {
-      description: 'nombre d\'expériences (tirs)',
+      description: 'number of experiments (shots)',
       min: 100,
       max: 5000,
       step: 100,
@@ -41,18 +41,18 @@ export default {
   },
 
   groups: [
-    { title: 'Cible', params: ['mu', 'sigma'] },
-    { title: 'Estimateurs', params: ['N', 'lambda'] },
-    { title: 'Répétitions', params: ['M'] },
+    { title: 'Target', params: ['mu', 'sigma'] },
+    { title: 'Estimators', params: ['N', 'lambda'] },
+    { title: 'Repetitions', params: ['M'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // CUSTOM view: the canonical 2×2 dartboard figure — four equal-aspect
-    // targets with rings, shot clouds and per-estimator EQM annotations fit
+    // targets with rings, shot clouds and per-estimator MSE annotations fit
     // no generic 1D plot type.
-    custom('targets', 'La cible', () => import('./views/Targets.svelte')),
+    custom('targets', 'The target', () => import('./views/Targets.svelte')),
 
     figure(
       'sampling',
@@ -61,30 +61,30 @@ export default {
         opacity: 0.55,
         label: 'x̄',
         overlays: [
-          histogram('dMedian', { color: '#77AC30', opacity: 0.45, label: 'médiane' }),
+          histogram('dMedian', { color: '#77AC30', opacity: 0.45, label: 'median' }),
           histogram('dShrink', { color: '#D95319', opacity: 0.5, label: 'λx̄' }),
           histogram('dFirst', { color: '#7E2F8E', opacity: 0.35, label: 'x₁' }),
           vline((p) => p.mu, { color: '#EDB120', dashed: true, width: 2, label: 'μ' }),
         ],
-        axes: { x: 'valeur estimée', y: 'densité' },
+        axes: { x: 'estimated value', y: 'density' },
       })
     ),
 
-    // The exact EQM(λ) of the shrunk mean: same U as ridge, in closed form.
+    // The exact MSE(λ) of the shrunk mean: same U as ridge, in closed form.
     view(
       'tradeoff',
-      'EQM vs λ',
+      'MSE vs λ',
       line('mseVsLambda', {
         color: '#7E2F8E',
         width: 2.5,
-        label: 'EQM',
+        label: 'MSE',
         overlays: [
-          line('bias2VsLambda', { color: '#D95319', width: 2, label: 'biais²' }),
+          line('bias2VsLambda', { color: '#D95319', width: 2, label: 'bias²' }),
           line('varVsLambda', { color: '#0072BD', width: 2, label: 'variance' }),
           vline('lambdaStar', { color: '#77AC30', dashed: true, width: 1.8, label: 'λ*' }),
           vline((p) => p.lambda, { color: '#EDB120', dashed: true, width: 2, label: 'λ' }),
         ],
-        axes: { x: 'λ', y: 'erreur quadratique' },
+        axes: { x: 'λ', y: 'squared error' },
       })
     ),
   ],

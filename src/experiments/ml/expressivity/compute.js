@@ -1,39 +1,38 @@
-// Le pouvoir d'expression, et ce qu'une STRUCTURE de matrice y change.
+// Expressive power, and what a matrix STRUCTURE changes about it.
 //
-// Le réseau est le plus simple qui soit : un signal de N points entre, une
-// couche linéaire le transforme, une activation le tord, une seconde couche
-// linéaire le recombine. Les poids sont TIRÉS AU HASARD et jamais appris —
-// c'est volontaire. Ce qu'on regarde ici n'est pas ce qu'un réseau apprend,
-// c'est ce qu'il PEUT représenter avant même d'avoir appris quoi que ce soit.
+// The network is as simple as they come: a signal of N points goes in, a linear
+// layer transforms it, an activation bends it, a second linear layer recombines
+// it. The weights are DRAWN AT RANDOM and never learned — deliberately. What is
+// looked at here is not what a network learns, it is what it CAN represent
+// before having learned anything at all.
 //
-// Deux choses se démontrent à l'écran :
+// Two things are demonstrated on screen:
 //
-//   1. SANS activation, deux couches n'en font qu'une. La sortie du réseau
-//      W₂·(W₁x) est celle d'une SEULE matrice W₂W₁, à la précision machine —
-//      donc empiler des couches linéaires n'achète rigoureusement rien. Le
-//      harnais l'épingle à 1e-12, et c'est la justification de tout le reste.
+//   1. WITHOUT an activation, two layers make one. The network output W₂·(W₁x)
+//      is that of a SINGLE matrix W₂W₁, to machine precision — so stacking
+//      linear layers buys strictly nothing. The harness pins it at 1e-12, and
+//      that is the justification for everything else.
 //
-//   2. La STRUCTURE de W₁ décide de ce que la couche sait faire.
-//      · DENSE : N² poids indépendants. Chaque sortie mélange toutes les
-//        entrées, donc la notion de « voisinage temporel » disparaît. Le
-//        spectre de sortie n'a plus rien à voir avec celui d'entrée.
-//      · TOEPLITZ : W[i][j] ne dépend que de i − j. C'est une convolution,
-//        donc un FILTRE : L poids au lieu de N², et le spectre de sortie est
-//        celui d'entrée MULTIPLIÉ par |H(f)|. La structure n'est pas une
-//        économie de mémoire, c'est un a priori sur le monde — « ce qui
-//        compte est local et invariant par translation » — et c'est très
-//        exactement ce qu'est une couche de convolution.
+//   2. The STRUCTURE of W₁ decides what the layer can do.
+//      · DENSE: N² independent weights. Every output mixes every input, so the
+//        notion of "time neighbourhood" disappears. The output spectrum has
+//        nothing left to do with the input one.
+//      · TOEPLITZ: W[i][j] depends only on i − j. That is a convolution, hence a
+//        FILTER: L weights instead of N², and the output spectrum is the input
+//        one MULTIPLIED by |H(f)|. The structure is not a memory saving, it is a
+//        prior about the world — "what matters is local and shift-invariant" —
+//        and it is very exactly what a convolutional layer is.
 //
-// Le compteur de paramètres est dans la statline, parce que le rapport N²/L
-// est l'argument entier : 16 384 contre 9 à N = 128.
+// The parameter counter is in the statline, because the ratio N²/L is the whole
+// argument: 16 384 against 9 at N = 128.
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { tone, magSpectrum, freqAxis, dbAmp, timeAxis } from '../../../core/dsp.js';
 import { denseMatrix, toeplitzMatrix, matvec, applyAct, ACTIVATIONS } from '../_lib/nn.js';
 
-const N = 128; // longueur du signal (= largeur des couches)
-const FS = 128; // Hz — un point par hertz, la lecture la plus simple
+const N = 128; // signal length (= layer width)
+const FS = 128; // Hz — one point per hertz, the simplest reading
 const NFFT = 128;
 const DB_FLOOR = -60;
 
@@ -45,7 +44,7 @@ const DB_FLOOR = -60;
 export function compute({ structure, act, kernel, scale, signal, seed }) {
   const gauss = gaussFrom(mulberry32(seed));
 
-  /* ---------- l'entrée ---------------------------------------------------- */
+  /* ---------- the input --------------------------------------------------- */
   let x;
   if (signal === 'sine') x = tone(N, 8, { fs: FS });
   else if (signal === 'two') {
@@ -54,16 +53,16 @@ export function compute({ structure, act, kernel, scale, signal, seed }) {
     x = Float64Array.from(a, (v, i) => v + b[i]);
   } else if (signal === 'pulse') {
     x = new Float64Array(N);
-    x[N / 2] = 1; // l'impulsion : sa sortie EST la réponse impulsionnelle
+    x[N / 2] = 1; // the impulse: its output IS the impulse response
   } else {
     x = Float64Array.from({ length: N }, () => gauss());
   }
 
-  /* ---------- la première couche ------------------------------------------ */
-  // Le noyau du cas Toeplitz : un filtre RIF aléatoire de `kernel` points.
-  // On le tire AVANT la matrice dense pour que les deux structures partagent
-  // la même graine de départ — comparer deux tirages différents ne dirait
-  // rien de la structure.
+  /* ---------- the first layer ---------------------------------------------- */
+  // The kernel of the Toeplitz case: a random FIR filter of `kernel` points.
+  // It is drawn BEFORE the dense matrix so that both structures share the same
+  // starting seed — comparing two different draws would say nothing about the
+  // structure.
   const h = new Float64Array(kernel);
   for (let k = 0; k < kernel; k++) h[k] = (scale * gauss()) / Math.sqrt(kernel);
 
@@ -74,20 +73,20 @@ export function compute({ structure, act, kernel, scale, signal, seed }) {
   const z = matvec(W1, x, N, N);
   const a1 = applyAct(z, act);
 
-  // Seconde couche : la même structure, pour que le réseau reste homogène.
+  // Second layer: the same structure, so the network stays homogeneous.
   const h2 = new Float64Array(kernel);
   for (let k = 0; k < kernel; k++) h2[k] = (scale * gauss()) / Math.sqrt(kernel);
   const W2 =
     structure === 'dense' ? denseMatrix(N, N, scale, gauss) : toeplitzMatrix(N, N, h2);
   const y = matvec(W2, a1, N, N);
 
-  /* ---------- le témoin : le MÊME réseau sans activation ------------------ */
-  // C'est la démonstration 1. Deux couches linéaires composées, c'est une
-  // matrice — et la sortie ci-dessous est identique à celle d'une seule
-  // couche W₂W₁, ce que le harnais vérifie.
+  /* ---------- the control: the SAME network without an activation --------- */
+  // This is demonstration 1. Two composed linear layers are one matrix — and the
+  // output below is identical to that of a single layer W₂W₁, which the harness
+  // verifies.
   const yLin = matvec(W2, z, N, N);
 
-  /* ---------- tracés ------------------------------------------------------ */
+  /* ---------- plots -------------------------------------------------------- */
   const t = timeAxis(N, FS);
   const ms = Float64Array.from(t, (v) => 1000 * v);
   const fx = freqAxis(NFFT, FS);
@@ -98,15 +97,15 @@ export function compute({ structure, act, kernel, scale, signal, seed }) {
     return out;
   };
 
-  // La réponse en fréquence du noyau, seule courbe qui a un sens dans le cas
-  // Toeplitz — et aucun dans le cas dense, où elle n'est donc pas tracée.
+  // The frequency response of the kernel, the only curve that means anything in
+  // the Toeplitz case — and nothing in the dense one, where it is not drawn.
   const respDb =
     structure === 'toeplitz' ? norm(magSpectrum(h, { nfft: NFFT })) : new Float64Array(0);
   const respX = structure === 'toeplitz' ? fx : new Float64Array(0);
 
-  // La première LIGNE de W₁ : c'est le dessin qui explique tout. Dense, elle
-  // est un bruit sans structure ; Toeplitz, elle est le noyau, décalé — et
-  // toutes les autres lignes sont la même, décalée d'un cran.
+  // The first ROW of W₁: this is the drawing that explains everything. Dense, it
+  // is structureless noise; Toeplitz, it is the kernel, shifted — and every
+  // other row is the same one, shifted by one notch.
   const rowIdx = new Float64Array(N);
   const row = new Float64Array(N);
   const rowMid = new Float64Array(N);
@@ -117,9 +116,9 @@ export function compute({ structure, act, kernel, scale, signal, seed }) {
     rowMid[j] = W1[mid * N + j];
   }
 
-  /* ---------- ce qui se lit en chiffres ----------------------------------- */
-  // L'écart entre le réseau avec et sans activation : nul si σ = identité,
-  // et c'est la mesure du « pouvoir » que l'activation ajoute.
+  /* ---------- what is read as numbers ------------------------------------- */
+  // The gap between the network with and without the activation: zero if
+  // σ = identity, and it measures the "power" the activation adds.
   let dev = 0;
   let ref = 0;
   for (let i = 0; i < N; i++) {
@@ -128,8 +127,8 @@ export function compute({ structure, act, kernel, scale, signal, seed }) {
   }
   const nonlin = Math.sqrt(dev / Math.max(ref, 1e-300));
 
-  // Le rang de la couche, mesuré par la plus simple des sondes : le nombre
-  // de fréquences que la sortie contient là où l'entrée n'en avait pas.
+  // The reach of the layer, measured by the simplest probe there is: the number
+  // of frequencies the output holds where the input had none.
   const magIn = magSpectrum(x, { nfft: NFFT });
   const magOut = magSpectrum(y, { nfft: NFFT });
   const inPeak = Math.max(...magIn, 1e-300);
@@ -153,27 +152,27 @@ export function compute({ structure, act, kernel, scale, signal, seed }) {
       rowMid: { x: rowIdx, y: rowMid },
 
       nParams: {
-        // precision: 0 — sans elle la statline arrondit à quatre chiffres
-        // significatifs et 16384 s'affiche 16380, ce qui ruine exactement
-        // l'argument que ce nombre porte.
+        // precision: 0 — without it the statline rounds to four significant
+        // digits and 16384 shows as 16380, which wrecks exactly the argument
+        // this number carries.
         value: nParams,
-        meta: { label: 'poids de la couche', precision: 0 },
+        meta: { label: 'weights in the layer', precision: 0 },
       },
       nDense: {
         value: N * N,
-        meta: { label: 'poids si dense', precision: 0 },
+        meta: { label: 'weights if dense', precision: 0 },
       },
       ratio: {
         value: (N * N) / nParams,
-        meta: { label: 'rapport dense / structuré', precision: 0 },
+        meta: { label: 'dense / structured ratio', precision: 0 },
       },
       nonlinearity: {
         value: nonlin,
-        meta: { label: 'écart au réseau linéaire', precision: 4 },
+        meta: { label: 'gap to the linear network', precision: 4 },
       },
       created: {
         value: created,
-        meta: { label: 'fréquences créées', precision: 0 },
+        meta: { label: 'frequencies created', precision: 0 },
       },
     },
   };

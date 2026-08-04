@@ -1,65 +1,67 @@
 // Lecture script — auto-discovered by the registry.
 export default [
   {
-    id: 'moindres-carres',
-    title: 'Scène 1 · Ce que « moindres carrés » veut dire',
+    id: 'least-squares',
+    title: 'Scene 1 · What "least squares" means',
     params: { a: 1.5, b: 1, sigma: 1, N: 20, spread: 3, outlier: 0 },
     view: 'fit',
     visible: ['sigma'],
-    notes: `Les traits gris verticaux SONT la quantité minimisée : la somme de
-leurs carrés, affichée dans la statline. Pas la distance à la droite, pas
-l'écart horizontal — l'écart VERTICAL, parce que c'est y qu'on cherche à
-prédire à partir de x.
-Question à poser en montrant la droite jaune (la vraie) et la bleue
-(l'ajustée) : « pourquoi ne se superposent-elles pas ? » — parce qu'on
-n'observe pas la droite, on observe 20 points bruités.
-Marteler R pour retirer : la bleue danse autour de la jaune. C'est déjà
-la scène 3.`,
+    notes: `The vertical grey segments are the quantity being minimized — the
+sum of their squares, printed in the statline. Not the distance to the line,
+not the horizontal gap: the VERTICAL gap, because y is what is being predicted
+from x.
+
+With the yellow true line and the blue fitted one both on screen, the question
+is why they do not coincide. They cannot: the line is never observed, only
+twenty noisy points are. Pressing R to redraw makes the blue line dance around
+the yellow one, which is already the third scene.`,
   },
   {
-    id: 'residus',
-    title: 'Scène 2 · Les résidus, seul diagnostic honnête',
+    id: 'residuals',
+    title: 'Scene 2 · The residuals, the only honest diagnostic',
     params: { a: 1.5, b: 1, sigma: 1, N: 40, spread: 3, outlier: 0 },
     view: 'residuals',
     visible: ['sigma', 'N'],
-    notes: `Avec le bon modèle, les résidus n'ont AUCUNE structure : un nuage
-informe autour de zéro. C'est ce qu'il faut regarder avant de croire un R².
-Deux propriétés exactes, vérifiées par le harnais numérique : leur somme
-est nulle, et leur produit scalaire avec x est nul. Autrement dit la droite
-a extrait tout ce que x pouvait dire de y — ce qui reste lui est orthogonal.
-Enchaîner sur « Régression polynomiale » : quand une COURBURE apparaît ici,
-c'est que la droite ne suffit plus.`,
+    notes: `With the right model the residuals have no structure at all: a
+shapeless cloud around zero. This is what to look at before believing any R².
+
+Two properties are exact rather than approximate, and the harness verifies
+both: the residuals sum to zero, and their inner product with x is zero. The
+line has extracted everything x could say about y, and what remains is
+orthogonal to it. When a curvature appears in this view, the straight line has
+stopped being enough — which is where polynomial regression begins.`,
   },
   {
-    id: 'levier',
-    title: 'Scène 3 · Écarter les x vaut mieux qu\'en ajouter',
+    id: 'leverage',
+    title: 'Scene 3 · Spreading the x beats adding more',
     params: { a: 1.5, b: 1, sigma: 1.5, N: 20, spread: 1, outlier: 0 },
     view: 'slope-law',
     visible: ['spread', 'N'],
     lock: true,
-    notes: `Quatre cents expériences répétées : l'histogramme est la loi de â.
-Sa largeur théorique est σ/√Sxx, superposée en jaune — les deux se collent.
-Question AVANT de bouger : « pour mieux estimer la pente, vaut-il mieux
-doubler le nombre de points ou doubler l'étendue des x ? »
-Réponse : doubler L divise l'écart-type par DEUX, doubler N seulement par
-√2. Le faire, les deux repères de la statline le confirment.
-C'est le plan d'expérience en une phrase : où l'on place les points compte
-plus que combien on en place.`,
+    notes: `Four hundred repeated experiments make the histogram the
+distribution of â, and its theoretical width σ/√Sxx is superimposed in yellow.
+
+The question to ask before moving anything: to estimate the slope better, is it
+better to double the number of points or to double the range of x? Doubling L
+halves the standard deviation, doubling N only divides it by √2, and the two
+markers in the statline confirm it. That is experimental design in one
+sentence — where the points are placed matters more than how many there are.`,
   },
   {
-    id: 'aberrant',
-    title: 'Scène 4 · Un seul point suffit à tout tordre',
+    id: 'outlier',
+    title: 'Scene 4 · One point is enough to bend everything',
     params: { a: 1.5, b: 1, sigma: 0.6, N: 20, spread: 3, outlier: 0 },
     view: 'fit',
     visible: ['outlier'],
-    notes: `Geler (F) avec un ajustement propre, puis éloigner LE dernier point.
-La droite bleue part le rejoindre : élever au carré, c'est donner à l'écart
-le plus grand un poids écrasant. Le point est au bord, donc son levier est
-maximal — la scène 3 explique pourquoi.
-Regarder R² s'effondrer, et surtout l'onglet Résidus : un résidu géant
-isolé, signature d'une donnée aberrante et pas d'un mauvais modèle.
-Morale : les moindres carrés n'ont aucune défense contre une valeur fausse.
-C'est la porte d'entrée des méthodes robustes.`,
+    notes: `Freezing a clean fit and then dragging the last point away shows the
+blue line following it. Squaring the errors gives the largest one a crushing
+weight, and the point sits at the edge of the range, so its leverage is maximal
+— which is exactly what the previous scene measured.
+
+R² collapses, and the residuals view is more informative still: one enormous
+isolated residual is the signature of a bad data point rather than a bad model.
+Least squares has no defence at all against a wrong value, which is the door
+into robust methods.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

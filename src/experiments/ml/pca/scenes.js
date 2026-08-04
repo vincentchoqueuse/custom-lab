@@ -2,112 +2,111 @@
 export default [
   {
     id: 'cloud',
-    title: 'Scène 1 · Quatre dimensions, une photo',
+    title: 'Scene 1 · Four dimensions, one photograph',
     view: 'scores',
     params: { dataset: 'iris', standardize: false, k: 2, xComp: 1, yComp: 2 },
     visible: ['dataset', 'xComp'],
-    notes: `150 iris, quatre mesures chacun : longueur et largeur de sépale,
-longueur et largeur de pétale. Un nuage dans un espace à quatre dimensions,
-que personne ne sait dessiner.
+    notes: `A hundred and fifty irises, four measurements each: sepal length and
+width, petal length and width. A cloud in a four-dimensional space that nobody
+can draw.
 
-L'ACP cherche les directions le long desquelles ce nuage s'étale le plus, et
-la figure montre la projection sur les deux premières. Ce n'est pas UNE
-photo du nuage : c'est LA meilleure photo plane, au sens des moindres
-carrés — et l'onglet « Erreur de reconstruction » le démontre.
+PCA looks for the directions along which that cloud spreads most, and the
+figure shows the projection onto the first two. This is not A photograph of the
+cloud, it is THE best flat photograph of it in the least-squares sense, which
+the reconstruction tab demonstrates rather than asserts.
 
-Les trois espèces se séparent presque parfaitement, et personne ne les a
-données à l'algorithme. L'ACP ne sait pas qu'il y a des espèces : elle a
-cherché de la variance, et la structure biologique était dedans.
+The three species separate almost perfectly, and nobody gave them to the
+algorithm. PCA does not know that species exist: it looked for variance, and
+the biological structure was in there.
 
-Basculer sur les manchots de Palmer (342 individus, mêmes quatre mesures,
-CC0) : même exercice, autre bestiaire. La séparation y est moins nette sur
-le jeu brut, et la scène 3 dira pourquoi.
+Switching to the Palmer penguins — 342 individuals, the same four measurements,
+CC0 — repeats the exercise on another bestiary. The separation is less clean on
+the raw data, and the third scene explains why.
 
-Puis mettre l'abscisse sur CP3 et l'ordonnée sur CP4 : le nuage s'effondre
-en une bouillie ronde. Ces deux composantes-là ne portent que 2.2 % de la
-variance, et rien de reconnaissable. C'est ce que « garder deux
-composantes » veut dire concrètement.`,
+Putting PC3 on the horizontal axis and PC4 on the vertical one collapses the
+cloud into a round blur. Those two components carry 2.2 % of the variance
+between them and nothing recognizable, which is what "keeping two components"
+means concretely.`,
   },
   {
     id: 'scree',
-    title: 'Scène 2 · Combien en garder',
+    title: 'Scene 2 · How many to keep',
     view: 'scree',
     params: { dataset: 'iris', standardize: false, k: 2, xComp: 1, yComp: 2 },
     visible: ['k', 'standardize'],
-    notes: `L'éboulis. CP1 porte 92.46 % de la variance, CP2 5.31 %, et les
-deux dernières 2.2 % à elles deux. La courbe orange cumule : à k = 2 on est
-à 97.77 %.
+    notes: `The scree plot. PC1 carries 92.46 % of the variance, PC2 5.31 %, and
+the last two 2.2 % between them. The orange curve accumulates: at k = 2 the
+total is 97.77 %.
 
-Voilà pourquoi on garde deux composantes — pas parce que le plan est commode
-à dessiner, mais parce que la troisième n'apporterait que 1.7 %.
+That is why two components are kept — not because a plane is convenient to
+draw, but because the third would add 1.7 %.
 
-Le décrochage entre CP1 et CP2 est le « coude » que tout le monde cherche
-dans un éboulis. Ici il est franc. Dire aussi que ce n'est pas toujours le
-cas : sur des données sans structure forte, l'éboulis descend en pente
-douce et le choix de k redevient un jugement.`,
+The drop between PC1 and PC2 is the "elbow" everyone looks for in a scree plot,
+and here it is unmistakable. It is worth saying that this is not always so: on
+data without strong structure the scree falls gently and the choice of k
+becomes a judgement again.`,
   },
   {
     id: 'standardize',
-    title: 'Scène 3 · Le piège des unités',
+    title: 'Scene 3 · The trap of units',
     view: 'scree',
     params: { dataset: 'penguins', standardize: false, k: 2, xComp: 1, yComp: 2 },
     visible: ['standardize', 'dataset'],
-    notes: `Les manchots de Palmer : 342 individus, quatre mesures — trois
-longueurs en millimètres et une MASSE EN GRAMMES.
+    notes: `The Palmer penguins: 342 individuals and four measurements — three
+lengths in millimetres and one MASS IN GRAMS.
 
-Regarder l'éboulis avant de dire quoi que ce soit. **99.99 %** sur la
-première composante. Laisser la salle réagir : un tel chiffre a l'air d'un
-triomphe.
+The scree plot is worth showing before saying anything: 99.99 % on the first
+component. A number like that looks like a triumph, and the room should be
+allowed to react to it.
 
-C'en est un pour l'algorithme et une catastrophe pour l'analyse. La statline
-dit ce que CP1 mesure : « masse ». Rien d'autre. La variance de la masse
-vaut 643 000 g² contre 30 mm² pour la longueur du bec — on diagonalise la
-covariance, donc la variable aux plus grands nombres rafle tout. Ce n'est
-pas un résultat biologique, c'est un choix d'unité.
+It is a triumph for the algorithm and a disaster for the analysis. The statline
+says what PC1 measures: mass, and nothing else. The variance of the mass is
+643 000 g² against 30 mm² for the bill length, and since the covariance is what
+is being diagonalized, the variable carrying the largest numbers takes
+everything. That is a choice of unit, not a biological result.
 
-Cocher « standardiser » : on diagonalise alors la corrélation, les quatre
-variables pèsent pareil. CP1 tombe à **68.84 %** et devient la LONGUEUR DE
-NAGEOIRE — une grandeur qui, elle, sépare vraiment les espèces. Retourner à
-l'onglet du nuage pour le voir.
+Ticking "standardize" diagonalizes the correlation instead, giving the four
+variables equal weight. PC1 falls to 68.84 % and becomes FLIPPER LENGTH — a
+quantity that genuinely separates the species, as the cloud view then shows.
 
-Puis basculer sur l'iris, où le même phénomène existe en plus discret :
-92.46 % non standardisé, CP1 presque uniquement la longueur de pétale ;
-72.96 % standardisé. Le harnais y ajoute la preuve directe : passer la SEULE
-largeur de sépale des centimètres aux millimètres change la réponse sur
-covariance (92.46 → 84.64 %, et CP1 devient la largeur de sépale) et ne la
-change PAS sur corrélation, à 1e-12 près.
+The same phenomenon exists on the irises, more discreetly: 92.46 % unstandardized
+with PC1 almost entirely petal length, 72.96 % standardized. The harness adds
+the direct proof: taking the sepal width ALONE from centimetres to millimetres
+changes the answer on covariance — 92.46 % to 84.64 %, with PC1 becoming sepal
+width — and does not change it on correlation, to 1e-12.
 
-La règle à retenir : variables de même nature et de même unité, covariance ;
-variables hétérogènes, corrélation. Et dans le doute, montrer les deux — ce
-que cette expérience permet en un clic.`,
+The rule worth keeping: variables of the same nature and unit, covariance;
+heterogeneous variables, correlation. And when in doubt, show both, which this
+experiment allows in one click.`,
   },
   {
     id: 'reconstruction',
-    title: 'Scène 4 · Le théorème qu’on regarde',
+    title: 'Scene 4 · The theorem, watched',
     view: 'reconstruction',
     params: { dataset: 'iris', standardize: false, k: 2, xComp: 1, yComp: 2 },
     visible: ['k', 'standardize'],
-    notes: `Deux courbes, et elles sont CONFONDUES.
+    notes: `Two curves, and they coincide.
 
-La bleue est mesurée : on reconstruit les 150 fleurs à partir des k
-premières composantes, et on regarde ce qu'on a perdu. L'orange est la somme
-des valeurs propres qu'on a jetées.
+The blue one is measured: the 150 flowers are reconstructed from the first k
+components and what was lost is computed. The orange one is the sum of the
+eigenvalues that were discarded.
 
-Ce n'est ni une borne, ni une approximation, ni un hasard numérique : c'est
-le théorème d'Eckart–Young (1936, la même année que l'article de Fisher).
-Il dit que la projection sur les k premières composantes est LA meilleure
-approximation de rang k, et que l'erreur vaut exactement ce qui reste. Le
-harnais l'épingle à 1e-12, avec et sans standardisation.
+This is neither a bound, nor an approximation, nor a numerical coincidence: it
+is the Eckart–Young theorem of 1936, the same year as Fisher's paper. It says
+that projecting onto the first k components is THE best rank-k approximation,
+and that the error is exactly what remains. The harness pins it to 1e-12, with
+and without standardization.
 
-C'est ce qui distingue l'ACP d'une heuristique : sa qualité se calcule
-d'avance, sans rien reconstruire. Balayer k de 1 à 4 et regarder les deux
-courbes descendre ensemble jusqu'à zéro exact.
+That is what distinguishes PCA from a heuristic — its quality can be computed
+in advance, without reconstructing anything. Sweeping k from 1 to 4 brings both
+curves down together to exactly zero.
 
-Le lien à faire avec le reste du catalogue : c'est la MÊME décomposition
-propre de covariance que dans « techniques hautes résolutions ». Là-bas les
-grandes valeurs propres étaient le signal et les petites le bruit ; ici les
-grandes sont ce qu'on garde et les petites ce qu'on jette. Une seule algèbre,
-deux lectures — et c'est ce genre de pont qui fait qu'un cours tient.`,
+The connection to make with the rest of the catalogue: this is the SAME
+eigendecomposition of a covariance matrix as in the high-resolution methods.
+There the large eigenvalues were signal and the small ones noise; here the
+large ones are what is kept and the small ones what is thrown away. One
+algebra, two readings — and bridges like this one are what make a course hold
+together.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

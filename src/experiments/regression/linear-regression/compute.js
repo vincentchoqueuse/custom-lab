@@ -1,4 +1,4 @@
-// Simple linear regression, y = a·x + b + bruit, by ordinary least squares.
+// Simple linear regression, y = a·x + b + noise, by ordinary least squares.
 // The closed form is the whole point, so nothing here is iterated:
 //   â = Sxy / Sxx      b̂ = ȳ − â·x̄      with Sxx = Σ(xᵢ − x̄)², Sxy = Σ(xᵢ − x̄)(yᵢ − ȳ)
 // and the two properties that CHARACTERISE the solution, both checked to
@@ -112,15 +112,15 @@ export function compute(params) {
       residuals: { x, y: resid },
       slopes,
       slopePdf: { x: px, y: py },
-      aHat: { value: f.a, meta: { label: 'pente â', precision: 3 } },
-      bHat: { value: f.b, meta: { label: 'ordonnée b̂', precision: 3 } },
+      aHat: { value: f.a, meta: { label: 'slope â', precision: 3 } },
+      bHat: { value: f.b, meta: { label: 'intercept b̂', precision: 3 } },
       r2: { value: r2, meta: { label: 'R²', precision: 4 } },
-      seTh: { value: seA, meta: { label: 'écart-type de â : σ/√Sxx', precision: 4 } },
+      seTh: { value: seA, meta: { label: 'standard deviation of â: σ/√Sxx', precision: 4 } },
       seEmp: {
         value: Math.sqrt(variance(slopes)),
-        meta: { label: 'écart-type mesuré de â', precision: 4 },
+        meta: { label: 'measured standard deviation of â', precision: 4 },
       },
-      sse: { value: sse, meta: { label: 'somme des carrés des résidus', precision: 3 } },
+      sse: { value: sse, meta: { label: 'sum of squared residuals', precision: 3 } },
       sxx: { value: f.sxx, meta: { label: 'Sxx = Σ(xᵢ − x̄)²', precision: 1 } },
     },
   };

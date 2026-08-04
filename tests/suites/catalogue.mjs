@@ -1,11 +1,11 @@
-// Tout le catalogue, dans le bundle construit : chaque vue de chaque
-// expérience dessine, chaque scène se rejoue, `?view=` fait l'aller-retour.
+// The whole catalogue, in the built bundle: every view of every experiment
+// draws, every scene replays, and `?view=` makes the round trip.
 //
-// C'est la suite qui attrape ce qu'aucune vérification numérique ne peut
-// voir : une vue qui référence un observable disparu (elle rend un cadre
-// vide, pas une erreur), une scène qui ouvre un onglet supprimé, un
-// `?view=` qui ne pointe plus nulle part. Toutes ces pannes se ressemblent
-// à l'écran — un graphe absent — et aucune ne fait échouer `npm run check`.
+// This is the suite that catches what no numerical verification can see: a view
+// referencing a vanished observable (it renders an empty frame, not an error), a
+// scene opening a deleted tab, a `?view=` pointing nowhere any more. All these
+// failures look alike on screen — a missing plot — and none of them makes
+// `npm run check` fail.
 import { run, catalogue } from '../harness.mjs';
 
 export default () =>
@@ -28,12 +28,12 @@ export default () =>
         const marks = await h.marks();
         const st = await h.statline();
         t(
-          `${key} « ${tabs[i] ?? '—'} » dessine`,
+          `${key} "${tabs[i] ?? '—'}" draws`,
           marks > 2 && !/⚠|abandon/i.test(st),
-          `${marks} marques`
+          `${marks} marks`
         );
-        // l'onglet ouvert doit être celui que l'URL désigne : c'est ce qui
-        // rend un lien de cours reproductible
+        // the open tab must be the one the URL names: that is what makes a
+        // lecture link reproducible
         const hash = await page.evaluate(() => location.hash);
         const id = hash.match(/[?&]view=([^&]*)/)?.[1];
         if (id) {
@@ -41,7 +41,7 @@ export default () =>
           const active = await page.$$eval('.tabs button.active', (b) =>
             b.map((x) => x.textContent.trim())
           );
-          t(`${key} ?view=${id} rouvre le même onglet`, active[0] === tabs[i], `→ ${active[0]}`);
+          t(`${key} ?view=${id} reopens the same tab`, active[0] === tabs[i], `→ ${active[0]}`);
         }
       }
     }
@@ -61,8 +61,8 @@ export default () =>
         scenes++;
         const marks = await h.marks();
         const st = await h.statline();
-        t(`${key} scène ${i + 1}/${count}`, marks > 2 && !/⚠|abandon/i.test(st), `${marks} marques`);
+        t(`${key} scene ${i + 1}/${count}`, marks > 2 && !/⚠|aborted/i.test(st), `${marks} marks`);
       }
     }
-    console.log(`  ${keys.length} expériences · ${views} vues · ${scenes} scènes`);
+    console.log(`  ${keys.length} experiments · ${views} views · ${scenes} scenes`);
   });

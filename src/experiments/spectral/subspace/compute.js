@@ -1,33 +1,30 @@
-// Au-delà de la résolution de Fourier — et à quel prix.
+// Beyond the Fourier resolution — and at what price.
 //
-// Le périodogramme ne sépare pas deux raies plus proches que Fs/N. Ce n'est
-// pas un défaut d'algorithme : c'est la conséquence d'une hypothèse
-// MINIMALE, celle de ne rien supposer du signal. Les méthodes à haute
-// résolution font l'inverse — elles POSTULENT un modèle, « d exponentielles
-// complexes dans du bruit blanc » — et ce postulat achète une résolution
-// que Fourier ne peut pas atteindre. Toute l'expérience tient dans le prix
-// de ce marché.
+// The periodogram does not separate two lines closer than Fs/N. That is no
+// algorithmic defect: it is the consequence of a MINIMAL assumption, that of
+// assuming nothing about the signal. High-resolution methods do the opposite —
+// they POSTULATE a model, "d complex exponentials in white noise" — and that
+// postulate buys a resolution Fourier cannot reach. The whole experiment lies in
+// the price of that bargain.
 //
-// La covariance R = E[x xᴴ] d'un tel signal a une structure très
-// particulière : ses M valeurs propres se séparent en d GRANDES (le
-// sous-espace signal) et M−d égales à σ² (le sous-espace bruit). Les
-// vecteurs propres du bruit sont orthogonaux à toutes les exponentielles
-// présentes, ce qui donne trois estimateurs :
+// The covariance R = E[x xᴴ] of such a signal has a very particular structure:
+// its M eigenvalues split into d LARGE ones (the signal subspace) and M−d equal
+// to σ² (the noise subspace). The noise eigenvectors are orthogonal to every
+// exponential present, which gives three estimators:
 //
-//   MUSIC        balaie 1/‖Eₙᴴa(f)‖² : là où a(f) tombe dans le signal, le
-//                dénominateur s'annule et le pseudo-spectre explose.
-//   root-MUSIC   annule le même dénominateur ALGÉBRIQUEMENT : les racines
-//                d'un polynôme, donc aucune grille, donc aucune résolution
-//                limitée par un pas de balayage.
-//   ESPRIT       n'utilise même pas le bruit : la structure de décalage du
-//                sous-espace signal donne les fréquences par une résolution
-//                de système linéaire.
+//   MUSIC        sweeps 1/‖Eₙᴴa(f)‖²: where a(f) falls into the signal, the
+//                denominator vanishes and the pseudo-spectrum explodes.
+//   root-MUSIC   cancels the same denominator ALGEBRAICALLY: the roots of a
+//                polynomial, hence no grid, hence no resolution limited by a
+//                sweep step.
+//   ESPRIT       does not even use the noise: the shift structure of the signal
+//                subspace gives the frequencies by solving a linear system.
 //
-// Et le prix, qu'il faut montrer autant que le gain : il faut CONNAÎTRE d.
-// Se tromper ne dégrade pas l'estimation, cela la casse — d trop petit et
-// une source disparaît, d trop grand et des pics fantômes apparaissent. Le
-// paramètre `d` est donc au premier plan, avec la vue des valeurs propres
-// qui sert à le choisir.
+// And the price, which must be shown as much as the gain: d must be KNOWN.
+// Getting it wrong does not degrade the estimation, it breaks it — d too small
+// and a source disappears, d too large and phantom peaks appear. The parameter
+// `d` is therefore front and centre, with the eigenvalue view that serves to
+// choose it.
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { noiseSigma } from '../../../core/dsp.js';
@@ -41,14 +38,14 @@ import {
   esprit,
   lsAmplitudes,
 } from '../_lib/subspace.js';
-// le cadrage figé, partagé avec le manifeste (frame.js)
+// the pinned framing, shared with the manifest (frame.js)
 import { F_LO, F_HI, F_HI_FAR, MODEL_FLOOR } from './frame.js';
 
 const FS = 1000; // Hz
-const F1 = 200; // première raie (Hz)
-const F3 = 330; // troisième raie, franchement à l'écart (Hz)
-const NFFT = 4096; // grille du périodogramme de référence
-const NGRID = 1500; // grille du pseudo-spectre
+const F1 = 200; // first line (Hz)
+const F3 = 330; // third line, plainly off to the side (Hz)
+const NFFT = 4096; // grid of the reference periodogram
+const NGRID = 1500; // grid of the pseudo-spectrum
 const DB_FLOOR = -80;
 
 /**
@@ -59,18 +56,18 @@ const DB_FLOOR = -80;
 export function compute({ N, M, d, sources, df, snr, seed }) {
   const gauss = gaussFrom(mulberry32(seed));
 
-  // L'écart est exprimé en unités de la LIMITE DE FOURIER Fs/N : c'est le
-  // seul réglage qui garde son sens quand on change N, et il met le propos
-  // dans le paramètre lui-même — à 1 le périodogramme sépare tout juste, en
-  // dessous il ne peut plus, quoi qu'on fasse.
+  // The gap is expressed in units of the FOURIER LIMIT Fs/N: the only setting
+  // that keeps its meaning when N changes, and it puts the point inside the
+  // parameter itself — at 1 the periodogram just barely separates, below it
+  // cannot any more, whatever one does.
   const fourier = FS / N;
   const f2 = F1 + df * fourier;
   const freqs = sources === 3 ? [F1, f2, F3] : [F1, f2];
 
-  // Bruit blanc complexe CIRCULAIRE : σ² par quadrature, donc 2σ² au total.
-  // La puissance de référence passée à noiseSigma est donc 0.5 et non 1,
-  // pour une raie de puissance unité — c'est le facteur 2 qu'on ne voit pas
-  // passer quand la conversion est écrite à la main.
+  // CIRCULAR complex white noise: σ² per quadrature, hence 2σ² in total. The
+  // reference power passed to noiseSigma is therefore 0.5 and not 1, for a line
+  // of unit power — that is the factor 2 one does not notice going by when the
+  // conversion is written by hand.
   const sigma = noiseSigma(0.5, snr);
   const xr = new Float64Array(N);
   const xi = new Float64Array(N);
@@ -84,7 +81,7 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
     xi[n] += sigma * gauss();
   }
 
-  /* ---------- la référence : le périodogramme ---------------------------- */
+  /* ---------- the reference: the periodogram ------------------------------ */
   const pr = new Float64Array(NFFT);
   const pi = new Float64Array(NFFT);
   pr.set(xr.subarray(0, Math.min(N, NFFT)));
@@ -107,7 +104,7 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
     py.push(toDb(Math.sqrt(mags[k] / pMax), DB_FLOOR));
   }
 
-  /* ---------- la covariance et son spectre propre ------------------------ */
+  /* ---------- the covariance and its eigenspectrum ------------------------ */
   const Meff = Math.min(M, Math.floor(N / 2));
   const R = covariance(xr, xi, Meff);
   const eig = hermitianEig(R.re, R.im, Meff);
@@ -120,17 +117,17 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
     evIdx[k] = k + 1;
     evDb[k] = toDb(Math.sqrt(Math.max(eig.values[k], 0) / top), DB_FLOOR);
   }
-  // les d retenues comme signal, en surbrillance
+  // the d kept as signal, highlighted
   const selIdx = new Float64Array(dEff);
   const selDb = new Float64Array(dEff);
   for (let k = 0; k < dEff; k++) {
     selIdx[k] = k + 1;
     selDb[k] = evDb[k];
   }
-  // le niveau de bruit théorique σ², et le saut mesuré à la coupure
-  // 2σ² et non σ² : le bruit est complexe circulaire et porte σ² PAR
-  // QUADRATURE, donc une puissance totale de 2σ². C'est le niveau auquel le
-  // plateau se tient, et le check l'épingle contre la moyenne du plateau.
+  // the theoretical noise level σ², and the jump measured at the cutoff.
+  // 2σ² and not σ²: the noise is circular complex and carries σ² PER
+  // QUADRATURE, hence a total power of 2σ². That is the level the plateau sits
+  // at, and the check pins it against the mean of the plateau.
   const noisePow = 2 * sigma * sigma;
   const noiseDb = toDb(Math.sqrt(Math.max(noisePow, 1e-300) / top), DB_FLOOR);
   const gapDb = dEff < Meff ? evDb[dEff - 1] - evDb[dEff] : NaN;
@@ -154,31 +151,30 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
   const rmHz = toHz(rm);
   const esHz = toHz(es);
 
-  // Les estimations, posées sur le pseudo-spectre à hauteur fixe : ce sont
-  // des NOMBRES, pas des courbes, et les voir tomber (ou non) sur les
-  // verticales de vérité est toute la lecture de la vue.
+  // The estimates, laid on the pseudo-spectrum at a fixed height: they are
+  // NUMBERS, not curves, and seeing them land (or not) on the truth verticals is
+  // the whole reading of the view.
   const marks = (hz, y) => ({
     x: Float64Array.from(hz),
     y: Float64Array.from(hz, () => y),
   });
 
-  /* ---------- le MODÈLE complet : fréquences + amplitudes + bruit -------- */
-  // Les méthodes à sous-espace rendent des FRÉQUENCES et rien d'autre. Tant
-  // qu'on s'arrête là, on sait où sont les raies sans savoir ce qu'elles
-  // valent — on ne peut donc ni reconstruire le signal, ni dire si le modèle
-  // explique ce qu'on a mesuré. Les fréquences une fois connues, le modèle
-  // devient LINÉAIRE en ses amplitudes, et un moindres carrés d × d les rend.
-  // Les DEUX estimateurs, pas un choisi : la vue les montre côte à côte
-  // avec la vérité, dans la même représentation, et c'est cette identité de
-  // forme qui permet de les comparer d'un regard plutôt que de traduire
-  // mentalement d'un dessin à l'autre.
+  /* ---------- the full MODEL: frequencies + amplitudes + noise ------------ */
+  // Subspace methods return FREQUENCIES and nothing else. As long as one stops
+  // there, one knows where the lines are without knowing what they are worth —
+  // so one can neither reconstruct the signal nor say whether the model explains
+  // what was measured. Once the frequencies are known the model becomes LINEAR
+  // in its amplitudes, and a d × d least squares returns them. BOTH estimators,
+  // not one picked: the view shows them side by side with the truth, in the same
+  // representation, and it is that identity of form which allows comparing them
+  // at a glance rather than translating mentally from one drawing to another.
   const lsRoot = lsAmplitudes(xr, xi, rm);
   const lsEsprit = lsAmplitudes(xr, xi, es);
 
-  // Deux estimations INDÉPENDANTES de la variance du bruit, qui doivent
-  // tomber d'accord : le résidu du modèle ‖x − Va‖²/N, et la moyenne du
-  // plateau des valeurs propres. Deux chemins qui concordent valent mieux
-  // qu'un chemin qu'on croit sur parole — le harnais vérifie l'accord.
+  // Two INDEPENDENT estimates of the noise variance, which must agree: the
+  // model residual ‖x − Va‖²/N, and the mean of the eigenvalue plateau. Two
+  // routes that agree are worth more than one route taken on trust — the harness
+  // verifies the agreement.
   let plateau = 0;
   let nPlateau = 0;
   for (let k = dEff; k < Meff; k++) {
@@ -188,14 +184,13 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
   plateau = nPlateau ? plateau / nPlateau : NaN;
 
   const dbP = (v) => (v > 0 ? 10 * Math.log10(v) : DB_FLOOR);
-  const MODEL_FLOOR = -60; // plancher de la vue « spectre estimé »
+  const MODEL_FLOOR = -60; // floor of the "estimated spectrum" view
 
-  // TROIS spectres, tous dans la MÊME représentation : des raies (stem) pour
-  // les sinusoïdes, une ligne pour le niveau de bruit. Un spectre de raies
-  // est discret — un trait continu prétendrait qu'il se passe quelque chose
-  // entre elles — et donner à la vérité la forme des estimations est ce qui
-  // permet de les comparer d'un regard. Quand tout va bien les trois se
-  // confondent : c'est le résultat, pas un défaut de lisibilité.
+  // THREE spectra, all in the SAME representation: stems for the sinusoids, a
+  // line for the noise level. A line spectrum is discrete — a continuous stroke
+  // would claim something happens between the lines — and giving the truth the
+  // shape of the estimates is what allows comparing them at a glance. When all
+  // is well the three coincide: that is the result, not a legibility defect.
   const lineSpec = (hz, power) => ({
     x: Float64Array.from(hz),
     y: Float64Array.from(power, (pw) => Math.max(dbP(pw), MODEL_FLOOR)),
@@ -204,7 +199,7 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
   const linesRoot = lineSpec(Array.from(rm, (f) => f * FS), lsRoot.power);
   const linesEsprit = lineSpec(Array.from(es, (f) => f * FS), lsEsprit.power);
 
-  /** pire écart d'amplitude, en dB, sur les raies effectivement appariées */
+  /** worst amplitude gap, in dB, over the lines actually matched */
   const ampErrOf = (hz, power) => {
     let worst = 0;
     for (let k = 0; k < hz.length; k++) {
@@ -214,14 +209,14 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
     return worst;
   };
 
-  /** Le socle de bruit en rectangle : de la base du cadre jusqu'au niveau. */
+  /** The noise floor as a rectangle: from the base of the frame up to the level. */
   const noiseBand = (levelDb) => ({
     x: Float64Array.of(fLo, fHi),
     lo: Float64Array.of(MODEL_FLOOR, MODEL_FLOOR),
     hi: Float64Array.of(levelDb, levelDb),
   });
 
-  /** plus grande erreur d'appariement, en Hz, entre estimations et vérité */
+  /** largest matching error, in Hz, between the estimates and the truth */
   const worstErr = (hz) => {
     if (hz.length === 0) return NaN;
     let worst = 0;
@@ -234,16 +229,16 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
   };
 
   /**
-   * L'erreur QUE L'APPARIEMENT NE VOIT PAS : pour chaque estimation, la
-   * distance à la vraie fréquence la plus proche. `worstErr` regarde si
-   * chaque vraie raie a été trouvée ; celle-ci regarde si une fréquence a
-   * été INVENTÉE, ce qui est le mode de panne d'un d trop grand.
+   * The error MATCHING DOES NOT SEE: for each estimate, the distance to the
+   * nearest true frequency. `worstErr` looks at whether every true line was
+   * found; this one looks at whether a frequency was INVENTED, which is the
+   * failure mode of a d that is too large.
    *
-   * Elle a remplacé une preuve visuelle : le cadrage étant maintenant figé,
-   * une raie fantôme à 840 Hz sort du cadre au lieu de l'étirer. Un chiffre
-   * qui reste au centième de hertz tant que le modèle est juste et saute à
-   * plusieurs centaines dès qu'il ne l'est plus dit la même chose, et le
-   * dit même quand la salle ne regarde pas au bon endroit.
+   * It replaced a visual proof: now that the framing is pinned, a phantom line
+   * at 840 Hz leaves the frame instead of stretching it. A figure that stays at
+   * a hundredth of a hertz while the model is right and jumps to several hundred
+   * as soon as it is not says the same thing, and says it even when the room is
+   * not looking in the right place.
    */
   const strayHz = (hz) => {
     let worst = 0;
@@ -263,90 +258,89 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
       pseudo: { x: gf, y: gy },
       rootMusicMarks: marks(rmHz, -3),
       espritMarks: marks(esHz, -8),
-      // les fréquences vraies, en verticales sur les trois vues
+      // the true frequencies, as verticals on all three views
       fTrue1: F1,
       fTrue2: f2,
       fTrue3: sources === 3 ? F3 : NaN,
       noiseLine: noiseDb,
-      dLine: dEff + 0.5, // verticale : la coupure signal / bruit
+      dLine: dEff + 0.5, // vertical: the signal / noise cutoff
       fourierLimit: {
         value: fourier,
-        meta: { label: 'limite de Fourier Fs/N', unit: 'Hz', precision: 2 },
+        meta: { label: 'Fourier limit Fs/N', unit: 'Hz', precision: 2 },
       },
       spacing: {
         value: f2 - F1,
-        meta: { label: 'écart des deux raies', unit: 'Hz', precision: 2 },
+        meta: { label: 'gap between the lines', unit: 'Hz', precision: 2 },
       },
-      snapshots: { value: R.snapshots, meta: { label: 'instantanés' } },
+      snapshots: { value: R.snapshots, meta: { label: 'snapshots' } },
       eigenGap: {
         value: gapDb,
-        meta: { label: 'saut à la coupure', unit: 'dB', precision: 1 },
+        meta: { label: 'jump at the cutoff', unit: 'dB', precision: 1 },
       },
       errRoot: {
         value: worstErr(rmHz),
-        meta: { label: 'erreur root-MUSIC', unit: 'Hz', precision: 3 },
+        meta: { label: 'root-MUSIC error', unit: 'Hz', precision: 3 },
       },
       errEsprit: {
         value: worstErr(esHz),
-        meta: { label: 'erreur ESPRIT', unit: 'Hz', precision: 3 },
+        meta: { label: 'ESPRIT error', unit: 'Hz', precision: 3 },
       },
       strayRoot: {
         value: strayHz(rmHz),
-        meta: { label: 'invention root-MUSIC', unit: 'Hz', precision: 2 },
+        meta: { label: 'root-MUSIC invention', unit: 'Hz', precision: 2 },
       },
       strayEsprit: {
         value: strayHz(esHz),
-        meta: { label: 'invention ESPRIT', unit: 'Hz', precision: 2 },
+        meta: { label: 'ESPRIT invention', unit: 'Hz', precision: 2 },
       },
-      // les trois spectres, même forme : raies + niveau de bruit
+      // the three spectra, same shape: lines + noise level
       linesTrue,
       linesRoot,
       linesEsprit,
       nsTrue: dbP(2 * sigma * sigma),
       nsRoot: dbP(lsRoot.noise),
       nsEsprit: dbP(lsEsprit.noise),
-      // Le bruit est une puissance ÉTALÉE sur toute la bande, pas une valeur
-      // à une fréquence : un rectangle le dit, une ligne ne le dit pas. Les
-      // raies montent au-dessus d'un socle, et c'est exactement le modèle
-      // « d exponentielles PLUS du bruit blanc » qu'on est en train de
-      // valider. Le bord supérieur reste tracé par-dessus, parce qu'un
-      // aplat translucide ne se lit pas au décibel près.
+      // The noise is a power SPREAD over the whole band, not a value at one
+      // frequency: a rectangle says that, a line does not. The lines rise above
+      // a floor, and that is exactly the model "d exponentials PLUS white
+      // noise" being validated. The upper edge is still drawn on top, because a
+      // translucent wash cannot be read to the decibel.
       bandTrue: noiseBand(dbP(2 * sigma * sigma)),
       bandRoot: noiseBand(dbP(lsRoot.noise)),
       bandEsprit: noiseBand(dbP(lsEsprit.noise)),
       modelFloor: MODEL_FLOOR,
       noiseRoot: {
         value: dbP(lsRoot.noise),
-        meta: { label: 'bruit — root-MUSIC', unit: 'dB', precision: 2 },
+        meta: { label: 'noise — root-MUSIC', unit: 'dB', precision: 2 },
       },
       noiseEsprit: {
         value: dbP(lsEsprit.noise),
-        meta: { label: 'bruit — ESPRIT', unit: 'dB', precision: 2 },
+        meta: { label: 'noise — ESPRIT', unit: 'dB', precision: 2 },
       },
       noiseEigen: {
         value: dbP(plateau),
-        meta: { label: 'bruit — valeurs propres', unit: 'dB', precision: 2 },
+        meta: { label: 'noise — eigenvalues', unit: 'dB', precision: 2 },
       },
       noiseRef: {
         value: dbP(2 * sigma * sigma),
-        meta: { label: 'bruit vrai', unit: 'dB', precision: 2 },
+        meta: { label: 'true noise', unit: 'dB', precision: 2 },
       },
       ampErrRoot: {
         value: ampErrOf(rm, lsRoot.power),
-        meta: { label: 'erreur d’amplitude — root-MUSIC', unit: 'dB', precision: 2 },
+        meta: { label: 'amplitude error — root-MUSIC', unit: 'dB', precision: 2 },
       },
       ampErrEsprit: {
         value: ampErrOf(es, lsEsprit.power),
-        meta: { label: 'erreur d’amplitude — ESPRIT', unit: 'dB', precision: 2 },
+        meta: { label: 'amplitude error — ESPRIT', unit: 'dB', precision: 2 },
       },
       model: {
         value:
           dEff === sources
-            ? `d = ${dEff} = nombre de sources`
+            ? `d = ${dEff} = number of sources`
             : dEff < sources
-              ? `d = ${dEff} < ${sources} sources : il en manque une`
-              : `d = ${dEff} > ${sources} sources : pics fantômes`,
-        meta: { label: 'modèle' },
+              ? `d = ${dEff} < ${sources} sources: one is missing`
+              : `d = ${dEff} > ${sources} sources: phantom peaks`,
+        meta: { label: 'model' },
       },
     },
   };

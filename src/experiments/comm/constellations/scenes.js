@@ -2,42 +2,45 @@
 export default [
   {
     id: 'qpsk',
-    title: 'QPSK confortable',
+    title: 'QPSK, comfortable',
     params: { mod: 'qpsk', snrDb: 15, N: 2000 },
     visible: ['snrDb'],
-    notes: `Quatre nuages bien séparés autour des quatre symboles jaunes : à
-15 dB, la décision au plus proche voisin (frontières pointillées = les
-axes) ne se trompe jamais ou presque. Vocabulaire : symbole émis, bruit
-complexe, région de décision. Baisser le SNR en direct : les nuages
-gonflent, les premiers points orange (erreurs) franchissent les
-frontières vers 6–7 dB. Marteler R : les erreurs changent de place,
-leur NOMBRE est stable — c'est une probabilité, pas un accident.`,
+    notes: `Four well-separated clouds around the four yellow symbols: at 15 dB
+the nearest-neighbour decision, whose boundaries are the dashed axes, is almost
+never wrong. The vocabulary belongs here — transmitted symbol, complex noise,
+decision region.
+
+Lowering the SNR live inflates the clouds, and the first orange errors cross the
+boundaries around 6 to 7 dB. Pressing R moves the errors around while their
+NUMBER stays stable: this is a probability, not an accident.`,
   },
   {
     id: 'qam',
-    title: '16-QAM : le prix des 4 bits',
+    title: '16-QAM: the price of four bits',
     params: { mod: '16qam', snrDb: 15, N: 4000 },
     visible: ['mod', 'snrDb'],
-    notes: `Même énergie moyenne, même bruit — mais 16 symboles au lieu de 4 :
-les régions de décision rétrécissent, les erreurs orange apparaissent
-déjà à 15 dB, là où la QPSK était limpide. Question : « quels symboles
-se trompent le plus ? » — les 4 du centre (4 voisins), puis les bords
-(3), les coins s'en sortent mieux (2). Doubler les bits par symbole se
-paie en dB : geler (F) en QPSK, basculer en 16-QAM, comparer.`,
+    notes: `Same average energy, same noise, but sixteen symbols instead of four:
+the decision regions shrink and orange errors already appear at 15 dB, where
+QPSK was spotless.
+
+Which symbols get it wrong most is worth asking — the four in the middle, with
+four neighbours each, then the edges with three, while the corners cope best
+with two. Doubling the bits per symbol is paid for in decibels: freeze on QPSK,
+switch to 16-QAM, compare.`,
   },
   {
     id: 'ser',
-    title: 'Les courbes en cascade',
+    title: 'The cascade of curves',
     params: { mod: '16qam', snrDb: 12, N: 4000 },
     view: 'ser',
     visible: ['mod'],
-    notes: `L'axe SER est LOGARITHMIQUE : chaque graduation est un facteur 10.
-Les points Monte Carlo collent à la théorie jusqu'à ce que les erreurs
-deviennent trop rares pour être comptées (c'est déjà une leçon : simuler
-un SER de 1e-6 demande des millions de symboles). Basculer BPSK → QPSK →
-8-PSK → 16-QAM : les courbes se décalent vers la droite. À SER = 1e-3,
-lire l'écart QPSK ↔ 16-QAM : ≈ 7 dB — le prix, en puissance, du débit
-doublé. Tout le dimensionnement d'une liaison tient dans cette lecture.`,
+    notes: `The SER axis is LOGARITHMIC, so each gridline is a factor of ten. The
+Monte Carlo points sit on the theory until errors become too rare to count — a
+lesson in itself, since simulating a SER of 1e-6 takes millions of symbols.
+
+Stepping through BPSK, QPSK, 8-PSK and 16-QAM shifts the curves to the right. At
+a SER of 1e-3 the gap between QPSK and 16-QAM is about 7 dB, which is the price
+in power of doubling the rate. Sizing a link is that reading and little else.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

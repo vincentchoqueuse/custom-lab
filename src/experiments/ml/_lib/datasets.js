@@ -1,24 +1,22 @@
-// Les jeux de donnees du sujet, EMBARQUES — le site est purement statique,
-// donc rien ne se telecharge a l'ouverture d'une experience. Quatre
-// kilo-octets pour l'iris : moins qu'une icone.
+// The subject's datasets, EMBEDDED — the site is purely static, so nothing is
+// downloaded when an experiment opens. Four kilobytes for the iris: less than
+// an icon.
 //
-// L'IRIS DE FISHER (1936), le jeu de donnees le plus utilise de toute la
-// statistique appliquee. 150 fleurs, 4 mesures en centimetres, 3 especes de
-// 50 individus. Domaine public, distribue depuis des decennies par le UCI
-// Machine Learning Repository ; cette copie vient du paquet npm
-// `ml-dataset-iris` (MIT) et elle a ete VERIFIEE contre les statistiques
-// publiees avant d'entrer ici : moyennes 5.843 / 3.057 / 3.758 / 1.199,
-// ecarts-types 0.828 / 0.436 / 1.765 / 0.762, et une ACP sur covariance qui
-// rend 92.46 / 5.31 / 1.71 / 0.52 %. Le harnais rejoue ces controles a
-// chaque execution : un jeu de donnees recopie est une donnee comme une
-// autre, donc il se verifie.
+// FISHER'S IRIS (1936), the most used dataset in all of applied statistics. 150
+// flowers, 4 measurements in centimetres, 3 species of 50 individuals. Public
+// domain, distributed for decades by the UCI Machine Learning Repository; this
+// copy comes from the npm package `ml-dataset-iris` (MIT) and was VERIFIED
+// against the published statistics before entering here: means 5.843 / 3.057 /
+// 3.758 / 1.199, standard deviations 0.828 / 0.436 / 1.765 / 0.762, and a
+// covariance PCA returning 92.46 / 5.31 / 1.71 / 0.52 %. The harness replays
+// those checks on every run: a copied dataset is data like any other, so it
+// gets verified.
 //
-// Note d'honnetete, a dire en cours : la copie qui circule partout (UCI)
-// differe de l'article de Fisher sur deux fleurs. Tous les chiffres publies
-// depuis cinquante ans, y compris ceux ci-dessus, se rapportent a CETTE
-// copie-la.
+// A point of honesty worth making in class: the copy that circulates everywhere
+// (UCI) differs from Fisher's paper on two flowers. Every published figure of
+// the last fifty years, including those above, refers to THAT copy.
 
-/** longueur sepale, largeur sepale, longueur petale, largeur petale, espece */
+/** sepal length, sepal width, petal length, petal width, species */
 export const IRIS = [
   [5.1, 3.5, 1.4, 0.2, 0],
   [4.9, 3, 1.4, 0.2, 0],
@@ -173,33 +171,33 @@ export const IRIS = [
 ];
 
 export const IRIS_FEATURES = [
-  'longueur sépale',
-  'largeur sépale',
-  'longueur pétale',
-  'largeur pétale',
+  'sepal length',
+  'sepal width',
+  'petal length',
+  'petal width',
 ];
 export const IRIS_UNITS = 'cm';
 export const IRIS_SPECIES = ['setosa', 'versicolor', 'virginica'];
 
-// LES MANCHOTS DE PALMER (Horst, Hill & Gorman, 2020), l'alternative moderne
-// a l'iris — meme role pedagogique, sans le contexte de l'article de Fisher,
-// paru dans les Annals of Eugenics. Donnees collectees de 2007 a 2009 par la
-// station Palmer, en Antarctique, dans le cadre du programme LTER de la NSF,
-// et publiees sous **CC0** (domaine public volontaire).
+// THE PALMER PENGUINS (Horst, Hill & Gorman, 2020), the modern alternative to
+// the iris — the same pedagogical role, without the context of Fisher's paper,
+// which appeared in the Annals of Eugenics. Data collected from 2007 to 2009 by
+// the Palmer station in Antarctica, under the NSF LTER programme, and released
+// under **CC0** (deliberate public domain).
 //
-// 344 manchots au depart, 342 apres retrait des DEUX individus dont les
-// quatre mesures manquent — le sous-ensemble « cas complets » auquel se
-// rapportent tous les chiffres publies. Cette copie vient du paquet npm
-// `vega-datasets` (BSD-3-Clause), et elle a ete verifiee avant d'entrer ici :
-// 151 Adelie, 68 Chinstrap, 123 Gentoo ; moyennes 43.92 / 17.15 / 200.92 /
-// 4201.75 ; ecarts-types 5.46 / 1.97 / 14.06 / 801.95.
+// 344 penguins to start with, 342 after removing the TWO individuals whose four
+// measurements are missing — the "complete cases" subset to which every
+// published figure refers. This copy comes from the npm package `vega-datasets`
+// (BSD-3-Clause), and it was verified before entering here: 151 Adelie, 68
+// Chinstrap, 123 Gentoo; means 43.92 / 17.15 / 200.92 / 4201.75; standard
+// deviations 5.46 / 1.97 / 14.06 / 801.95.
 //
-// L'interet pedagogique par rapport a l'iris est dans la DERNIERE colonne :
-// la masse est en grammes, donc sa variance vaut 643 000 contre 30 pour la
-// longueur du bec. Sur covariance, la premiere composante est la masse et
-// rien d'autre — le piege des unites n'y est plus visible, il est ecrasant.
+// The pedagogical interest against the iris is in the LAST column: the mass is
+// in grams, so its variance is 643 000 against 30 for the bill length. On
+// covariance, the first component is the mass and nothing else — the units trap
+// is no longer merely visible there, it is overwhelming.
 
-/** longueur bec (mm), épaisseur bec (mm), nageoire (mm), masse (g), espèce */
+/** bill length (mm), bill depth (mm), flipper (mm), body mass (g), species */
 export const PENGUINS = [
   [39.1, 18.7, 181, 3750, 0],
   [39.5, 17.4, 186, 3800, 0],
@@ -546,10 +544,10 @@ export const PENGUINS = [
 ];
 
 export const PENGUIN_FEATURES = [
-  'longueur du bec',
-  'épaisseur du bec',
-  'longueur nageoire',
-  'masse',
+  'bill length',
+  'bill depth',
+  'flipper length',
+  'body mass',
 ];
 export const PENGUIN_UNITS = ['mm', 'mm', 'mm', 'g'];
-export const PENGUIN_SPECIES = ['Adélie', 'à jugulaire', 'papou'];
+export const PENGUIN_SPECIES = ['Adélie', 'chinstrap', 'gentoo'];

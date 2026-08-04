@@ -5,7 +5,7 @@ import { mulberry32, gaussFrom } from '../../../core/rng.js';
 const FS = 1000;
 const BASE = { method: 'raw', win: 'rect', N: 2048, L: 256, snr: 10, a2: -20, df: 40, seed: 1 };
 
-/** Bruit blanc pur d'écart-type σ — le seul signal dont on connaisse la DSP. */
+/** Pure white noise of standard deviation σ — the only signal whose PSD is known. */
 const whiteNoise = (n, sigma, seed) => {
   const g = gaussFrom(mulberry32(seed));
   return Float64Array.from({ length: n }, () => sigma * g());
@@ -13,14 +13,15 @@ const whiteNoise = (n, sigma, seed) => {
 
 export const checks = [
   {
-    name: 'normalisation densité : E[P] = σ²/Fs sur du bruit blanc',
+    name: 'density normalization: E[P] = σ²/Fs on white noise',
     category: 'statistical',
     run() {
-      // La normalisation |X|²/(Fs·Σw²) est choisie POUR que la moyenne du
-      // périodogramme soit σ²/Fs, quelle que soit la fenêtre et quelle que
-      // soit la longueur. On le vérifie sur les quatre fenêtres.
-      // Chaque bin est σ⁴χ²₂/2 : écart-type relatif 1, donc la moyenne sur
-      // M bins a une erreur-type de 1/√M. M ≈ 1024 → SE ≈ 3.1 %, tolérance 4 SE.
+      // The normalization |X|²/(Fs·Σw²) is chosen SO THAT the mean of the
+      // periodogram is σ²/Fs, whatever the window and whatever the length. It is
+      // verified here on all four windows.
+      // Every bin is σ⁴χ²₂/2: relative standard deviation 1, so the mean over M
+      // bins has a standard error of 1/√M. M ≈ 1024 → SE ≈ 3.1 %, tolerance
+      // 4 SE.
       const sigma = 0.7;
       const x = whiteNoise(4096, sigma, 11);
       const target = (sigma * sigma) / FS;
@@ -34,18 +35,19 @@ export const checks = [
         },
         () => 1
       );
-      return { ok: worst < tol, detail: `écart relatif max ${(worst * 100).toFixed(2)} % (tol ${(tol * 100).toFixed(2)} %)` };
+      return { ok: worst < tol, detail: `max relative gap ${(worst * 100).toFixed(2)} % (tol ${(tol * 100).toFixed(2)} %)` };
     },
   },
   {
-    name: "le périodogramme n'est PAS consistant : σ/moyenne ≈ 1 quel que soit N",
+    name: 'the periodogram is NOT consistent: σ/mean ≈ 1 whatever N',
     category: 'statistical',
     run() {
-      // Le résultat central de l'expérience, et le seul dont une régression
-      // détruirait le propos. Sur du bruit blanc chaque bin suit σ⁴χ²₂/2,
-      // dont l'écart-type ÉGALE la moyenne : le rapport vaut 1 pour tout N.
-      // L'écart-type d'un rapport estimé sur M bins d'un χ²₂ vaut ≈ 1/√(2M) ;
-      // pour le plus petit N (512 → M ≈ 256) cela fait 4.4 %, tolérance 4 SE.
+      // The central result of the experiment, and the only one whose regression
+      // would destroy the point. On white noise every bin follows σ⁴χ²₂/2, whose
+      // standard deviation EQUALS its mean: the ratio is 1 for every N. The
+      // standard deviation of a ratio estimated over M bins of a χ²₂ is
+      // ≈ 1/√(2M); for the smallest N (512 → M ≈ 256) that is 4.4 %, tolerance
+      // 4 SE.
       const sigma = 0.7;
       const worst = maxGap(
         [512, 1024, 2048, 4096, 8192],
@@ -59,19 +61,19 @@ export const checks = [
       const tol = 4 / Math.sqrt(2 * 256);
       return {
         ok: worst < tol,
-        detail: `max|σ/moyenne − 1| = ${worst.toFixed(3)} sur N = 512…8192 (tol ${tol.toFixed(3)})`,
+        detail: `max|σ/mean − 1| = ${worst.toFixed(3)} over N = 512…8192 (tol ${tol.toFixed(3)})`,
       };
     },
   },
   {
-    name: 'moyenner K segments divise la fluctuation par √K',
+    name: 'averaging K segments divides the fluctuation by √K',
     category: 'statistical',
     run() {
-      // La loi que la vue « Fluctuation vs K » trace. Segments DISJOINTS,
-      // donc indépendants, donc la moyenne de K périodogrammes suit un
-      // χ²_{2K}/2K, de rapport écart-type/moyenne exactement 1/√K.
-      // Erreur-type du rapport sur M bins : ≈ 1/√(2MK) — d'autant plus
-      // serrée que K est grand, donc la tolérance est prise au pire cas.
+      // The law the "fluctuation vs K" view draws. DISJOINT segments, hence
+      // independent, hence the mean of K periodograms follows a χ²_{2K}/2K,
+      // whose standard-deviation-to-mean ratio is exactly 1/√K. Standard error
+      // of the ratio over M bins: ≈ 1/√(2MK) — the tighter the larger K is, so
+      // the tolerance is taken at the worst case.
       const sigma = 1.1;
       const x = whiteNoise(8192, sigma, 33);
       const rel = [];
@@ -85,17 +87,17 @@ export const checks = [
       const tol = 4 / Math.sqrt(2 * (8192 / 32 / 2)); // pire cas : M = L/2 = 128
       return {
         ok: worst < tol,
-        detail: `max|σ/moy·√K − 1| = ${worst.toFixed(3)} sur K = 2…32 (tol ${tol.toFixed(3)})`,
+        detail: `max|σ/mean·√K − 1| = ${worst.toFixed(3)} over K = 2…32 (tol ${tol.toFixed(3)})`,
       };
     },
   },
   {
-    name: 'la segmentation compte juste : Welch obtient 2N/L − 1 segments, Bartlett N/L',
+    name: 'the segmentation counts right: Welch gets 2N/L − 1 segments, Bartlett N/L',
     category: 'numeric',
     run() {
-      // Comptage exact, pas statistique : c'est la comptabilité qui décide
-      // du gain de Welch, et une erreur d'un segment fausserait la loi
-      // ci-dessus sans rien casser de visible.
+      // Exact counting, not statistical: the accounting is what decides Welch's
+      // gain, and an error of one segment would skew the law above without
+      // breaking anything visible.
       const x = whiteNoise(4096, 1, 5);
       const bad = [];
       for (const L of [64, 128, 256, 512, 1024]) {
@@ -108,17 +110,17 @@ export const checks = [
           if (got !== want) bad.push(`${method} L=${L}: ${got} ≠ ${want}`);
         }
       }
-      return { ok: bad.length === 0, detail: bad.length ? bad.join(' · ') : 'exact pour L = 64…1024' };
+      return { ok: bad.length === 0, detail: bad.length ? bad.join(' · ') : 'exact for L = 64…1024' };
     },
   },
   {
-    name: 'sans bruit, la raie tombe exactement sur son bin',
+    name: 'with no noise, the line lands exactly on its bin',
     category: 'numeric',
     run() {
-      // 150 Hz et 190 Hz à Fs = 1000 sur N = 2048 : 307.2 et 389.12 bins,
-      // donc pas de bin exact — le maximum doit être le bin le plus proche,
-      // et pas un voisin. Vérifie que l'axe des fréquences n'est pas décalé
-      // d'un demi-bin, l'erreur classique et invisible à l'œil.
+      // 150 Hz and 190 Hz at Fs = 1000 over N = 2048: 307.2 and 389.12 bins, so
+      // no exact bin — the maximum must be the nearest bin, not a neighbour.
+      // Verifies that the frequency axis is not shifted by half a bin, the
+      // classic error and one invisible to the eye.
       const { observables: o } = compute({ ...BASE, snr: 200, a2: 0, df: 40 });
       const bin = FS / BASE.N;
       const peakNear = (fc) => {
@@ -134,45 +136,45 @@ export const checks = [
         return o.psd.x[best];
       };
       const worst = maxGap([150, 190], peakNear, (fc) => fc);
-      return { ok: worst <= bin, detail: `écart max ${worst.toFixed(3)} Hz ≤ 1 bin = ${bin.toFixed(3)} Hz` };
+      return { ok: worst <= bin, detail: `max gap ${worst.toFixed(3)} Hz ≤ 1 bin = ${bin.toFixed(3)} Hz` };
     },
   },
   {
-    name: 'la fluctuation tracée est celle que la statline annonce',
+    name: 'the plotted fluctuation is the one the statline announces',
     category: 'numeric',
     run() {
-      // Le point K = 1 de la courbe et le nombre affiché doivent être le
-      // MÊME calcul : la scène 5 affirme à voix haute que le périodogramme
-      // brut est le cas dégénéré de Welch, et c'est vérifiable.
+      // The K = 1 point of the curve and the displayed number must be the SAME
+      // computation: scene 5 states out loud that the raw periodogram is the
+      // degenerate case of Welch, and that is verifiable.
       const { observables: o } = compute({ ...BASE, method: 'raw' });
-      const i = 0; // le premier point du balayage EST le périodogramme brut
+      const i = 0; // the first point of the sweep IS the raw periodogram
       return {
         ok: Math.abs(o.fluctVsK.y[i] - o.stdRatio.value) < 1e-12 && o.fluctVsK.x[i] === 1,
-        detail: `K=${o.fluctVsK.x[i]}, tracé ${o.fluctVsK.y[i].toFixed(6)} vs statline ${o.stdRatio.value.toFixed(6)}`,
+        detail: `K=${o.fluctVsK.x[i]}, plotted ${o.fluctVsK.y[i].toFixed(6)} vs statline ${o.stdRatio.value.toFixed(6)}`,
       };
     },
   },
   {
-    name: "variance vraie (Monte-Carlo) : la loi en 1/√K, et ce que le recouvrement coûte",
+    name: 'true variance (Monte Carlo): the 1/√K law, and what the overlap costs',
     category: 'statistical',
     run() {
-      // Correction d'une affirmation que j'avais d'abord écrite de travers.
-      // La vue « Fluctuation vs K » mesure la dispersion D'UN BIN À L'AUTRE :
-      // c'est ce que l'œil voit comme de l'herbe, mais ce n'est PAS la
-      // variance de l'estimateur à une fréquence donnée — une fenêtre qui
-      // lisse corrèle les bins voisins et rabaisse ce nombre. La vraie
-      // variance se mesure sur des RÉALISATIONS indépendantes, ici R = 200
-      // graines, à f = 300 Hz (bande sans raie).
+      // A correction of a statement first written the wrong way round here. The
+      // "fluctuation vs K" view measures the dispersion FROM ONE BIN TO THE
+      // NEXT: that is what the eye sees as grass, but it is NOT the variance of
+      // the estimator at a given frequency — a smoothing window correlates
+      // neighbouring bins and lowers that number. The real variance is measured
+      // over independent REALIZATIONS, here R = 200 seeds, at f = 300 Hz (a band
+      // with no line).
       //
-      // Le résultat, qui est celui du cours et non un détail numérique :
-      //   brut          σ/moy·√K ≈ 1     — pas consistant
-      //   Bartlett      ≈ 1              — segments disjoints, donc indépendants
-      //   Welch + Hann  ≈ 1              — le recouvrement est presque GRATUIT
-      //   Welch + rect  ≥ 1.10           — il COÛTE 20 %
-      // Autrement dit le recouvrement de Welch ne paie qu'avec une fenêtre
-      // qui s'atténue sur les bords : c'est la raison d'être de cette
-      // fenêtre, et sans elle deux segments voisins partagent la moitié de
-      // leurs échantillons sans aucune atténuation.
+      // The result, which is the one from the course and not a numerical detail:
+      //   raw           σ/mean·√K ≈ 1    — not consistent
+      //   Bartlett      ≈ 1              — disjoint segments, hence independent
+      //   Welch + Hann  ≈ 1              — the overlap is nearly FREE
+      //   Welch + rect  ≥ 1.10           — it COSTS 20 %
+      // In other words Welch's overlap only pays with a window that tapers at
+      // the edges: that is the reason that window exists, and without it two
+      // neighbouring segments share half their samples with no attenuation at
+      // all.
       const R = 200;
       const N = 4096;
       const ratio = (method, win, L) => {
@@ -190,8 +192,8 @@ export const checks = [
         const sd = Math.sqrt(v.reduce((a, b) => a + (b - m) ** 2, 0) / R);
         return (sd / m) * Math.sqrt(K);
       };
-      // erreur-type d'un écart-type estimé sur R réalisations : 1/√(2R) = 5 %,
-      // tolérance 3 SE = 15 %
+      // standard error of a standard deviation estimated over R realizations:
+      // 1/√(2R) = 5 %, tolerance 3 SE = 15 %
       const raw = ratio('raw', 'rect', N);
       const bart = ratio('bartlett', 'rect', 256);
       const wHann = ratio('welch', 'hann', 256);
@@ -200,27 +202,27 @@ export const checks = [
       return {
         ok: near1(raw) && near1(bart) && near1(wHann) && wRect > 1.1,
         detail:
-          `brut ${raw.toFixed(3)} · Bartlett ${bart.toFixed(3)} · ` +
-          `Welch+Hann ${wHann.toFixed(3)} · Welch+rect ${wRect.toFixed(3)} (doit dépasser 1.10)`,
+          `raw ${raw.toFixed(3)} · Bartlett ${bart.toFixed(3)} · ` +
+          `Welch+Hann ${wHann.toFixed(3)} · Welch+rect ${wRect.toFixed(3)} (must exceed 1.10)`,
       };
     },
   },
   {
-    name: 'la raie faible est exactement A₂ dB sous la forte',
+    name: 'the weak line is exactly A₂ dB below the strong one',
     category: 'numeric',
     run() {
-      // A₂ est un niveau en dB, donc un rapport de PUISSANCES : l'écart entre
-      // les deux pics DOIT valoir A₂, pas 2·A₂. Sans bruit et sur des
-      // segments longs, les deux pics sont propres et l'écart est exact à la
-      // discrétisation du bin près.
+      // A₂ is a level in dB, hence a ratio of POWERS: the gap between the two
+      // peaks MUST be A₂, not 2·A₂. Noise-free and over long segments, both
+      // peaks are clean and the gap is exact up to the bin discretization.
       const worst = maxGap(
         [-5, -10, -20, -35, -50],
         (a2) => {
           const { observables: o } = compute({ ...BASE, snr: 200, a2, df: 40, N: 8192, win: 'hann' });
-          // La PUISSANCE du lobe, pas la hauteur du pic : ni 150 ni 190 Hz
-          // ne tombent sur un bin exact, et la perte de feston diffère de
-          // l'un à l'autre. Sommer la densité sur le lobe l'annule, et
-          // l'identité redevient exacte au lieu d'être « à 0.4 dB près ».
+          // The POWER of the lobe, not the height of the peak: neither 150 nor
+          // 190 Hz falls on an exact bin, and the scalloping loss differs
+          // between them. Summing the density over the lobe cancels it, and the
+          // identity becomes exact again instead of holding "to within
+          // 0.4 dB".
           const lobe = (fc) => {
             let p = 0;
             for (let k = 0; k < o.psd.x.length; k++)
@@ -231,20 +233,20 @@ export const checks = [
         },
         (a2) => a2
       );
-      return { ok: worst < 0.05, detail: `écart max ${worst.toFixed(4)} dB sur A₂ = −5…−50 dB` };
+      return { ok: worst < 0.05, detail: `max gap ${worst.toFixed(4)} dB over A₂ = −5…−50 dB` };
     },
   },
   {
-    name: 'la somme des fenêtres raconte les quatre cas, exactement',
+    name: 'the sum of the windows tells the four cases, exactly',
     category: 'numeric',
     run() {
-      // La vue « Découpage et recouvrement » repose entièrement sur cette
-      // somme, et chacun des quatre cas est une identité EXACTE, pas une
-      // tendance : c'est ce qui permet de l'affirmer devant une salle.
-      //   rect  disjoint  → 1 partout
-      //   rect  50 %      → 2 partout (chaque échantillon compté deux fois)
-      //   Hann  50 %      → 1 partout (COLA : reconstruction parfaite)
-      //   Hann  disjoint  → descend à ~0 entre les segments (bords jetés)
+      // The "segmentation and overlap" view rests entirely on this sum, and
+      // each of the four cases is an EXACT identity, not a tendency: that is
+      // what allows stating it in front of a room.
+      //   rect  disjoint  → 1 everywhere
+      //   rect  50 %      → 2 everywhere (every sample counted twice)
+      //   Hann  50 %      → 1 everywhere (COLA: perfect reconstruction)
+      //   Hann  disjoint  → drops to ~0 between segments (edges thrown away)
       const cases = [
         { method: 'bartlett', win: 'rect', min: 1, max: 1 },
         { method: 'welch', win: 'rect', min: 2, max: 2 },
@@ -253,7 +255,7 @@ export const checks = [
       const bad = [];
       for (const c of cases) {
         const { observables: o } = compute({ ...BASE, method: c.method, win: c.win, N: 4096, L: 256 });
-        // régime intérieur seulement : les bords extrêmes n'ont pas de voisin
+        // interior regime only: the outermost edges have no neighbour
         let lo = Infinity;
         let hi = -Infinity;
         for (let i = 256; i < o.windowSum.y.length - 256; i++) {
@@ -263,11 +265,11 @@ export const checks = [
         if (Math.abs(lo - c.min) > 1e-12 || Math.abs(hi - c.max) > 1e-12)
           bad.push(`${c.method}/${c.win}: [${lo.toFixed(6)}, ${hi.toFixed(6)}] ≠ [${c.min}, ${c.max}]`);
       }
-      // et le cas qui MOTIVE le recouvrement : Hann disjoint jette les bords
+      // and the case that MOTIVATES the overlap: disjoint Hann throws the edges away
       const { observables: h } = compute({ ...BASE, method: 'bartlett', win: 'hann', N: 4096, L: 256 });
       let lo = Infinity;
       for (let i = 256; i < h.windowSum.y.length - 256; i++) lo = Math.min(lo, h.windowSum.y[i]);
-      if (lo > 1e-9) bad.push(`bartlett/hann: creux à ${lo.toFixed(6)}, attendu ~0`);
+      if (lo > 1e-9) bad.push(`bartlett/hann: trough at ${lo.toFixed(6)}, expected ~0`);
       return {
         ok: bad.length === 0,
         detail: bad.length ? bad.join(' · ') : 'rect/disjoint=1, rect/50 %=2, Hann/50 %=1, Hann/disjoint→0 (exact)',

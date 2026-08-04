@@ -2,70 +2,73 @@
 export default [
   {
     id: 'through',
-    title: 'Scène 1 · Le signal entre, le signal sort',
+    title: 'Scene 1 · The signal goes in, the signal comes out',
     view: 'response',
     params: { source: 'square', f0: 110, fc: 500, Q: 2, output: 'lp' },
     visible: ['fc', 'output'],
-    notes: `Deux multiplications par échantillon, et le carré s'arrondit. Bouger f_c
-et regarder la sortie changer de forme en direct ; changer de sortie (passe-bas,
-passe-haut, passe-bande, notch) sans rien recalculer d'autre — c'est TOUT
-l'intérêt de la structure à variables d'état.
-Question à poser avant de changer d'onglet : « quelle sortie donne un signal
-qui ressemble encore à un carré ? » Le passe-haut : il garde les angles et
-jette la pente.`,
+    notes: `Two multiplications per sample, and the square wave rounds off.
+Moving f_c changes the shape of the output live, and switching output —
+low-pass, high-pass, band-pass, notch — costs nothing extra, which is the whole
+point of the state-variable structure.
+
+The question before changing tab: which output still looks like a square wave?
+The high-pass, which keeps the corners and throws away the slope.`,
   },
   {
     id: 'sculpt',
-    title: 'Scène 2 · Sculpter les harmoniques',
+    title: 'Scene 2 · Sculpting the harmonics',
     view: 'gain',
     params: { source: 'square', f0: 110, fc: 500, Q: 2, output: 'lp' },
     visible: ['fc', 'output'],
-    notes: `Lire la courbe passe-bas : elle vaut 1 jusqu'à f_c puis s'effondre.
-Le carré d'entrée est un peigne d'harmoniques impairs à 110, 330, 550, 770 Hz ;
-chacun est MULTIPLIÉ par la valeur de la courbe à sa fréquence — c'est tout ce
-que fait un filtre, harmonique par harmonique (le harnais le vérifie à 1e-6).
-Faire l'exercice à voix haute : à f_c = 500 Hz, lesquels survivent ?
-Puis revenir au temporel pour voir le carré arrondi que ça donne. Descendre
-f_c sous 330 Hz : il ne reste que la fondamentale — un sinus.`,
+    notes: `The low-pass curve is 1 up to f_c and then collapses. The input square
+wave is a comb of odd harmonics at 110, 330, 550 and 770 Hz, and each one is
+MULTIPLIED by the value of the curve at its frequency — that is all a filter
+does, harmonic by harmonic, and the harness verifies it to 1e-6.
+
+The exercise is worth doing out loud: at f_c = 500 Hz, which ones survive? Then
+back to the time view for the rounded square that results. Taking f_c below
+330 Hz leaves only the fundamental — a sine.`,
   },
   {
     id: 'resonance',
-    title: 'Scène 3 · La résonance chante',
+    title: 'Scene 3 · Resonance sings',
     view: 'gain',
     params: { source: 'saw', f0: 110, fc: 550, Q: 12, output: 'lp' },
     visible: ['fc', 'Q'],
-    notes: `Q = 12 : une bosse de +20 dB à f_c. L'harmonique qui passe dessous
-est PROJETÉ en avant — glisser f_c lentement de 300 à 1200 Hz : la bosse
-balaie les harmoniques un à un. C'est exactement le geste du filtre d'un
-synthétiseur (le « wah » : f_c qui bouge, rien d'autre). Revenir au temporel :
-le ringing à f_c s'installe dans la forme d'onde, et l'impulsionnelle montre
-la même chose — une oscillation qui met d'autant plus longtemps à mourir que
-Q est grand.`,
+    notes: `At Q = 12 there is a +20 dB bump at f_c, and whichever harmonic passes
+under it is thrown forward. Sliding f_c slowly from 300 to 1200 Hz sweeps the
+bump across the harmonics one at a time — which is exactly the gesture of a
+synthesizer filter, the "wah" being f_c moving and nothing else.
+
+Back in the time view the ringing at f_c settles into the waveform, and the
+impulse response says the same thing: an oscillation that takes longer to die
+the higher Q is.`,
   },
   {
     id: 'four',
-    title: 'Scène 4 · Quatre filtres pour deux multiplications',
+    title: 'Scene 4 · Four filters for two multiplications',
     view: 'gain',
     params: { source: 'square', f0: 110, fc: 600, Q: 2, output: 'lp' },
     visible: ['Q', 'fc'],
-    notes: `La structure de Chamberlin : DEUX multiplications par échantillon,
-et les quatre sorties existent simultanément — passe-bas, passe-bande,
-passe-haut, notch. Monter Q : les quatre réponses se cambrent ensemble autour
-du même f_c (mêmes pôles, numérateurs différents). C'est pour ça que le SVF
-règne sur les synthétiseurs depuis les années 80.`,
+    notes: `The Chamberlin structure costs TWO multiplications per sample and
+gives all four outputs at once — low-pass, band-pass, high-pass and notch.
+
+Raising Q arches all four responses together around the same f_c: same poles,
+different numerators. That is why the SVF has ruled synthesizers since the
+1980s.`,
   },
   {
     id: 'notch',
-    title: 'Scène 5 · Le notch chirurgical',
+    title: 'Scene 5 · The surgical notch',
     view: 'gain',
     params: { source: 'square', f0: 110, fc: 330, Q: 8, output: 'notch' },
     visible: ['fc', 'Q'],
-    notes: `Courbe notch : une encoche qui plonge exactement à f_c (propriété du
-choix f₁ = 2·sin(πf_c/Fs), vérifiée par le harnais). Posée sur 330 Hz, elle
-tombe pile sur l'harmonique 3 du carré, qui DISPARAÎT.
-Vue temporelle : le carré est à peine altéré —
-un harmonique ne pèse presque rien dans la forme. Monter Q : l'encoche
-s'affine, les voisins respirent. C'est le filtre anti-50 Hz de tout
-instrument de mesure.`,
+    notes: `The notch curve dives exactly at f_c, a property of the choice
+f₁ = 2·sin(πf_c/Fs) that the harness verifies. Placed at 330 Hz it lands on the
+third harmonic of the square wave, which DISAPPEARS.
+
+In the time view the square is barely altered — one harmonic weighs almost
+nothing in the shape. Raising Q sharpens the notch and lets its neighbours
+breathe. This is the 50 Hz rejection filter of every measuring instrument.`,
   },
 ];

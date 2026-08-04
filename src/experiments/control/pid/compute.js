@@ -128,17 +128,17 @@ export function compute({ Kp, Ki, Kd, sigma, seed }) {
       zeroDb: toDb(1), // hline: 0 dB, where the phase margin is read
       overshoot: {
         value: Math.max(0, (overshootMax - 1) * 100),
-        meta: { label: 'dépassement', unit: '%', precision: 1 },
+        meta: { label: 'overshoot', unit: '%', precision: 1 },
       },
       ess: {
         value: essAcc / essCnt,
-        meta: { label: 'erreur statique (avant perturbation)', precision: 4 },
+        meta: { label: 'steady-state error (before the disturbance)', precision: 4 },
       },
       rejection: {
         value: rejAcc / rejCnt,
-        meta: { label: '|erreur| finale', precision: 4 },
+        meta: { label: 'final |error|', precision: 4 },
       },
-      uStd: { value: uStd, meta: { label: 'σ(u) régime établi', precision: 3 } },
+      uStd: { value: uStd, meta: { label: 'σ(u) in steady state', precision: 3 } },
     },
   };
 }

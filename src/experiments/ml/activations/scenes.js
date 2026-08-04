@@ -2,101 +2,99 @@
 export default [
   {
     id: 'shape',
-    title: 'Scène 1 · La courbe, et sa dérivée',
+    title: 'Scene 1 · The curve, and its derivative',
     view: 'transfer',
     params: { act: 'relu', signal: 'sine', gain: 1, bias: 0 },
     visible: ['act', 'bias'],
-    notes: `Passer les six activations dans l'ordre et regarder DEUX courbes,
-pas une : σ en bleu, σ′ en orange.
+    notes: `Going through the six activations in order, there are TWO curves to
+watch rather than one: σ in blue and σ′ in orange.
 
-  identité   σ′ = 1 partout — et c'est justement le problème, voir scène 4
-  ReLU       σ′ vaut 1 ou 0. Rien entre les deux.
-  leaky      le 0 devient 0.01 : le neurone mort peut revenir
-  tanh       σ′(0) = 1, puis s'effondre
-  sigmoïde   σ′(0) = 0.25 AU MIEUX, 1.8·10⁻² à x = 4, 3.4·10⁻⁴ à x = 8
+  identity   σ′ = 1 everywhere — which is precisely the problem, see scene 4
+  ReLU       σ′ is 1 or 0, with nothing in between
+  leaky      the 0 becomes 0.01, so a dead neuron can come back
+  tanh       σ′(0) = 1, then collapses
+  sigmoid    σ′(0) = 0.25 AT BEST, 1.8·10⁻² at x = 4, 3.4·10⁻⁴ at x = 8
 
-Le chiffre est dans la statline. Attention à ce qu'on en dit, parce que la
-version courante est fausse : un seul étage saturé ne divise pas le gradient
-par mille, il le divise par 57 à x = 4. Ce qui tue, c'est l'EMPILEMENT — dix
-couches au mieux de leur forme multiplient le gradient par 0.25¹⁰ = 10⁻⁶.
-Le « gradient qui disparaît » n'a donc rien de mystérieux : c'est une
-multiplication répétée, et ReLU la remplace par 1.
+The statline carries the number, and it is worth being careful about what is
+claimed from it: one saturated stage does not divide the gradient by a
+thousand, it divides it by 57 at x = 4. What kills a deep network is the
+STACKING — ten layers at their very best multiply the gradient by
+0.25¹⁰ = 10⁻⁶. The vanishing gradient is therefore nothing mysterious; it is
+repeated multiplication, and ReLU replaces the factor by 1.
 
-Bouger le biais : la courbe glisse. C'est tout ce que fait un biais, et
-c'est déjà beaucoup — il choisit OÙ dans la courbe le signal travaille.
+Moving the bias slides the curve. That is all a bias does, and it is already a
+great deal: it chooses WHERE in the curve the signal works.
 
-Puis l'onglet « Dérivées comparées », qui met les cinq σ′ sur la même
-figure : c'est de là qu'on choisit une activation. Éteindre les courbes une
-à une au clic dans la légende pour les comparer deux à deux. Une seule
-passe sous zéro, GELU — sa dérivée descend à −0.13, donc elle n'est pas
-monotone, ce qui surprend et mérite d'être dit.`,
+The "Derivatives compared" tab puts the five σ′ on one figure, which is where
+an activation is actually chosen. Clicking legend chips off one at a time
+allows pairwise comparison. Only one of them dips below zero, GELU, whose
+derivative reaches −0.13 — it is not monotone, which surprises and deserves
+saying out loud.`,
   },
   {
     id: 'harmonics',
-    title: 'Scène 2 · Une non-linéarité crée des fréquences',
+    title: 'Scene 2 · A nonlinearity creates frequencies',
     view: 'spectrum',
     params: { act: 'relu', signal: 'sine', gain: 1, bias: 0 },
     visible: ['act', 'gain'],
-    notes: `Une sinusoïde à 16 Hz entre. En sortie de ReLU : une raie continue,
-le fondamental, et un peigne à 32, 64, 96 Hz — que personne n'a mis là.
+    notes: `A 16 Hz sinusoid goes in. Out of the ReLU comes a DC line, the
+fundamental, and a comb at 32, 64 and 96 Hz that nobody put there.
 
-C'est un redressement simple, et sa série de Fourier est connue depuis 1822 :
-    continue = A/π,  fondamental = A/2,  harmonique 2k = 2A/(π(4k²−1))
-Le harnais vérifie que les raies mesurées tombent dessus à 1e-12. Ce n'est
-donc pas une illustration, c'est la formule.
+This is plain half-wave rectification, and its Fourier series has been known
+since 1822: DC = A/π, fundamental = A/2, harmonic 2k = 2A/(π(4k²−1)). The
+harness verifies that the measured lines land on those values to 1e-12, so this
+is the formula rather than an illustration of it.
 
-Puis passer à tanh, et faire prédire AVANT : les harmoniques paires
-disparaissent. Raison : tanh est IMPAIRE, et une fonction impaire d'une
-sinusoïde ne peut contenir que des harmoniques impaires. La parité de la
-fonction se lit directement sur le spectre.
+Switching to tanh is worth predicting first: the even harmonics disappear.
+The reason is parity — tanh is an odd function, and an odd function of a
+sinusoid can only contain odd harmonics. The parity of the function is legible
+directly in the spectrum.
 
-Repasser à l'identité pour finir : le spectre de sortie est celui d'entrée,
-raie pour raie. Une couche linéaire n'invente rien.`,
+Ending on the identity closes the argument: the output spectrum is the input
+spectrum, line for line. A linear layer invents nothing.`,
   },
   {
     id: 'imd',
-    title: 'Scène 3 · Deux tons, et la raie qu’on ne peut pas filtrer',
+    title: 'Scene 3 · Two tones, and the line that cannot be filtered',
     view: 'spectrum',
     params: { act: 'tanh', signal: 'two', gain: 2, bias: 0 },
     visible: ['gain', 'act'],
-    notes: `Deux tons, 16 et 21 Hz. En sortie il y a bien plus que leurs
-harmoniques : il y a des SOMMES et des DIFFÉRENCES. La plus gênante est
-2f₁ − f₂ = 11 Hz — la statline la chiffre.
+    notes: `Two tones, at 16 and 21 Hz. The output holds far more than their
+harmonics: it holds SUMS and DIFFERENCES, and the awkward one is
+2f₁ − f₂ = 11 Hz, which the statline measures.
 
-Pourquoi elle est gênante, et c'est le point de la scène : les harmoniques
-sont loin, un filtre passe-bas les enlève. Celle-ci est ENTRE les deux tons,
-dans la bande utile. Aucun filtre ne la retire sans retirer le signal.
+Why it is awkward is the point of the scene. The harmonics are far away and a
+low-pass filter removes them. This line sits BETWEEN the two tones, inside the
+useful band, and no filter takes it out without taking the signal with it.
 
-C'est le fléau des amplificateurs, des convertisseurs et des étages RF, et
-c'est aussi ce qu'un réseau de neurones fait volontairement à chaque couche :
-mélanger des fréquences pour en fabriquer de nouvelles.
+That is the plague of amplifiers, converters and RF stages, and it is also what
+a neural network does deliberately at every layer: mixing frequencies to
+manufacture new ones.
 
-Monter g et regarder la raie grimper trois fois plus vite que le signal, en
-dB. Mesuré : à g = 0.05 → 0.1, le fondamental monte de 1 (en log₂) et
-l'intermodulation de 2.99. La loi du 3 pour 1 est donc exacte — EN PETIT
-SIGNAL.
-
-Puis pousser à g = 0.4 → 0.8 : la pente tombe à 2.41. Le régime cubique s'est
-refermé, tanh comprime. Dire les deux : une loi asymptotique sans son domaine
-de validité est une demi-vérité, et c'est précisément celle qu'on applique
-ensuite hors domaine.`,
+Raising g makes the line climb three times faster than the signal, in dB.
+Measured: from g = 0.05 to 0.1 the fundamental rises by 1 in log₂ and the
+intermodulation by 2.99, so the three-for-one law is exact — IN SMALL SIGNAL.
+Pushing to g = 0.4 → 0.8 drops the slope to 2.41, because the cubic regime has
+closed and tanh is compressing. Both halves belong in the lecture: an
+asymptotic law without its domain of validity is a half-truth, and it is
+exactly the half that gets applied outside the domain.`,
   },
   {
     id: 'why',
-    title: 'Scène 4 · Pourquoi il en faut une',
+    title: 'Scene 4 · Why one is needed at all',
     view: 'time',
     params: { act: 'identity', signal: 'square', gain: 1, bias: 0 },
     visible: ['act'],
-    notes: `Activation « identité » : la sortie EST l'entrée. Le spectre aussi.
+    notes: `With the identity activation the output IS the input, and so is the
+spectrum.
 
-Poser la question qui ouvre l'expérience suivante :
-« si toutes les activations étaient l'identité, que ferait un réseau de dix
-couches ? »
+The question that opens the next experiment: if every activation were the
+identity, what would a ten-layer network compute?
 
-Réponse : le produit de dix matrices, c'est-à-dire UNE matrice. Dix couches
-linéaires ont exactement le pouvoir d'expression d'une seule — la profondeur
-ne sert alors à rien du tout. C'est démontré à l'écran dans l'expérience
-« Pouvoir d'expression », et c'est la raison d'être de tout ce fichier.`,
+The product of ten matrices, which is to say one matrix. Ten linear layers have
+exactly the expressive power of one, so depth buys nothing whatsoever. The
+expressive-power experiment demonstrates it on screen, and it is the reason
+this whole file exists.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

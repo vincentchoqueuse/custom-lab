@@ -1,29 +1,26 @@
-// Les images du sujet — CALCULÉES, jamais copiées.
+// The subject's images — COMPUTED, never copied.
 //
-// C'est un choix, et il vaut d'être expliqué en cours. L'image de test la
-// plus célèbre du traitement d'image, « Lena », n'est PAS libre de droits :
-// c'est une photographie de Playboy (1972), utilisée pendant cinquante ans
-// sans autorisation claire, et écartée depuis 2019 par l'IEEE puis par
-// Nature. Les autres classiques (Barbara, Mandrill, Peppers) traînent des
-// statuts tout aussi flous.
+// That is a choice, and it deserves explaining in class. The most famous test
+// image in image processing, "Lena", is NOT free of rights: it is a Playboy
+// photograph (1972), used for fifty years without clear permission, and dropped
+// in 2019 by the IEEE and then by Nature. The other classics (Barbara,
+// Mandrill, Peppers) carry statuses just as murky.
 //
-// Le fantôme de SHEPP–LOGAN règle la question : c'est l'image de test
-// standard de l'imagerie médicale depuis 1974, et elle n'est pas une photo
-// mais une FORMULE — dix ellipses aux paramètres publiés. On ne la copie
-// donc pas, on la recalcule, ce qui la rend libre par construction ET
-// vérifiable par le harnais. Un jeu de données recopié se vérifie ; une
-// image recalculée se démontre.
+// The SHEPP–LOGAN phantom settles the question: it has been the standard test
+// image of medical imaging since 1974, and it is not a photograph but a
+// FORMULA — ten ellipses with published parameters. So it is not copied but
+// recomputed, which makes it free by construction AND checkable by the harness.
+// A copied dataset can be verified; a recomputed image can be proved.
 //
-// Version dite « modifiée » (Toft, 1996) : mêmes ellipses, contrastes
-// relevés, parce que l'originale est trop peu contrastée pour un
-// vidéoprojecteur.
+// The so-called "modified" version (Toft, 1996): same ellipses, raised
+// contrasts, because the original is too flat for a video projector.
 //
-// PURE, sans état, sans DOM. Importable depuis compute.js ET check.js.
+// PURE, stateless, no DOM. Importable from compute.js AND check.js.
 
 /**
- * Les dix ellipses du fantôme : [intensité, demi-axe a, demi-axe b,
- * centre x, centre y, rotation en degrés], dans le carré [−1, 1]².
- * Ces vingt-quatre nombres sont ceux de la littérature.
+ * The ten ellipses of the phantom: [intensity, semi-axis a, semi-axis b, centre
+ * x, centre y, rotation in degrees], in the square [−1, 1]².
+ * These twenty-four numbers are the ones from the literature.
  */
 export const SHEPP_LOGAN_ELLIPSES = [
   [1.0, 0.69, 0.92, 0, 0, 0],
@@ -38,11 +35,11 @@ export const SHEPP_LOGAN_ELLIPSES = [
   [0.1, 0.023, 0.046, 0.06, -0.605, 0],
 ];
 
-/** Le fantôme, n × n, valeurs dans [0, 1]. */
+/** The phantom, n × n, values in [0, 1]. */
 export function sheppLogan(n) {
   const img = new Float64Array(n * n);
   for (let i = 0; i < n; i++) {
-    // y descend quand la ligne monte : convention image
+    // y decreases as the row index rises: image convention
     const y = 1 - (2 * (i + 0.5)) / n;
     for (let j = 0; j < n; j++) {
       const x = (2 * (j + 0.5)) / n - 1;
@@ -64,14 +61,13 @@ export function sheppLogan(n) {
 }
 
 /**
- * Une image EXACTEMENT de rang r, par construction. Elle existe pour montrer
- * le cas où la SVD gagne tout : r valeurs singulières non nulles, et rien
- * après.
+ * An image of EXACTLY rank r, by construction. It exists to show the case where
+ * the SVD wins everything: r non-zero singular values, and nothing after.
  *
- * (r − 1) produits extérieurs de sinusoïdes, et la constante que la
- * normalisation ajoute pour la r-ième. Ce détail n'en est pas un : un
- * décalage global EST une couche de rang 1, et l'oublier livrerait une image
- * de rang r + 1 vendue pour du rang r. Le harnais le mesure.
+ * (r − 1) outer products of sinusoids, and the constant that the normalization
+ * adds as the r-th. That detail is not one: a global offset IS a rank-1 layer,
+ * and forgetting it would deliver an image of rank r + 1 sold as rank r. The
+ * harness measures it.
  */
 export function lowRankImage(n, r) {
   const img = new Float64Array(n * n);
@@ -85,11 +81,11 @@ export function lowRankImage(n, r) {
 }
 
 /**
- * Un damier — et le contre-exemple le plus utile de la séance, parce qu'il
- * dit le contraire de ce qu'on attend. Des bords francs partout, l'air très
- * « détaillé », et un rang de… 2 : la valeur d'un pixel s'écrit
- * f(ligne) + g(colonne) − 2·f(ligne)·g(colonne), donc l'image est SÉPARABLE.
- * Deux couches la reconstruisent exactement. L'œil ne juge pas du rang.
+ * A checkerboard — and the most useful counter-example of the session, because
+ * it says the opposite of what is expected. Sharp edges everywhere, a very
+ * "detailed" look, and a rank of… 2: a pixel value is
+ * f(row) + g(column) − 2·f(row)·g(column), so the image is SEPARABLE. Two
+ * layers reconstruct it exactly. The eye does not judge rank.
  */
 export function checkerboard(n, cells) {
   const img = new Float64Array(n * n);
@@ -101,15 +97,15 @@ export function checkerboard(n, cells) {
 }
 
 /**
- * Du bruit : le contre-exemple. Aucune structure, donc rien à compresser.
+ * Noise: the counter-example. No structure, so nothing to compress.
  *
- * Tirage UNIFORME sur [0, 1], et pas un gaussien renormalisé : ce dernier
- * occupe mal la dynamique (± 4σ ramenés dans [0, 1], donc un écart-type de
- * 1/8 autour d'une moyenne de 0.5), si bien que sa première couche — la
- * composante continue — emporte à elle seule 95 % de l'énergie. La courbe
- * d'énergie disait alors qu'un bruit se compresse mieux qu'un fantôme, ce
- * qui est vrai de la MOYENNE et de rien d'autre, et ruinait la démonstration.
- * L'uniforme descend cette part à 75 % et rend la comparaison honnête.
+ * A UNIFORM draw on [0, 1], and not a renormalized Gaussian: the latter fills
+ * the range poorly (±4σ mapped into [0, 1], so a standard deviation of 1/8
+ * around a mean of 0.5), so much so that its first layer — the DC component —
+ * takes 95 % of the energy on its own. The energy curve then claimed that noise
+ * compresses better than a phantom, which is true of the MEAN and of nothing
+ * else, and it wrecked the demonstration. The uniform draw brings that share
+ * down to 75 % and makes the comparison honest.
  */
 export function noiseImage(n, rand) {
   const img = new Float64Array(n * n);
@@ -117,7 +113,7 @@ export function noiseImage(n, rand) {
   return img;
 }
 
-/** Ramène un tableau dans [0, 1] par translation et échelle. */
+/** Maps an array into [0, 1] by a shift and a scale. */
 export function normalize01(a) {
   let lo = Infinity;
   let hi = -Infinity;
@@ -131,21 +127,20 @@ export function normalize01(a) {
   return out;
 }
 
-/* ------------------------------------------------------- affichage BMP -- */
+/* ---------------------------------------------------------- BMP output -- */
 
-// Un BMP 8 bits en niveaux de gris, encodé à la main et rendu en `data:` URI.
+// An 8-bit greyscale BMP, encoded by hand and returned as a `data:` URI.
 //
-// Pourquoi BMP et pas PNG : le PNG demande un deflate et un CRC, soit une
-// centaine de lignes qu'il faudrait vérifier, quand le BMP est un en-tête
-// suivi des octets bruts. Pourquoi pas un canvas : le worker n'a pas le DOM,
-// le harnais tourne dans Node, et la vue doit rester du SVG pur clonable —
-// c'est ce dont dépendent le gel et l'export. Une chaîne `data:` traverse
-// tout cela sans rien supposer.
+// Why BMP and not PNG: PNG needs a deflate and a CRC, some hundred lines that
+// would have to be verified, where BMP is a header followed by raw bytes. Why
+// not a canvas: the worker has no DOM, the harness runs in Node, and the view
+// must stay pure clonable SVG — which is what freeze and export depend on. A
+// `data:` string crosses all of that assuming nothing.
 
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
-/** base64 écrit ici plutôt que via btoa ou Buffer : le même code doit
- *  tourner dans un worker ET dans Node, sans branche selon l'hôte. */
+/** base64 written here rather than through btoa or Buffer: the same code must
+ *  run inside a worker AND inside Node, with no branch on the host. */
 function base64(bytes) {
   let out = '';
   for (let i = 0; i < bytes.length; i += 3) {
@@ -160,12 +155,12 @@ function base64(bytes) {
 }
 
 /**
- * Une image n × n de [0, 1] en `data:image/bmp;base64,…`.
- * Le BMP se lit du BAS vers le haut : les lignes sont écrites à l'envers,
- * faute de quoi l'image apparaît retournée — l'erreur classique du format.
+ * An n × n image of [0, 1] values as `data:image/bmp;base64,…`.
+ * A BMP is read from the BOTTOM up: the rows are written in reverse, failing
+ * which the image appears upside down — the classic mistake with this format.
  */
 export function toBmpDataUri(img, n) {
-  const rowSize = (n + 3) & ~3; // lignes alignées sur 4 octets
+  const rowSize = (n + 3) & ~3; // rows aligned on 4 bytes
   const pixOffset = 14 + 40 + 256 * 4;
   const size = pixOffset + rowSize * n;
   const b = new Uint8Array(size);
@@ -183,13 +178,13 @@ export function toBmpDataUri(img, n) {
   b[1] = 77; // 'M'
   u32(2, size);
   u32(10, pixOffset);
-  u32(14, 40); // taille de l'en-tête DIB
+  u32(14, 40); // size of the DIB header
   u32(18, n);
   u32(22, n);
-  u16(26, 1); // plans
-  u16(28, 8); // bits par pixel
+  u16(26, 1); // planes
+  u16(28, 8); // bits per pixel
   u32(34, rowSize * n);
-  u32(46, 256); // couleurs de la palette
+  u32(46, 256); // palette colours
   for (let k = 0; k < 256; k++) {
     const o = 54 + k * 4;
     b[o] = k;
@@ -197,7 +192,7 @@ export function toBmpDataUri(img, n) {
     b[o + 2] = k;
   }
   for (let i = 0; i < n; i++) {
-    const src = (n - 1 - i) * n; // bas vers haut
+    const src = (n - 1 - i) * n; // bottom to top
     const dst = pixOffset + i * rowSize;
     for (let j = 0; j < n; j++) {
       const v = img[src + j];

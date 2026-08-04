@@ -2,43 +2,50 @@
 export default [
   {
     id: 'syndrome',
-    title: 'Une erreur par trame : gratuite',
+    title: 'One error per frame: free',
     params: { code: 'hamming74', ebn0Db: 5, Nbits: 20000 },
     visible: ['ebn0Db'],
-    notes: `Chaque colonne est une trame de 7 bits (4 données + 3 parités, ligne
-grise). Un point bleu = un bit retourné par le canal. Regarder les
-colonnes à UN SEUL point bleu : aucune erreur orange — le syndrome
-pointe le coupable, le décodeur le corrige. Les oranges n'apparaissent
-que dans les colonnes à 2+ bleus, et parfois sur un bit que le canal
-n'avait PAS touché : le décodeur, sûr de lui, corrige de travers.
-Marteler R, faire compter les colonnes à 2 bleus.`,
+    notes: `Each column is a seven-bit frame — four data bits and three parity
+bits, separated by the grey line — and each blue dot is a bit flipped by the
+channel.
+
+The columns with a SINGLE blue dot carry no orange error at all: the syndrome
+points at the culprit and the decoder corrects it. Orange only appears in
+columns with two or more blue dots, and sometimes on a bit the channel never
+touched — the decoder, quite sure of itself, corrects the wrong one. Pressing R
+and counting the two-dot columns makes the failure rate concrete.`,
   },
   {
     id: 'crossover',
-    title: 'Le croisement : coder peut perdre',
+    title: 'The crossover: coding can lose',
     params: { code: 'hamming74', ebn0Db: 2, Nbits: 40000 },
     view: 'ber',
     visible: ['ebn0Db'],
-    notes: `À Eb/N₀ égal, les 7 bits émis se partagent l'énergie de 4 bits utiles :
-le canal codé est PIRE (taxe −10·log₁₀(4/7) = 2.4 dB). En dessous de
-~3 dB, la violette est AU-DESSUS de la bleue : le code perd — trop
-d'erreurs, il corrige de travers. Au-delà, il gagne, et l'écart croît :
-lire le gain à BER = 10⁻⁵ (~0.6 dB en dur). La pente aussi change :
-p² au lieu de p — le code double la pente de la cascade.`,
+    notes: `At equal Eb/N₀ the seven transmitted bits share the energy of four
+useful ones, so the coded channel is WORSE by a rate penalty of
+−10·log₁₀(4/7) = 2.4 dB.
+
+Below about 3 dB the purple curve is ABOVE the blue one: the code loses, because
+there are too many errors and it corrects the wrong bits. Above it the code
+wins, and the gap grows — the gain at a BER of 10⁻⁵ is about 0.6 dB with hard
+decoding. The slope changes too, from p to p², so the code doubles the steepness
+of the cascade.`,
   },
   {
     id: 'repetition',
-    title: 'La répétition, fausse bonne idée',
+    title: 'Repetition, a plausible bad idea',
     params: { code: 'repetition3', ebn0Db: 5, Nbits: 40000 },
     view: 'ber',
     visible: ['code'],
-    notes: `L'idée naïve de la salle : « répéter trois fois et voter ». Verdict
-sur la courbe : la répétition ×3 ne passe JAMAIS sous le sans-codage —
-la taxe de rendement (4.8 dB !) mange tout le bénéfice du vote, à tout
-Eb/N₀. Rebasculer sur Hamming : même prix par trame (3 parités), mais
-4 bits protégés au lieu d'un. Moralité : un code n'est pas « de la
-redondance », c'est de la redondance STRUCTURÉE — et le choix de la
-structure fait tout. Suite logique : plus long, plus malin (BCH, LDPC).`,
+    notes: `The naive idea the room proposes is to repeat three times and vote.
+The curve delivers the verdict: repetition ×3 NEVER goes below the uncoded
+curve, because a rate penalty of 4.8 dB eats the whole benefit of the vote at
+every Eb/N₀.
+
+Switching back to Hamming makes the comparison sharp: the same price per frame,
+three parity bits, but four protected bits instead of one. A code is not
+redundancy, it is STRUCTURED redundancy, and the structure is what decides. The
+sequel writes itself — longer and cleverer, with BCH and LDPC.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

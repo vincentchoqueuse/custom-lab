@@ -35,8 +35,8 @@
   /** A p => number radius may return NaN: the circle then has no meaning for
    *  the current params and is simply not drawn, legend included — the same
    *  rule vline/hline follow in the cartesian plots. */
-  // un cercle éteint devient un rayon non fini, que IQPlane ne dessine déjà
-  // pas — le chemin d'extinction existait donc déjà, il suffit de l'emprunter
+  // a circle switched off becomes a non-finite radius, which IQPlane already
+  // declines to draw — the path was there, it just had to be taken
   const circleR = $derived(
     off(spec.circle?.label) ? NaN : (num(spec.circle?.radius) ?? (spec.circle ? 1 : NaN))
   );
@@ -66,9 +66,9 @@
    *  legend — an entry pointing at nothing is worse than no entry. */
   const drawn = (v) => v?.x?.length > 0;
 
-  /** Éteinte depuis la légende ? Le plan doit obéir au même clic que le
-   *  tracé cartésien : une pastille cliquable qui ne masque rien serait un
-   *  bouton menteur, et c'est pire que pas de bouton du tout. */
+  /** Switched off from the legend? The plane must obey the same click as a
+   *  cartesian plot: a clickable chip that hides nothing would be a lying
+   *  button, and that is worse than no button at all. */
   const off = (label) => !!label && app.hidden.includes(label);
 
   const curves = $derived.by(() =>

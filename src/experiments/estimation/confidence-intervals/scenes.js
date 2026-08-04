@@ -2,21 +2,26 @@
 // by the registry. Defaults: view = first view, drawer = false.
 export default [
   {
-    id: 'scene-1',
-    title: 'Tout va bien (N=30)',
+    id: 'all-is-well',
+    title: 'All is well (N = 30)',
     params: { N: 30, conf: 0.95 },
     visible: ['N', 'conf'], // Prompt Bar pills
     masked: [], // black box: pill shows "?", revealHidden action
-    notes: `Question à poser AVANT de bouger N :
-« Si je passe N de 30 à 200, la couverture change-t-elle ? »
-Réponse attendue fausse : "elle augmente". Montrer que seule la largeur diminue.`,
+    notes: `The question to put to the room before touching N: if N goes from 30
+to 200, does the coverage change? Most of them will answer that it goes up, and
+it is worth collecting that answer out loud before moving the slider.
+
+It does not. The intervals get narrower and the proportion containing μ stays at
+95 %, because the level is what was asked for and the width is what it costs.`,
   },
   {
-    id: 'scene-2',
-    title: 'Niveau α = 0.20',
+    id: 'level-80',
+    title: 'Level α = 0.20',
     params: { conf: 0.8 },
     visible: ['conf'],
-    notes: `Faire compter les intervalles rouges à voix haute (~1 sur 5).`,
+    notes: `At 1−α = 0.80 the red intervals become common enough to count, and
+counting them out loud is the cheapest way to make the frequentist definition
+concrete: roughly one in five misses, by construction rather than by accident.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

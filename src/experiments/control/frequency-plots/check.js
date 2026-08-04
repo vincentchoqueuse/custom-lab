@@ -15,7 +15,7 @@ const obs = (p) => compute({ ...BASE, ...p }).observables;
 
 export const checks = [
   {
-    name: 'les trois diagrammes tracent le MÊME nombre complexe',
+    name: 'the three diagrams plot the SAME complex number',
     category: 'numeric',
     run() {
       // The whole point of the experiment, as an identity: the Nyquist point,
@@ -51,11 +51,11 @@ export const checks = [
           }, () => 180)
         );
       }
-      return { ok: worst < 1e-12, detail: `écart max ${worst.toExponential(2)}` };
+      return { ok: worst < 1e-12, detail: `max gap ${worst.toExponential(2)}` };
     },
   },
   {
-    name: 'le curseur pointe exactement H(jω_c) sur les quatre vues',
+    name: 'the cursor points at exactly H(jω_c) on all four views',
     category: 'numeric',
     run() {
       const gap = maxGap([0.05, 0.4, 1, 3.7, 40], (wc) => {
@@ -69,11 +69,11 @@ export const checks = [
           Math.abs(o.cursorBlack.x[0] - (Math.atan2(im, re) * 180) / Math.PI)
         );
       });
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'premier ordre : le lieu de Nyquist EST un demi-cercle',
+    name: 'first order: the Nyquist locus IS a half-circle',
     category: 'numeric',
     run() {
       // |H − K/2| = K/2 for every ω — the geometric fact scene 2 claims
@@ -84,11 +84,11 @@ export const checks = [
         (i) => Math.hypot(o.locus.x[i] - K / 2, o.locus.y[i]),
         () => K / 2
       );
-      return { ok: gap < 1e-15, detail: `écart max au cercle ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-15, detail: `max gap au cercle ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'premier ordre : −3.01 dB et −45° exactement à ω = 1/τ',
+    name: 'first order: −3.01 dB and −45° exactly at ω = 1/τ',
     category: 'numeric',
     run() {
       const gap = maxGap([0.08, 0.5, 1, 3.3], (tau) => {
@@ -98,11 +98,11 @@ export const checks = [
           Math.abs(o.cPhase.value + 45)
         );
       });
-      return { ok: gap < 1e-13, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-13, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'second ordre : exactement −90° à ω₀, quel que soit m',
+    name: 'second order: exactly −90° at ω₀, whatever m is',
     category: 'numeric',
     run() {
       // H(jω₀) = K/(2jm): purely imaginary, whatever the damping
@@ -113,11 +113,11 @@ export const checks = [
           Math.abs(o.cMod.value - 1.3 / (2 * m)) / (1.3 / (2 * m))
         );
       });
-      return { ok: gap < 1e-13, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-13, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'résonance : seuil exact à m = 1/√2, pic M_r et ω_r en forme close',
+    name: 'resonance: exact threshold at m = 1/√2, peak M_r and ω_r in closed form',
     category: 'numeric',
     run() {
       // below the threshold the peak exists and matches K/(2m√(1−m²)) at
@@ -129,11 +129,11 @@ export const checks = [
         return Math.max(Math.abs(o.wrOut.value - wantW), Math.abs(o.mrDb.value - wantDb));
       });
       const none = [0.71, 1, 1.8].every((m) => Number.isNaN(obs({ sys: 'second', m }).mrDb.value));
-      return { ok: gap < 1e-13 && none, detail: `écart max ${gap.toExponential(2)}, pas de pic au-dessus de 1/√2` };
+      return { ok: gap < 1e-13 && none, detail: `max gap ${gap.toExponential(2)}, no peak above 1/√2` };
     },
   },
   {
-    name: 'la bosse de Bode est bien au maximum mesuré du gain',
+    name: 'the Bode bump really is at the measured maximum of the gain',
     category: 'numeric',
     run() {
       // the closed-form ω_r must land on the argmax of the drawn curve, to
@@ -146,12 +146,12 @@ export const checks = [
       const ratio = o.gain.x[iMax] / o.wrOut.value;
       return {
         ok: ratio > 1 / step && ratio < step,
-        detail: `argmax à ${o.gain.x[iMax].toFixed(4)}, ω_r = ${o.wrOut.value.toFixed(4)} (pas de grille ${step.toFixed(4)})`,
+        detail: `argmax at ${o.gain.x[iMax].toFixed(4)}, ω_r = ${o.wrOut.value.toFixed(4)} (grid step ${step.toFixed(4)})`,
       };
     },
   },
   {
-    name: 'la grille est centrée sur la pulsation naturelle du système',
+    name: 'the grid is centred on the natural frequency of the system',
     category: 'numeric',
     run() {
       const gap = maxGap(
@@ -167,11 +167,11 @@ export const checks = [
           return Math.abs(mid - naturalW(p.sys ?? 'first', { ...BASE, ...p })) ;
         }
       );
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'boucle ouverte : ω₁₈₀ et la marge de gain en forme close',
+    name: 'open loop: ω₁₈₀ and the gain margin in closed form',
     category: 'numeric',
     run() {
       // arctan(τ₁ω) + arctan(τ₂ω) = 90° ⟺ ω = 1/√(τ₁τ₂) = √5/τ, and there
@@ -196,14 +196,14 @@ export const checks = [
           );
         }
       );
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'boucle ouverte : la marge de phase se lit bien à |H| = 1',
+    name: 'open loop: the phase margin really is read at |H| = 1',
     category: 'numeric',
     run() {
-      // ω à 0 dB has no closed form (it is bisected); what CAN be asserted is
+      // ω at 0 dB has no closed form (it is bisected); what CAN be asserted is
       // that |H| is exactly 1 there, and that the margin is the gap the phase
       // curve leaves to −180° at that very pulsation.
       const gap = maxGap(
@@ -222,15 +222,15 @@ export const checks = [
           );
         }
       );
-      return { ok: gap < 1e-11, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-11, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'boucle ouverte : les deux marges s\'annulent ENSEMBLE à K = 6/τ',
+    name: 'open loop: both margins vanish TOGETHER at K = 6/τ',
     category: 'numeric',
     run() {
       // the scene's punchline, as an identity: at K critique the locus passes
-      // exactly through −1, so ω à 0 dB = ω à −180° and both margins are zero
+      // exactly through −1, so ω at 0 dB = ω at −180° and both margins are zero
       const gap = maxGap([0.15, 0.6, 1, 4], (tau) => {
         const kc = (TAU_RATIO + 1) / tau;
         const o = obs({ sys: 'openloop', tau, K: kc });
@@ -242,7 +242,7 @@ export const checks = [
           Math.abs(o.wcoOut.value - o.w180Out.value)
         );
       });
-      // and the sign flips on the right side of K critique
+      // and the sign flips on the right side of K_crit
       const below = obs({ sys: 'openloop', tau: 1, K: 5.9 });
       const above = obs({ sys: 'openloop', tau: 1, K: 6.1 });
       const signs =
@@ -252,17 +252,17 @@ export const checks = [
         above.phaseMargin.value < 0;
       return {
         ok: gap < 1e-9 && signs,
-        detail: `écart max ${gap.toExponential(2)}, marges positives sous K_crit et négatives au-dessus`,
+        detail: `max gap ${gap.toExponential(2)}, margins positive below K_crit and negative above`,
       };
     },
   },
   {
-    name: 'ω₁₈₀ ne dépend pas de K — seul le lieu grandit',
+    name: 'ω₁₈₀ does not depend on K — only the locus grows',
     category: 'numeric',
     run() {
       // The whole Nyquist criterion in one line: K is a homothety of centre
       // origin — H_K(jω) = K·H_1(jω) at EVERY ω, so the phase is untouched and
-      // ω à −180° with it; only the distance to the fixed −1 point changes.
+      // ω at −180° with it; only the distance to the fixed −1 point changes.
       // Compared at equal ω, not index by index: the plotted grid is framed by
       // gain, so it slides when K does.
       const tau = 0.8;
@@ -283,11 +283,11 @@ export const checks = [
           homothety
         );
       });
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
-    name: 'premier et second ordre : pas de marges (la phase ne coupe jamais −180°)',
+    name: 'first and second order: no margins (the phase never crosses −180°)',
     category: 'numeric',
     run() {
       // the reason the open loop had to be added at all: a stable first or
@@ -303,11 +303,11 @@ export const checks = [
           );
         }
       );
-      return { ok: none, detail: 'marges NaN et phase ≥ −180° pour les ordres 1 et 2' };
+      return { ok: none, detail: 'margins NaN and phase ≥ −180° for orders 1 and 2' };
     },
   },
   {
-    name: 'boucle ouverte : la fenêtre tracée est bornée en gain et en module',
+    name: 'open loop: the plotted window is bounded in gain and in magnitude',
     category: 'numeric',
     run() {
       // the framing IS a numerical property: the grid ends at exactly +30 and
@@ -332,12 +332,12 @@ export const checks = [
       }
       return {
         ok: worstEnds < 1e-9 && cut,
-        detail: `bornes ±${worstEnds.toExponential(2)} dB, coupure exactement à |H| = 3`,
+        detail: `bounds ±${worstEnds.toExponential(2)} dB, cut exactly at |H| = 3`,
       };
     },
   },
   {
-    name: 'le dépliage de _lib/bode.js retrouve la phase en forme close',
+    name: 'the unwrapping in _lib/bode.js recovers the closed-form phase',
     category: 'numeric',
     run() {
       // This experiment computes its phase in CLOSED FORM, because it can.
@@ -368,7 +368,7 @@ export const checks = [
           );
         }
       );
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   standardChecks.determinism(compute, { ...BASE, sys: 'second' }, 'locus'),

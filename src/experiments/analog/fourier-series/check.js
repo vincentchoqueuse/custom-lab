@@ -80,7 +80,7 @@ export const checks = [
     },
   },
   {
-    name: 'train d\'impulsions : aₙ = 2Aα·sinc(nα), par quadrature',
+    name: 'pulse train: aₙ = 2Aα·sinc(nα), by quadrature',
     category: 'numeric',
     run() {
       // the coefficient the experiment draws, confronted with the integral it
@@ -94,7 +94,7 @@ export const checks = [
     },
   },
   {
-    name: 'zéros de l\'enveloppe : aₙ = 0 exactement aux rangs k/α',
+    name: 'zeros of the envelope: aₙ = 0 exactly at orders k/α',
     category: 'numeric',
     run() {
       // α = 1/8 ⇒ the ranks 8, 16, 24… are missing from the spectrum
@@ -106,7 +106,7 @@ export const checks = [
     },
   },
   {
-    name: 'α = 1/2 : rangs pairs nuls, impairs à la moitié du carré',
+    name: 'α = 1/2: even orders vanish, odd ones at half the square wave',
     category: 'numeric',
     run() {
       // the pulse swings A where the ±A square swings 2A: exactly half
@@ -135,7 +135,7 @@ export const checks = [
     },
   },
   {
-    name: 'valeur moyenne du train d\'impulsions = Aα (moyenne temporelle)',
+    name: 'mean value of the pulse train = Aα (time average)',
     category: 'numeric',
     run() {
       // independent route: average the drawn signal over its two periods

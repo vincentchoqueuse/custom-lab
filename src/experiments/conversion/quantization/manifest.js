@@ -6,14 +6,14 @@ export default {
   id: 'quantization',
   order: 3,
   random: true,
-  title: 'Quantification',
-  subtitle: "L'escalier du CAN, son erreur, et la règle des 6 dB par bit",
-  tags: ['numérique', 'CAN', 'quantification', 'SNR', 'dither'],
+  title: 'Quantization',
+  subtitle: 'The ADC staircase, its error, and the 6 dB per bit rule',
+  tags: ['digital', 'ADC', 'quantization', 'SNR', 'dither'],
 
   params: {
-    b: int('b', { description: 'nombre de bits', min: 1, max: 12, default: 8, unit: 'bits' }),
+    b: int('b', { description: 'number of bits', min: 1, max: 12, default: 8, unit: 'bits' }),
     A: float('A', {
-      description: "amplitude relative à la pleine échelle",
+      description: 'amplitude relative to full scale',
       min: 0.05,
       max: 1,
       step: 0.01,
@@ -21,7 +21,7 @@ export default {
       precision: 2,
     }),
     f: float('f', {
-      description: 'fréquence du signal',
+      description: 'signal frequency',
       min: 1,
       max: 20,
       step: 0.1,
@@ -30,7 +30,7 @@ export default {
       precision: 1,
     }),
     dither: bool('dither', {
-      description: 'bruit uniforme ±Δ/2 ajouté AVANT quantification',
+      description: 'uniform noise ±Δ/2 added BEFORE quantization',
       default: false,
     }),
   },
@@ -40,14 +40,14 @@ export default {
       'time',
       line('quantT', {
         width: 1.5,
-        label: 'quantifié',
+        label: 'quantized',
         overlays: [line('cleanT', { color: '#D95319', dashed: true, label: 'signal' })],
         axes: { x: { label: 't', unit: 's' }, y: 'x' },
       })
     ),
     view(
       'error',
-      "L'erreur",
+      'The error',
       line('errT', {
         overlays: [
           hline((p) => 1 / 2 ** p.b, { color: '#EDB120', dashed: true, label: '+Δ/2' }),
@@ -58,17 +58,17 @@ export default {
     ),
     view(
       'error-hist',
-      "Distribution de l'erreur",
+      'Distribution of the error',
       histogram('error', {
-        overlays: [density('errPdf', { label: 'uniforme ±Δ/2' })],
-        axes: { x: 'erreur', y: 'densité' },
+        overlays: [density('errPdf', { label: 'uniform ±Δ/2' })],
+        axes: { x: 'error', y: 'density' },
       })
     ),
     view(
       'snr',
       'SNR vs bits',
       line('snrCurve', {
-        label: 'mesuré',
+        label: 'measured',
         overlays: [
           line('snrTh', { color: '#D95319', dashed: true, label: '6.02b + 1.76 + 20log₁₀A' }),
           vline('b', { color: '#EDB120', dashed: true, label: 'b' }),

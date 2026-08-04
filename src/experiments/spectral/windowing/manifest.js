@@ -5,15 +5,15 @@ import { view, line, vline, hline, figure } from '../../../core/views.js';
 export default {
   id: 'windowing',
   order: 2,
-  title: 'Fenêtrage spectral',
-  subtitle: 'Résolution, fuites et dynamique — ce que la fenêtre fait au spectre',
-  tags: ['numérique', 'DFT', 'fenêtre', 'résolution', 'leakage'],
+  title: 'Spectral windowing',
+  subtitle: 'Resolution, leakage and dynamic range — what the window does to the spectrum',
+  tags: ['digital', 'DFT', 'window', 'resolution', 'leakage'],
 
   params: {
-    win: select('fenêtre', {
-      description: "fenêtre d'observation",
+    win: select('window', {
+      description: 'observation window',
       options: [
-        { value: 'rect', label: 'rectangulaire' },
+        { value: 'rect', label: 'rectangular' },
         { value: 'hann', label: 'Hann' },
         { value: 'hamming', label: 'Hamming' },
         { value: 'blackman', label: 'Blackman' },
@@ -21,7 +21,7 @@ export default {
       default: 'rect',
     }),
     df: float('Δf', {
-      description: 'écart entre les deux raies',
+      description: 'gap between the two lines',
       min: 1,
       max: 50,
       step: 0.5,
@@ -30,7 +30,7 @@ export default {
       precision: 1,
     }),
     a2: float('A₂', {
-      description: 'niveau de la seconde raie',
+      description: 'level of the second line',
       min: -80,
       max: 0,
       step: 1,
@@ -39,7 +39,7 @@ export default {
       precision: 0,
     }),
     N: select('N', {
-      description: "longueur de la fenêtre (échantillons, Fs = 1 kHz)",
+      description: 'window length (samples, Fs = 1 kHz)',
       options: [
         { value: 64, label: '64' },
         { value: 128, label: '128' },
@@ -50,7 +50,7 @@ export default {
       default: 256,
     }),
     pad: select('zero-padding', {
-      description: 'facteur de zero-padding (interpole, ne résout pas)',
+      description: 'zero-padding factor (interpolates, does not resolve)',
       options: [
         { value: 1, label: '×1' },
         { value: 4, label: '×4' },
@@ -59,7 +59,7 @@ export default {
       default: 1,
     }),
     f1: float('f₁', {
-      description: 'fréquence de la première raie',
+      description: 'frequency of the first line',
       min: 100,
       max: 400,
       step: 0.5,
@@ -70,7 +70,7 @@ export default {
   },
 
   groups: [
-    { title: 'Fenêtre', params: ['win', 'N', 'pad'] },
+    { title: 'Window', params: ['win', 'N', 'pad'] },
     { title: 'Signal', params: ['f1', 'df', 'a2'] },
   ],
 
@@ -79,7 +79,7 @@ export default {
       'time',
       line('signal', {
         overlays: [
-          line('envUp', { color: '#D95319', dashed: true, label: 'enveloppe' }),
+          line('envUp', { color: '#D95319', dashed: true, label: 'envelope' }),
           line('envDown', { color: '#D95319', dashed: true }),
         ],
         axes: { x: 'n', y: 'x(n)·w(n)' },
@@ -101,26 +101,25 @@ export default {
 
     view(
       'kernel',
-      'La fenêtre au microscope',
+      'The window under the microscope',
       line('kernel', {
-        // Deux traits, et l'écart entre eux est la leçon : ce que le tracé
-        // MONTRE, et ce que la théorie DIT pour cette fenêtre à ce N —
-        // TFtd en forme close, maximum raffiné par section dorée, jamais
-        // une valeur tabulée. Ils ne coïncident pas exactement, et c'est
-        // honnête : à 16× de bourrage la grille ne tombe pas sur le sommet
-        // du lobe, donc la lecture passe légèrement en dessous. La statline
-        // chiffre l'écart.
+        // Two strokes, and the gap between them is the lesson: what the plot
+        // SHOWS, and what the theory SAYS for this window at this N — a
+        // closed-form DTFT, maximum refined by golden section, never a tabulated
+        // value. They do not coincide exactly, and that is honest: at 16×
+        // zero-padding the grid does not fall on the top of the lobe, so the
+        // reading passes slightly below. The statline gives the gap a number.
         overlays: [
-          hline('sidelobe', { color: '#D95319', dashed: true, width: 1.8, label: 'lu' }),
-          hline('sidelobeTheoryLine', { color: '#7E2F8E', dashed: true, width: 1.8, label: 'théorie' }),
-          // et OÙ la théorie place ce sommet : avec le niveau, cela fait une
-          // croix sur le lobe. Les deux traits horizontaux se confondent dès
-          // que la lecture est bonne — ce qui est le cas visé, donc un
-          // repère qui ne dépend pas de leur écart est nécessaire.
+          hline('sidelobe', { color: '#D95319', dashed: true, width: 1.8, label: 'measured' }),
+          hline('sidelobeTheoryLine', { color: '#7E2F8E', dashed: true, width: 1.8, label: 'theory' }),
+          // and WHERE the theory places that peak: together with the level, it
+          // makes a cross on the lobe. The two horizontal strokes coincide as
+          // soon as the reading is good — which is the intended case, so a
+          // marker that does not depend on their gap is necessary.
           vline('sidelobeBinLine', { color: '#7E2F8E', dashed: true, width: 1.2 }),
         ],
         axes: {
-          x: { label: 'écart à la raie', unit: 'bins (Fs/N)' },
+          x: { label: 'offset from the line', unit: 'bins (Fs/N)' },
           y: { label: '|W(f)|', unit: 'dB', domain: [-100, 5] },
         },
       })

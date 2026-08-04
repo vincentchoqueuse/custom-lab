@@ -1,45 +1,50 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'euler-gonfle',
-    title: 'Euler invente de l\'énergie',
+    id: 'euler-inflates',
+    title: 'Euler invents energy',
     params: { system: 'pendulum', h: 0.1, theta0: 2.5 },
     visible: ['h'],
-    notes: `Pendule à grande amplitude, h = 0.1 s : Euler (orange) INVENTE de
-l'énergie à chaque pas — jusqu'à faire PASSER LE PENDULE PAR-DESSUS
-son sommet : θ dévale, le mouvement devient une rotation continue.
-Le vrai pendule oscille (bleu) ; RK4 (violet pointillé) le suit
-exactement AU MÊME PAS. Vue Énergie : la droite orange en axe log =
-croissance exponentielle. Baisser h : Euler se calme mais dérive
-toujours — c'est structurel : chaque pas sort par la tangente, vers
-l'extérieur d'une orbite convexe. La simulation a changé la NATURE
-du mouvement, pas juste sa précision.`,
+    notes: `A large-amplitude pendulum at h = 0.1 s: Euler, in orange, adds
+energy at every step, and enough of it that the pendulum eventually goes over
+the top — θ runs away and the oscillation becomes a continuous rotation. The
+real pendulum swings, in blue, and RK4 follows it exactly at the same step size.
+
+The energy view makes the mechanism explicit: a straight line on a logarithmic
+axis is exponential growth. Reducing h calms Euler without curing it, because
+the fault is structural — every step leaves along the tangent, on the outside
+of a convex orbit. The simulation changed the NATURE of the motion, not merely
+its accuracy.`,
   },
   {
-    id: 'ordre',
-    title: 'La pente est l\'ordre',
+    id: 'order',
+    title: 'The slope is the order',
     params: { system: 'linear', h: 0.1 },
     view: 'order',
     visible: ['system'],
-    notes: `Log-log : diviser h par 10 gagne un facteur 10 pour Euler (pente 1),
-100 pour RK2 (pente 2), 10 000 pour RK4 (pente 4). Le vrai comparatif
-est À COÛT ÉGAL : RK4 paie 4 évaluations par pas (tiroir) — mais à
-h = 0.16 il bat déjà Euler à h = 0.005, pour 8 fois moins de calcul.
-La morale tient en une phrase : mieux vaut un pas intelligent que
-mille pas naïfs. C'est RK4/5 qui tourne dans scipy et LTspice.`,
+    notes: `On log–log axes, dividing h by ten buys a factor of ten for Euler,
+a hundred for RK2 and ten thousand for RK4 — slopes of 1, 2 and 4.
+
+The honest comparison is at equal cost, since RK4 pays four evaluations of f
+per step, as the drawer counts. Even so, RK4 at h = 0.16 already beats Euler at
+h = 0.005 while doing eight times less arithmetic. One intelligent step is
+worth a thousand naive ones, which is why RK4/5 is what runs inside scipy and
+LTspice.`,
   },
   {
-    id: 'second-ordre',
-    title: 'Simuler le second ordre',
+    id: 'second-order',
+    title: 'Simulating the second order',
     params: { system: 'linear', h: 0.3 },
     visible: ['h'],
-    notes: `Le système de l'expérience « Réponse d'un second ordre » (m = 0.2,
-ω₀ = 2), maintenant SIMULÉ au lieu d'être résolu. À h = 0.3 s, Euler
-déforme la pseudo-période et l'amortissement ; pousser h vers 0.4 :
-il devient instable alors que le système réel est stable — la
-simulation peut mentir sur la STABILITÉ elle-même. RK4 reste fidèle.
-Boucle bouclée : quand la forme exacte n'existe pas (pendule, non-
-linéaire), l'intégrateur est tout ce qu'on a — d'où l'ordre.`,
+    notes: `This is the system of the second-order response experiment, m = 0.2
+and ω₀ = 2, now simulated instead of solved. At h = 0.3 s Euler distorts both
+the pseudo-period and the damping; pushing h toward 0.4 makes it unstable while
+the real system is stable, which is the worst failure available — a simulation
+lying about stability itself. RK4 stays faithful.
+
+That closes the loop: when no closed form exists, as for the nonlinear
+pendulum, the integrator is all there is, and its order is what decides whether
+the answer means anything.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.
