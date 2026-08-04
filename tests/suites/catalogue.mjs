@@ -61,7 +61,7 @@ export default () =>
         scenes++;
         const marks = await h.marks();
         const st = await h.statline();
-        t(`${key} scene ${i + 1}/${count}`, marks > 2 && !/⚠|abort/i.test(st), `${marks} marks`);
+        t(`${key} scene ${i + 1}/${count}`, marks > 2 && !/⚠|aborted/i.test(st), `${marks} marks`);
       }
     }
     console.log(`  ${keys.length} experiments · ${views} views · ${scenes} scenes`);

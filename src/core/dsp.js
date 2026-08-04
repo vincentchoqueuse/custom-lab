@@ -1,30 +1,30 @@
-// La couche « appels » des computes — celle qui fait qu'un compute.js se lit
-// comme une suite d'OPÉRATIONS NOMMÉES et non comme une suite de boucles.
+// The "call" layer of the computes — the one that makes a compute.js read as
+// a sequence of NAMED OPERATIONS rather than a sequence of loops.
 //
-// La règle de lecture qu'elle sert : dans un compute, on doit pouvoir suivre
-// la science sans lire d'indices. Écrire
+// The reading rule it serves: inside a compute one should be able to follow the
+// science without reading indices. Writing
 //
 //     const x = tone(N, f0, { fs: FS });
 //     const y = addNoise(x, noiseSigma(0.5, snrDb), gauss);
 //     const S = dbAmp(magSpectrum(y, { nfft: NFFT, window: 'hann' }));
 //
-// dit exactement ce que la ligne fait ; les trois boucles équivalentes le
-// disent aussi, mais après relecture. Le catalogue en comptait dix-neuf qui
-// fabriquaient une sinusoïde à la main et neuf qui refaisaient le même
-// spectre — autant d'endroits où une erreur d'indice ou de facteur peut se
-// glisser sans que rien ne la signale.
+// says exactly what the line does; the three equivalent loops say it too, but
+// only on a second reading. The catalogue held nineteen places that built a
+// sinusoid by hand and nine that recomputed the same spectrum — that many
+// places where an index or a factor-of-two error can slip in with nothing to
+// signal it.
 //
-// Ce module ne fait AUCUNE science : il ne contient que des opérations dont
-// la définition est publique et vérifiable, et le harnais les épingle une
-// fois pour toutes plutôt qu'une fois par expérience.
+// This module does NO science: it holds only operations whose definition is
+// public and checkable, and the harness pins them once and for all rather than
+// once per experiment.
 //
-// PURE, sans état, sans DOM. Importable depuis compute.js ET check.js.
+// PURE, stateless, no DOM. Importable from compute.js AND check.js.
 
 import { fft, toDb, windowValue } from './numeric.js';
 
-/* ------------------------------------------------------------- grilles -- */
+/* --------------------------------------------------------------- grids -- */
 
-/** n points régulièrement espacés de a à b, bornes comprises (MATLAB). */
+/** n evenly spaced points from a to b, both ends included (MATLAB). */
 export function linspace(a, b, n) {
   const out = new Float64Array(n);
   if (n === 1) {
@@ -36,7 +36,7 @@ export function linspace(a, b, n) {
   return out;
 }
 
-/** Les instants d'échantillonnage : n points au pas 1/fs, à partir de 0. */
+/** The sampling instants: n points spaced 1/fs apart, starting at 0. */
 export function timeAxis(n, fs) {
   const t = new Float64Array(n);
   for (let i = 0; i < n; i++) t[i] = i / fs;
@@ -44,9 +44,9 @@ export function timeAxis(n, fs) {
 }
 
 /**
- * L'axe fréquentiel du DEMI-spectre, 0 à fs/2 inclus — nfft/2 + 1 points,
- * la convention de MATLAB. Le point de Nyquist est inclus parce qu'il
- * EXISTE : l'oublier laisse un trou d'un bin au bout de chaque tracé.
+ * The frequency axis of the HALF spectrum, 0 to fs/2 inclusive — nfft/2 + 1
+ * points, the MATLAB convention. The Nyquist point is included because it
+ * EXISTS: leaving it out puts a one-bin hole at the end of every plot.
  */
 export function freqAxis(nfft, fs) {
   const nh = nfft / 2;
@@ -55,12 +55,12 @@ export function freqAxis(nfft, fs) {
   return f;
 }
 
-/* ------------------------------------------------------------- signaux -- */
+/* ------------------------------------------------------------- signals -- */
 
 /**
- * Une sinusoïde. `phase` en radians, `amp` en amplitude crête.
- * @param {number} n nombre d'échantillons
- * @param {number} f fréquence (même unité que fs)
+ * A sinusoid. `phase` in radians, `amp` as peak amplitude.
+ * @param {number} n number of samples
+ * @param {number} f frequency (same unit as fs)
  * @param {{fs: number, amp?: number, phase?: number, cos?: boolean}} o
  */
 export function tone(n, f, { fs, amp = 1, phase = 0, cos = false }) {
@@ -71,30 +71,30 @@ export function tone(n, f, { fs, amp = 1, phase = 0, cos = false }) {
 }
 
 /**
- * L'écart-type de bruit qui donne le SNR demandé face à une puissance de
- * signal connue. Écrit une fois ici parce que c'est UN endroit où se tromper
- * de facteur 2 ne se voit pas : σ² = P/10^(SNR/10), et une sinusoïde
- * d'amplitude A porte A²/2, pas A².
+ * The noise standard deviation giving the requested SNR against a known
+ * signal power. Written once here because this is ONE place where a
+ * factor-of-two mistake does not show: σ² = P/10^(SNR/10), and a sinusoid of
+ * amplitude A carries A²/2, not A².
  */
 export function noiseSigma(signalPower, snrDb) {
   return Math.sqrt(signalPower / 10 ** (snrDb / 10));
 }
 
-/** x + σ·g, dans un nouveau tableau. `gauss` vient de core/rng.js. */
+/** x + σ·g, in a new array. `gauss` comes from core/rng.js. */
 export function addNoise(x, sigma, gauss) {
   const y = new Float64Array(x.length);
   for (let i = 0; i < x.length; i++) y[i] = x[i] + sigma * gauss();
   return y;
 }
 
-/** Puissance moyenne (1/N)·Σx². */
+/** Mean power (1/N)·Σx². */
 export function power(x) {
   let s = 0;
   for (let i = 0; i < x.length; i++) s += x[i] * x[i];
   return s / x.length;
 }
 
-/** a divisé par son maximum absolu — le tracé d'un spectre en relatif. */
+/** a divided by its absolute maximum — the relative plot of a spectrum. */
 export function normalizeMax(a) {
   let m = 0;
   for (let i = 0; i < a.length; i++) m = Math.max(m, Math.abs(a[i]));
@@ -104,12 +104,12 @@ export function normalizeMax(a) {
   return out;
 }
 
-/* ---------------------------------------------------------- transformée -- */
+/* ------------------------------------------------------------ transform -- */
 
 /**
- * TFD inverse, en place, exactement l'inverse de `fft` (aucune convention
- * cachée : ifft(fft(x)) === x). Le tour du conjugué était réécrit dans deux
- * expériences, avec deux normalisations différentes.
+ * Inverse DFT, in place, exactly the inverse of `fft` (no hidden convention:
+ * ifft(fft(x)) === x). The conjugate trick was rewritten in two experiments,
+ * with two different normalizations.
  */
 export function ifft(re, im) {
   const n = re.length;
@@ -122,13 +122,12 @@ export function ifft(re, im) {
 }
 
 /**
- * Le module du DEMI-spectre : fenêtrage, zéro-padding, |X(k)| pour k de 0 à
- * nfft/2 inclus.
+ * The magnitude of the HALF spectrum: windowing, zero-padding, |X(k)| for k
+ * from 0 to nfft/2 inclusive.
  *
- * La fenêtre porte sur les ÉCHANTILLONS, pas sur nfft — fenêtrer le
- * zéro-padding reviendrait à multiplier le signal par le début d'une fenêtre
- * bien plus longue, donc à le déformer. C'est l'erreur que la signature rend
- * impossible.
+ * The window applies to the SAMPLES, not to nfft — windowing the zero-padding
+ * would multiply the signal by the beginning of a much longer window, and so
+ * distort it. That is the mistake this signature makes impossible.
  *
  * @param {ArrayLike<number>} x
  * @param {{nfft?: number, window?: string, symmetric?: boolean}} o
@@ -139,9 +138,9 @@ export function magSpectrum(x, opts = {}) {
 }
 
 /**
- * Le module du demi-spectre d'une transformée DÉJÀ calculée. Sans elle, une
- * expérience qui a besoin du spectre complexe ET de son module transformait
- * deux fois — ce qui ne se voit pas, sinon au chronomètre.
+ * The half-spectrum magnitude of an ALREADY computed transform. Without it, an
+ * experiment needing both the complex spectrum and its magnitude transformed
+ * twice — which does not show, except on a stopwatch.
  */
 export function magHalf(re, im) {
   const nh = re.length / 2;
@@ -151,11 +150,10 @@ export function magHalf(re, im) {
 }
 
 /**
- * La transformée COMPLÈTE, fenêtrée et zéro-paddée — dont `magSpectrum`
- * n'est que le module. Elle existe parce que Parseval se vérifie sur le
- * spectre entier, pas sur sa moitié : une expérience qui contrôle son
- * énergie a besoin des deux moitiés, et n'a pas à refaire le fenêtrage
- * pour autant.
+ * The COMPLETE transform, windowed and zero-padded — of which `magSpectrum`
+ * is only the magnitude. It exists because Parseval is verified on the whole
+ * spectrum, not on half of it: an experiment checking its energy needs both
+ * halves, and should not have to redo the windowing for that.
  */
 export function spectrumComplex(
   x,
@@ -169,36 +167,35 @@ export function spectrumComplex(
   return { re, im };
 }
 
-/** La plus petite puissance de deux ≥ n. */
+/** The smallest power of two ≥ n. */
 export function nextPow2(n) {
   let p = 1;
   while (p < n) p <<= 1;
   return p;
 }
 
-/* ------------------------------------------------------------ décibels -- */
+/* ------------------------------------------------------------ decibels -- */
 
 /**
- * dB d'une AMPLITUDE : 20·log10. Alias explicite de `toDb`, pour que le
- * facteur soit dans le NOM de la fonction et non dans la tête de celui qui
- * relit.
+ * dB of an AMPLITUDE: 20·log10. An explicit alias of `toDb`, so that the
+ * factor lives in the NAME of the function rather than in the head of whoever
+ * reads it back.
  */
 export const dbAmp = toDb;
 
 /**
- * dB d'une PUISSANCE : 10·log10.
+ * dB of a POWER: 10·log10.
  *
- * Elle existe parce que son absence a coûté un bug réel : une densité
- * spectrale de puissance passée dans `toDb` sort DEUX FOIS trop grande en
- * dB, et le tracé reste parfaitement plausible — il ne devient faux que
- * quand on lit une valeur. Deux fonctions nommées valent mieux qu'un
- * commentaire.
+ * It exists because its absence cost a real bug: a power spectral density put
+ * through `toDb` comes out TWICE too large in dB, and the plot stays perfectly
+ * plausible — it only becomes wrong when a value is read off it. Two named
+ * functions beat one comment.
  */
 export function dbPower(p, floor = -Infinity) {
   return Math.max(floor, 10 * Math.log10(p + 1e-300));
 }
 
-/** Le vecteur entier en dB d'amplitude, avec plancher. */
+/** The whole vector in amplitude dB, with a floor. */
 export function dbAmpAll(a, floor = -Infinity) {
   const out = new Float64Array(a.length);
   for (let i = 0; i < a.length; i++) out[i] = toDb(a[i], floor);
@@ -206,11 +203,11 @@ export function dbAmpAll(a, floor = -Infinity) {
 }
 
 /**
- * Le plus haut point du spectre autour d'une fréquence donnée — la lecture
- * « combien vaut la raie à f₀ », sans supposer qu'elle tombe pile sur un bin.
- * @param {ArrayLike<number>} mag demi-spectre
- * @param {number} f fréquence cherchée
- * @param {{fs: number, nfft: number, width?: number}} o `width` en bins
+ * The highest point of the spectrum around a given frequency — the reading
+ * "how big is the line at f₀", without assuming it falls exactly on a bin.
+ * @param {ArrayLike<number>} mag half spectrum
+ * @param {number} f frequency looked for
+ * @param {{fs: number, nfft: number, width?: number}} o `width` in bins
  */
 export function peakNear(mag, f, { fs, nfft, width = 6 }) {
   const c = Math.round((f * nfft) / fs);

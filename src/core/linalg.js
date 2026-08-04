@@ -1,34 +1,34 @@
-// L'algèbre linéaire du catalogue — et RIEN DE PLUS que ce qu'il utilise.
+// The catalogue's linear algebra — and NOTHING MORE than what it uses.
 //
-// Ce module tient une frontière avec `numeric.js` (le scalaire : erf,
-// Student, trapz, fft) et `dsp.js` (le signal) : ici, tout ce qui prend une
-// matrice. Il a été ouvert le jour où trois sujets se sont mis à écrire les
-// mêmes boucles — décomposition propre en spectral, en filtrage adaptatif
-// et en ACP ; équations normales en régression polynomiale et en régression
-// sur base ; produit matrice-vecteur en filtrage et en apprentissage.
+// This module holds a border with `numeric.js` (the scalar side: erf, Student,
+// trapz, fft) and `dsp.js` (the signal side): here, everything that takes a
+// matrix. It was opened the day three subjects started writing the same loops —
+// eigendecomposition in spectral analysis, in adaptive filtering and in PCA;
+// normal equations in polynomial regression and in basis regression;
+// matrix–vector products in filtering and in learning.
 //
-// CE QU'IL NE CONTIENT PAS, VOLONTAIREMENT : LU, QR, Cholesky, déterminant,
-// inverse. Aucune expérience ne les utilise, donc AUCUN CHECK ne les
-// exercerait — et une décomposition fausse que personne ne teste est pire
-// que pas de décomposition du tout, parce qu'on lui fait confiance le jour
-// où on s'en sert. Le principe 7 du projet dit cela ; ce paragraphe est là
-// pour qu'on s'en souvienne au moment de « compléter la boîte ».
+// WHAT IT DELIBERATELY DOES NOT CONTAIN: LU, QR, Cholesky, determinant,
+// inverse. No experiment uses them, so NO CHECK would exercise them — and a
+// wrong decomposition nobody tests is worse than no decomposition at all,
+// because it gets trusted the day it is needed. Principle 7 of the project says
+// as much; this paragraph is here to be remembered at the moment of "completing
+// the toolbox".
 //
-// La SVD, elle, EST là — et la façon dont elle est arrivée est la règle en
-// action : elle est entrée le jour où une expérience l'a exercée (la
-// compression d'image), avec ses identités dans le harnais, et pas la
-// veille « parce qu'une boîte d'algèbre linéaire a une SVD ».
+// The SVD IS here — and the way it arrived is the rule in action: it came in
+// the day an experiment exercised it (image compression), with its identities
+// in the harness, and not the day before "because a linear-algebra box has an
+// SVD".
 //
-// Convention : une matrice n × m est un `Float64Array` de n·m en LIGNE
-// MAJEURE, A[i][j] = A[i * m + j]. Sauf `solveLinearSystem`, hérité, qui
-// prend un tableau de tableaux — sa signature n'a pas bougé pour ne pas
-// toucher aux quatre expériences qui l'appellent.
+// Convention: an n × m matrix is a `Float64Array` of n·m in ROW MAJOR order,
+// A[i][j] = A[i * m + j]. Except `solveLinearSystem`, inherited, which takes an
+// array of arrays — its signature has not moved so as not to disturb the four
+// experiments that call it.
 //
-// PURE, sans état, sans DOM. Importable depuis compute.js ET check.js.
+// PURE, stateless, no DOM. Importable from compute.js AND check.js.
 
 /**
- * y = A·x, A de rows × cols en ligne majeure.
- * L'opération d'une couche linéaire, et de tout produit scalaire répété.
+ * y = A·x, with A of rows × cols in row-major order.
+ * The operation of a linear layer, and of any repeated inner product.
  */
 export function matvec(A, x, rows, cols) {
   const y = new Float64Array(rows);
@@ -42,10 +42,10 @@ export function matvec(A, x, rows, cols) {
 }
 
 /**
- * xᵀAx — la forme quadratique. C'est une PUISSANCE quand A est une
- * covariance : celle d'un filtre à l'entrée, celle d'une erreur de
- * coefficients, celle d'une projection. Trois expériences la calculent,
- * chacune pour une raison différente, avec la même boucle.
+ * xᵀAx — the quadratic form. It is a POWER when A is a covariance: that of a
+ * filter at its input, that of a coefficient error, that of a projection.
+ * Three experiments compute it, each for a different reason, with the same
+ * loop.
  */
 export function quadForm(A, x, n) {
   let s = 0;
@@ -59,17 +59,17 @@ export function quadForm(A, x, n) {
 }
 
 /**
- * Résolution d'un système linéaire dense par élimination de Gauss avec
- * PIVOT PARTIEL. A et b sont MODIFIÉS.
+ * Solves a dense linear system by Gaussian elimination with PARTIAL PIVOTING.
+ * A and b are MODIFIED.
  *
- * Le pivot n'est pas une précaution de style : sans lui, une matrice
- * parfaitement inversible dont le premier coefficient est petit donne un
- * résultat faux sans rien signaler. Convient jusqu'à une trentaine
- * d'inconnues, ce qui couvre tout le catalogue.
+ * The pivot is not a stylistic precaution: without it, a perfectly invertible
+ * matrix whose first coefficient happens to be small gives a wrong result with
+ * nothing to signal it. Good up to some thirty unknowns, which covers the whole
+ * catalogue.
  *
- * @param {number[][]} A tableau de lignes
+ * @param {number[][]} A array of rows
  * @param {number[]} b
- * @returns {number[]} la solution
+ * @returns {number[]} the solution
  */
 export function solveLinearSystem(A, b) {
   const n = b.length;
@@ -101,19 +101,19 @@ export function solveLinearSystem(A, b) {
 }
 
 /**
- * Valeurs et vecteurs propres d'une matrice SYMÉTRIQUE RÉELLE n×n, par
- * rotations de Jacobi cycliques.
+ * Eigenvalues and eigenvectors of a REAL SYMMETRIC n×n matrix, by cyclic
+ * Jacobi rotations.
  *
- * Jacobi et pas QR : les matrices que le projet décompose sont petites
- * (n ≤ 64 — une covariance de sous-espace, une autocorrélation de filtre
- * adaptatif, une matrice de corrélation d'ACP), la convergence est garantie
- * sans décalage ni cas particulier, et surtout le résultat est exact au sens
- * où on peut le vérifier : l'orthogonalité est maintenue par construction,
- * puisqu'on n'applique que des rotations.
+ * Jacobi rather than QR: the matrices this project decomposes are small (n ≤ 64
+ * — a subspace covariance, an adaptive-filter autocorrelation, a PCA
+ * correlation matrix), convergence is guaranteed with no shift and no special
+ * case, and above all the result is exact in the sense that it can be checked —
+ * orthogonality is maintained by construction, since only rotations are
+ * applied.
  *
- * @param {Float64Array} a  n×n en ligne majeure — MODIFIÉE en place
- * @returns {{values: Float64Array, vectors: Float64Array}} vecteurs en
- *          COLONNES : v_k[i] = vectors[i*n + k]
+ * @param {Float64Array} a  n×n in row-major order — MODIFIED in place
+ * @returns {{values: Float64Array, vectors: Float64Array}} vectors in COLUMNS:
+ *          v_k[i] = vectors[i*n + k]
  */
 export function jacobiSym(a, n) {
   const v = new Float64Array(n * n);
@@ -160,17 +160,16 @@ export function jacobiSym(a, n) {
 }
 
 /**
- * Les ÉQUATIONS NORMALES d'un ajustement linéaire, accumulées en une passe :
- * AᵀA et Aᵀy, sans jamais former A.
+ * The NORMAL EQUATIONS of a linear fit, accumulated in one pass: AᵀA and Aᵀy,
+ * without ever forming A.
  *
- * `row(i, out)` remplit `out` avec la i-ème ligne de la matrice de
- * conception — les puissances de x pour une régression polynomiale, les
- * fonctions de base pour une régression sur base, les exponentielles pour
- * une estimation d'amplitudes. C'est le seul endroit où les trois diffèrent,
- * et c'est pour cela qu'il est passé en argument.
+ * `row(i, out)` fills `out` with the i-th row of the design matrix — powers of
+ * x for a polynomial regression, basis functions for a basis regression,
+ * exponentials for an amplitude estimation. That is the only place where the
+ * three differ, which is why it is passed as an argument.
  *
- * Ne jamais former A explicitement n'est pas une optimisation : c'est ce qui
- * permet d'ajuster sur dix mille points sans allouer dix mille lignes.
+ * Never forming A explicitly is not an optimization: it is what allows fitting
+ * ten thousand points without allocating ten thousand rows.
  *
  * @returns {{AtA: number[][], Aty: number[]}}
  */
@@ -191,13 +190,13 @@ export function normalEquations(n, cols, row, y) {
 }
 
 /**
- * Résout (AᵀA + λD)·w = Aᵀy sans modifier les entrées. λ = 0 rend les
- * moindres carrés ordinaires, et le harnais vérifie cette continuité.
+ * Solves (AᵀA + λD)·w = Aᵀy without modifying its inputs. λ = 0 gives ordinary
+ * least squares, and the harness verifies that continuity.
  *
- * `skipFirst` laisse le terme constant HORS de la pénalité, ce qui est la
- * convention en régression : pénaliser l'ordonnée à l'origine reviendrait à
- * préférer les modèles qui passent près de zéro, ce qui n'a aucun sens
- * physique et dépend de l'endroit où l'on a placé l'origine.
+ * `skipFirst` keeps the constant term OUT of the penalty, which is the
+ * convention in regression: penalizing the intercept would favour models
+ * passing near zero, which has no physical meaning and depends on where the
+ * origin happens to have been placed.
  */
 export function ridgeSolve(AtA, Aty, lambda, { skipFirst = false } = {}) {
   const A = AtA.map((r, j) => {
@@ -209,33 +208,32 @@ export function ridgeSolve(AtA, Aty, lambda, { skipFirst = false } = {}) {
 }
 
 /**
- * DÉCOMPOSITION EN VALEURS SINGULIÈRES d'une matrice m × n réelle :
- * A = U·diag(σ)·Vᵀ, σ décroissantes.
+ * SINGULAR VALUE DECOMPOSITION of a real m × n matrix:
+ * A = U·diag(σ)·Vᵀ, with σ decreasing.
  *
- * Elle entre ici le jour où une expérience l'exerce — la compression
- * d'image — et pas avant, conformément à l'en-tête de ce module.
+ * It enters here the day an experiment exercises it — image compression — and
+ * not before, in keeping with this module's header.
  *
- * Voie choisie : diagonaliser AᵀA (symétrique, n × n) par le Jacobi
- * ci-dessus, d'où V et σ² ; puis U = A·V/σ. C'est la construction du cours,
- * elle tient en quinze lignes, et son défaut est connu et documenté : les
- * PETITES valeurs singulières y perdent en précision relative, puisqu'on
- * passe par leur carré (σ ≈ √ε·σmax est le plancher). Pour une compression
- * qui garde les grandes et jette les petites, c'est sans conséquence — et
- * le harnais borne l'erreur de reconstruction complète à 1e-10, ce qui le
- * prouve plutôt que de le supposer.
+ * The route chosen: diagonalize AᵀA (symmetric, n × n) with the Jacobi routine
+ * above, giving V and σ²; then U = A·V/σ. That is the textbook construction, it
+ * fits in fifteen lines, and its weakness is known and documented — the SMALL
+ * singular values lose relative accuracy, since they are reached through their
+ * square (σ ≈ √ε·σmax is the floor). For a compression that keeps the large
+ * ones and discards the small ones this is harmless, and the harness bounds the
+ * full reconstruction error at 1e-10, which proves it rather than assuming it.
  *
- * Les colonnes de U correspondant à une valeur singulière nulle ne sont pas
- * complétées en base orthonormée : elles restent nulles. Une reconstruction
- * ne les utilise jamais, et prétendre les avoir calculées serait mentir.
+ * The columns of U matching a zero singular value are not completed into an
+ * orthonormal basis: they stay zero. A reconstruction never uses them, and
+ * claiming to have computed them would be a lie.
  *
- * @param {Float64Array} A m × n en ligne majeure (non modifiée)
+ * @param {Float64Array} A m × n in row-major order (not modified)
  * @returns {{u: Float64Array, s: Float64Array, v: Float64Array, rank: number}}
- *   u est m × r, v est n × r, tous deux en ligne majeure, r = min(m, n).
+ *   u is m × r, v is n × r, both row-major, with r = min(m, n).
  */
 export function svd(A, m, n) {
   const r = Math.min(m, n);
 
-  // AᵀA, symétrique n × n
+  // AᵀA, symmetric n × n
   const AtA = new Float64Array(n * n);
   for (let a = 0; a < n; a++)
     for (let b = a; b < n; b++) {
@@ -258,16 +256,16 @@ export function svd(A, m, n) {
     for (let j = 0; j < n; j++) v[j * r + k] = eig.vectors[j * n + src];
   }
 
-  // Le rang NUMÉRIQUE, et son seuil est celui de cette voie-ci : passer par
-  // AᵀA fait perdre la moitié des chiffres, donc une valeur singulière
-  // vraiment nulle ressort autour de √ε·σmax et non de ε·σmax. Compter avec
-  // le seuil habituel (ε) donnerait 65 au lieu de 4 sur une image
-  // construite de rang 4 — un chiffre faux, et le harnais le vérifie.
+  // The NUMERICAL rank, and its threshold is the one this route imposes: going
+  // through AᵀA loses half the digits, so a genuinely zero singular value comes
+  // out around √ε·σmax rather than ε·σmax. Counting with the usual ε threshold
+  // would give 65 instead of 4 on an image built with rank 4 — a wrong number,
+  // and the harness checks it.
   const rankTol = Math.max(m, n) * Math.sqrt(Number.EPSILON) * (s[0] || 1);
   let rank = 0;
   for (let k = 0; k < r; k++) if (s[k] > rankTol) rank++;
 
-  // U = A·V/σ, colonne par colonne ; σ nulle ⇒ colonne laissée à zéro
+  // U = A·V/σ, column by column; a zero σ leaves its column at zero
   const u = new Float64Array(m * r);
   const tol = 1e-12 * (s[0] || 1);
   for (let k = 0; k < r; k++) {
@@ -286,9 +284,9 @@ export function svd(A, m, n) {
 /**
  * La meilleure approximation de rang k : Aₖ = Σ_{i<k} σᵢ·uᵢvᵢᵀ.
  *
- * « Meilleure » n'est pas une façon de parler — Eckart–Young dit que
- * ‖A − Aₖ‖²_F = Σ_{i≥k} σᵢ², et qu'aucune matrice de rang k ne fait mieux.
- * C'est le même théorème que celui de l'ACP, sur la même page.
+ * "Best" is not a figure of speech — Eckart–Young says that
+ * ‖A − Aₖ‖²_F = Σ_{i≥k} σᵢ², and that no rank-k matrix does better. It is the
+ * same theorem as the one behind PCA, on the same page.
  */
 export function lowRank(model, m, n, k) {
   const { u, s, v } = model;
