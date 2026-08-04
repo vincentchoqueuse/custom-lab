@@ -11,5 +11,5 @@
 export default {
   title: 'Regression & tracking',
   order: 4,
-  figureOrder: ['fit', 'time', 'sampling'],
+  figureOrder: ['fit', 'time', 'spectrum', 'sampling'],
 };
