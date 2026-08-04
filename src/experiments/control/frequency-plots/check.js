@@ -51,7 +51,7 @@ export const checks = [
           }, () => 180)
         );
       }
-      return { ok: worst < 1e-12, detail: `écart max ${worst.toExponential(2)}` };
+      return { ok: worst < 1e-12, detail: `max gap ${worst.toExponential(2)}` };
     },
   },
   {
@@ -69,7 +69,7 @@ export const checks = [
           Math.abs(o.cursorBlack.x[0] - (Math.atan2(im, re) * 180) / Math.PI)
         );
       });
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
@@ -84,7 +84,7 @@ export const checks = [
         (i) => Math.hypot(o.locus.x[i] - K / 2, o.locus.y[i]),
         () => K / 2
       );
-      return { ok: gap < 1e-15, detail: `écart max au cercle ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-15, detail: `max gap au cercle ${gap.toExponential(2)}` };
     },
   },
   {
@@ -98,7 +98,7 @@ export const checks = [
           Math.abs(o.cPhase.value + 45)
         );
       });
-      return { ok: gap < 1e-13, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-13, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
@@ -113,7 +113,7 @@ export const checks = [
           Math.abs(o.cMod.value - 1.3 / (2 * m)) / (1.3 / (2 * m))
         );
       });
-      return { ok: gap < 1e-13, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-13, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
@@ -129,7 +129,7 @@ export const checks = [
         return Math.max(Math.abs(o.wrOut.value - wantW), Math.abs(o.mrDb.value - wantDb));
       });
       const none = [0.71, 1, 1.8].every((m) => Number.isNaN(obs({ sys: 'second', m }).mrDb.value));
-      return { ok: gap < 1e-13 && none, detail: `écart max ${gap.toExponential(2)}, pas de pic au-dessus de 1/√2` };
+      return { ok: gap < 1e-13 && none, detail: `max gap ${gap.toExponential(2)}, no peak above 1/√2` };
     },
   },
   {
@@ -146,7 +146,7 @@ export const checks = [
       const ratio = o.gain.x[iMax] / o.wrOut.value;
       return {
         ok: ratio > 1 / step && ratio < step,
-        detail: `argmax à ${o.gain.x[iMax].toFixed(4)}, ω_r = ${o.wrOut.value.toFixed(4)} (pas de grille ${step.toFixed(4)})`,
+        detail: `argmax at ${o.gain.x[iMax].toFixed(4)}, ω_r = ${o.wrOut.value.toFixed(4)} (grid step ${step.toFixed(4)})`,
       };
     },
   },
@@ -167,7 +167,7 @@ export const checks = [
           return Math.abs(mid - naturalW(p.sys ?? 'first', { ...BASE, ...p })) ;
         }
       );
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
@@ -196,14 +196,14 @@ export const checks = [
           );
         }
       );
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
     name: 'open loop: the phase margin really is read at |H| = 1',
     category: 'numeric',
     run() {
-      // ω à 0 dB has no closed form (it is bisected); what CAN be asserted is
+      // ω at 0 dB has no closed form (it is bisected); what CAN be asserted is
       // that |H| is exactly 1 there, and that the margin is the gap the phase
       // curve leaves to −180° at that very pulsation.
       const gap = maxGap(
@@ -222,7 +222,7 @@ export const checks = [
           );
         }
       );
-      return { ok: gap < 1e-11, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-11, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
@@ -230,7 +230,7 @@ export const checks = [
     category: 'numeric',
     run() {
       // the scene's punchline, as an identity: at K critique the locus passes
-      // exactly through −1, so ω à 0 dB = ω à −180° and both margins are zero
+      // exactly through −1, so ω at 0 dB = ω at −180° and both margins are zero
       const gap = maxGap([0.15, 0.6, 1, 4], (tau) => {
         const kc = (TAU_RATIO + 1) / tau;
         const o = obs({ sys: 'openloop', tau, K: kc });
@@ -242,7 +242,7 @@ export const checks = [
           Math.abs(o.wcoOut.value - o.w180Out.value)
         );
       });
-      // and the sign flips on the right side of K critique
+      // and the sign flips on the right side of K_crit
       const below = obs({ sys: 'openloop', tau: 1, K: 5.9 });
       const above = obs({ sys: 'openloop', tau: 1, K: 6.1 });
       const signs =
@@ -252,7 +252,7 @@ export const checks = [
         above.phaseMargin.value < 0;
       return {
         ok: gap < 1e-9 && signs,
-        detail: `écart max ${gap.toExponential(2)}, marges positives sous K_crit et négatives au-dessus`,
+        detail: `max gap ${gap.toExponential(2)}, margins positive below K_crit and negative above`,
       };
     },
   },
@@ -262,7 +262,7 @@ export const checks = [
     run() {
       // The whole Nyquist criterion in one line: K is a homothety of centre
       // origin — H_K(jω) = K·H_1(jω) at EVERY ω, so the phase is untouched and
-      // ω à −180° with it; only the distance to the fixed −1 point changes.
+      // ω at −180° with it; only the distance to the fixed −1 point changes.
       // Compared at equal ω, not index by index: the plotted grid is framed by
       // gain, so it slides when K does.
       const tau = 0.8;
@@ -283,7 +283,7 @@ export const checks = [
           homothety
         );
       });
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   {
@@ -303,7 +303,7 @@ export const checks = [
           );
         }
       );
-      return { ok: none, detail: 'marges NaN et phase ≥ −180° pour les ordres 1 et 2' };
+      return { ok: none, detail: 'margins NaN and phase ≥ −180° for orders 1 and 2' };
     },
   },
   {
@@ -332,7 +332,7 @@ export const checks = [
       }
       return {
         ok: worstEnds < 1e-9 && cut,
-        detail: `bornes ±${worstEnds.toExponential(2)} dB, coupure exactement à |H| = 3`,
+        detail: `bounds ±${worstEnds.toExponential(2)} dB, cut exactly at |H| = 3`,
       };
     },
   },
@@ -368,7 +368,7 @@ export const checks = [
           );
         }
       );
-      return { ok: gap < 1e-12, detail: `écart max ${gap.toExponential(2)}` };
+      return { ok: gap < 1e-12, detail: `max gap ${gap.toExponential(2)}` };
     },
   },
   standardChecks.determinism(compute, { ...BASE, sys: 'second' }, 'locus'),

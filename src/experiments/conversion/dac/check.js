@@ -2,19 +2,19 @@ import { compute, interpKernel, filterStream, FS } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { fft } from '../../../core/numeric.js';
 
-// f0 = 1000 Hz tombe sur un bin de la grille : les niveaux se lisent sans
+// f0 = 1000 Hz falls on a bin of the grid: the levels are read without
 // fuite spectrale.
 const BASE = { stage: 'filtered', L: 4, f0: 1000, half: 8 };
 
 export const checks = [
   {
-    name: 'le zéro-stuffing ne change RIEN au spectre — identité exacte',
+    name: 'zero-stuffing changes NOTHING in the spectrum — an exact identity',
     category: 'numeric',
     run() {
-      // Le cœur de l'expérience, et la seule chose qu'il faut croire : insérer
-      // L−1 zéros laisse la transformée identique, périodisée. Sur des DFT de
-      // longueurs N et N·L, cela s'écrit X_up[k] = X[k mod N] — sans fenêtre,
-      // sans tolérance, à la précision machine.
+      // The heart of the experiment, and the only thing that has to be believed:
+      // inserting L−1 zeros leaves the transform identical, periodized. On DFTs
+      // of lengths N and N·L that reads X_up[k] = X[k mod N] — no window, no
+      // tolerance, to machine precision.
       const N = 64;
       const bad = [];
       for (const L of [2, 4, 8]) {
@@ -33,16 +33,16 @@ export const checks = [
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : '|X_up[k]| = |X[k mod N]| à 1e-12 pour L = 2, 4, 8',
+        detail: bad.length ? bad.join(' · ') : '|X_up[k]| = |X[k mod N]| to 1e-12 for L = 2, 4, 8',
       };
     },
   },
   {
-    name: 'le noyau vaut 1 au centre et 0 aux autres multiples de L',
+    name: 'the kernel is 1 at the centre and 0 at the other multiples of L',
     category: 'numeric',
     run() {
-      // La propriété qui fait que l'interpolation ne DÉPLACE pas les données :
-      // aux instants des échantillons d'origine, le filtre ne lit qu'eux.
+      // The property that makes the interpolation not DISPLACE the data: at the
+      // instants of the original samples, the filter reads nothing but them.
       const bad = [];
       for (const L of [2, 4, 8]) {
         const half = 8 * L;
@@ -51,32 +51,32 @@ export const checks = [
         const worst = Math.max(
           ...range(2 * 8 + 1, (i) => (i === 8 ? 0 : Math.abs(h[half + (i - 8) * L])))
         );
-        if (worst > 1e-15) bad.push(`L=${L} : zéros ${worst.toExponential(1)}`);
+        if (worst > 1e-15) bad.push(`L=${L}: zeros ${worst.toExponential(1)}`);
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : 'h(0) = 1 à 1e-15, h(mL) = 0 à 1e-15',
+        detail: bad.length ? bad.join(' · ') : 'h(0) = 1 to 1e-15, h(mL) = 0 to 1e-15',
       };
     },
   },
   {
-    name: 'le flux interpolé passe EXACTEMENT par les échantillons d’origine',
+    name: 'the interpolated stream passes EXACTLY through the original samples',
     category: 'numeric',
     run() {
       const { observables: o } = compute(BASE);
       return {
         ok: o.interpErr.value < 1e-12,
-        detail: `écart max ${o.interpErr.value.toExponential(2)}`,
+        detail: `max gap ${o.interpErr.value.toExponential(2)}`,
       };
     },
   },
   {
-    name: 'le zéro-stuffing divise la puissance moyenne par exactement L',
+    name: 'zero-stuffing divides the mean power by exactly L',
     category: 'numeric',
     run() {
-      // Le prix caché du premier geste, et la raison pour laquelle le filtre
-      // porte un gain L : un échantillon sur L est non nul, donc la puissance
-      // moyenne est divisée par L — exactement, pas approximativement.
+      // The hidden price of the first gesture, and the reason the filter carries
+      // a gain of L: one sample in L is non-zero, so the mean power is divided by
+      // L — exactly, not approximately.
       const N = 512;
       const bad = [];
       for (const L of [2, 4, 8]) {
@@ -90,18 +90,19 @@ export const checks = [
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : 'P(x)/P(x_up) = L à 1e-12 pour L = 2, 4, 8',
+        detail: bad.length ? bad.join(' · ') : 'P(x)/P(x_up) = L to 1e-12 for L = 2, 4, 8',
       };
     },
   },
   {
-    name: 'le gain rendu par le filtre vaut EXACTEMENT 20·log₁₀(L)',
+    name: 'the gain the filter gives back is EXACTLY 20·log₁₀(L)',
     category: 'numeric',
     run() {
-      // Le corollaire du check précédent, lu sur la figure : le stuffing
-      // avait divisé la puissance par L, le noyau de gain continu L la rend.
-      // La raie utile ne « revient » donc pas à son niveau du flux à zéros —
-      // elle passe 20·log10(L) au-dessus, et c'est ce qu'il faut dire.
+      // The corollary of the previous check, read off the figure: the stuffing
+      // had divided the power by L, and the kernel of DC gain L gives it back.
+      // The useful line therefore does not "come back" to its level in the
+      // zero-stuffed stream — it goes 20·log10(L) above it, and that is what has
+      // to be said.
       const bad = [];
       for (const L of [2, 4, 8]) {
         const v = compute({ ...BASE, L }).observables.bandLevel.value;
@@ -110,21 +111,21 @@ export const checks = [
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : '+6.02, +12.04, +18.06 dB pour L = 2, 4, 8 (±0.15)',
+        detail: bad.length ? bad.join(' · ') : '+6.02, +12.04, +18.06 dB for L = 2, 4, 8 (±0.15)',
       };
     },
   },
   {
-    name: 'un filtre trop court ne rejette rien — mais la réjection n’est PAS monotone',
+    name: 'a filter too short rejects nothing — but the rejection is NOT monotone',
     category: 'numeric',
     run() {
-      // Ce que la scène 4 projette, et le piège qu'elle doit éviter. Allonger
-      // le filtre améliore la réjection en TENDANCE, pas à chaque pas : la
-      // fenêtre de Hann pose un plancher de lobes, et le motif d'ondulation
-      // glisse quand M change — l'image à Fs − f₀ tombe donc tantôt dans un
-      // creux, tantôt sur une bosse (−55 dB à M = 2, −44 à M = 4). Le check
-      // épingle les deux bouts, qui eux ne trompent pas, ET la
-      // non-monotonicité, pour qu'on ne la « corrige » pas un jour par erreur.
+      // What scene 4 projects, and the trap it must avoid. Lengthening the
+      // filter improves the rejection as a TREND, not at every step: the Hann
+      // window sets a lobe floor, and the ripple pattern slides as M changes —
+      // so the image at Fs − f₀ falls sometimes in a trough, sometimes on a bump
+      // (−55 dB at M = 2, −44 at M = 4). The check pins both ends, which do not
+      // mislead, AND the non-monotonicity, so that nobody "fixes" it one day by
+      // mistake.
       const img = (half) => compute({ ...BASE, half }).observables.imgFilteredDb;
       const short = img(1);
       const long = img(16);
@@ -138,17 +139,17 @@ export const checks = [
     },
   },
   {
-    name: 'à l’étape 2 les images sont là, à l’étape 3 elles n’y sont plus',
+    name: 'at step 2 the images are there, at step 3 they are gone',
     category: 'numeric',
     run() {
-      // Ce que les deux dernières scènes montrent, en un seul nombre : sans
-      // filtre l'image à Fs − f₀ est au niveau de la raie utile ; avec, elle
-      // est enfouie.
+      // What the last two scenes show, in a single number: without the filter
+      // the image at Fs − f₀ is at the level of the useful line; with it, it is
+      // buried.
       const stuffed = compute({ ...BASE, stage: 'stuffed' }).observables.imgStuffedDb;
       const filtered = compute(BASE).observables.imgFilteredDb;
       return {
         ok: stuffed > -3 && filtered < -45,
-        detail: `étape 2 : ${stuffed.toFixed(1)} dB · étape 3 : ${filtered.toFixed(1)} dB`,
+        detail: `step 2: ${stuffed.toFixed(1)} dB · step 3: ${filtered.toFixed(1)} dB`,
       };
     },
   },

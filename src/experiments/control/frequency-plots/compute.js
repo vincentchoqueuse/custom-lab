@@ -10,9 +10,9 @@
 //
 // Three systems, chosen because their frequency behaviour is the whole first
 // year of the subject:
-//   premier ordre  H = K/(1 + jωτ)        — Nyquist is EXACTLY a half-circle
-//   second ordre   H = Kω₀²/(ω₀²−ω² + 2jmω₀ω)
-//   boucle ouverte H = K/(jω(1+jωτ₁)(1+jωτ₂)),  τ₂ = τ₁/5
+//   first order    H = K/(1 + jωτ)        — Nyquist is EXACTLY a half-circle
+//   second order   H = Kω₀²/(ω₀²−ω² + 2jmω₀ω)
+//   open loop      H = K/(jω(1+jωτ₁)(1+jωτ₂)),  τ₂ = τ₁/5
 // The second order resonates iff m < 1/√2 ≈ 0.707: below that the Bode gain
 // bulges, the Nyquist loop swells past the real axis and the Black curve
 // grows a nose. Above, all three are tame. That threshold is the reason the

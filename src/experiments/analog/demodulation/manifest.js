@@ -6,8 +6,8 @@ export default {
   id: 'demodulation',
   order: 5,
   random: true, // bruit gaussien additif
-  // pluriel, comme l'expérience miroir « Modulations AM et FM » : les deux
-  // en portent bien deux, et le catalogue se lit par paires
+  // plural, like the mirror experiment "AM and FM modulation": both really carry
+  // two, and the catalogue is read in pairs
   title: 'AM and FM demodulation',
   subtitle: 'Recovering A(t) and f(t) — one global method, one local method',
   tags: ['demodulation', 'Hilbert', 'Teager–Kaiser', 'DESA', 'envelope', 'instantaneous frequency'],
@@ -66,14 +66,14 @@ export default {
       unit: 'dB',
       precision: 0,
     }),
-    // seed injecté par le cœur, parce que random: true
+    // seed injected by the core, because random: true
   },
 
   validate: [
     {
-      // f_i < 0 n'est pas un cas d'école mais une bouillie : le signal
-      // analytique n'y a plus de sens et les DEUX méthodes déraillent, pour
-      // une raison sans rapport avec ce que l'expérience enseigne.
+      // f_i < 0 is not a textbook case but a mess: the analytic signal no longer
+      // means anything there and BOTH methods go off the rails, for a reason
+      // unrelated to what the experiment teaches.
       when: (p) => p.fc - p.fdev < 50,
       message: 'The instantaneous frequency would fall below 50 Hz: lower Δf or raise f_c',
     },
@@ -96,8 +96,8 @@ export default {
   ],
 
   views: [
-    // Le signal, et les deux enveloppes posées sur la vraie. Le signal lui-
-    // même est estompé : c'est le support, pas le sujet.
+    // The signal, and the two envelopes laid over the true one. The signal
+    // itself is faded: it is the carrier of the story, not the subject.
     figure(
       'time',
       line('envTrue', {
@@ -113,10 +113,10 @@ export default {
       })
     ),
 
-    // La seconde information cachée dans la même courbe. La ligne Fs/4 n'est
-    // pas décorative : DESA-2 obtient Ω par un demi-arccos, donc son image
-    // est [0, π/2] et il se REPLIE au-delà. Quand la fréquence instantanée
-    // traverse cette ligne, la courbe orange s'en va et la bleue reste.
+    // The second piece of information hidden in the same curve. The Fs/4 line is
+    // not decorative: DESA-2 obtains Ω through a half-arccos, so its range is
+    // [0, π/2] and it FOLDS beyond that. When the instantaneous frequency crosses
+    // that line, the orange curve leaves and the blue one stays.
     view(
       'freq',
       'Instantaneous frequency',
@@ -133,8 +133,8 @@ export default {
       })
     ),
 
-    // Pour situer : la porteuse, ses bandes latérales, et le plancher de
-    // bruit que les deux méthodes doivent traverser.
+    // For context: the carrier, its sidebands, and the noise floor both methods
+    // have to work through.
     figure(
       'spectrum',
       line('spectrum', {

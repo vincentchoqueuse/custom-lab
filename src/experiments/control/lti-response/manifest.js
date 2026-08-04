@@ -89,10 +89,10 @@ export default {
       })
     ),
 
-    // Impulse response — the same tab, in the same place, as in Réponse d'un
-    // premier ordre and Réponse d'un second ordre: a listener who arrives at
-    // "un système quelconque" after those two finds the five readings they
-    // already know, on a transfer function they typed in themselves.
+    // Impulse response — the same tab, in the same place, as in First-order
+    // response and Second-order response: a listener who arrives at "an
+    // arbitrary system" after those two finds the five readings they already
+    // know, on a transfer function they typed in themselves.
     // A bi-proper system (deg num = deg den) also carries a Dirac at t = 0;
     // its weight is in the statline, since an arrow of infinite height is
     // not something a plot can honestly draw.

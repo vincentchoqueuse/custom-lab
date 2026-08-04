@@ -107,15 +107,15 @@ export const checks = [
     name: 'the marked point IS the area of the drawn band',
     category: 'numeric',
     run() {
-      // Ce que la vue prétend : le point jaune de la courbe du bas vaut l'aire
-      // hachurée de la vue du haut, au même t. Deux affirmations de natures
-      // différentes, et il faut les séparer :
-      //   · le marqueur EST y(t), exactement — c'est le même nombre ;
-      //   · l'aire DESSINÉE, elle, est celle d'un polygone échantillonné sur
-      //     la grille d'affichage, qui coupe les bords de porte entre deux
-      //     points. Elle ne peut donc pas valoir mieux qu'un pas de grille —
-      //     c'est exactement l'erreur que le calcul par morceaux évite, et
-      //     la borne est celle-là, pas un pourcentage choisi.
+      // What the view claims: the yellow point on the curve below equals the
+      // shaded area of the view above, at the same t. Two claims of different
+      // natures, and they must be separated:
+      //   · the marker IS y(t), exactly — it is the same number;
+      //   · the DRAWN area, by contrast, is that of a polygon sampled on the
+      //     display grid, which cuts the gate edges between two points. It
+      //     therefore cannot be better than one grid step — exactly the error
+      //     the piecewise computation avoids, and the bound is that one, not a
+      //     chosen percentage.
       const step = obs({}).shade.x[1] - obs({}).shade.x[0];
       let exact = 0;
       let drawn = 0;
@@ -157,11 +157,11 @@ export const checks = [
     name: 'the piecewise integral is insensitive to the drawing grid',
     category: 'numeric',
     run() {
-      // overlap() ne dépend QUE des ruptures, pas de la grille d'affichage :
-      // c'est ce qui la rend exacte sur les portes. Vérifié en changeant le
-      // nombre de panneaux… ce qu'on ne peut pas faire de l'extérieur — alors
-      // on vérifie l'invariant équivalent : deux t infiniment proches d'une
-      // rupture donnent la même valeur des deux côtés quand y est continue.
+      // overlap() depends ONLY on the breakpoints, not on the display grid:
+      // that is what makes it exact on gates. Verified by changing the number of
+      // panels… which cannot be done from outside — so the equivalent invariant
+      // is verified instead: two t infinitely close to a breakpoint give the
+      // same value on either side when y is continuous.
       const gap = maxGap([0.5, 1, 2.2], (a) => {
         const x = { f: (u) => (u >= 0 && u <= a ? 1 : 0), edges: [0, a] };
         const h = { f: (u) => (u >= 0 && u <= 1 ? 1 : 0), edges: [0, 1] };

@@ -22,19 +22,19 @@ export default {
     'Nyquist',
     'Black',
     'Nichols',
-    'résonance',
-    'lieu de transfert',
-    'marge de gain',
-    'marge de phase',
-    'stabilité',
+    'resonance',
+    'transfer locus',
+    'gain margin',
+    'phase margin',
+    'stability',
   ],
 
   params: {
-    sys: select('système', {
+    sys: select('system', {
       description: 'the transfer function plotted',
-      // the expression IS the name of the system: "premier ordre K/(1+jωτ)"
-      // said the same thing twice, and the prose was the half that did not
-      // fit on a pill
+      // the expression IS the name of the system: "first order K/(1+jωτ)" said
+      // the same thing twice, and the prose was the half that did not fit on a
+      // pill
       options: [
         { value: 'first', label: 'K/(1+jωτ)' },
         { value: 'second', label: 'Kω₀²/(ω₀²−ω²+2jmω₀ω)' },
@@ -94,23 +94,23 @@ export default {
       label: 'resonance?',
       calc: (p) =>
         p.sys === 'first'
-          ? 'non (premier ordre)'
+          ? 'no (first order)'
           : p.sys === 'openloop'
-            ? 'sans objet (boucle ouverte)'
+            ? 'not applicable (open loop)'
             : p.m < Math.SQRT1_2
-              ? `oui : m = ${p.m} < 0.707`
-              : `non : m = ${p.m} ≥ 0.707`,
+              ? `yes: m = ${p.m} < 0.707`
+              : `no: m = ${p.m} ≥ 0.707`,
     },
     // The number the open-loop scene is built around: (τ₁+τ₂)/(τ₁τ₂) = 6/τ.
-    // Below it both marges sont positives, au-dessus la boucle fermée diverge.
+    // Below it both margins are positive, above it the closed loop diverges.
     stability: {
       label: 'closed loop',
       calc: (p) => {
-        if (p.sys !== 'openloop') return 'sans objet (pas de boucle)';
+        if (p.sys !== 'openloop') return 'not applicable (no loop)';
         const kc = 6 / p.tau;
         return p.K < kc
-          ? `stable : K = ${(+p.K).toFixed(2)} < K_crit = ${kc.toFixed(2)}`
-          : `instable : K = ${(+p.K).toFixed(2)} ≥ K_crit = ${kc.toFixed(2)}`;
+          ? `stable: K = ${(+p.K).toFixed(2)} < K_crit = ${kc.toFixed(2)}`
+          : `unstable: K = ${(+p.K).toFixed(2)} ≥ K_crit = ${kc.toFixed(2)}`;
       },
     },
   },
@@ -125,7 +125,7 @@ export default {
   views: [
     // Bode, split in two as the subject does — gainView/phaseView are the
     // catalogue's shared frequency figures, so this Bode plot IS the analog
-    // filter's réponse fréquentielle with another abscissa.
+    // filter's frequency response with another abscissa.
     // The three verticals are the SAME on both halves: the cursor, and the
     // two margin readings. A margin is a GAP on a plot, not a number in a
     // statline, so both ends of each gap have to be drawn. Every reference is

@@ -78,10 +78,10 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
-    // LA vue. Tout le calcul se passe dans l'espace des τ, et rien d'autre :
-    // x(τ) ne bouge jamais, h(t−τ) est h retournée puis glissée de t, et
-    // l'aire bleue sous leur produit EST y(t). Le curseur t est le seul
-    // paramètre qui bouge, et le glisser fait l'animation à la main.
+    // THE view. The whole computation happens in τ space and nowhere else:
+    // x(τ) never moves, h(t−τ) is h flipped and then slid by t, and the blue
+    // area under their product IS y(t). The cursor t is the only parameter that
+    // moves, and sliding it does the animation by hand.
     view(
       'overlap',
       'The computation, at frozen t',
@@ -100,8 +100,8 @@ export default {
       })
     ),
 
-    // Le résultat, où le point courant se reporte : la courbe se remplit à
-    // mesure qu'on glisse t sur la vue précédente.
+    // The result, where the current point is carried over: the curve fills in as
+    // t is slid on the previous view.
     figure(
       'response',
       line('yOut', {

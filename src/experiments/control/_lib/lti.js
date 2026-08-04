@@ -56,7 +56,7 @@ export function secondOrderImpulse(K, m, w0, t) {
   return (K * w0 * w0 * (Math.exp(r1 * t) - Math.exp(r2 * t))) / (r1 - r2);
 }
 
-/** Les deux pôles de ce même second ordre, comme [[Re, Im], [Re, Im]]. */
+/** The two poles of that same second order, as [[Re, Im], [Re, Im]]. */
 export function secondOrderPoles(m, w0) {
   if (m < 1) {
     const wd = w0 * Math.sqrt(1 - m * m);

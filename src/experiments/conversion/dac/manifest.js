@@ -10,9 +10,9 @@ export default {
   tags: ['digital', 'upsampling', 'interpolation', 'zero stuffing', 'images', 'DAC'],
 
   params: {
-    // L'ÉTAPE est un paramètre, pas un onglet : les deux figures restent les
-    // mêmes et c'est la chaîne qui avance dessus. Une scène s'ouvre donc à
-    // l'étape où le cours en est, et son URL la porte.
+    // THE STEP is a parameter, not a tab: the two figures stay the same and it
+    // is the chain that advances on them. A scene therefore opens at the step
+    // the lecture has reached, and its URL carries it.
     stage: select('étape', {
       description: 'stage reached in the chain',
       options: [
@@ -54,11 +54,11 @@ export default {
     { title: 'Interpolation filter', params: ['half'] },
   ],
 
-  // actions omises → l'expérience ne tire rien : pas de dé, seulement freeze
+  // actions omitted → the experiment draws nothing: no dice, only freeze
 
   views: [
-    // Le temporel d'abord — c'est là que le GESTE se voit : des zéros
-    // apparaissent entre les échantillons, puis se remplissent.
+    // The time view first — that is where the GESTURE is seen: zeros appear
+    // between the samples, then fill in.
     figure(
       'time',
       stem('stems', {
@@ -73,9 +73,9 @@ export default {
       })
     ),
 
-    // Et le spectre, qui raconte l'autre moitié : le zéro-stuffing n'y change
-    // RIEN — il élargit la bande, ce qui fait entrer les copies. Le filtre,
-    // lui, les efface.
+    // And the spectrum, which tells the other half: zero-stuffing changes
+    // NOTHING there — it widens the band, which brings the copies in. The filter
+    // erases them.
     figure(
       'spectrum',
       line('spectrum', {
