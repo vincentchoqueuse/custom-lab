@@ -13,6 +13,7 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { fft, qfunc } from '../../../core/numeric.js';
+import { ifft } from '../../../core/dsp.js';
 
 const MAX_CLOUD = 2500; // constellation points kept for display
 
@@ -25,10 +26,16 @@ function fftU(re, im) {
     im[i] *= s;
   }
 }
+// Convention UNITAIRE (1/√N des deux côtés), celle de l'OFDM : elle
+// conserve l'énergie, donc un SNR par sous-porteuse se lit tel quel. Le
+// cœur, lui, normalise en 1/N — d'où le √N qui rattrape.
 function ifftU(re, im) {
-  for (let i = 0; i < im.length; i++) im[i] = -im[i];
-  fftU(re, im);
-  for (let i = 0; i < im.length; i++) im[i] = -im[i];
+  ifft(re, im);
+  const s = Math.sqrt(re.length);
+  for (let i = 0; i < re.length; i++) {
+    re[i] *= s;
+    im[i] *= s;
+  }
 }
 
 /**

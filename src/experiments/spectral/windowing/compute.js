@@ -6,6 +6,7 @@
 // window. Exact identities used by check.js: Parseval through the
 // zero-padded DFT, and periodic-Hann ENBW = 1.5 bins.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { magSpectrum, magHalf, spectrumComplex } from '../../../core/dsp.js';
 import { fft, toDb as coreToDb, windowValue } from '../../../core/numeric.js';
 
 const FS = 1000; // sampling rate (Hz)
@@ -111,16 +112,6 @@ export function theoreticalSidelobe(win, N, span = 16) {
 }
 
 /** |FFT(x zero-padded to nfft)| — returns the magnitude of bins 0..nfft/2. */
-function magSpectrum(x, nfft) {
-  const re = new Float64Array(nfft);
-  const im = new Float64Array(nfft);
-  re.set(x);
-  fft(re, im);
-  const nh = nfft / 2;
-  const mag = new Float64Array(nh + 1);
-  for (let k = 0; k <= nh; k++) mag[k] = Math.hypot(re[k], im[k]);
-  return { mag, re, im };
-}
 
 const toDb = (m, ref) => coreToDb(m / ref, DB_FLOOR);
 
@@ -150,7 +141,9 @@ export function compute({ N, pad, f1, df, a2, win }) {
   }
   const ref = sw / 2; // coherent gain: a full-scale sine peaks at 0 dB
 
-  const { mag, re, im } = magSpectrum(xw, nfft);
+  // xw porte déjà la fenêtre : le spectre ne doit pas en remettre une
+  const { re, im } = spectrumComplex(xw, { nfft });
+  const mag = magHalf(re, im);
 
   // Parseval through the zero-padded DFT (exact identity, checked)
   let specEnergy = 0;
@@ -180,7 +173,7 @@ export function compute({ N, pad, f1, df, a2, win }) {
 
   // window kernel |W(f)| at fixed fine padding, x in bins of Fs/N
   const kfft = N * KPAD;
-  const { mag: km } = magSpectrum(w, kfft);
+  const km = magSpectrum(w, { nfft: kfft });
   const kMax = Math.min(kfft / 2, KBINS * KPAD);
   const kb = new Float64Array(kMax + 1);
   const ky = new Float64Array(kMax + 1);

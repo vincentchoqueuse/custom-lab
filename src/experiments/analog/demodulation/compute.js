@@ -33,6 +33,7 @@
 // mesurés et non supposés.
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { ifft, noiseSigma } from '../../../core/dsp.js';
 import { fft } from '../../../core/numeric.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 
@@ -63,16 +64,8 @@ export function analytic(x) {
     re[k] = 0;
     im[k] = 0;
   }
-  // TFD inverse = conjuguer, transformer, conjuguer, diviser par n
-  for (let k = 0; k < n; k++) im[k] = -im[k];
-  fft(re, im);
-  const zr = new Float64Array(n);
-  const zi = new Float64Array(n);
-  for (let k = 0; k < n; k++) {
-    zr[k] = re[k] / n;
-    zi[k] = -im[k] / n;
-  }
-  return { re: zr, im: zi };
+  ifft(re, im);
+  return { re, im };
 }
 
 /** Ψ(x)[n] = x[n]² − x[n+1]·x[n−1] — l'opérateur d'énergie de Teager. */
@@ -153,7 +146,7 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
   const fTrue = new Float64Array(N);
   // puissance du signal : ⟨A²⟩/2 = (1 + ka²/2)/2
   const sigPow = (1 + (ka * ka) / 2) / 2;
-  const sigma = Math.sqrt(sigPow / 10 ** (snr / 10));
+  const sigma = noiseSigma(sigPow, snr);
   for (let i = 0; i < N; i++) {
     const ti = i / FS;
     t[i] = ti * 1000; // ms
