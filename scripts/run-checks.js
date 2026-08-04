@@ -15,6 +15,7 @@ import { pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { normalizeViews } from '../src/core/figures.js';
 import * as dsp from '../src/core/dsp.js';
+import * as la from '../src/core/linalg.js';
 import { fft } from '../src/core/numeric.js';
 import { validateScene } from '../src/core/scenes.js';
 
@@ -232,11 +233,116 @@ function checkDsp() {
   }
 }
 
+/**
+ * L'algèbre linéaire du cœur (core/linalg.js), vérifiée par ses IDENTITÉS —
+ * une fois, ici, plutôt qu'une fois par sujet.
+ *
+ * Le module ne contient volontairement que ce que des expériences utilisent
+ * (voir son en-tête : ni LU, ni QR, ni SVD). Ce check est la contrepartie de
+ * cette règle : chaque fonction qui entre doit arriver avec une identité
+ * qu'on peut écrire, sinon elle n'entre pas.
+ */
+function checkLinalg() {
+  const bad = [];
+  const n = 5;
+  const worst = (k, f) => Math.max(...Array.from({ length: k }, (_, i) => Math.abs(f(i))));
+
+  // matvec : A = I laisse x intact, et A quelconque redonne le produit
+  const I = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) I[i * n + i] = 1;
+  const x = Float64Array.from({ length: n }, (_, i) => 1.7 - 0.4 * i);
+  if (worst(n, (i) => la.matvec(I, x, n, n)[i] - x[i]) > 0) bad.push('matvec(I, x) ≠ x');
+
+  // une matrice symétrique de test, définie positive (AᵀA + I)
+  const R = new Float64Array(n * n);
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++) R[i * n + j] = 1 / (1 + Math.abs(i - j)) + (i === j ? 1 : 0);
+
+  // quadForm : xᵀRx = Σ x_i (Rx)_i, et Σ λ_k ⟨v_k, x⟩² par la décomposition
+  const Rx = la.matvec(R, x, n, n);
+  let direct = 0;
+  for (let i = 0; i < n; i++) direct += x[i] * Rx[i];
+  if (Math.abs(la.quadForm(R, x, n) - direct) > 1e-12) bad.push('quadForm ≠ xᵀ(Rx)');
+
+  const eig = la.jacobiSym(Float64Array.from(R), n);
+  let spectral = 0;
+  for (let k = 0; k < n; k++) {
+    let p = 0;
+    for (let i = 0; i < n; i++) p += eig.vectors[i * n + k] * x[i];
+    spectral += eig.values[k] * p * p;
+  }
+  if (Math.abs(spectral - direct) > 1e-12) bad.push(`Σλ⟨v,x⟩² : ${Math.abs(spectral - direct)}`);
+
+  // jacobiSym : VᵀV = I, et Rv = λv
+  for (let a = 0; a < n; a++)
+    for (let b = 0; b < n; b++) {
+      let d = 0;
+      for (let i = 0; i < n; i++) d += eig.vectors[i * n + a] * eig.vectors[i * n + b];
+      if (Math.abs(d - (a === b ? 1 : 0)) > 1e-12) bad.push('VᵀV ≠ I');
+    }
+  for (let k = 0; k < n; k++) {
+    const v = Float64Array.from({ length: n }, (_, i) => eig.vectors[i * n + k]);
+    const Rv = la.matvec(R, v, n, n);
+    if (worst(n, (i) => Rv[i] - eig.values[k] * v[i]) > 1e-12) bad.push(`Rv ≠ λv (k=${k})`);
+  }
+
+  // solveLinearSystem : solve(A, A·x) rend x, y compris quand le premier
+  // pivot est nul — c'est là que l'absence de pivot partiel se verrait
+  const A = [
+    [0, 2, 1],
+    [1, -1, 3],
+    [2, 4, -1],
+  ];
+  const xs = [1.5, -2, 0.75];
+  const b = A.map((r) => r[0] * xs[0] + r[1] * xs[1] + r[2] * xs[2]);
+  const sol = la.solveLinearSystem(A.map((r) => r.slice()), b.slice());
+  if (worst(3, (i) => sol[i] - xs[i]) > 1e-12) bad.push('solve(A, Ax) ≠ x');
+
+  // normalEquations + ridgeSolve : sur des données EXACTEMENT polynomiales,
+  // λ = 0 retrouve les coefficients ; et λ > 0 rétrécit la solution
+  const xs2 = Array.from({ length: 40 }, (_, i) => -1 + (2 * i) / 39);
+  const truth = [0.5, -1.25, 2];
+  const ys = xs2.map((t) => truth[0] + truth[1] * t + truth[2] * t * t);
+  const { AtA, Aty } = la.normalEquations(
+    xs2.length,
+    3,
+    (i, row) => {
+      row[0] = 1;
+      row[1] = xs2[i];
+      row[2] = xs2[i] * xs2[i];
+    },
+    ys
+  );
+  const w0 = la.ridgeSolve(AtA, Aty, 0);
+  if (worst(3, (i) => w0[i] - truth[i]) > 1e-10) bad.push('moindres carrés exacts ratés');
+  const wR = la.ridgeSolve(AtA, Aty, 5);
+  const norm = (w) => Math.hypot(...w);
+  if (!(norm(wR) < norm(w0))) bad.push('ridge ne rétrécit pas');
+  // et la continuité : λ → 0 redonne les moindres carrés
+  const wEps = la.ridgeSolve(AtA, Aty, 1e-9);
+  if (worst(3, (i) => wEps[i] - w0[i]) > 1e-6) bad.push('ridge discontinue en 0');
+  // les entrées ne sont PAS modifiées : deux appels donnent le même résultat
+  const again = la.ridgeSolve(AtA, Aty, 0);
+  if (worst(3, (i) => again[i] - w0[i]) > 0) bad.push('ridgeSolve modifie ses entrées');
+
+  console.log(`  ${dim('linalg')}`);
+  if (bad.length) {
+    for (const b2 of bad) console.log(`    ${red('✗')} ${b2}`);
+    fail++;
+  } else {
+    console.log(
+      `    ${green('✓')} matvec, xᵀRx = Σλ⟨v,x⟩², VᵀV = I, Rv = λv, solve(A,Ax) = x, ridge exact et continu en 0`
+    );
+    pass++;
+  }
+}
+
 async function checkCatalogue() {
   console.log(bold('catalogue'));
   checkLayering();
   checkRandomness();
   checkDsp();
+  checkLinalg();
   console.log(`  ${dim('vocabulary')}`);
   let figuresOk = true;
   let scenesOk = true;

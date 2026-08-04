@@ -239,98 +239,7 @@ export function polyval(coeffs, x) {
 
 /* ---------- linear algebra ------------------------------------------------ */
 
-/**
- * Solve A·z = b by Gaussian elimination with partial pivoting.
- * A is an array of rows (mutated), b an array (mutated). Suited to the small
- * dense systems of this project (normal equations, d ≤ 10) — not a BLAS.
- * @returns {Float64Array}
- */
-export function solveLinearSystem(A, b) {
-  const n = b.length;
-  for (let col = 0; col < n; col++) {
-    let piv = col;
-    for (let r = col + 1; r < n; r++) {
-      if (Math.abs(A[r][col]) > Math.abs(A[piv][col])) piv = r;
-    }
-    if (A[piv][col] === 0) throw new Error('singular linear system');
-    if (piv !== col) {
-      [A[piv], A[col]] = [A[col], A[piv]];
-      [b[piv], b[col]] = [b[col], b[piv]];
-    }
-    for (let r = col + 1; r < n; r++) {
-      const f = A[r][col] / A[col][col];
-      for (let c = col; c < n; c++) A[r][c] -= f * A[col][c];
-      b[r] -= f * b[col];
-    }
-  }
-  const z = new Float64Array(n);
-  for (let r = n - 1; r >= 0; r--) {
-    let s = b[r];
-    for (let c = r + 1; c < n; c++) s -= A[r][c] * z[c];
-    z[r] = s / A[r][r];
-  }
-  return z;
-}
 
-/**
- * Valeurs et vecteurs propres d'une matrice SYMÉTRIQUE RÉELLE n×n, par
- * rotations de Jacobi cycliques.
- *
- * Jacobi et pas QR : les matrices que le projet décompose sont petites
- * (n ≤ 64 — une covariance de sous-espace, une autocorrélation de filtre
- * adaptatif), la convergence est garantie sans décalage ni cas
- * particulier, et surtout le résultat est exact au sens où on peut le
- * vérifier — l'orthogonalité est maintenue par construction puisqu'on
- * n'applique que des rotations.
- *
- * @param {Float64Array} a  n×n en ligne majeure — MODIFIÉE en place
- * @returns {{values: Float64Array, vectors: Float64Array}} vecteurs en
- *          COLONNES : v_k[i] = vectors[i*n + k]
- */
-export function jacobiSym(a, n) {
-  const v = new Float64Array(n * n);
-  for (let i = 0; i < n; i++) v[i * n + i] = 1;
-
-  for (let sweep = 0; sweep < 100; sweep++) {
-    let off = 0;
-    for (let p = 0; p < n; p++)
-      for (let q = p + 1; q < n; q++) off += a[p * n + q] * a[p * n + q];
-    if (off < 1e-30) break;
-
-    for (let p = 0; p < n - 1; p++) {
-      for (let q = p + 1; q < n; q++) {
-        const apq = a[p * n + q];
-        if (Math.abs(apq) < 1e-300) continue;
-        const theta = (a[q * n + q] - a[p * n + p]) / (2 * apq);
-        const t =
-          Math.sign(theta || 1) / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
-        const c = 1 / Math.sqrt(t * t + 1);
-        const s = t * c;
-        for (let k = 0; k < n; k++) {
-          const akp = a[k * n + p];
-          const akq = a[k * n + q];
-          a[k * n + p] = c * akp - s * akq;
-          a[k * n + q] = s * akp + c * akq;
-        }
-        for (let k = 0; k < n; k++) {
-          const apk = a[p * n + k];
-          const aqk = a[q * n + k];
-          a[p * n + k] = c * apk - s * aqk;
-          a[q * n + k] = s * apk + c * aqk;
-        }
-        for (let k = 0; k < n; k++) {
-          const vkp = v[k * n + p];
-          const vkq = v[k * n + q];
-          v[k * n + p] = c * vkp - s * vkq;
-          v[k * n + q] = s * vkp + c * vkq;
-        }
-      }
-    }
-  }
-  const values = new Float64Array(n);
-  for (let i = 0; i < n; i++) values[i] = a[i * n + i];
-  return { values, vectors: v };
-}
 
 /**
  * In-place iterative radix-2 FFT of the complex signal (re, im).
@@ -340,6 +249,11 @@ export function jacobiSym(a, n) {
  * @param {Float64Array} re — real part (mutated)
  * @param {Float64Array} im — imaginary part (mutated)
  */
+// jacobiSym et solveLinearSystem ont déménagé dans core/linalg.js le jour où
+// l'algèbre matricielle a servi trois sujets : numeric.js garde le SCALAIRE
+// (erf, Student, trapz), linalg.js prend tout ce qui est matrice, dsp.js le
+// signal. Trois modules, trois frontières lisibles.
+
 export function fft(re, im) {
   const n = re.length;
   if (n !== im.length || (n & (n - 1)) !== 0) {

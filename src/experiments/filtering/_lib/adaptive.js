@@ -24,7 +24,7 @@
 // PURE : pas de DOM, pas d'état, générateur passé en argument. Importable
 // depuis compute.js ET check.js.
 
-import { jacobiSym } from '../../../core/numeric.js';
+import { jacobiSym, quadForm } from '../../../core/linalg.js';
 
 /**
  * Le système à identifier : une réponse impulsionnelle oscillante et
@@ -118,16 +118,11 @@ export function msBound(values) {
   return lo;
 }
 
-/** xᵀRx — la puissance d'un filtre à l'entrée, exactement. */
-export function quadForm(R, x, L) {
-  let s = 0;
-  for (let i = 0; i < L; i++) {
-    let row = 0;
-    for (let j = 0; j < L; j++) row += R[i * L + j] * x[j];
-    s += x[i] * row;
-  }
-  return s;
-}
+// xᵀRx — la puissance d'un filtre à l'entrée — vient du cœur : trois sujets
+// la calculent, chacun pour une raison différente (puissance de signal ici,
+// excès d'EQM plus bas, variance projetée en ACP). Ré-exportée pour que le
+// harnais de ce sujet la trouve où il l'a toujours trouvée.
+export { quadForm };
 
 /**
  * UNE réalisation de l'adaptation.
