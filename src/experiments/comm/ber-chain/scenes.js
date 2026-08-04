@@ -1,45 +1,48 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'eb-honnete',
-    title: 'Eb/N₀ : la comparaison honnête',
+    id: 'honest-eb',
+    title: 'Eb/N₀: the honest comparison',
     params: { mod: 'qpsk', mapping: 'gray', ebn0Db: 6, Nbits: 20000 },
     view: 'ber',
     visible: ['mod', 'ebn0Db'],
-    notes: `Pourquoi Eb/N₀ et pas Es/N₀ ? Parce qu'on paie l'énergie PAR BIT
-transporté. Basculer BPSK → QPSK : les courbes BER se SUPERPOSENT —
-la QPSK transporte deux bits pour le même Eb/N₀, cadeau apparent…
-en réalité deux BPSK orthogonales (I et Q). C'est LE résultat qui
-surprend : à énergie par bit égale, doubler le débit de la BPSK est
-gratuit. 8-PSK et 16-QAM, elles, paient — les voisins se rapprochent
-plus vite que k n'augmente.`,
+    notes: `Why Eb/N₀ and not Es/N₀? Because the energy is paid PER BIT
+carried.
+
+Switching from BPSK to QPSK makes the BER curves COINCIDE: QPSK carries two bits
+for the same Eb/N₀, an apparent gift that is really two orthogonal BPSKs, on I
+and on Q. That is the result that surprises — at equal energy per bit, doubling
+the rate of BPSK is free. 8-PSK and 16-QAM do pay, because their neighbours
+close in faster than k grows.`,
   },
   {
     id: 'gray',
-    title: 'Gray contre binaire naturel',
+    title: 'Gray against natural binary',
     params: { mod: '16qam', mapping: 'gray', ebn0Db: 8, Nbits: 40000 },
     visible: ['mapping'],
-    notes: `Vue Constellation : en Gray, tous les voisins diffèrent d'UN bit —
-lire les étiquettes. Une erreur de symbole (quasi toujours vers un
-voisin) coûte donc un seul bit : les erreurs sont jaunes. Basculer en
-binaire naturel : des voisins à 2 bits apparaissent (lire 0111↔1000
-sur un axe), les erreurs ROUGES surgissent — même SER, plus de bits
-faux. Vue BER : les points Monte Carlo décollent de la courbe théorique
-Gray. Le mapping est gratuit en énergie et rapporte des dB : toujours
-prendre Gray.`,
+    notes: `On the constellation view with Gray mapping, every neighbour differs
+by ONE bit — the labels say so. A symbol error, which almost always goes to a
+neighbour, therefore costs a single bit, and the errors are yellow.
+
+Switching to natural binary creates neighbours two bits apart — 0111 next to
+1000 along one axis — and RED errors appear: the same SER, more wrong bits. On
+the BER view the Monte Carlo points lift off the Gray theory curve. The mapping
+costs no energy and buys decibels, so Gray is always the answer.`,
   },
   {
     id: 'cascade',
-    title: 'Lire la cascade',
+    title: 'Reading the cascade',
     params: { mod: '16qam', mapping: 'gray', ebn0Db: 10, Nbits: 40000 },
     view: 'ber',
     visible: ['mod', 'ebn0Db'],
-    notes: `Lecture d'ingénieur sur l'axe log : à BER = 10⁻³, relever l'Eb/N₀
-requis pour chaque modulation — BPSK/QPSK ≈ 6.8 dB, 8-PSK ≈ +3.5 dB,
-16-QAM ≈ +3.3 dB. Chaque bit par symbole supplémentaire se paie en
-puissance, mais économise de la bande : le compromis débit-puissance-
-bande, tout le métier tient là. Question finale : « comment descendre
-SOUS ces courbes ? » — le codage correcteur, chapitre suivant.`,
+    notes: `The engineer's reading, on the log axis: at a BER of 10⁻³, read the
+required Eb/N₀ for each modulation — about 6.8 dB for BPSK and QPSK, 3.5 dB more
+for 8-PSK, another 3.3 for 16-QAM.
+
+Each extra bit per symbol is paid for in power and saves bandwidth. The
+rate–power–bandwidth trade-off is the whole trade, and it is entirely in that
+reading. The closing question: how does one get BELOW those curves? Error-
+correcting codes, next chapter.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

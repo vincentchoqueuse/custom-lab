@@ -100,7 +100,7 @@ export function compute({ mod, mapping, ebn0Db, Nbits, seed }) {
       },
       berTh: {
         value: berTheoryGray(mod, gb),
-        meta: { label: 'BER théorie (Gray)', precision: 4 },
+        meta: { label: 'BER theory (Gray)', precision: 4 },
       },
       serEmp: {
         value: symErr / nSym,

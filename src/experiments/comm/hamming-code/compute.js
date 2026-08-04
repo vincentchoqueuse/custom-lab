@@ -100,11 +100,11 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
       pCh: { value: p, meta: { label: 'BER canal', precision: 4 } },
       berOut: {
         value: bitErr / (nBlocks * k),
-        meta: { label: 'BER décodé', precision: 5 },
+        meta: { label: 'decoded BER', precision: 5 },
       },
       berOutTh: {
         value: berHardExact(code, enumr, p),
-        meta: { label: 'théorie exacte', precision: 5 },
+        meta: { label: 'exact theory', precision: 5 },
       },
       berUncoded: {
         value: uncodedErr / Nbits,

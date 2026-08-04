@@ -198,10 +198,10 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
       hEnergy, // checks: Σ|h|² = 1 exactly
       parseval, // checks: (1/Nc)Σ|H|² = Σ|h|² exactly
       berSe, // checks: derived standard error of the mean BER
-      berMeas: { value: berMeas, meta: { label: 'BER mesuré', precision: 4 } },
+      berMeas: { value: berMeas, meta: { label: 'measured BER', precision: 4 } },
       berThAvg: {
         value: berTh,
-        meta: { label: 'BER théorie (ZF)', precision: 4 },
+        meta: { label: 'BER theory (ZF)', precision: 4 },
       },
     },
   };

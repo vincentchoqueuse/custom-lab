@@ -111,7 +111,7 @@ export function compute({ mod, snrDb, N, seed }) {
       },
       serTh: {
         value: serTheory(mod, snr),
-        meta: { label: 'SER théorique', precision: 4 },
+        meta: { label: 'theoretical SER', precision: 4 },
       },
       nErrors: { value: errors, meta: { label: 'erreurs', precision: 0 } },
     },

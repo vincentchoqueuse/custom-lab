@@ -6,31 +6,31 @@ export default {
   id: 'ber-chain',
   order: 2,
   random: true,
-  title: 'Chaîne BER complète',
-  subtitle: 'Bits, codage de Gray, Eb/N₀ : la comparaison honnête des modulations',
-  tags: ['BER', 'Gray', 'Eb/N0', 'mapping', 'chaîne de transmission'],
+  title: 'The complete BER chain',
+  subtitle: 'Bits, Gray coding, Eb/N₀: the honest comparison of modulations',
+  tags: ['BER', 'Gray', 'Eb/N0', 'mapping', 'transmission chain'],
 
   params: {
     mod: select('modulation', {
-      description: 'constellation émise (énergie moyenne unité)',
+      description: 'transmitted constellation (unit average energy)',
       options: [
-        { value: 'bpsk', label: 'BPSK (1 bit/symbole)' },
-        { value: 'qpsk', label: 'QPSK (2 bits/symbole)' },
-        { value: '8psk', label: '8-PSK (3 bits/symbole)' },
-        { value: '16qam', label: '16-QAM (4 bits/symbole)' },
+        { value: 'bpsk', label: 'BPSK (1 bit/symbol)' },
+        { value: 'qpsk', label: 'QPSK (2 bits/symbol)' },
+        { value: '8psk', label: '8-PSK (3 bits/symbol)' },
+        { value: '16qam', label: '16-QAM (4 bits/symbol)' },
       ],
       default: 'qpsk',
     }),
     mapping: select('mapping', {
-      description: 'association bits → symboles',
+      description: 'bits to symbols mapping',
       options: [
-        { value: 'gray', label: 'Gray (voisins à 1 bit)' },
-        { value: 'natural', label: 'binaire naturel' },
+        { value: 'gray', label: 'Gray (neighbours differ by 1 bit)' },
+        { value: 'natural', label: 'natural binary' },
       ],
       default: 'gray',
     }),
     ebn0Db: float('Eb/N₀', {
-      description: 'énergie par bit sur densité de bruit',
+      description: 'energy per bit over noise density',
       min: 0,
       max: 14,
       step: 0.5,
@@ -39,7 +39,7 @@ export default {
       precision: 1,
     }),
     Nbits: int('N', {
-      description: 'nombre de bits transmis',
+      description: 'number of bits transmitted',
       min: 1000,
       max: 100000,
       step: 1000,
@@ -59,8 +59,8 @@ export default {
   },
 
   groups: [
-    { title: 'Émission', params: ['mod', 'mapping'] },
-    { title: 'Canal', params: ['ebn0Db', 'Nbits'] },
+    { title: 'Transmitter', params: ['mod', 'mapping'] },
+    { title: 'Channel', params: ['ebn0Db', 'Nbits'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -69,9 +69,9 @@ export default {
     // equal-aspect plane: per-symbol bit labels, error clouds split by bit cost
     plane('mapping', 'Constellation & bits', {
       clouds: [
-        { source: 'rxOk', color: '#0072BD', r: 1.6, opacity: 0.22, max: 2500, label: 'décidé juste' },
-        { source: 'rxErr1', color: '#EDB120', r: 2.4, opacity: 0.85, label: 'erreur à 1 bit' },
-        { source: 'rxErrMulti', color: '#D95319', r: 2.8, opacity: 0.95, label: 'erreur multi-bits' },
+        { source: 'rxOk', color: '#0072BD', r: 1.6, opacity: 0.22, max: 2500, label: 'decided correctly' },
+        { source: 'rxErr1', color: '#EDB120', r: 2.4, opacity: 0.85, label: 'single-bit error' },
+        { source: 'rxErrMulti', color: '#D95319', r: 2.8, opacity: 0.95, label: 'multi-bit error' },
       ],
       markers: { source: 'idealPoints', color: 'var(--muted-fg)', labels: 'bitLabels' },
     }),
@@ -84,7 +84,7 @@ export default {
       line('berTheoryCurve', {
         color: '#7E2F8E',
         width: 2.4,
-        label: 'théorie (Gray)',
+        label: 'theory (Gray)',
         overlays: [
           scatter('berEmpCurve', { color: '#D95319', size: 5, label: 'Monte Carlo' }),
         ],

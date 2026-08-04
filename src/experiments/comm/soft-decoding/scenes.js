@@ -1,45 +1,48 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'confiance',
-    title: 'La confiance jetée à la poubelle',
+    id: 'confidence',
+    title: 'Confidence thrown away',
     params: { code: 'hamming74', ebn0Db: 3, Nbits: 40000 },
     visible: ['ebn0Db'],
-    notes: `Un échantillon reçu à +0.05 vote « 0 »… sans conviction. La décision
-dure garde le vote et JETTE la conviction ; le décodeur souple correle
-les 7 valeurs reçues avec les 16 mots de code possibles et garde tout.
-À l'écran : mêmes trames, même bruit, deux décodeurs. Les gros points
-orange (échecs du dur) sans point violet dessus = réparés par le
-souple. Marteler R : le violet est TOUJOURS inclus dans l'orange, ou
-presque — le souple domine trame par trame, pas seulement en moyenne.`,
+    notes: `A sample received at +0.05 votes "0" — without conviction. The hard
+decision keeps the vote and DISCARDS the conviction; the soft decoder correlates
+the seven received values against the sixteen possible codewords and keeps
+everything.
+
+On screen: the same frames, the same noise, two decoders. The large orange dots
+without a purple one on top are the hard failures repaired by the soft decoder.
+Pressing R shows the purple set almost always contained in the orange one — soft
+dominates frame by frame, not merely on average.`,
   },
   {
-    id: 'deux-db',
-    title: 'Deux décibels gratuits',
+    id: 'two-db',
+    title: 'Two free decibels',
     params: { code: 'hamming74', ebn0Db: 5, Nbits: 40000 },
     view: 'ber',
     visible: ['ebn0Db'],
-    notes: `Lire l'écart HORIZONTAL entre la courbe orange (dur, exacte) et les
-points violets (souple) : ≈ 2 dB à BER = 10⁻⁴ — même code, mêmes bits
-émis, même énergie ; seul le récepteur change. La borne de l'union
-(pointillés) colle aux points dès 4-5 dB : à haut SNR, l'erreur va vers
-le mot de code VOISIN (distance 3), et la borne ne compte que ça.
-2 dB gratuits : c'est pour ça qu'aucun récepteur moderne ne décide dur.`,
+    notes: `The HORIZONTAL gap between the orange curve (hard, exact) and the
+purple points (soft) is about 2 dB at a BER of 10⁻⁴ — same code, same
+transmitted bits, same energy, and only the receiver changed.
+
+The union bound, dashed, sits on the points from 4 or 5 dB upward: at high SNR
+the error goes to the NEAREST codeword, at distance 3, and the bound counts
+nothing else. Two free decibels is why no modern receiver decides hard.`,
   },
   {
     id: 'repetition',
-    title: 'La répétition rachetée',
+    title: 'Repetition redeemed',
     params: { code: 'repetition3', ebn0Db: 4, Nbits: 40000 },
     view: 'ber',
     visible: ['code'],
-    notes: `Le retour de la fausse bonne idée : en dur, la répétition ×3 perdait
-partout. En souple, moyenner les 3 échantillons = additionner 3 tiers
-d'énergie = récupérer TOUTE l'énergie : les points violets tombent
-EXACTEMENT sur la courbe sans-codage — ni mieux, ni pire, Q(√(2γb)).
-C'est le filtre adapté (revoir cette expérience !) déguisé en code.
-Moralité finale du chapitre : la répétition souple ne gagne rien, le
-Hamming souple gagne 2 dB — la structure ET la confiance, il faut les
-deux.`,
+    notes: `The plausible bad idea returns. Decoded hard, repetition ×3 lost
+everywhere. Decoded soft, averaging the three samples adds three thirds of the
+energy back together and recovers ALL of it: the purple points land EXACTLY on
+the uncoded curve, neither better nor worse, at Q(√(2γb)).
+
+That is the matched filter — worth revisiting that experiment — disguised as a
+code. The closing moral of the chapter: soft repetition gains nothing while soft
+Hamming gains 2 dB. Structure AND confidence, both of them.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

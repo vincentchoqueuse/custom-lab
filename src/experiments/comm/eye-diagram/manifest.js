@@ -6,21 +6,21 @@ export default {
   id: 'eye-diagram',
   order: 3,
   random: true,
-  title: 'Diagramme de l\'œil',
-  subtitle: 'ISI, bruit et instant d\'échantillonnage — la santé d\'une liaison en un regard',
-  tags: ['diagramme de l\'œil', 'ISI', 'cosinus surélevé', 'Nyquist', 'PAM'],
+  title: 'The eye diagram',
+  subtitle: 'ISI, noise and sampling instant — the health of a link at a glance',
+  tags: ['eye diagram', 'ISI', 'raised cosine', 'Nyquist', 'PAM'],
 
   params: {
     levels: select('M', {
-      description: 'nombre de niveaux PAM',
+      description: 'number of PAM levels',
       options: [
         { value: 2, label: '2-PAM (±1)' },
-        { value: 4, label: '4-PAM (deux bits/symbole)' },
+        { value: 4, label: '4-PAM (two bits/symbol)' },
       ],
       default: 2,
     }),
     alpha: float('α', {
-      description: 'roll-off du cosinus surélevé',
+      description: 'roll-off of the raised cosine',
       min: 0.05,
       max: 1,
       step: 0.05,
@@ -28,14 +28,14 @@ export default {
       precision: 2,
     }),
     bt: log('B·T', {
-      description: 'bande passante du canal (normalisée au débit symbole)',
+      description: 'channel bandwidth (normalized to the symbol rate)',
       min: 0.2,
       max: 8,
       default: 8,
     }),
-    sigma: float('σ', { description: 'bruit au récepteur', min: 0, max: 0.4, step: 0.01, default: 0.02 }),
+    sigma: float('σ', { description: 'noise at the receiver', min: 0, max: 0.4, step: 0.01, default: 0.02 }),
     Nsym: int('N', {
-      description: 'nombre de symboles superposés',
+      description: 'number of symbols superimposed',
       min: 50,
       max: 1000,
       step: 50,
@@ -45,8 +45,8 @@ export default {
   },
 
   groups: [
-    { title: 'Émission', params: ['levels', 'alpha'] },
-    { title: 'Canal', params: ['bt', 'sigma'] },
+    { title: 'Transmitter', params: ['levels', 'alpha'] },
+    { title: 'Channel', params: ['bt', 'sigma'] },
     { title: 'Observation', params: ['Nsym'] },
   ],
 
@@ -57,12 +57,12 @@ export default {
     // Line; the ±1/3 level guides only exist in 4-PAM (NaN hides them)
     view(
       'eye',
-      'Diagramme de l\'œil',
+      'Eye diagram',
       line('eyeTraces', {
         width: 1.1,
         opacity: 0.28,
         overlays: [
-          vline(() => 1, { color: '#EDB120', dashed: true, width: 2, label: 'instant optimal' }),
+          vline(() => 1, { color: '#EDB120', dashed: true, width: 2, label: 'optimal instant' }),
           hline(() => 1, { color: '#a1a1aa', width: 1, dashed: true }),
           hline(() => -1, { color: '#a1a1aa', width: 1, dashed: true }),
           hline((p) => (p.levels === 4 ? 1 / 3 : NaN), { color: '#a1a1aa', width: 1, dashed: true }),
@@ -77,9 +77,9 @@ export default {
       'time',
       line('waveform', {
         width: 1.8,
-        label: 'signal reçu',
+        label: 'received signal',
         overlays: [
-          scatter('samplePoints', { color: '#D95319', size: 4.5, label: 'échantillons à kT' }),
+          scatter('samplePoints', { color: '#D95319', size: 4.5, label: 'samples at kT' }),
         ],
         axes: { x: 't/T', y: 'x(t)' },
       })
@@ -88,7 +88,7 @@ export default {
     // the vertical cut at the sampling instant: clusters around the levels
     view(
       'at-sample',
-      'À l\'instant d\'échantillonnage',
+      'At the sampling instant',
       histogram('sampleValues', {
         color: '#0072BD',
         opacity: 0.6,
