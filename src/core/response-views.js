@@ -236,7 +236,11 @@ export function spectrumView(opts = {}) {
     width: 1.8,
     overlays: [
       line('specIn', { color: SPEC_IN_COLOR, opacity: 0.45, label: 'entrée' }),
-      line(resp, { color: RESP_COLOR, dashed: true, label: '|H(f)|' }),
+      // TRAIT PLEIN : |H(f)| n'est pas une référence théorique posée sur une
+      // mesure — c'est la réponse du filtre, l'objet même de la vue, et le
+      // tiret la faisait lire comme un repère secondaire. Les deux spectres
+      // gardent leurs couleurs, la réponse prend la sienne, pleine.
+      line(resp, { color: RESP_COLOR, width: 1.8, label: '|H(f)|' }),
       ...overlays,
     ],
   });

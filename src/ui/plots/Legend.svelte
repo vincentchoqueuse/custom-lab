@@ -74,22 +74,25 @@
         x2="0"
         y1="-1.5"
         y2="-1.5"
-        stroke={dataColor(e.color)}
+        stroke={off ? '#a1a1aa' : dataColor(e.color)}
         stroke-width="2.4"
         stroke-dasharray="4 3"
-        opacity={off ? 0.45 : 1}
+        opacity={off ? 0.85 : 1}
       />
     {:else}
+      <!-- Éteinte, la pastille passe au GRIS PLEIN : un carré vidé se lisait
+           comme une case à cocher, donc comme « pas encore choisi », quand
+           il veut dire « couche masquée ». Une pastille grise dit la même
+           chose que le libellé barré, et le dit à la couleur — ce qui se
+           voit de loin. -->
       <rect
         x="-14"
         y="-4"
         width="14"
         height="5"
         rx="2"
-        fill={off ? 'none' : dataColor(e.color)}
-        stroke={dataColor(e.color)}
-        stroke-width={off ? 1.2 : 0}
-        opacity={off ? 0.6 : 1}
+        fill={off ? '#a1a1aa' : dataColor(e.color)}
+        opacity={off ? 0.85 : 1}
       />
     {/if}
     <text
