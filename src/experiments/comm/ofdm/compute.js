@@ -26,9 +26,9 @@ function fftU(re, im) {
     im[i] *= s;
   }
 }
-// Convention UNITAIRE (1/√N des deux côtés), celle de l'OFDM : elle
-// conserve l'énergie, donc un SNR par sous-porteuse se lit tel quel. Le
-// cœur, lui, normalise en 1/N — d'où le √N qui rattrape.
+// UNITARY convention (1/√N on both sides), the one OFDM uses: it preserves
+// energy, so a per-subcarrier SNR reads as it stands. The core normalizes by
+// 1/N instead — hence the √N that makes up the difference.
 function ifftU(re, im) {
   ifft(re, im);
   const s = Math.sqrt(re.length);

@@ -237,7 +237,7 @@ export function toggleSeries(label) {
     : [...app.hidden, label];
 }
 
-/** Tout réafficher — appelé quand la vue change, et par Échap. */
+/** Show everything again — called when the view changes, and by Esc. */
 export function showAllSeries() {
   if (app.hidden.length) app.hidden = [];
 }
@@ -246,7 +246,7 @@ export function setView(id) {
   app.view = id;
   app.ghost = null; // a ghost from another view would be a misleading overlay
   app.axisLock = false; // another view's frame means nothing here
-  app.hidden = []; // les libellés d'une autre vue n'ont rien à masquer ici
+  app.hidden = []; // another view's labels have nothing to hide here
   syncUrl(true);
 }
 

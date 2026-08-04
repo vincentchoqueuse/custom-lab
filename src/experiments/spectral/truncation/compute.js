@@ -54,8 +54,8 @@ export function windowedSamples(p, Tms) {
 /** |X_T(f)| on the zero-padded grid — the transform of the truncated signal. */
 export function spectrumOf(p, Tms, nfft = NFFT) {
   const xw = windowedSamples(p, Tms);
-  // le spectre complet EST rendu : le harnais y vérifie Parseval, qui porte
-  // sur les deux moitiés et pas sur le demi-spectre affiché
+  // the FULL spectrum is returned: the harness checks Parseval on it, and
+  // that identity holds over both halves, not over the displayed half
   const { re, im } = spectrumComplex(xw, { nfft });
   return { mag: magHalf(re, im), binHz: FS / nfft, n: xw.length, re, im };
 }

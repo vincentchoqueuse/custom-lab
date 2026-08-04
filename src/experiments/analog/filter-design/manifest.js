@@ -90,7 +90,7 @@ export default {
       ],
     }),
     polesView({
-      zeroLabel: 'zéros (sur jω)',
+      zeroLabel: 'zeros (on jω)',
       circle: { radius: 1, label: 'circle |s| = ωp' },
       segments: [{ x1: 0, y1: -5, x2: 0, y2: 5 }],
       axes: { x: 'Re(s)/ωp', y: 'Im(s)/ωp' },

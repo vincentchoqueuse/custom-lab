@@ -8,7 +8,7 @@
 //   gaussienne     e^{−π(t/T)²}           T·e^{−π(fT)²}          ← point fixe
 //   exp. causale   e^{−t/T}·u(t)          T/(1 + j2πfT)          ← seule complexe
 //   exp. bilatér.  e^{−|t|/T}             2T/(1 + (2πfT)²)
-//   sinus cardinal sinc(t/T)              T·rect(fT)             ← dual de la porte
+//   sinc          sinc(t/T)               T·rect(fT)             ← dual of the gate
 //   sinusoïde      cos(2πf₀t)·Π(t/T)      (T/2)[sinc((f−f₀)T) + sinc((f+f₀)T)]
 //     tronquée
 //

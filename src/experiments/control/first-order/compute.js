@@ -5,7 +5,7 @@
 // Everything below is a closed form, none of it integrated numerically:
 //   indicielle    y(t) = K[1 − (1 − τ_z/τ)·e^{−t/τ}]
 //   impulsion     h(t) = K·(τ_z/τ)·δ(t) + (K/τ)(1 − τ_z/τ)·e^{−t/τ}
-//   pôle          s = −1/τ          zéro  s = −1/τ_z  (aucun si τ_z = 0)
+//   pole          s = −1/τ          zero  s = −1/τ_z  (none if τ_z = 0)
 //   fréquentiel   H(jω) = K(1 + jωτ_z)/(1 + jωτ)
 //
 // τ_z is a single slider that produces the three textbook behaviours:

@@ -121,8 +121,8 @@ export default {
     // simulated. The frame follows the characteristic pulsation read off the
     // denominator, so a system typed with any coefficients arrives framed.
     polesView({
-      poleLabel: 'pôles de den(s)',
-      zeroLabel: 'zéros de num(s)',
+      poleLabel: 'poles of den(s)',
+      zeroLabel: 'zeros of num(s)',
       minHalf: (p) => {
         const wn = naturalPulsation(p.den);
         return Number.isFinite(wn) && wn > 0 ? 1.6 * wn : 2;

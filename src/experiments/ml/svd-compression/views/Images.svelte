@@ -27,7 +27,7 @@
     { uri: obs.residual?.value, label: 'residual ×4' },
   ]);
 
-  // trois vignettes carrées, réparties sur la largeur du cadre
+  // three square thumbnails, spread across the width of the frame
   const gap = 26;
   const side = $derived(Math.min((W - 4 * gap) / 3, H - 90));
   const x0 = $derived((W - (3 * side + 2 * gap)) / 2);

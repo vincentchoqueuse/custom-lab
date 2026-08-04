@@ -154,9 +154,9 @@
         if (app.ui.palette) app.ui.palette = false;
         else if (app.ui.inspector) app.ui.inspector = false;
         else if (app.ghost) app.ghost = null; // clear the freeze ghost
-        // en dernier, et seulement si rien d'autre n'attendait d'être
-        // fermé : Échap rend l'écran à son état simple, donc il rallume
-        // les courbes éteintes depuis la légende
+        // last, and only if nothing else was waiting to be closed: Esc
+        // returns the screen to its plain state, so it also switches back on
+        // the curves hidden from the legend
         else showAllSeries();
         break;
     }

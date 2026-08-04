@@ -5,7 +5,7 @@
 // Three separate semantic keys, never concatenated in one string:
 //   name        — displayed symbol ('f', 'φ', 'N'); first positional argument,
 //                 defaults to the param key (filled in by the registry)
-//   description — what it is ('fréquence', 'phase'); feeds the tooltip and the
+//   description — what it is ('frequency', 'phase'); feeds the tooltip and the
 //                 drawer's secondary text
 //   unit        — 'Hz', 'rad', 'dB'
 // Pills render `name = value unit`. Every param has a `default` (the URL

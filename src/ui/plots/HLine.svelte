@@ -1,6 +1,6 @@
 <script>
   // Horizontal reference line (param, scalar observable, or p => fn).
-  // Son nom est porté par la légende (voir VLine).
+  // Its name is carried by the legend (see VLine).
 
   let { ys, y, spec = {}, w, k = 1, kt = 1 } = $props();
 

@@ -108,8 +108,8 @@ export default {
     // One pole, at most one zero, on the equal-aspect s-plane: the zero
     // crosses to the right half-plane exactly when τ_z becomes negative.
     polesView({
-      poleLabel: 'pôle −1/τ',
-      zeroLabel: 'zéro −1/τ_z',
+      poleLabel: 'pole −1/τ',
+      zeroLabel: 'zero −1/τ_z',
       minHalf: (p) => Math.max(1.5 / p.tau, 1),
       maxHalf: 60,
     }),

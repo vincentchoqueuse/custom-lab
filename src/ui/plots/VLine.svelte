@@ -1,8 +1,8 @@
 <script>
   // Vertical reference line (param, scalar observable, or p => fn).
-  // Son nom est porté par la légende, comme celui de toute autre couche :
-  // écrit au sommet du trait, il devenait illisible dès que deux repères
-  // tombaient au même endroit.
+  // Its name is carried by the legend, like that of any other layer: written
+  // at the top of the stroke, it became unreadable as soon as two markers
+  // landed in the same place.
 
   let { xs, x, spec = {}, h, k = 1, kt = 1 } = $props();
 

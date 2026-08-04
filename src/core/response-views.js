@@ -82,8 +82,8 @@ function magnitudeAxis(y, yLabel, domain) {
 }
 
 /**
- * |H| against frequency: Bode gain in control, frequency response in
- * traitement du signal, spectre when the source is a signal — one figure.
+ * |H| against frequency: Bode gain in control, frequency response in signal
+ * processing, spectrum when the source is a signal — one figure.
  *   x       OMEGA | HERTZ | HERTZ_LIN, or any axis object
  *   y       'dB' (default) | 'log' (decades) | a full axis object
  *   domain  [min, max] on the ordinate, when the figure needs a fixed frame
@@ -162,8 +162,8 @@ export function polesView(opts = {}) {
   const {
     poles = 'poles',
     zeros = 'zeros',
-    poleLabel = 'pôles',
-    zeroLabel = 'zéros',
+    poleLabel = 'poles',
+    zeroLabel = 'zeros',
     variable = 's',
     axes,
     circle,

@@ -97,8 +97,8 @@ function makePlot(type, source, opts = {}) {
   // The legend sits at the top RIGHT by default, and that is the right corner
   // almost everywhere. Almost: when the layers crowd the right — three
   // estimators landing near the bound they estimate — it covers them.
-  // `legend: 'left'` puts it opposite. A closed list, like the
-  // reste du vocabulaire.
+  // `legend: 'left'` puts it opposite. A closed list, like the rest of the
+  // vocabulary.
   if (opts.legend != null && opts.legend !== 'left' && opts.legend !== 'right')
     throw new ViewError(`${where}: legend accepts 'left' or 'right' (got '${opts.legend}')`);
   return { type, source, ...opts };

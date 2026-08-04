@@ -212,7 +212,7 @@ export const checks = [
     name: 'modulation : le spectre de la porte, déplacé en f₀',
     category: 'numeric',
     run() {
-      // |X_rf(f₀+δ)| = (T/2)|sinc(δT)| au terme croisé (T/2)sinc((2f₀+δ)T) près
+      // |X_rf(f₀+δ)| = (T/2)|sinc(δT)| up to the cross term (T/2)sinc((2f₀+δ)T)
       const deltas = range(40, (i) => (i - 20) / (10 * T0));
       let worst = 0;
       let bound = 0;

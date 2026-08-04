@@ -1,17 +1,17 @@
-// Les briques d'un réseau, écrites une fois pour les trois expériences du
-// sujet. Rien de plus qu'une activation, un produit matrice-vecteur et une
-// descente de gradient — et c'est précisément le propos : il n'y a rien de
-// plus dans un réseau que ce que ce fichier contient.
+// The building blocks of a network, written once for the subject's three
+// experiments. Nothing beyond an activation, a matrix–vector product and a
+// gradient descent — and that is exactly the point: there is nothing more in a
+// network than what this file contains.
 //
-// PURE, sans état, générateur passé en argument. Importable depuis
-// compute.js ET check.js.
+// PURE, stateless, generator passed as an argument. Importable from compute.js
+// AND check.js.
 
 /**
- * Les activations, chacune avec sa dérivée — la dérivée n'est pas un
- * ornement : c'est elle qui décide si un réseau apprend, et la vue de
- * transfert la trace à côté de la fonction.
+ * The activations, each with its derivative — the derivative is not an
+ * ornament: it is what decides whether a network learns, and the transfer view
+ * draws it beside the function.
  *
- * `leaky` porte sa pente négative en dur (0.01), la valeur d'usage.
+ * `leaky` carries its negative slope hard-coded (0.01), the usual value.
  */
 export const ACTIVATIONS = {
   identity: { f: (x) => x, df: () => 1, odd: true },
@@ -26,7 +26,7 @@ export const ACTIVATIONS = {
     },
     odd: false,
   },
-  // GELU dans sa forme exacte (et non l'approximation en tanh) : x·Φ(x).
+  // GELU in its exact form (not the tanh approximation): x·Φ(x).
   gelu: {
     f: (x) => x * 0.5 * (1 + erf(x / Math.SQRT2)),
     df: (x) =>
@@ -35,7 +35,7 @@ export const ACTIVATIONS = {
   },
 };
 
-/** erf par l'approximation d'Abramowitz–Stegun 7.1.26 (7 chiffres). */
+/** erf by the Abramowitz–Stegun 7.1.26 approximation (7 digits). */
 function erf(x) {
   const s = Math.sign(x);
   const a = Math.abs(x);
@@ -48,7 +48,7 @@ function erf(x) {
   return s * y;
 }
 
-/** σ appliquée terme à terme. */
+/** σ applied element by element. */
 export function applyAct(x, act) {
   const { f } = ACTIVATIONS[act];
   const y = new Float64Array(x.length);
@@ -57,8 +57,8 @@ export function applyAct(x, act) {
 }
 
 /**
- * y = W·x, W étant donnée en ligne majeure (rows × cols).
- * Le produit matrice-vecteur : la seule opération d'une couche linéaire.
+ * y = W·x, with W given in row-major order (rows × cols).
+ * The matrix–vector product: the only operation of a linear layer.
  */
 export function matvec(W, x, rows, cols) {
   const y = new Float64Array(rows);
@@ -72,11 +72,11 @@ export function matvec(W, x, rows, cols) {
 }
 
 /**
- * Une matrice DENSE aléatoire, entrées i.i.d. gaussiennes d'écart-type
- * scale/√cols — la normalisation « He/Glorot », qui garde la variance de
- * la sortie indépendante de la largeur. Sans elle, élargir le réseau
- * saturerait l'activation, et on attribuerait à la largeur un effet qui
- * n'est qu'un défaut d'échelle.
+ * A random DENSE matrix, entries i.i.d. Gaussian with standard deviation
+ * scale/√cols — the "He/Glorot" normalization, which keeps the output variance
+ * independent of the width. Without it, widening the network would saturate the
+ * activation, and an effect that is only a scaling defect would be attributed
+ * to the width.
  */
 export function denseMatrix(rows, cols, scale, gauss) {
   const W = new Float64Array(rows * cols);
@@ -86,12 +86,12 @@ export function denseMatrix(rows, cols, scale, gauss) {
 }
 
 /**
- * La MÊME couche, mais dont la matrice est de Toeplitz : W[i][j] ne dépend
- * que de i − j. Autrement dit un filtre RIF, autrement dit une convolution
- * — et l'expérience est là pour que cette phrase cesse d'être une analogie.
+ * The SAME layer, but with a Toeplitz matrix: W[i][j] depends only on i − j.
+ * In other words an FIR filter, in other words a convolution — and the
+ * experiment exists so that this sentence stops being an analogy.
  *
- * Le noyau est causal de longueur `len`, et la matrice fait rows × cols :
- * W[i][j] = h[i − j] si 0 ≤ i − j < len, 0 sinon.
+ * The kernel is causal of length `len`, and the matrix is rows × cols:
+ * W[i][j] = h[i − j] if 0 ≤ i − j < len, 0 otherwise.
  */
 export function toeplitzMatrix(rows, cols, kernel) {
   const W = new Float64Array(rows * cols);
@@ -103,7 +103,7 @@ export function toeplitzMatrix(rows, cols, kernel) {
   return W;
 }
 
-/** Convolution causale h*x, tronquée à la longueur de x. */
+/** Causal convolution h*x, truncated to the length of x. */
 export function convolve(x, h) {
   const y = new Float64Array(x.length);
   for (let i = 0; i < x.length; i++) {
@@ -115,9 +115,9 @@ export function convolve(x, h) {
 }
 
 /**
- * Le réseau à UNE couche cachée, dans sa forme minimale :
+ * The ONE-hidden-layer network, in its minimal form:
  *     y(x) = w₂ᵀ σ(W₁x + b₁) + b₂
- * Rien d'autre. Les trois expériences du sujet n'en utilisent pas plus.
+ * Nothing else. The subject's three experiments use nothing more.
  */
 export function forward(x, { W1, b1, w2, b2, act, hidden, inDim }) {
   const z = matvec(W1, x, hidden, inDim);
@@ -129,14 +129,14 @@ export function forward(x, { W1, b1, w2, b2, act, hidden, inDim }) {
 }
 
 /**
- * Descente de gradient COMPLÈTE (batch) sur l'erreur quadratique, pour un
- * réseau 2 → H → 1. Rend la trajectoire entière : l'époque devient un
- * paramètre de l'expérience, donc une scène s'ouvre à l'état où le cours en
- * est, sans moteur d'animation et sans rien perdre de la reproductibilité.
+ * FULL-batch gradient descent on the squared error, for a 2 → H → 1 network.
+ * Returns the whole trajectory: the epoch becomes a parameter of the
+ * experiment, so a scene opens at the state the lecture has reached, with no
+ * animation engine and no loss of reproducibility.
  *
  * @returns {{loss: Float64Array, path: Float64Array, params: object}}
- *   `path` contient les paramètres à chaque époque (aplatis), `params` ceux
- *   de la dernière.
+ *   `path` holds the parameters at each epoch (flattened), `params` those of
+ *   the last one.
  */
 export function trainGD({ X, T, hidden, act, epochs, lr, init, keepEvery = 1 }) {
   const inDim = X[0].length;
@@ -169,7 +169,7 @@ export function trainGD({ X, T, hidden, act, epochs, lr, init, keepEvery = 1 }) 
 
     for (let s = 0; s < n; s++) {
       const x = X[s];
-      // avant
+      // forward
       const z = new Float64Array(hidden);
       const h = new Float64Array(hidden);
       let y = b2;
@@ -182,7 +182,7 @@ export function trainGD({ X, T, hidden, act, epochs, lr, init, keepEvery = 1 }) 
       }
       const e = y - T[s];
       l += (e * e) / (2 * n);
-      // arrière
+      // backward
       gb2 += e / n;
       for (let i = 0; i < hidden; i++) {
         gw2[i] += (e * h[i]) / n;
@@ -207,10 +207,10 @@ export function trainGD({ X, T, hidden, act, epochs, lr, init, keepEvery = 1 }) 
 }
 
 /**
- * Les iso-contours d'un champ scalaire par MARCHING SQUARES — la frontière
- * de décision, tracée comme une courbe et non devinée sur un nuage.
- * Rendue en segments concaténés, séparés par des NaN : un seul observable,
- * que le tracé générique coupe tout seul.
+ * The level curves of a scalar field by MARCHING SQUARES — the decision
+ * boundary, drawn as a curve rather than guessed from a cloud. Returned as
+ * concatenated segments separated by NaN: a single observable, which the
+ * generic plot breaks up on its own.
  *
  * @param {Float64Array} field grille (ny × nx) en ligne majeure
  */
@@ -220,8 +220,8 @@ export function contourLines(field, nx, ny, x0, x1, y0, y1, level) {
   const at = (i, j) => field[j * nx + i];
   const px = (i) => x0 + ((x1 - x0) * i) / (nx - 1);
   const py = (j) => y0 + ((y1 - y0) * j) / (ny - 1);
-  // Interpolation linéaire sur l'arête : c'est ce qui rend la courbe lisse
-  // au lieu d'escalier, et c'est la seule « science » du procédé.
+  // Linear interpolation along the edge: this is what makes the curve smooth
+  // instead of a staircase, and it is the only "science" in the procedure.
   const lerp = (a, b, va, vb) => a + ((b - a) * (level - va)) / (vb - va);
 
   for (let j = 0; j < ny - 1; j++) {

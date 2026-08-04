@@ -107,8 +107,9 @@
 
     <g clip-path="url(#iq-clip)">
       <!-- The cross through the origin. On a pole map it is not decoration:
-           Re(s) = 0 is the line the whole subject is about, and "le pôle passe
-           à droite" is a great deal easier to say when the right is drawn.
+           Re(s) = 0 is the line the whole subject is about, and "the pole
+           crosses to the right" is a great deal easier to say when the right
+           half is drawn.
            Under everything else, and only when the plane asks for it. -->
       {#if axisLines}
         <line
