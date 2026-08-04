@@ -16,7 +16,7 @@ import { readFileSync } from 'node:fs';
 import { normalizeViews } from '../src/core/figures.js';
 import * as dsp from '../src/core/dsp.js';
 import * as la from '../src/core/linalg.js';
-import { fft } from '../src/core/numeric.js';
+import { fft, median, medianInPlace } from '../src/core/numeric.js';
 import { validateScene } from '../src/core/scenes.js';
 import { castParam, parseHash, decodeQuery, encodeHash } from '../src/core/router.js';
 
@@ -228,6 +228,55 @@ function checkDsp() {
   } else {
     console.log(
       `    ${green('✓')} ifft∘fft, dbAmp = dbPower∘square, line on bin, Nyquist included, σ(SNR), linspace`
+    );
+    pass++;
+  }
+}
+
+/**
+ * medianInPlace agrees with median, EXACTLY, on every shape of input.
+ *
+ * A median is an order statistic, so selecting the middle rank and sorting for
+ * it cannot legitimately disagree — which makes this a bit-for-bit identity
+ * rather than a tolerance, and the only honest way to buy the faster one. The
+ * inputs below are the ones that break a careless quickselect: already sorted
+ * and reverse sorted (the quadratic pivot cases), all-equal, two values, and
+ * both parities of length.
+ */
+function checkMedian() {
+  const bad = [];
+  const rand = (() => {
+    let s = 12345;
+    return () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  })();
+  const shapes = {
+    sorted: (n) => Float64Array.from({ length: n }, (_, i) => i),
+    reversed: (n) => Float64Array.from({ length: n }, (_, i) => n - i),
+    equal: (n) => new Float64Array(n).fill(3.5),
+    twoValued: (n) => Float64Array.from({ length: n }, (_, i) => (i % 2 ? 1 : -1)),
+    random: (n) => Float64Array.from({ length: n }, () => rand() * 20 - 10),
+    spiky: (n) => Float64Array.from({ length: n }, (_, i) => (i === 0 ? 1e9 : rand())),
+  };
+  for (const [shape, make] of Object.entries(shapes)) {
+    for (let n = 1; n <= 65; n++) {
+      const a = make(n);
+      const want = median(a); // copies and sorts
+      const got = medianInPlace(Float64Array.from(a)); // selects, in place
+      if (!Object.is(want, got)) bad.push(`${shape} n=${n}: ${got} ≠ ${want}`);
+    }
+  }
+  // and it really does leave the input alone when called through `median`
+  const src = Float64Array.from([5, 1, 4, 2, 3]);
+  median(src);
+  if (String(src) !== '5,1,4,2,3') bad.push(`median mutated its input: ${src}`);
+
+  console.log(`  ${dim('median')}`);
+  if (bad.length) {
+    for (const b of bad.slice(0, 6)) console.log(`    ${red('✗')} ${b}`);
+    fail++;
+  } else {
+    console.log(
+      `    ${green('✓')} select = sort, bit for bit, on 6 shapes × n = 1…65  ${dim('(390 cases)')}`
     );
     pass++;
   }
@@ -514,6 +563,7 @@ async function checkCatalogue() {
   checkRandomness();
   checkDsp();
   checkLinalg();
+  checkMedian();
   checkRouter();
   console.log(`  ${dim('vocabulary')}`);
   let figuresOk = true;

@@ -137,8 +137,19 @@ export function covariance(xr, xi, M) {
  */
 export function musicPseudo(vec, M, d, f) {
   const out = new Float64Array(f.length);
+  // a(f) depends on the frequency and on nothing else, so it is built ONCE per
+  // grid point and reused across the M−d noise eigenvectors. Written the
+  // obvious way, cos(ωi) and sin(ωi) sat in the innermost loop and were
+  // recomputed M−d times for the same (k, i) — 336 000 sine-cosine pairs per
+  // call at the default settings instead of 24 000, for identical values.
+  const cs = new Float64Array(M);
+  const sn = new Float64Array(M);
   for (let k = 0; k < f.length; k++) {
     const w = 2 * Math.PI * f[k];
+    for (let i = 0; i < M; i++) {
+      cs[i] = Math.cos(w * i);
+      sn[i] = Math.sin(w * i);
+    }
     let acc = 0;
     for (let c = d; c < M; c++) {
       // ⟨v_c, a(f)⟩ = Σ_i conj(v_c[i]) e^{jωi}
@@ -147,10 +158,8 @@ export function musicPseudo(vec, M, d, f) {
       for (let i = 0; i < M; i++) {
         const vr = vec.re[i * M + c];
         const vi = vec.im[i * M + c];
-        const cs = Math.cos(w * i);
-        const sn = Math.sin(w * i);
-        sr += vr * cs + vi * sn;
-        si += vr * sn - vi * cs;
+        sr += vr * cs[i] + vi * sn[i];
+        si += vr * sn[i] - vi * cs[i];
       }
       acc += sr * sr + si * si;
     }
