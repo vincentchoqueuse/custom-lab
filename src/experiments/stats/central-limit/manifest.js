@@ -7,31 +7,31 @@ export default {
   id: 'central-limit',
   order: 5,
   random: true,
-  title: 'Théorème central limite',
-  subtitle: 'La moyenne de n tirages devient gaussienne — quelle que soit la loi',
-  tags: ['TCL', 'CLT', 'convergence', 'gaussienne', 'moyenne'],
+  title: 'Central limit theorem',
+  subtitle: 'The mean of n draws turns Gaussian — whatever the distribution',
+  tags: ['CLT', 'convergence', 'Gaussian', 'mean'],
 
   params: {
-    law: select('loi', {
-      description: 'loi des tirages individuels',
+    law: select('distribution', {
+      description: 'distribution of the individual draws',
       options: [
-        { value: 'dice', label: 'Dé à 6 faces' },
-        { value: 'uniform', label: 'Uniforme U(0, 1)' },
-        { value: 'exponential', label: 'Exponentielle Exp(1)' },
+        { value: 'dice', label: '6-sided die' },
+        { value: 'uniform', label: 'Uniform U(0, 1)' },
+        { value: 'exponential', label: 'Exponential Exp(1)' },
         { value: 'bernoulli', label: 'Bernoulli(p)' },
       ],
       default: 'dice',
     }),
-    n: int('n', { description: 'tirages moyennés par réalisation', min: 1, max: 200, default: 1 }),
+    n: int('n', { description: 'draws averaged per realization', min: 1, max: 200, default: 1 }),
     M: int('M', {
-      description: 'nombre de moyennes calculées',
+      description: 'number of means computed',
       min: 100,
       max: 20000,
       step: 100,
       default: 5000,
     }),
     p: float('p', {
-      description: 'probabilité de succès',
+      description: 'success probability',
       min: 0.05,
       max: 0.95,
       step: 0.05,
@@ -50,8 +50,8 @@ export default {
   },
 
   groups: [
-    { title: 'Tirages', params: ['law', 'p'] },
-    { title: 'Moyennage', params: ['n', 'M'] },
+    { title: 'Draws', params: ['law', 'p'] },
+    { title: 'Averaging', params: ['n', 'M'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -62,13 +62,13 @@ export default {
     // SAME mean and the CORRECT variance.
     view(
       'clt',
-      'Moyenne x̄ₙ',
+      'Mean x̄ₙ',
       bars('meansPdf', {
-        label: 'moyennes empiriques',
+        label: 'sample means',
         overlays: [
           density('gaussPdf', { color: '#D95319', width: 2.5, label: 'N(μ, σ²/n)' }),
         ],
-        axes: { x: 'x̄ₙ', y: 'densité' },
+        axes: { x: 'x̄ₙ', y: 'density' },
       })
     ),
   ],

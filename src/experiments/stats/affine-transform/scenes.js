@@ -1,34 +1,34 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'translation',
-    title: 'Translater : b (a = 1)',
+    id: 'shift',
+    title: 'Shifting: b (a = 1)',
     params: { law: 'gaussian', a: 1, b: 2 },
     visible: ['a', 'b', 'law'],
-    notes: `a = 1 : bouger b déplace la courbe orange EN BLOC.
-Regarder le statline : E[Y] = E[X] + b suit, Var(Y) ne bouge PAS.
-Question : « pourquoi la variance est-elle insensible à b ? »
-(la variance mesure l'écart à la moyenne — qui se translate avec).`,
+    notes: `a = 1: moving b slides the orange curve AS A WHOLE.
+Watch the statline: E[Y] = E[X] + b follows, Var(Y) does NOT move.
+Question: "why is the variance blind to b?"
+(variance measures the spread about the mean — which shifts along with it).`,
   },
   {
-    id: 'dilatation',
-    title: 'Dilater : a (b = 0)',
+    id: 'stretch',
+    title: 'Stretching: a (b = 0)',
     params: { law: 'gaussian', a: 2, b: 0 },
     visible: ['a', 'b'],
-    notes: `Monter a : la courbe s'élargit ET s'aplatit — l'aire reste 1.
-Var(Y) = a²·Var(X) : passer a de 1 à 2 quadruple la variance (statline).
-Question piège : « et E[Y] ? » — nulle tant que E[X] = 0 et b = 0.
-Avec la loi uniforme, l'effet plateau se voit encore mieux.`,
+    notes: `Raise a: the curve widens AND flattens — the area stays 1.
+Var(Y) = a²·Var(X): taking a from 1 to 2 quadruples the variance (statline).
+Trick question: "and E[Y]?" — zero, as long as E[X] = 0 and b = 0.
+With the uniform distribution the plateau makes the effect even clearer.`,
   },
   {
-    id: 'miroir',
-    title: 'Retourner : a < 0',
+    id: 'flip',
+    title: 'Flipping: a < 0',
     params: { law: 'exponential', a: -1, b: 0 },
     visible: ['a', 'b', 'law'],
-    notes: `a = −1 sur une exponentielle : la densité se retourne en miroir,
-E[Y] = −1. La formule f_Y(y) = f_X((y−b)/a)/|a| exige |a|, pas a —
-c'est exactement ce que montre cette scène.
-Vue « Histogramme de Y » : les réalisations transformées tombent dessus.`,
+    notes: `a = −1 on an exponential: the density flips like a mirror image,
+E[Y] = −1. The formula f_Y(y) = f_X((y−b)/a)/|a| needs |a|, not a —
+which is exactly what this scene shows.
+Switch to "Histogram of Y": the transformed draws land right on it.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

@@ -2,35 +2,36 @@
 export default [
   {
     id: 'correlation',
-    title: 'ρ incline le nuage',
+    title: 'ρ tilts the cloud',
     params: { rho: 0.6, N: 500 },
     visible: ['rho', 'N'],
-    notes: `Faire glisser ρ de −0.95 à 0.95 : le nuage s'écrase le long d'une droite,
-les ellipses (lignes de niveau EXACTES de la pdf) suivent.
-ρ = 0 : ellipses alignées avec les axes — indépendance (cas gaussien !).
-Marteler R : le nuage change, les ellipses ne bougent pas — modèle vs données.
-1σ, 2σ, 3σ contiennent ≈ 39 %, 86 %, 99 % des points.`,
+    notes: `Slide ρ from −0.95 to 0.95: the cloud flattens along a line, and the
+ellipses (the EXACT level curves of the pdf) follow.
+ρ = 0: ellipses aligned with the axes — independence (in the Gaussian case!).
+Hammer R: the cloud changes, the ellipses do not — model against data.
+1σ, 2σ, 3σ hold ≈ 39 %, 86 %, 99 % of the points.`,
   },
   {
     id: 'regression',
-    title: 'Régression ≠ axe principal',
+    title: 'Regression ≠ principal axis',
     params: { rho: 0.6, sigmax: 1.5, sigmay: 1.5, N: 1000 },
     visible: ['rho'],
-    notes: `Deux droites dans le nuage : le grand axe (violet) et E[Y|X=x] (verte).
-La verte est PLUS PLATE — c'est la régression vers la moyenne :
-à X extrême, Y retombe vers μᵧ. Question : « quand coïncident-elles ? »
-(|ρ| → 1). Baisser ρ : la verte s'aplatit vers l'horizontale, pas le grand axe.`,
+    notes: `Two lines in the cloud: the major axis (purple) and E[Y|X=x] (green).
+The green one is FLATTER — that is regression to the mean:
+at extreme X, Y falls back toward μᵧ. Question: "when do they coincide?"
+(|ρ| → 1). Lower ρ: the green line flattens toward horizontal, the major axis
+does not.`,
   },
   {
-    id: 'marginales',
-    title: 'Les marginales ignorent ρ',
+    id: 'marginals',
+    title: 'The marginals ignore ρ',
     params: { rho: 0.9, sigmax: 1.5, sigmay: 1 },
     view: 'marginals',
     visible: ['rho'],
-    notes: `Bouger ρ de −0.95 à 0.95 : RIEN ne bouge. Toute la dépendance est dans
-la loi jointe, invisible depuis les marginales.
-Revenir à la vue Nuage pour le contraste, puis poser la question :
-« deux marginales gaussiennes suffisent-elles à définir la loi jointe ? » Non.`,
+    notes: `Move ρ from −0.95 to 0.95: NOTHING moves. All the dependence lives in
+the joint distribution, invisible from the marginals.
+Go back to the Cloud view for the contrast, then ask:
+"are two Gaussian marginals enough to pin down the joint distribution?" No.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

@@ -40,11 +40,16 @@ staging rather than parameter editing.**
    code used across subjects earns a place in `core/`.
 5. **Strict layer separation**: scientific computation → observables → declarative
    views → graphic components. Views NEVER perform scientific computation.
-6. **AGPL-3.0. Code, UI, and commits in English.** Pedagogical content (param labels,
-   experiment titles, teacher notes, preset names) is authored in the course's teaching
-   language — French for ENIB courses — and lives entirely in the manifests. All UI
-   strings of the core are centralized in a single `src/core/strings.js` module
-   (plain English constants, no i18n framework — extension point per principle 7).
+6. **AGPL-3.0. Everything in English — code, UI, commits, and pedagogical content
+   alike.** One language, no i18n framework: labels become `{fr, en}` pairs the day
+   a second language is added, which would break the manifest contract and double
+   the maintenance of every teacher note forever. The catalogue is a demonstration
+   instrument for an international audience; the lecture may be given in any
+   language, the instrument speaks one. Core UI strings live in
+   `src/core/strings.js`; the catalogue's own vocabulary — the word chosen, once,
+   for each recurring quantity — lives in `TERMINOLOGY.md` and is a closed list.
+   (A per-language build, resolved at build time like `EXPE34_SUBJECT`, remains an
+   extension point per principle 7. Nothing before a concrete need.)
 7. **Extension points over premature features.** Any future capability (stories,
    incremental execution, remote control, voting, annotations) must be addable without
    breaking the manifest and compute contracts, but **no dedicated infrastructure is
@@ -155,7 +160,7 @@ Claude.ai):
 ```
 
 (Tab titles, pill labels and preset names above come from the manifest and are shown
-in the course language; the chrome — Parameters, Draw, Presets, Search… — is English.)
+and the chrome — Parameters, Draw, Presets, Search… — in English, like everything else.)
 
 ## Interface components
 
@@ -178,7 +183,7 @@ views.
 **View bar (tabs line).** The representations on the left when the experiment has
 several — a segmented control on a desktop or a projector, where the room should see
 that there ARE four readings before any is opened, and a NATIVE `<select>` below
-860 px, because six tabs the length of "Réponse impulsionnelle" do not fit a phone.
+860 px, because six tabs the length of "Impulse response" do not fit a phone.
 Both are in the DOM, CSS shows exactly one, and the native picker buys the platform's
 own wheel plus keyboard and screen-reader support for nothing. Flush right, the
 instrument's actions — `randomizeSeed`, `freeze`, the
@@ -324,9 +329,9 @@ registry at load time):
   the subject's own name for it (`_subject.js` → `figures` for the variant,
   `figureOrder` for the tab grammar). The rule the registry enforces at load
   time, and `npm run check` repeats: **a canonical id carries the canonical
-  title, or the view takes an id of its own.** A pole map called "Plan des
-  pôles" while every other one says "Pôles et zéros" is a load-time error, not
-  a thing to notice in class.
+  title, or the view takes an id of its own.** A pole map called "Pole map"
+  while every other one says "Poles and zeros" is a load-time error, not a
+  thing to notice in class.
 - **`order` ranks the experiment inside its subject** — the lecture progression, not
   the alphabet: the sidebar and the palette read a subject in the order the course
   meets its demos. Absent → the experiment lands at the end of its subject,
@@ -343,7 +348,7 @@ registry at load time):
   errors** — a typo fails at first `npm run dev`, never silently in class.
   **Three separate semantic keys, never concatenated in one string**:
   `name` — the displayed symbol ('f', 'φ', 'N'; first positional argument, defaults
-  to the param key); `description` — what it is ('fréquence', 'phase'); `unit` —
+  to the param key); `description` — what it is ('frequency', 'phase'); `unit` —
   'Hz', 'rad', 'dB'. Rendering: pills show `name = value unit`; the drawer shows
   the name with the description as secondary text; the description also feeds the
   tooltip. Every param has a `default` (no nullable fields: the URL contract and
@@ -381,21 +386,21 @@ import { view, custom, histogram, line, density, vline, hline } from '../../core
 export default {
   id: 'confidence-intervals',
   order: 6,                                     // rank inside the subject (lecture order)
-  title: 'Intervalles de confiance',            // course language (French here)
-  subtitle: 'Couverture fréquentiste et largeur des IC',
-  tags: ['fréquentiste', 'IC', 'Student'],
+  title: 'Confidence intervals',
+  subtitle: 'Frequentist coverage and the width of the interval',
+  tags: ['frequentist', 'interval', 'Student'],
 
   params: {
-    mu:    float('μ', { description: 'moyenne vraie',       min: 0,    max: 10,  step: 0.1,  default: 5 }),
-    sigma: float('σ', { description: 'écart-type',          min: 0.5,  max: 5,   step: 0.1,  default: 2 }),
-    N:     int('N',   { description: "taille d'échantillon", min: 2,    max: 200, default: 30 }),
-    M:     int('M',   { description: "nombre d'IC",          min: 10,   max: 100, default: 40 }),
-    conf:  float('1−α', { description: 'niveau de confiance visé',
+    mu:    float('μ', { description: 'true mean',           min: 0,    max: 10,  step: 0.1,  default: 5 }),
+    sigma: float('σ', { description: 'standard deviation',  min: 0.5,  max: 5,   step: 0.1,  default: 2 }),
+    N:     int('N',   { description: 'sample size',         min: 2,    max: 200, default: 30 }),
+    M:     int('M',   { description: 'number of intervals', min: 10,   max: 100, default: 40 }),
+    conf:  float('1−α', { description: 'target confidence level',
                           min: 0.80, max: 0.99, step: 0.01, default: 0.95, precision: 2 }),
-    known: select('σ connue ?', { options: [
-              { value: false, label: 'non — IC de Student' },
-              { value: true,  label: 'oui — IC gaussien' }], default: false }),
-    dof:   readonly('ν', { description: 'degrés de liberté', visibleIf: { known: false } }),
+    known: select('σ known?', { options: [
+              { value: false, label: 'no — Student interval' },
+              { value: true,  label: 'yes — Gaussian interval' }], default: false }),
+    dof:   readonly('ν', { description: 'degrees of freedom', visibleIf: { known: false } }),
     // no seed here: injected by the core
   },
   // Factories: float, int, bool, select, log, readonly (+ seed, injected).
@@ -407,8 +412,8 @@ export default {
   //    the UI, never in views).
 
   validate: [
-    { when: p => p.N < 2, message: 'N doit être ≥ 2' },        // course language
-    { when: p => p.M * p.N > 1e7, message: 'M×N trop grand pour rester fluide' },
+    { when: p => p.N < 2, message: 'N must be ≥ 2' },
+    { when: p => p.M * p.N > 1e7, message: 'M×N too large to stay responsive' },
   ],
   // An invalid state blocks computation (not input) and shows the message.
 
@@ -419,8 +424,8 @@ export default {
   // statistics.
 
   groups: [
-    { title: 'Modèle',          params: ['mu', 'sigma', 'known', 'dof'] },
-    { title: 'Échantillonnage', params: ['N', 'M', 'conf'] },
+    { title: 'Model',           params: ['mu', 'sigma', 'known', 'dof'] },
+    { title: 'Sampling',        params: ['N', 'M', 'conf'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze, resetDefaults].
@@ -429,21 +434,21 @@ export default {
 
   views: [
     // CUSTOM view: the M stacked segments fit no generic type.
-    custom('realizations', 'Réalisations', () => import('./views/Realizations.svelte')),
+    custom('realizations', 'Realizations', () => import('./views/Realizations.svelte')),
 
-    view('distribution', 'Distribution de x̄',
+    view('distribution', 'Distribution of x̄',
       histogram('means', {
         overlays: [
           density('theoreticalDensity', { color: '#D95319' }),
           vline('mu', { color: '#EDB120', dashed: true, label: 'μ' }),
         ],
-        axes: { x: 'x̄', y: 'fréquence' },
+        axes: { x: 'x̄', y: 'frequency' },
       })),
 
-    view('coverage', 'Couverture vs N',
+    view('coverage', 'Coverage vs N',
       line('coverageVsN', {
         overlays: [hline(p => p.conf, { dashed: true, label: '1−α' })],
-        axes: { x: 'N', y: 'couverture empirique' },
+        axes: { x: 'N', y: 'empirical coverage' },
       })),
   ],
   // Factories: view(id, title, plotSpec) / custom(id, title, loader).
@@ -468,12 +473,12 @@ export default {
   // states a title: the id comes from core/figures.js (global, so ?view=gain
   // is the magnitude figure everywhere) and the title comes from the SUBJECT
   // (_subject.js `figures`/`figureOrder`), because the same plot is honestly
-  // "Bode — gain" in automatique and "Réponse fréquentielle" in filtrage.
+  // "Bode — gain" in control and "Frequency response" in filtering.
   // The registry enforces it both ways at load time, and `npm run check`
   // repeats the enforcement: a canonical id may not carry a hand-written
   // title, and the standard figures must appear in the subject's order.
-  // An experiment whose figure is genuinely its own ("L'oscillo", "Diagramme
-  // de l'œil") declares an ordinary view with its own id and its own title.
+  // An experiment whose figure is genuinely its own ("The scope", "Eye
+  // diagram") declares an ordinary view with its own id and its own title.
   //
   // VIEW ORDER is a convention, not a detail — a listener who moves from one
   // experiment to the next must find the same tab in the same place:
@@ -482,7 +487,7 @@ export default {
   //     response, then the frequency response, then the extras
   //   control experiment: the temporal responses FIRST, then the poles,
   //     then `Bode — gain` and `Bode — phase` under those exact titles and
-  //     under the ids `gain` and `phase` — every system in automatique is
+  //     under the ids `gain` and `phase` — every system in control is
   //     read the same way, and the same URL points at the same figure
   // An experiment whose subject IS another representation (spectrogram, eye
   // diagram, I/Q plane) leads with it and says so in a comment. A scene that
@@ -506,19 +511,19 @@ while keeping manifest and compute untouched.
 // Auto-discovered by the registry. Defaults: view = first view, drawer = false.
 export default [
   {
-    id: 'scene-1', title: 'Tout va bien (N=30)',
+    id: 'scene-1', title: 'All is well (N=30)',
     params: { N: 30, conf: 0.95 },
     visible: ['N', 'conf'],    // Prompt Bar pills
     masked: [],                 // black box: pill shows "?", revealHidden action
-    notes: `Question à poser AVANT de bouger N :
-« Si je passe N de 30 à 200, la couverture change-t-elle ? »
-Réponse attendue fausse : "elle augmente". Montrer que seule la largeur diminue.`,
+    notes: `Question to ask BEFORE moving N:
+"If I take N from 30 to 200, does the coverage change?"
+The wrong answer to expect: "it goes up". Show that only the width shrinks.`,
   },
   {
-    id: 'scene-2', title: 'Niveau α = 0.20',
+    id: 'scene-2', title: 'Level α = 0.20',
     params: { conf: 0.80 },
     visible: ['conf'],
-    notes: `Faire compter les intervalles rouges à voix haute (~1 sur 5).`,
+    notes: `Have the room count the red intervals out loud (~1 in 5).`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.
@@ -626,22 +631,22 @@ import { view, line } from '../../core/views.js';
 /** @type {import('../../core/types').ExperimentManifest} */
 export default {
   id: 'sinusoid',
-  random: true,                                 // it draws: σ·bruit, so it gets a seed
-  title: 'La sinusoïde',
-  subtitle: 'Amplitude, fréquence, phase — et un peu de bruit',
-  tags: ['signal', 'sinusoïde', 'fondamentaux'],
+  random: true,                                 // it draws: σ·noise, so it gets a seed
+  title: 'The sinusoid',
+  subtitle: 'Amplitude, frequency, phase — and a little noise',
+  tags: ['signal', 'sinusoid', 'fundamentals'],
 
   params: {
     A:     float('A', { description: 'amplitude', min: 0,     max: 2,    step: 0.05, default: 1 }),
-    f:     float('f', { description: 'fréquence', min: 0.5,   max: 20,   step: 0.1,  default: 3,
+    f:     float('f', { description: 'frequency', min: 0.5,   max: 20,   step: 0.1,  default: 3,
                         unit: 'Hz', precision: 1 }),
     phi:   float('φ', { description: 'phase',     min: -3.14, max: 3.14, step: 0.01, default: 0,
                         unit: 'rad', precision: 2 }),
-    sigma: float('σ', { description: 'bruit',     min: 0,     max: 1,    step: 0.02, default: 0 }),
+    sigma: float('σ', { description: 'noise',     min: 0,     max: 1,    step: 0.02, default: 0 }),
   },
 
   views: [
-    view('time', 'Temporel',
+    view('time', 'Time signal',
       line('noisy', {
         overlays: [line('clean', { color: '#D95319', width: 2 })],
         axes: { x: { label: 't', unit: 's' }, y: 'x(t)' },
@@ -654,21 +659,21 @@ export default {
 // experiments/signal/sinusoid/scenes.js
 export default [
   {
-    id: 'phase', title: 'Scène 1 · La phase, ça décale',
+    id: 'phase', title: 'Scene 1 · Phase shifts the curve',
     params: { A: 1, f: 3, phi: 0, sigma: 0 },
     visible: ['phi'],
-    notes: `Un seul potard : φ. Geler (F) à φ=0, puis tourner.
-Question : « φ = π/2, j'obtiens quelle courbe connue ? »
-Le fantôme gris montre le sinus d'origine, le cosinus se superpose.`,
+    notes: `One dial only: φ. Freeze (F) at φ=0, then turn it.
+Question: "at φ = π/2, which familiar curve do I get?"
+The grey ghost holds the original sine; the cosine lands on top of it.`,
   },
   {
-    id: 'noise', title: 'Scène 2 · Le signal dans le bruit',
+    id: 'noise', title: 'Scene 2 · The signal inside the noise',
     params: { A: 1, f: 3, phi: 0, sigma: 0.5 },
     visible: ['sigma', 'A'],
-    notes: `Marteler R : le bruit change, la sinusoïde rouge reste.
-Monter σ jusqu'à ce que l'œil perde le signal (~σ = A).
-Teaser : « et pourtant, on peut retrouver A, f, φ exactement —
-c'est tout le programme du semestre. »`,
+    notes: `Hammer R: the noise changes, the red sinusoid stays put.
+Raise σ until the eye loses the signal (~σ = A).
+Teaser: "and yet A, f and φ can be recovered exactly —
+that is the whole point of the semester."`,
   },
 ];
 ```
@@ -821,7 +826,7 @@ export const checks = [
 │   │   ├── response-views.js     # the FIGURES a response experiment draws,
 │   │   │                         #   shared across analog, digital and control:
 │   │   │                         #   gainView/phaseView (a Bode plot IS a
-│   │   │                         #   réponse fréquentielle with another
+│   │   │                         #   frequency response with another
 │   │   │                         #   abscissa), polesView, timeView,
 │   │   │                         #   impulseView, spectrumView
 │   │   ├── checks.js             # standardChecks factories (determinism…)
@@ -860,9 +865,11 @@ export const checks = [
 
 ## Conventions
 
-- **Code, UI chrome, comments, commit messages: English.** Pedagogical content
-  (labels, titles, notes, validation messages) lives in manifests, in the course
-  language.
+- **Everything in English**: code, UI chrome, comments, commit messages, and the
+  pedagogical content (labels, titles, notes, validation messages) that lives in
+  the manifests. A recurring term is chosen once in `TERMINOLOGY.md` and used
+  identically across the catalogue — a listener moving from one experiment to the
+  next must never re-learn a name.
 - Commits: prefixes `core:`, `exp(confidence-intervals):`, `ui:`, `scaffold:`,
   `check:`.
 - After any new experiment or compute change: `npm run check`.

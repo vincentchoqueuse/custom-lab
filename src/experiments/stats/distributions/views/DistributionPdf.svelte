@@ -20,7 +20,7 @@
   const k = $derived(strokeScale(pres));
   const kt = $derived(typeScale(pres));
 
-  const BLUE = $derived(dataColor('#0072BD')); // empirical
+  const BLUE = $derived(dataColor('#0072BD')); // sampled
   const ORANGE = $derived(dataColor('#D95319')); // theoretical
 
   const discrete = $derived(obs.discrete.value === 1);
@@ -54,8 +54,8 @@
   const barW = $derived(Math.min(22, Math.max(4, 0.32 * pxUnit)));
 
   const legend = $derived([
-    { label: 'empirique', color: BLUE },
-    { label: 'théorique', color: ORANGE },
+    { label: 'sampled', color: BLUE },
+    { label: 'theory', color: ORANGE },
   ]);
 </script>
 
@@ -65,7 +65,7 @@
       {xs}
       {ys}
       xAxis={{ label: 'x' }}
-      yAxis={{ label: discrete ? 'probabilité' : 'densité' }}
+      yAxis={{ label: discrete ? 'probability' : 'density' }}
       w={iw}
       h={ih}
       {k}
