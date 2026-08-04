@@ -1,50 +1,49 @@
-// L'algèbre des méthodes à haute résolution — le sous-espace bruit, et ce
-// qu'on en tire.
+// The algebra of the high-resolution methods — the noise subspace, and what
+// gets drawn from it.
 //
-// Tout part d'une matrice de covariance hermitienne M×M et de sa
-// décomposition propre. C'est LA brique, et c'est aussi la seule chose
-// qu'aucune petite bibliothèque JS ne sait faire : `ml-matrix` ne
-// décompose que du réel, `mathjs` non plus et pèse sept fois plus lourd,
-// et un portage WASM d'Eigen coûterait un mégaoctet contre la cible
-// Safari 11 du build. Avec l'une ou l'autre il faudrait DE TOUTE FAÇON
-// passer par le plongement ci-dessous — après quoi il ne reste qu'un
-// Jacobi, soit une soixantaine de lignes qu'on peut vérifier ligne à
-// ligne. On les écrit donc, et le harnais les épingle :
-// R·v = λ·v à 1e-12, vecteurs orthonormés à 1e-12.
+// Everything starts from an M×M Hermitian covariance matrix and its
+// eigendecomposition. That is THE building block, and it is also the one thing
+// no small JS library can do: `ml-matrix` only decomposes real matrices,
+// `mathjs` neither and weighs seven times more, and a WASM port of Eigen would
+// cost a megabyte against the build's Safari 11 target. With either of them the
+// embedding below would be needed ANYWAY — after which only a Jacobi routine
+// remains, some sixty lines that can be checked line by line. So they are
+// written here, and the harness pins them: R·v = λ·v to 1e-12, orthonormal
+// vectors to 1e-12.
 //
-// Convention complexe : partout des paires de Float64Array {re, im}, jamais
-// d'objets par élément — les boucles sont chaudes et le contrat du projet
-// interdit les tableaux d'objets sur les chemins critiques.
+// Complex convention: pairs of Float64Array {re, im} everywhere, never one
+// object per element — the loops are hot and the project contract forbids
+// arrays of objects on critical paths.
 //
-// PURE : pas de DOM, pas d'état. Importable depuis compute.js et check.js.
+// PURE: no DOM, no state. Importable from compute.js and check.js.
 //
-// Le Jacobi symétrique réel qui sert de socle a rejoint core/linalg.js le
-// jour où un second sujet en a eu besoin (filtrage adaptatif : le
-// conditionnement de la matrice d'autocorrélation EST la vitesse de LMS).
-// C'est la règle du projet : ce qui sert à UN sujet vit avec lui, ce qui
-// sert à plusieurs monte dans le cœur.
+// The real symmetric Jacobi routine underneath moved to core/linalg.js the day
+// a second subject needed it (adaptive filtering: the conditioning of the
+// autocorrelation matrix IS the speed of LMS). That is the project rule — what
+// serves ONE subject lives with it, what serves several moves up into the
+// core.
 import { jacobiSym } from '../../../core/linalg.js';
 
 /**
- * Valeurs et vecteurs propres d'une matrice HERMITIENNE complexe M×M,
- * triés par valeur propre DÉCROISSANTE.
+ * Eigenvalues and eigenvectors of a complex HERMITIAN M×M matrix, sorted by
+ * DECREASING eigenvalue.
  *
- * Le plongement classique : A = X + jY hermitienne (X symétrique, Y
- * antisymétrique) devient
+ * The classical embedding: a Hermitian A = X + jY (X symmetric, Y
+ * antisymmetric) becomes
  *
- *     B = [ X  −Y ]   symétrique réelle 2M×2M
+ *     B = [ X  −Y ]   real symmetric 2M×2M
  *         [ Y   X ]
  *
- * dont chaque valeur propre de A apparaît DEUX fois, et dont un vecteur
- * propre (u ; w) donne le vecteur complexe u + j·w. On garde un couple sur
- * deux après tri — et le fait que les valeurs sortent bien appariées est
- * lui-même vérifié par le harnais, parce que c'est ce qui rend le
- * dédoublonnage légitime plutôt que optimiste.
+ * in which every eigenvalue of A appears TWICE, and whose eigenvector (u ; w)
+ * gives the complex vector u + j·w. One pair in two is kept after sorting — and
+ * the fact that the values do come out paired is itself verified by the
+ * harness, because that is what makes the deduplication legitimate rather than
+ * optimistic.
  *
- * @param {Float64Array} re  M×M, partie réelle (symétrique)
- * @param {Float64Array} im  M×M, partie imaginaire (antisymétrique)
+ * @param {Float64Array} re  M×M, real part (symmetric)
+ * @param {Float64Array} im  M×M, imaginary part (antisymmetric)
  * @returns {{values: Float64Array, re: Float64Array, im: Float64Array}}
- *          M valeurs décroissantes ; vecteurs en COLONNES, v_k[i] à [i*M+k]
+ *          M decreasing values; vectors in COLUMNS, v_k[i] at [i*M+k]
  */
 export function hermitianEig(re, im, M) {
   const n = 2 * M;
@@ -60,7 +59,7 @@ export function hermitianEig(re, im, M) {
   const { values, vectors } = jacobiSym(b, n);
 
   const idx = Array.from({ length: n }, (_, k) => k).sort((p, q) => values[q] - values[p]);
-  // une valeur sur deux : les 2M valeurs sont M paires exactes
+  // one value in two: the 2M values are M exact pairs
   const outV = new Float64Array(M);
   const outRe = new Float64Array(M * M);
   const outIm = new Float64Array(M * M);
@@ -83,17 +82,17 @@ export function hermitianEig(re, im, M) {
 }
 
 /**
- * Covariance estimée d'un enregistrement complexe, par fenêtrage glissant
- * (matrice de Hankel) puis moyennage AVANT-ARRIÈRE.
+ * Covariance estimated from a complex record, by sliding windows (a Hankel
+ * matrix) and then FORWARD-BACKWARD averaging.
  *
- * Le moyennage avant-arrière n'est pas un raffinement : sur un
- * enregistrement unique les L instantanés glissants sont corrélés, et sans
- * lui le rang du sous-espace signal est sous-estimé dès que deux sources
- * sont proches — MUSIC n'en verrait qu'une, pour une raison qui n'a rien à
- * voir avec la résolution qu'on cherche à démontrer.
+ * Forward-backward averaging is not a refinement: on a single record the L
+ * sliding snapshots are correlated, and without it the rank of the signal
+ * subspace is underestimated as soon as two sources are close — MUSIC would see
+ * only one of them, for a reason having nothing to do with the resolution being
+ * demonstrated.
  *
- * @param {Float64Array} xr, xi  l'enregistrement complexe
- * @param {number} M             ordre de la covariance
+ * @param {Float64Array} xr, xi  the complex record
+ * @param {number} M             order of the covariance
  */
 export function covariance(xr, xi, M) {
   const N = xr.length;
@@ -113,7 +112,7 @@ export function covariance(xr, xi, M) {
       }
     }
   }
-  // arrière : R_b = J R* J, moyenné avec R
+  // backward: R_b = J R* J, averaged with R
   const fr = new Float64Array(M * M);
   const fi = new Float64Array(M * M);
   for (let i = 0; i < M; i++) {
@@ -127,14 +126,14 @@ export function covariance(xr, xi, M) {
 }
 
 /**
- * Pseudo-spectre MUSIC : 1 / ‖Eₙᴴ a(f)‖², a(f) = [1, e^{j2πf}, …].
- * Ce n'est PAS une densité spectrale — c'est l'inverse d'une distance au
- * sous-espace bruit, et ses ordonnées n'ont pas d'unité physique. D'où le
- * nom, qu'il faut garder devant une salle.
+ * MUSIC pseudo-spectrum: 1 / ‖Eₙᴴ a(f)‖², with a(f) = [1, e^{j2πf}, …].
+ * This is NOT a power spectral density — it is the inverse of a distance to the
+ * noise subspace, and its ordinates have no physical unit. Hence the name,
+ * which is worth keeping in front of a room.
  *
- * @param {{re, im}} vec   vecteurs propres (colonnes), M×M
- * @param {number} d       nombre de valeurs propres tenues pour signal
- * @param {Float64Array} f fréquences normalisées (cycles/échantillon)
+ * @param {{re, im}} vec   eigenvectors (columns), M×M
+ * @param {number} d       number of eigenvalues taken as signal
+ * @param {Float64Array} f normalized frequencies (cycles per sample)
  */
 export function musicPseudo(vec, M, d, f) {
   const out = new Float64Array(f.length);
@@ -164,20 +163,19 @@ export function musicPseudo(vec, M, d, f) {
 /* Racines d'un polynôme à coefficients COMPLEXES — pour root-MUSIC        */
 /* ---------------------------------------------------------------------- */
 //
-// `control/_lib/lti.js` a déjà un Durand–Kerner, mais à coefficients RÉELS :
-// les pôles d'une fonction de transfert le sont. Le polynôme de root-MUSIC
-// ne l'est pas (ses coefficients sont les diagonales d'une matrice
-// hermitienne), donc c'est le même schéma sur un autre corps, pas le même
-// code. Deux implémentations pour deux corps est le prix honnête ; à un
-// troisième appelant, la version complexe monterait dans le cœur et
-// absorberait l'autre.
+// `control/_lib/lti.js` already has a Durand–Kerner, but with REAL
+// coefficients: the poles of a transfer function are real-coefficient roots.
+// The root-MUSIC polynomial is not (its coefficients are the diagonals of a
+// Hermitian matrix), so it is the same scheme over another field, not the same
+// code. Two implementations for two fields is the honest price; at a third
+// caller, the complex version would move into the core and absorb the other.
 
 /**
- * Racines complexes d'un polynôme à coefficients complexes, puissances
- * décroissantes, par Durand–Kerner. Points de départ FIXES : le calcul doit
- * être déterministe à paramètres égaux, c'est le contrat du projet.
+ * Complex roots of a polynomial with complex coefficients, in decreasing
+ * powers, by Durand–Kerner. FIXED starting points: the computation must be
+ * deterministic at equal parameters, which is the project contract.
  *
- * @param {Float64Array} cr, ci  coefficients, cr[0] = plus haut degré
+ * @param {Float64Array} cr, ci  coefficients, cr[0] = highest degree
  * @returns {{re: Float64Array, im: Float64Array}}
  */
 export function polyRootsComplex(cr, ci) {
@@ -203,10 +201,10 @@ export function polyRootsComplex(cr, ci) {
     }
     return [pr, pi];
   };
-  // Rayon de départ : la borne de Cauchy, PLAFONNÉE. À grand degré elle
-  // suffit à faire déborder l'évaluation de Horner (R^n), et root-MUSIC
-  // travaille en degré 2(M−1) — 62 pour M = 32. Le plafond garde R^n dans
-  // les doubles avec une marge de vingt ordres de grandeur.
+  // Starting radius: the Cauchy bound, CAPPED. At high degree it is enough to
+  // overflow the Horner evaluation (R^n), and root-MUSIC works at degree
+  // 2(M−1) — 62 for M = 32. The cap keeps R^n inside doubles with twenty orders
+  // of magnitude to spare.
   let R = 1;
   for (let k = 1; k <= n; k++) R = Math.max(R, Math.hypot(ar[k], ai[k]));
   R = Math.min(1 + R, 10 ** (288 / n));
@@ -220,12 +218,12 @@ export function polyRootsComplex(cr, ci) {
   for (let it = 0; it < 500; it++) {
     let move = 0;
     for (let k = 0; k < n; k++) {
-      // Correction de Weierstrass p(z_k) / Π_{j≠k}(z_k − z_j), DIVISÉE AU
-      // FUR ET À MESURE et non formée en un produit puis divisée une fois.
-      // Le produit de 61 facteurs atteignait 1e183, son module au carré
-      // l'infini, et le quotient devenait NaN : root-MUSIC ne rendait plus
-      // rien dès M = 32, alors que M = 28 passait. Diviser à chaque pas
-      // garde les magnitudes bornées et ne change rien au résultat.
+      // Weierstrass correction p(z_k) / Π_{j≠k}(z_k − z_j), divided AS IT GOES
+      // rather than formed as a product and divided once. The product of 61
+      // factors reached 1e183, its squared modulus infinity, and the quotient
+      // became NaN: root-MUSIC returned nothing at all from M = 32 upward,
+      // while M = 28 went through. Dividing at each step keeps the magnitudes
+      // bounded and changes nothing in the result.
       let [qr, qi] = evalAt(zr[k], zi[k]);
       for (let j = 0; j < n; j++) {
         if (j === k) continue;
@@ -252,20 +250,20 @@ export function polyRootsComplex(cr, ci) {
 }
 
 /**
- * root-MUSIC : au lieu de balayer le pseudo-spectre, on ANNULE son
- * dénominateur. Le polynôme
+ * root-MUSIC: instead of sweeping the pseudo-spectrum, its denominator is set
+ * to ZERO. The polynomial
  *
- *   Q(z) = Σ_k c_k z^{-k},   c_k = somme de la k-ième diagonale de EₙEₙᴴ
+ *   Q(z) = Σ_k c_k z^{-k},   c_k = sum of the k-th diagonal of EₙEₙᴴ
  *
- * a ses zéros exactement sur le cercle unité aux fréquences des sources
- * (sans bruit). On prend donc les d racines INTÉRIEURES les plus proches du
- * cercle : pas de grille, donc pas de résolution limitée par un pas de
- * balayage — l'estimation est continue, ce que MUSIC balayé ne peut pas être.
+ * has its zeros exactly on the unit circle at the source frequencies (with no
+ * noise). The d INNER roots closest to the circle are therefore taken: no grid,
+ * hence no resolution limited by a sweep step — the estimate is continuous,
+ * which swept MUSIC cannot be.
  *
- * @returns {Float64Array} d fréquences normalisées, croissantes
+ * @returns {Float64Array} d normalized frequencies, increasing
  */
 export function rootMusic(vec, M, d) {
-  // C = Eₙ Eₙᴴ, puis ses diagonales
+  // C = Eₙ Eₙᴴ, then its diagonals
   const cr = new Float64Array(M * M);
   const ci = new Float64Array(M * M);
   for (let i = 0; i < M; i++) {
@@ -284,7 +282,7 @@ export function rootMusic(vec, M, d) {
       ci[i * M + j] = si;
     }
   }
-  // coefficients du polynôme de degré 2(M−1) : k de −(M−1) à (M−1)
+  // coefficients of the degree 2(M−1) polynomial: k from −(M−1) to (M−1)
   const deg = 2 * (M - 1);
   const pr = new Float64Array(deg + 1);
   const pi = new Float64Array(deg + 1);
@@ -297,23 +295,23 @@ export function rootMusic(vec, M, d) {
       sr += cr[i * M + j];
       si += ci[i * M + j];
     }
-    // z^{-k} · z^{M-1} → puissance (M−1−k), rangée en degrés décroissants
+    // z^{-k} · z^{M-1} → power (M−1−k), stored in decreasing degrees
     const p = deg - (M - 1 - k);
     pr[p] = sr;
     pi[p] = si;
   }
   const roots = polyRootsComplex(pr, pi);
-  // Les racines viennent par couples conjugués-inverses (z, 1/z*), de MÊME
-  // ANGLE : sur le cercle unité ces deux-là fusionnent en une racine
-  // double, et l'itération place alors ses deux itérés du même côté aussi
-  // souvent que d'un de chaque. Prendre « les d plus proches du cercle par
-  // l'intérieur » consommait donc deux places pour une seule source, et une
-  // source disparaissait — 1.2 Hz d'erreur au lieu de 1e-6.
+  // The roots come in conjugate-reciprocal pairs (z, 1/z*) at the SAME ANGLE:
+  // on the unit circle those two merge into a double root, and the iteration
+  // then places its two iterates on the same side as often as one on each.
+  // Taking "the d closest to the circle from inside" therefore spent two slots
+  // on a single source, and a source disappeared — 1.2 Hz of error instead of
+  // 1e-6.
   //
-  // On regroupe donc par angle avant de choisir. Le seuil est très serré
-  // (1e-6 en fréquence normalisée) parce que les deux membres d'un couple
-  // ont rigoureusement le même angle, alors que deux sources distinctes,
-  // même à 0.3 × Fs/N, en sont mille fois plus loin.
+  // So they are grouped by angle before choosing. The threshold is very tight
+  // (1e-6 in normalized frequency) because the two members of a pair have
+  // rigorously the same angle, while two distinct sources, even at
+  // 0.3 × Fs/N, are a thousand times further apart.
   const ANG_TOL = 1e-6;
   const cand = [];
   for (let k = 0; k < roots.re.length; k++) {
@@ -339,21 +337,20 @@ export function rootMusic(vec, M, d) {
 }
 
 /**
- * ESPRIT : la structure de décalage du sous-espace SIGNAL suffit, sans
- * jamais former de spectre. Si Eₛ engendre le signal, ses deux
- * sous-matrices décalées d'une ligne vérifient E₁ Ψ = E₂, et les valeurs
- * propres de Ψ sont les e^{j2πf_k}. Aucune grille, aucun balayage : la
- * fréquence sort d'une résolution de système linéaire.
+ * ESPRIT: the shift structure of the SIGNAL subspace is enough, without ever
+ * forming a spectrum. If Eₛ spans the signal, its two submatrices shifted by
+ * one row satisfy E₁ Ψ = E₂, and the eigenvalues of Ψ are the e^{j2πf_k}. No
+ * grid, no sweep: the frequency comes out of solving a linear system.
  *
- * Ψ est résolu au sens des moindres carrés par équations normales, et ses
- * valeurs propres sont obtenues en forme close pour d ≤ 2 (le cas du cours)
- * et par itération QR élémentaire au-delà.
+ * Ψ is solved in the least-squares sense through the normal equations, and its
+ * eigenvalues are obtained in closed form for d ≤ 2 (the lecture case) and by
+ * elementary QR iteration beyond.
  *
- * @returns {Float64Array} d fréquences normalisées, croissantes
+ * @returns {Float64Array} d normalized frequencies, increasing
  */
 export function esprit(vec, M, d) {
   const m = M - 1;
-  // E1 = lignes 0..M-2 des d premières colonnes, E2 = lignes 1..M-1
+  // E1 = rows 0..M-2 of the first d columns, E2 = rows 1..M-1
   const g = (rowOff, i, c) => [vec.re[(i + rowOff) * M + c], vec.im[(i + rowOff) * M + c]];
   // A = E1ᴴE1 (d×d), B = E1ᴴE2 (d×d)
   const Ar = new Float64Array(d * d);
@@ -381,7 +378,7 @@ export function esprit(vec, M, d) {
       Bi[p * d + q] = bi;
     }
   }
-  // Ψ = A⁻¹B, par élimination de Gauss complexe (d ≤ 4)
+  // Ψ = A⁻¹B, by complex Gaussian elimination (d ≤ 4)
   const psi = solveComplex(Ar, Ai, Br, Bi, d);
   const ev = eigComplexSmall(psi.re, psi.im, d);
   const f = [];
@@ -449,11 +446,11 @@ export function solveComplex(ar, ai, br, bi, n) {
 }
 
 /**
- * Valeurs propres d'une petite matrice complexe n×n (n ≤ 4).
- * n = 1 trivial, n = 2 en forme close par la quadratique, au-delà par
- * itération de la puissance sur les racines du polynôme caractéristique
- * obtenu par Leverrier — la taille est celle du nombre de sources d'un
- * cours, pas celle d'un solveur général.
+ * Eigenvalues of a small complex n×n matrix (n ≤ 4).
+ * n = 1 trivial, n = 2 in closed form through the quadratic, beyond that by
+ * power iteration on the roots of the characteristic polynomial obtained by
+ * Leverrier — the size is that of the number of sources in a lecture, not that
+ * of a general solver.
  */
 export function eigComplexSmall(mr, mi, n) {
   if (n === 1) return { re: Float64Array.from([mr[0]]), im: Float64Array.from([mi[0]]) };
@@ -474,7 +471,7 @@ export function eigComplexSmall(mr, mi, n) {
       im: Float64Array.from([(tr[1] + si) / 2, (tr[1] - si) / 2]),
     };
   }
-  // n ≥ 3 : polynôme caractéristique par Faddeev–LeVerrier, puis racines
+  // n ≥ 3: characteristic polynomial by Faddeev–LeVerrier, then its roots
   const I = (k) => k;
   const size = n * n;
   let Mr = Float64Array.from(mr);
@@ -526,26 +523,25 @@ export function eigComplexSmall(mr, mi, n) {
 }
 
 /**
- * Amplitudes complexes au sens des MOINDRES CARRÉS, aux fréquences données.
+ * Complex amplitudes in the LEAST-SQUARES sense, at the given frequencies.
  *
- * Une fois les fréquences connues, le modèle devient LINÉAIRE en ses
- * amplitudes : x ≈ V a, avec V[n][k] = e^{j2πf_k n}. Les équations normales
- * (VᴴV) a = Vᴴx sont un système d × d — d étant le nombre de sources, deux
- * ou trois en cours — donc l'élimination de Gauss complexe déjà écrite pour
- * ESPRIT suffit, sans rien de nouveau.
+ * Once the frequencies are known the model becomes LINEAR in its amplitudes:
+ * x ≈ V a, with V[n][k] = e^{j2πf_k n}. The normal equations (VᴴV) a = Vᴴx form
+ * a d × d system — d being the number of sources, two or three in a lecture —
+ * so the complex Gaussian elimination already written for ESPRIT is enough,
+ * with nothing new.
  *
- * C'est ce qui ferme la boucle : les méthodes à sous-espace rendent des
- * FRÉQUENCES et rien d'autre. Sans cette étape on sait où sont les raies et
- * pas ce qu'elles valent, et on ne peut donc ni reconstruire le signal, ni
- * dire si le modèle explique ce qu'on a mesuré.
+ * This is what closes the loop: subspace methods return FREQUENCIES and nothing
+ * else. Without this step one knows where the lines are and not what they are
+ * worth, and can therefore neither reconstruct the signal nor say whether the
+ * model explains the measurement.
  *
- * La puissance résiduelle ‖x − Va‖²/N est rendue avec : c'est l'estimation
- * de la variance du bruit qui découle du modèle, indépendante de celle que
- * donne le plateau des valeurs propres. Les deux doivent tomber d'accord, et
- * le harnais le vérifie — deux chemins qui concordent valent mieux qu'un
- * chemin qu'on croit sur parole.
+ * The residual power ‖x − Va‖²/N comes with it: that is the noise-variance
+ * estimate implied by the model, independent of the one the eigenvalue plateau
+ * gives. The two must agree, and the harness verifies it — two paths that
+ * concur are worth more than one path taken on trust.
  *
- * @param {Float64Array} xr, xi  l'enregistrement complexe
+ * @param {Float64Array} xr, xi  the complex record
  * @param {Float64Array} freqs   fréquences normalisées (cycles/échantillon)
  * @returns {{re: Float64Array, im: Float64Array, power: Float64Array,
  *            noise: number, residual: number}}
@@ -595,7 +591,7 @@ export function lsAmplitudes(xr, xi, freqs) {
     power[k] = ar[k] * ar[k] + ai[k] * ai[k];
   }
 
-  // résidu : ce que le modèle n'explique pas
+  // residual: what the model does not explain
   let res = 0;
   for (let n = 0; n < N; n++) {
     let mr = 0;

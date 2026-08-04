@@ -1,29 +1,28 @@
-// Les réponses temporelles en forme close des systèmes canoniques — la
-// moitié TEMPORELLE de ce que _lib/bode.js fait en fréquence.
+// The closed-form time responses of the canonical systems — the TIME half of
+// what _lib/bode.js does in frequency.
 //
-// Elles vivaient dans `control/second-order/compute.js`, et trois autres
-// expériences avaient fini par importer ce fichier : une expérience était
-// devenue la bibliothèque d'une autre, et on ne pouvait plus toucher au
-// second ordre sans risquer d'en casser deux. Une expérience se lit toute
-// seule ; ce qu'elle partage monte ici.
+// They used to live in `control/second-order/compute.js`, and three other
+// experiments had ended up importing that file: one experiment had become
+// another's library, and the second order could no longer be touched without
+// risking two breakages. An experiment reads on its own; what it shares moves
+// up here.
 //
-// Toutes ces fonctions sont des FORMES CLOSES, jamais une intégration
-// numérique : c'est ce qui permet aux harnais de comparer une réponse
-// calculée autrement (bouclage, changement de base) à une référence exacte,
-// sans pouvoir accuser un schéma d'intégration en cas d'écart.
+// All these functions are CLOSED FORMS, never a numerical integration: that is
+// what lets the harnesses compare a response computed some other way (closing a
+// loop, changing basis) against an exact reference, with no integration scheme
+// to blame if they disagree.
 //
-// PURE : pas de DOM, pas d'état. Importable depuis compute.js et check.js.
+// PURE: no DOM, no state. Importable from compute.js and check.js.
 
 import { polyEvalComplex } from '../../../core/numeric.js';
 
-const EPS = 1e-6; // la largeur de la zone traitée comme critique (m = 1)
+const EPS = 1e-6; // the width of the band treated as critical (m = 1)
 
 /**
- * Réponse indicielle de K·ω₀²/(s² + 2mω₀s + ω₀²), exacte dans les trois
- * régimes :
+ * Step response of K·ω₀²/(s² + 2mω₀s + ω₀²), exact in all three regimes:
  *   m < 1  y = K(1 − e^{−mω₀t}(cos ω_d t + m/√(1−m²)·sin ω_d t)), ω_d = ω₀√(1−m²)
  *   m = 1  y = K(1 − (1 + ω₀t)e^{−ω₀t})
- *   m > 1  deux pôles réels −ω₀(m ∓ √(m²−1)), bi-exponentielle
+ *   m > 1  two real poles −ω₀(m ∓ √(m²−1)), a sum of two exponentials
  */
 export function secondOrderStep(K, m, w0, t) {
   if (Math.abs(m - 1) < EPS) return K * (1 - (1 + w0 * t) * Math.exp(-w0 * t));
@@ -39,8 +38,8 @@ export function secondOrderStep(K, m, w0, t) {
 }
 
 /**
- * Réponse impulsionnelle du même système — c'est la dérivée de la
- * précédente, et les harnais le vérifient :
+ * Impulse response of the same system — it is the derivative of the previous
+ * one, and the harnesses verify it:
  *   m < 1  h = Kω₀²/ω_d · e^{−mω₀t}·sin(ω_d t)
  *   m = 1  h = Kω₀²·t·e^{−ω₀t}
  *   m > 1  h = Kω₀²(e^{r₁t} − e^{r₂t})/(r₁ − r₂)
@@ -74,49 +73,48 @@ export function secondOrderPoles(m, w0) {
 }
 
 /**
- * Réponse indicielle du premier ordre K(1 + τ_z s)/(1 + τs) :
+ * Step response of the first order K(1 + τ_z s)/(1 + τs):
  *   y(t) = K[1 − (1 − τ_z/τ)·e^{−t/τ}]
- * τ_z = 0 donne l'exponentielle pure ; τ_z < 0 la phase non minimale.
+ * τ_z = 0 gives the pure exponential; τ_z < 0 the non-minimum phase.
  */
 export function firstOrderStep(K, tau, tz, t) {
   return K * (1 - (1 - tz / tau) * Math.exp(-t / tau));
 }
 
-/** Partie continue de h(t) du premier ordre (le Dirac K·τ_z/τ est à part). */
+/** Continuous part of the first-order h(t) (the Dirac K·τ_z/τ is separate). */
 export function firstOrderImpulse(K, tau, tz, t) {
   return ((K * (1 - tz / tau)) / tau) * Math.exp(-t / tau);
 }
 
 /* ------------------------------------------------------------------------ */
-/* Racines d'un polynôme — les pôles et les zéros d'un système QUELCONQUE    */
+/* Roots of a polynomial — the poles and zeros of an ARBITRARY system        */
 /* ------------------------------------------------------------------------ */
 
 /**
- * Racines complexes d'un polynôme à coefficients réels donnés en puissances
- * DÉCROISSANTES, par l'itération de Durand–Kerner (Weierstrass) :
+ * Complex roots of a polynomial with real coefficients given in DECREASING
+ * powers, by the Durand–Kerner (Weierstrass) iteration:
  *
  *   z_k ← z_k − p(z_k) / Π_{j≠k} (z_k − z_j)
  *
- * C'est la méthode de Newton appliquée simultanément aux n racines, le
- * dénominateur jouant le rôle de la dérivée déflatée. Elle tient en trente
- * lignes, ne demande aucune algèbre linéaire (pas de matrice compagne, pas
- * de QR) et converge quadratiquement sur les racines simples — largement
- * assez pour les ordres 1 à 6 qu'on tape en cours.
+ * This is Newton's method applied simultaneously to the n roots, with the
+ * denominator playing the part of the deflated derivative. It fits in thirty
+ * lines, needs no linear algebra at all (no companion matrix, no QR) and
+ * converges quadratically on simple roots — far enough for the orders 1 to 6
+ * typed in a lecture.
  *
- * Deux précautions qui ne sont pas cosmétiques :
+ * Two precautions that are not cosmetic:
  *
- *  - les racines NULLES sont épluchées à la main (zéros de queue). Sur une
- *    racine multiple la convergence retombe au premier ordre et la précision
- *    plafonne à ε^{1/m} ; un intégrateur double, s² en facteur, donnerait
- *    deux points à 1e-8 de l'origine au lieu d'un pôle double net. Ici ils
- *    sont exacts par construction.
- *  - les points de départ sont FIXES (spirale de rayon Cauchy), jamais
- *    tirés au hasard : le calcul doit être déterministe à paramètres égaux,
- *    c'est le contrat du projet.
+ *  - the ZERO roots are peeled off by hand (trailing zeros). On a multiple root
+ *    the convergence drops to first order and the accuracy floors at ε^{1/m}; a
+ *    double integrator, with s² as a factor, would give two points 1e-8 from
+ *    the origin instead of one clean double pole. Here they are exact by
+ *    construction.
+ *  - the starting points are FIXED (a spiral of Cauchy radius), never drawn at
+ *    random: the computation must be deterministic at equal parameters, which
+ *    is the project contract.
  *
- * @param {number[]} coeffs puissances décroissantes, coeffs[0] = terme de
- *                          plus haut degré
- * @returns {number[][]} [[Re, Im], …], de longueur deg(p)
+ * @param {number[]} coeffs decreasing powers, coeffs[0] = highest-degree term
+ * @returns {number[][]} [[Re, Im], …], of length deg(p)
  */
 export function polyRoots(coeffs) {
   const c = Array.from(coeffs, Number);
@@ -129,8 +127,8 @@ export function polyRoots(coeffs) {
   const n = c.length - 1;
   if (n <= 0) return out;
 
-  const a = c.map((v) => v / c[0]); // unitaire
-  // borne de Cauchy : toutes les racines sont dans |z| ≤ 1 + max|a_i|
+  const a = c.map((v) => v / c[0]); // monic
+  // Cauchy bound: every root lies in |z| ≤ 1 + max|a_i|
   let R = 1;
   for (let i = 1; i <= n; i++) R = Math.max(R, Math.abs(a[i]));
   R = 1 + R;
@@ -138,7 +136,7 @@ export function polyRoots(coeffs) {
   const zr = new Float64Array(n);
   const zi = new Float64Array(n);
   for (let k = 0; k < n; k++) {
-    const th = (2 * Math.PI * k) / n + 0.4; // 0.4 rad : jamais sur l'axe réel
+    const th = (2 * Math.PI * k) / n + 0.4; // 0.4 rad: never on the real axis
     zr[k] = 0.6 * R * Math.cos(th);
     zi[k] = 0.6 * R * Math.sin(th);
   }
@@ -158,7 +156,7 @@ export function polyRoots(coeffs) {
         dr = t;
       }
       const m = dr * dr + di * di;
-      if (!(m > 1e-300)) continue; // deux itérés confondus : on passe ce tour
+      if (!(m > 1e-300)) continue; // two iterates coincide: skip this round
       const qr = (pr * dr + pi * di) / m;
       const qi = (pi * dr - pr * di) / m;
       zr[k] -= qr;
@@ -168,11 +166,10 @@ export function polyRoots(coeffs) {
     if (move < 1e-14) break;
   }
 
-  // Un polynôme réel a des racines réelles ou conjuguées deux à deux ; une
-  // racine réelle multiple sort de l'itération avec une partie imaginaire
-  // résiduelle (le plafond ε^{1/m} ci-dessus). La remettre à zéro dit la
-  // vérité — un pôle double en −1 est réel — au lieu de dessiner deux points
-  // décollés de l'axe.
+  // A real polynomial has roots that are real or conjugate in pairs; a multiple
+  // real root leaves the iteration with a residual imaginary part (the ε^{1/m}
+  // floor above). Setting it back to zero tells the truth — a double pole at −1
+  // is real — instead of drawing two points lifted off the axis.
   for (let k = 0; k < n; k++) {
     const scale = Math.max(1, Math.abs(zr[k]));
     out.push([zr[k], Math.abs(zi[k]) < 1e-6 * scale ? 0 : zi[k]]);
