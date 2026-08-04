@@ -128,12 +128,12 @@ export function compute({ act, signal, gain, bias, seed }) {
         value: fundIn > 1e-12 ? fund / fundIn : NaN,
         meta: { label: 'gain du fondamental', precision: 3 },
       },
-      dcOut: { value: dcOf(magOut), meta: { label: 'continue créée', precision: 4 } },
+      dcOut: { value: dcOf(magOut), meta: { label: 'DC created', precision: 4 } },
       thd: { value: 100 * thd, meta: { label: 'distorsion harmonique', unit: '%', precision: 2 } },
       imd3: { value: imd, meta: { label: 'intermodulation 2f₁−f₂', precision: 4 } },
       dMax: {
         value: Math.max(...deriv),
-        meta: { label: 'dérivée maximale', precision: 3 },
+        meta: { label: 'maximum derivative', precision: 3 },
       },
       dEnd: {
         // La dérivée au bord du domaine tracé : c'est ELLE qui dit si le

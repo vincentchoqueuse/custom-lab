@@ -1,1 +1,1 @@
-export default { title: 'Conversion A/N — N/A', order: 6 };
+export default { title: 'A/D — D/A conversion', order: 6 };

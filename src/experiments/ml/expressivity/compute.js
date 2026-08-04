@@ -165,15 +165,15 @@ export function compute({ structure, act, kernel, scale, signal, seed }) {
       },
       ratio: {
         value: (N * N) / nParams,
-        meta: { label: 'rapport dense / structuré', precision: 0 },
+        meta: { label: 'dense / structured ratio', precision: 0 },
       },
       nonlinearity: {
         value: nonlin,
-        meta: { label: 'écart au réseau linéaire', precision: 4 },
+        meta: { label: 'gap to the linear network', precision: 4 },
       },
       created: {
         value: created,
-        meta: { label: 'fréquences créées', precision: 0 },
+        meta: { label: 'frequencies created', precision: 0 },
       },
     },
   };

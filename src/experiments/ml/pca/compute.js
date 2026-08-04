@@ -180,9 +180,9 @@ export function compute({ dataset, standardize, k, xComp, yComp }) {
         // dont la saturation est la plus forte. Sur l'iris brut c'est la
         // longueur de pétale, et ça change avec la standardisation.
         value: D.features[argMax(loadX)],
-        meta: { label: 'CP1 dominée par' },
+        meta: { label: 'CP1 dominated by' },
       },
-      species: { value: D.species.join(', '), meta: { label: 'espèces' } },
+      species: { value: D.species.join(', '), meta: { label: 'species' } },
       nRows: { value: N, meta: { label: 'individus', precision: 0 } },
     },
   };

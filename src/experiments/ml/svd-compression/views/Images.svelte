@@ -22,9 +22,9 @@
   const kt = $derived(typeScale(pres));
 
   const tiles = $derived([
-    { uri: obs.original?.value, label: 'origine' },
-    { uri: obs.compressed?.value, label: `rang k = ${params.k}` },
-    { uri: obs.residual?.value, label: 'résidu ×4' },
+    { uri: obs.original?.value, label: 'original' },
+    { uri: obs.compressed?.value, label: `rank k = ${params.k}` },
+    { uri: obs.residual?.value, label: 'residual ×4' },
   ]);
 
   // trois vignettes carrées, réparties sur la largeur du cadre

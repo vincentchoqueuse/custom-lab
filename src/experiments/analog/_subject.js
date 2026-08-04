@@ -4,7 +4,7 @@
 // A signal is read in time then in frequency; a filter is read by its
 // response then by its poles. Both grammars in one list.
 export default {
-  title: 'Signaux analogiques',
+  title: 'Analog signals',
   order: 5,
   figureOrder: ['time', 'response', 'gain', 'poles', 'spectrum', 'phase'],
 };

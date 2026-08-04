@@ -115,15 +115,15 @@ export function compute({ image, k, seed }) {
 
   return {
     observables: {
-      original: { value: toBmpDataUri(src, N), meta: { label: 'image d’origine' } },
-      compressed: { value: toBmpDataUri(approx, N), meta: { label: 'rang k' } },
+      original: { value: toBmpDataUri(src, N), meta: { label: 'original image' } },
+      compressed: { value: toBmpDataUri(approx, N), meta: { label: 'rank k' } },
       // la différence, amplifiée : c'est LÀ que se voit ce que k a jeté
       residual: {
         value: toBmpDataUri(
           Float64Array.from(approx, (v, i) => 0.5 + 4 * (v - src[i])),
           N
         ),
-        meta: { label: 'résidu ×4' },
+        meta: { label: 'residual ×4' },
       },
       singular: { x: idx, y: spec },
       kLine: kk,
@@ -142,12 +142,12 @@ export function compute({ image, k, seed }) {
       // courbes entières, et la taille pleine ne bouge jamais. Elles
       // servent à l'inspecteur et au harnais, qui les lisent par leur nom.
       kept: { value: energy[kk] },
-      stored: { value: stored, meta: { label: 'nombres stockés', precision: 0 } },
+      stored: { value: stored, meta: { label: 'numbers stored', precision: 0 } },
       fullSize: { value: full },
-      ratio: { value: full / stored, meta: { label: 'facteur', precision: 2 } },
+      ratio: { value: full / stored, meta: { label: 'factor', precision: 2 } },
       psnr: { value: psnr, meta: { label: 'PSNR', unit: 'dB', precision: 1 } },
       errMeas: { value: errMeasured, meta: { label: '‖A−Aₖ‖²', precision: 2 } },
-      errTheo: { value: errTheory, meta: { label: 'théorie', precision: 2 } },
+      errTheo: { value: errTheory, meta: { label: 'theory', precision: 2 } },
     },
   };
 }

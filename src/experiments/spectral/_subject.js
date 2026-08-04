@@ -1,1 +1,1 @@
-export default { title: 'Analyse spectrale', order: 7 };
+export default { title: 'Spectral analysis', order: 7 };

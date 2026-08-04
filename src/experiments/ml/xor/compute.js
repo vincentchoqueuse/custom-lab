@@ -183,17 +183,17 @@ export function compute({ problem, hidden, act, lr, epoch, seed }) {
 
       lossNow: {
         value: run.loss[ep],
-        meta: { label: 'erreur à l’époque n', precision: 5 },
+        meta: { label: 'error at epoch n', precision: 5 },
       },
       lossEnd: {
         value: run.loss[EPOCHS],
         meta: { label: 'erreur finale', precision: 5 },
       },
-      errors: { value: wrong, meta: { label: 'points mal classés', precision: 0 } },
+      errors: { value: wrong, meta: { label: 'misclassified points', precision: 0 } },
       truth: { value: table, meta: { label: 'sortie' } },
       nWeights: {
         value: H * 2 + H + H + 1,
-        meta: { label: 'poids du réseau', precision: 0 },
+        meta: { label: 'network weights', precision: 0 },
       },
     },
   };

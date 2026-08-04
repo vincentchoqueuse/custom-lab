@@ -6,23 +6,23 @@ export default {
   id: 'expressivity',
   order: 2,
   random: true, // les poids sont tirés
-  title: 'Pouvoir d’expression',
-  subtitle: 'Deux couches, des poids au hasard — et ce que la structure de la matrice décide',
-  tags: ['réseaux', 'couche linéaire', 'convolution', 'Toeplitz', 'poids partagés'],
+  title: 'Expressive power',
+  subtitle: 'Two layers, random weights — and what the structure of the matrix decides',
+  tags: ['networks', 'linear layer', 'convolution', 'Toeplitz', 'weight sharing'],
 
   params: {
     structure: select('structure', {
-      description: 'structure de la matrice de couche',
+      description: 'structure of the layer matrix',
       options: [
-        { value: 'dense', label: 'dense — N² poids indépendants' },
-        { value: 'toeplitz', label: 'Toeplitz — une convolution' },
+        { value: 'dense', label: 'dense — N² independent weights' },
+        { value: 'toeplitz', label: 'Toeplitz — a convolution' },
       ],
       default: 'toeplitz',
     }),
     act: select('σ', {
-      description: 'activation entre les deux couches',
+      description: 'activation between the two layers',
       options: [
-        { value: 'identity', label: 'identité — aucune' },
+        { value: 'identity', label: 'identity — none' },
         { value: 'relu', label: 'ReLU' },
         { value: 'tanh', label: 'tanh' },
         { value: 'gelu', label: 'GELU' },
@@ -30,14 +30,14 @@ export default {
       default: 'relu',
     }),
     kernel: int('L', {
-      description: 'longueur du noyau (structure Toeplitz)',
+      description: 'kernel length (Toeplitz structure)',
       min: 1,
       max: 33,
       default: 9,
       visibleIf: { structure: 'toeplitz' },
     }),
     scale: float('α', {
-      description: 'échelle des poids',
+      description: 'scale of the weights',
       min: 0.2,
       max: 4,
       step: 0.1,
@@ -45,21 +45,21 @@ export default {
       precision: 1,
     }),
     signal: select('entrée', {
-      description: 'signal présenté au réseau',
+      description: 'signal fed to the network',
       options: [
-        { value: 'sine', label: 'sinusoïde (8 Hz)' },
-        { value: 'two', label: 'deux tons (6 + 20 Hz)' },
-        { value: 'pulse', label: 'impulsion' },
-        { value: 'noise', label: 'bruit blanc' },
+        { value: 'sine', label: 'sinusoid (8 Hz)' },
+        { value: 'two', label: 'two tones (6 + 20 Hz)' },
+        { value: 'pulse', label: 'impulse' },
+        { value: 'noise', label: 'white noise' },
       ],
       default: 'sine',
     }),
   },
 
   groups: [
-    { title: 'Couche', params: ['structure', 'kernel', 'scale'] },
-    { title: 'Réseau', params: ['act'] },
-    { title: 'Entrée', params: ['signal'] },
+    { title: 'Layer', params: ['structure', 'kernel', 'scale'] },
+    { title: 'Network', params: ['act'] },
+    { title: 'Input', params: ['signal'] },
   ],
 
   views: [
@@ -73,10 +73,10 @@ export default {
         color: '#7E2F8E',
         width: 1.4,
         opacity: 0.7,
-        label: 'entrée',
+        label: 'input',
         overlays: [
-          line('yTime', { color: '#0072BD', width: 2, label: 'sortie du réseau' }),
-          line('yLinTime', { color: '#a1a1aa', width: 1.4, dashed: true, label: 'sans activation' }),
+          line('yTime', { color: '#0072BD', width: 2, label: 'network output' }),
+          line('yLinTime', { color: '#a1a1aa', width: 1.4, dashed: true, label: 'without activation' }),
         ],
         axes: { x: { label: 't', unit: 'ms' }, y: { label: 'amplitude' } },
       })
@@ -89,10 +89,10 @@ export default {
       line('specOut', {
         color: '#0072BD',
         width: 1.6,
-        label: 'sortie',
+        label: 'output',
         overlays: [
-          line('specIn', { color: '#7E2F8E', width: 1.4, opacity: 0.55, label: 'entrée' }),
-          line('response', { color: '#D95319', width: 1.8, label: '|H(f)| du noyau' }),
+          line('specIn', { color: '#7E2F8E', width: 1.4, opacity: 0.55, label: 'input' }),
+          line('response', { color: '#D95319', width: 1.8, label: '|H(f)| of the kernel' }),
         ],
         axes: {
           x: { label: 'f', unit: 'Hz' },
@@ -106,14 +106,14 @@ export default {
     // Toeplitz, c'est la MÊME, décalée. Il n'y a rien d'autre à comprendre.
     view(
       'rows',
-      'Deux lignes de W₁',
+      'Two rows of W₁',
       stem('row', {
         color: '#0072BD',
         size: 3,
-        label: 'ligne 8',
-        overlays: [stem('rowMid', { color: '#D95319', size: 3, label: 'ligne 64' })],
+        label: 'row 8',
+        overlays: [stem('rowMid', { color: '#D95319', size: 3, label: 'row 64' })],
         legend: 'left',
-        axes: { x: { label: 'colonne j' }, y: { label: 'W₁[i, j]' } },
+        axes: { x: { label: 'column j' }, y: { label: 'W₁[i, j]' } },
       })
     ),
   ],

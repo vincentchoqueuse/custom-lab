@@ -2,90 +2,86 @@
 export default [
   {
     id: 'linear',
-    title: 'Scène 1 · Deux couches linéaires n’en font qu’une',
+    title: 'Scene 1 · Two linear layers make one',
     view: 'time',
     params: { structure: 'dense', act: 'identity', kernel: 9, scale: 1.5, signal: 'sine' },
     visible: ['act', 'structure'],
-    notes: `Activation « identité ». La courbe bleue (le réseau) et la grise
-tiretée (le même réseau sans activation) sont CONFONDUES — évidemment, c'est
-le même calcul.
+    notes: `With the identity activation, the blue curve — the network — and the
+dashed grey one — the same network without activation — coincide exactly, which
+is unsurprising since it is the same computation.
 
-Mais dire pourquoi ça compte : W₂(W₁x) = (W₂W₁)x. Le produit de deux
-matrices est une matrice. Empiler dix couches linéaires donne donc
-exactement le pouvoir d'expression d'UNE couche linéaire — pas un iota de
-plus, pour dix fois le calcul. Le harnais le vérifie à 1e-12.
+Why that matters is one line of algebra: W₂(W₁x) = (W₂W₁)x, and the product of
+two matrices is a matrix. Stacking ten linear layers therefore has the
+expressive power of one linear layer, not an iota more, for ten times the
+arithmetic. The harness verifies it to 1e-12.
 
-C'est la raison d'être de l'activation, et elle tient en une ligne
-d'algèbre. Passer σ à ReLU : les deux courbes se séparent, et la statline
-chiffre l'écart.`,
+That is the reason activations exist. Switching σ to ReLU separates the two
+curves, and the statline measures the gap.`,
   },
   {
     id: 'dense',
-    title: 'Scène 2 · Dense : 16 384 poids, et plus aucune structure',
+    title: 'Scene 2 · Dense: 16 384 weights and no structure left',
     view: 'spectrum',
     params: { structure: 'dense', act: 'relu', kernel: 9, scale: 1.5, signal: 'sine' },
     visible: ['structure', 'signal'],
-    notes: `Une matrice dense 128 × 128 : 16 384 poids indépendants, tirés au
-hasard. Une sinusoïde pure entre.
+    notes: `A dense 128 × 128 matrix holds 16 384 independent weights, drawn at
+random, and a pure sinusoid goes in.
 
-En sortie : un spectre plat. Toutes les fréquences, aucune raie. C'est
-normal — chaque sortie est une combinaison de TOUTES les entrées avec des
-poids sans rapport entre eux, donc la notion de voisinage temporel a été
-détruite. Le réseau peut tout représenter, et ne suppose rien.
+What comes out is a flat spectrum: every frequency, no line anywhere. That is
+what should happen — each output is a combination of ALL the inputs with
+unrelated weights, so any notion of temporal neighbourhood has been destroyed.
+The network can represent anything, and assumes nothing.
 
-Aller voir l'onglet « Deux lignes de W₁ » : deux lignes de la matrice n'ont
-rien en commun. Chacune est un dessin à part entière, appris séparément.`,
+The "Two rows of W₁" tab makes the same point structurally: two rows of the
+matrix have nothing in common. Each is its own drawing, learned separately.`,
   },
   {
     id: 'toeplitz',
-    title: 'Scène 3 · Toeplitz : 9 poids, et c’est un filtre',
+    title: 'Scene 3 · Toeplitz: 9 weights, and it is a filter',
     view: 'rows',
     params: { structure: 'toeplitz', act: 'relu', kernel: 9, scale: 1.5, signal: 'sine' },
     visible: ['structure', 'kernel'],
-    notes: `Basculer sur Toeplitz et rester sur cette vue AVANT de parler de
-spectre. Les deux lignes sont maintenant la MÊME, décalée de 56 crans.
+    notes: `Switching to Toeplitz while staying on this view, before any talk of
+spectra: the two rows are now the SAME row, shifted by 56 positions.
 
-Voilà ce que veut dire « partage de poids » : au lieu de 128 lignes
-indépendantes, une seule forme, répétée à toutes les positions. 9 poids au
-lieu de 16 384 — la statline donne le rapport, 1820.
+That is what weight sharing means — instead of 128 independent rows, one shape
+repeated at every position, 9 weights instead of 16 384, a ratio of 1820 in the
+statline.
 
-Et ce n'est pas une économie de mémoire, c'est une HYPOTHÈSE sur le monde :
-« ce qui compte est local, et ne dépend pas de l'endroit où ça arrive ».
-C'est exactement l'hypothèse d'un filtre, et exactement celle d'une couche
-de convolution.
+And it is not a memory saving, it is a HYPOTHESIS about the world: what matters
+is local, and does not depend on where it happens. That is exactly the
+assumption behind a filter, and exactly the one behind a convolutional layer.
 
-Puis l'onglet Spectre : le spectre de sortie est celui d'entrée multiplié
-par |H(f)|, la réponse du noyau, tracée en orange. La couche ne mélange plus
-les fréquences, elle les PONDÈRE. Le harnais vérifie l'identité
-Y(f) = H(f)·X(f) à 1e-12.
-
-Entrée « impulsion » pour finir : la sortie EST la réponse impulsionnelle,
-donc le noyau lui-même. Un réseau de convolution ne fait rien d'autre que
-d'apprendre des réponses impulsionnelles.`,
+The spectrum tab then shows the consequence: the output spectrum is the input
+spectrum multiplied by |H(f)|, the kernel response drawn in orange. The layer
+no longer mixes frequencies, it WEIGHTS them, and the harness verifies
+Y(f) = H(f)·X(f) to 1e-12. Feeding an impulse closes the argument — the output
+IS the impulse response, which is the kernel itself. A convolutional network
+does nothing but learn impulse responses.`,
   },
   {
     id: 'width',
-    title: 'Scène 4 · Le noyau qui grandit',
+    title: 'Scene 4 · The kernel that grows',
     view: 'spectrum',
     params: { structure: 'toeplitz', act: 'relu', kernel: 1, scale: 1.5, signal: 'noise' },
     visible: ['kernel', 'act'],
-    notes: `L = 1 : le noyau est un seul poids. La couche multiplie par une
-constante, |H(f)| est plat, et le réseau ne peut RIEN faire de fréquentiel.
-Une convolution 1×1 ne mélange pas les voisins, elle mélange les canaux —
-c'est d'ailleurs à ça qu'elle sert dans les vraies architectures.
+    notes: `At L = 1 the kernel is a single weight. The layer multiplies by a
+constant, |H(f)| is flat, and the network can do nothing in frequency at all. A
+1×1 convolution does not mix neighbours, it mixes channels — which is precisely
+what it is for in real architectures.
 
-Monter L : 3, 9, 17, 33. La réponse orange se structure, des creux
-apparaissent, et le spectre de sortie les suit. Le nombre de poids passe de
-1 à 33 — contre 16 384 pour la dense, toujours.
+Raising L through 3, 9, 17 and 33 gives the orange response structure, notches
+appear, and the output spectrum follows them. The weight count goes from 1 to
+33, against 16 384 for the dense layer throughout.
 
-La question qui vaut la séance : « puisque la dense contient toutes les
-Toeplitz, pourquoi ne pas toujours prendre dense ? »
+The question worth the session: since the dense matrix contains every Toeplitz
+matrix, why not always use dense?
 
-Parce que ce que la structure retire, c'est la liberté d'apprendre
-n'importe quoi — donc aussi celle de se tromper. Avec 16 384 poids et cent
-exemples, le réseau apprend les exemples par cœur. Avec 9, il ne peut
-apprendre qu'un filtre, et un filtre est ce qu'on voulait. Contraindre le
-modèle, c'est lui transmettre ce qu'on sait déjà.`,
+Because what the structure removes is the freedom to learn anything — and
+therefore the freedom to be wrong. With 16 384 weights and a hundred examples,
+the network memorizes the examples. With 9 it can only learn a filter, and a
+filter is what was wanted. Constraining a model is how prior knowledge is
+handed to it.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.
