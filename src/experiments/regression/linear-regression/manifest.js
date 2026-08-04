@@ -6,32 +6,32 @@ export default {
   id: 'linear-regression',
   order: 1,
   random: true,
-  title: 'Régression linéaire',
-  subtitle: 'Ajuster y = a·x + b au sens des moindres carrés — et ce que vaut la pente',
-  tags: ['moindres carrés', 'droite', 'résidus', 'R²', 'levier'],
+  title: 'Linear regression',
+  subtitle: 'Fitting y = a·x + b by least squares — and what the slope is worth',
+  tags: ['least squares', 'straight line', 'residuals', 'R²', 'leverage'],
 
   params: {
-    a: float('a', { description: 'pente vraie', min: -3, max: 3, step: 0.1, default: 1.5 }),
-    b: float('b', { description: 'ordonnée à l\'origine vraie', min: -5, max: 5, step: 0.2, default: 1 }),
+    a: float('a', { description: 'true slope', min: -3, max: 3, step: 0.1, default: 1.5 }),
+    b: float('b', { description: 'true intercept', min: -5, max: 5, step: 0.2, default: 1 }),
     sigma: float('σ', {
-      description: 'écart-type du bruit',
+      description: 'noise standard deviation',
       min: 0,
       max: 4,
       step: 0.1,
       default: 1,
       precision: 1,
     }),
-    N: int('N', { description: 'nombre de points observés', min: 3, max: 200, default: 20 }),
+    N: int('N', { description: 'number of observed points', min: 3, max: 200, default: 20 }),
     spread: float('L', {
-      description: 'demi-étendue des abscisses (les x vont de −L à +L)',
+      description: 'half-range of the abscissas (x runs from −L to +L)',
       min: 0.5,
       max: 6,
       step: 0.1,
       default: 3,
       precision: 1,
     }),
-    outlier: float('point aberrant', {
-      description: 'décalage appliqué au DERNIER point seulement',
+    outlier: float('outlier', {
+      description: 'offset applied to the LAST point only',
       min: -15,
       max: 15,
       step: 0.5,
@@ -42,7 +42,7 @@ export default {
   },
 
   groups: [
-    { title: 'Droite vraie', params: ['a', 'b'] },
+    { title: 'True line', params: ['a', 'b'] },
     { title: 'Observations', params: ['N', 'sigma', 'spread', 'outlier'] },
   ],
 
@@ -63,10 +63,10 @@ export default {
           line('residualSegments', {
             color: '#a1a1aa',
             width: 1.2,
-            label: 'résidus (ce qui est minimisé)',
+            label: 'residuals (what is minimized)',
           }),
-          line('truth', { color: '#EDB120', width: 1.6, dashed: true, label: 'droite vraie' }),
-          line('fitted', { color: '#0072BD', width: 2.6, label: 'droite ajustée' }),
+          line('truth', { color: '#EDB120', width: 1.6, dashed: true, label: 'true line' }),
+          line('fitted', { color: '#0072BD', width: 2.6, label: 'fitted line' }),
         ],
         axes: { x: 'x', y: 'y' },
       })
@@ -76,7 +76,7 @@ export default {
     // cloud around zero — any pattern here means the straight line was wrong.
     view(
       'residuals',
-      'Résidus',
+      'Residuals',
       scatter('residuals', {
         color: '#D95319',
         size: 3.8,
@@ -90,16 +90,16 @@ export default {
     // What the slope is worth: 400 repeated experiments against σ/√Sxx.
     view(
       'slope-law',
-      'Loi de la pente â',
+      'Distribution of the slope â',
       histogram('slopes', {
         color: '#0072BD',
         opacity: 0.6,
-        label: '400 expériences répétées',
+        label: '400 repeated experiments',
         overlays: [
-          density('slopePdf', { color: '#EDB120', width: 2.4, label: 'N(a, σ²/Sxx) — théorie' }),
+          density('slopePdf', { color: '#EDB120', width: 2.4, label: 'N(a, σ²/Sxx) — theory' }),
           vline((p) => p.a, { color: '#EDB120', dashed: true, width: 1.6, label: 'a' }),
         ],
-        axes: { x: 'â', y: 'densité' },
+        axes: { x: 'â', y: 'density' },
       })
     ),
   ],

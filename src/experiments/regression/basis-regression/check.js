@@ -45,7 +45,7 @@ export const checks = [
       const overshoot = (peak - 1) / 2; // fraction of the jump (height 2)
       return {
         ok: Math.abs(overshoot - 0.089) < 0.03,
-        detail: `dépassement=${(overshoot * 100).toFixed(1)}% (Gibbs ≈ 8.9%)`,
+        detail: `overshoot=${(overshoot * 100).toFixed(1)}% (Gibbs ≈ 8.9%)`,
       };
     },
   },

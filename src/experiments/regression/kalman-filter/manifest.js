@@ -6,45 +6,45 @@ export default {
   id: 'kalman-filter',
   order: 5,
   random: true,
-  title: 'Filtre de Kalman',
-  subtitle: 'Estimation récursive : prédire, corriger, et savoir de combien on se trompe',
-  tags: ['Kalman', 'estimation récursive', 'Riccati'],
+  title: 'The Kalman filter',
+  subtitle: 'Recursive estimation: predict, correct, and know by how much you are wrong',
+  tags: ['Kalman', 'recursive estimation', 'Riccati'],
 
   params: {
     sigw: log('σw', {
-      description: 'écart-type du bruit de modèle (dérive)',
+      description: 'process-noise standard deviation (drift)',
       min: 0.001,
       max: 1,
       default: 0.1,
       precision: 3,
     }),
     sigv: log('σv', {
-      description: 'écart-type du bruit de mesure',
+      description: 'measurement-noise standard deviation',
       min: 0.01,
       max: 10,
       default: 1,
       precision: 2,
     }),
-    N: int('N', { description: 'nombre de pas', min: 20, max: 500, default: 120 }),
+    N: int('N', { description: 'number of steps', min: 20, max: 500, default: 120 }),
   },
 
   views: [
     view(
       'tracking',
-      'Suivi',
+      'Tracking',
       line('trueState', {
-        label: 'état vrai',
+        label: 'true state',
         overlays: [
           band('tube', { color: '#D95319', opacity: 0.15, label: '±3σ' }),
-          scatter('meas', { color: '#7E2F8E', size: 2, opacity: 0.5, label: 'mesures' }),
-          line('est', { color: '#D95319', width: 2, label: 'estimée' }),
+          scatter('meas', { color: '#7E2F8E', size: 2, opacity: 0.5, label: 'measurements' }),
+          line('est', { color: '#D95319', width: 2, label: 'estimate' }),
         ],
         axes: { x: 'k', y: 'x' },
       })
     ),
     view(
       'kgain',
-      'Gain de Kalman',
+      'Kalman gain',
       line('gains', {
         overlays: [hline('kInf', { color: '#EDB120', dashed: true, label: 'K∞' })],
         axes: { x: 'k', y: 'Kₖ' },
@@ -52,14 +52,14 @@ export default {
     ),
     view(
       'consistency',
-      'Cohérence ±3σ',
+      'Consistency ±3σ',
       scatter('err', {
         size: 2,
         overlays: [
-          band('errTube', { color: '#D95319', opacity: 0.15, label: '±3σ prédit' }),
+          band('errTube', { color: '#D95319', opacity: 0.15, label: '±3σ predicted' }),
           hline(() => 0, { color: '#EDB120', dashed: true }),
         ],
-        axes: { x: 'k', y: 'erreur x̂ − x' },
+        axes: { x: 'k', y: 'error x̂ − x' },
       })
     ),
   ],

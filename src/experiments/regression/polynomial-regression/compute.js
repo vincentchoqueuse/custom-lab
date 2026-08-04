@@ -37,10 +37,10 @@ function normalEquations(x, y, K) {
   return { XtX, rhs: Array.from(rhs) };
 }
 
-// La résolution ridge vient du cœur : `skipFirst` laisse le terme constant
-// hors de la pénalité, ce qui est la convention — pénaliser l'ordonnée à
-// l'origine ferait préférer les modèles passant près de zéro, donc dépendre
-// de l'endroit où l'on a placé l'origine.
+// The ridge solve comes from the core: `skipFirst` keeps the constant term
+// out of the penalty, which is the convention — penalizing the intercept would
+// favor models passing near zero, and so make the answer depend on where the
+// origin happens to have been placed.
 const solveRidge = (XtX, rhs, lam) => ridgeSolve(XtX, rhs, lam, { skipFirst: true });
 
 /**

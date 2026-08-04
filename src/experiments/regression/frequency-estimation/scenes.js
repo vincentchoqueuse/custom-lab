@@ -1,49 +1,58 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'grille-fine',
-    title: 'Scène 1 · La grille fine trouve tout',
+    id: 'fine-grid',
+    title: 'Scene 1 · A fine grid finds everything',
     params: { f: 5, sigma: 0.3, step: 0.05 },
     view: 'cost',
     visible: ['step', 'sigma'],
-    notes: `Les points violets sont les évaluations de J : la grille balaie TOUT,
-aucun bassin ne lui échappe — au prix de ~380 évaluations (statline). Les creux
-secondaires sont espacés de 1/T = 1 Hz. Question : « combien coûte un pas deux
-fois plus fin ? et combien rapporte-t-il ? » — transition vers la scène 2.`,
+    notes: `The purple points are the evaluations of J. The grid sweeps
+everything, so no basin can hide from it, at a cost of about 380 evaluations as
+the statline reports. The secondary minima are spaced by 1/T = 1 Hz.
+
+The question that leads to the next scene: what does halving the step cost, and
+what does it buy?`,
   },
   {
-    id: 'pas-trop-grand',
-    title: 'Scène 2 · Le pas qui enjambe le bassin',
+    id: 'step-too-large',
+    title: 'Scene 2 · The step that steps over the basin',
     params: { f: 5, sigma: 0.3, step: 1.3 },
     view: 'cost',
     visible: ['step'],
-    notes: `Δf = 1.3 Hz > largeur du bassin (1/T = 1 Hz) : la grille peut passer
-PAR-DESSUS le vrai minimum et f̂ atterrit ailleurs (statline : |f̂−f|).
-Geler (F), réduire le pas jusqu'à raccrocher le bon creux. Règle : le pas doit
-être petit devant 1/T. C'est le premier dimensionnement d'estimateur du cours.`,
+    notes: `With Δf = 1.3 Hz, larger than the basin width 1/T = 1 Hz, the grid
+can straddle the true minimum entirely and f̂ lands somewhere else — the
+statline shows |f̂−f| jump accordingly.
+
+Freezing and then reducing the step until the right minimum is caught again
+makes the rule concrete: the step must be small compared with 1/T. This is the
+first estimator sizing calculation of the course.`,
   },
   {
-    id: 'quantification',
-    title: "Scène 3 · Sans bruit, l'erreur reste",
+    id: 'quantization',
+    title: 'Scene 3 · Without noise, the error remains',
     params: { f: 5, sigma: 0, step: 0.4 },
     view: 'cost',
     visible: ['step', 'sigma'],
-    notes: `σ = 0, aucun bruit — et pourtant |f̂−f| ≠ 0 : l'argmin ne peut pas
-faire mieux que ±Δf/2 (quantification de la grille). Descendre Δf : l'erreur
-suit. Teaser : même à Δf → 0, le bruit imposera SA limite — la borne de
-Cramér-Rao (expérience dédiée). Et pour faire mieux qu'une grille à coût égal :
-chapitre optimisation (descente de gradient).`,
+    notes: `At σ = 0 there is no noise at all, and yet |f̂−f| is not zero: an
+argmin over a grid cannot do better than ±Δf/2, which is quantization and not
+estimation error. Lowering Δf makes the error follow it down.
+
+Even at Δf → 0 the noise imposes its own limit, which is the Cramér–Rao bound
+and has an experiment of its own. Doing better than a grid at equal cost is the
+subject of the optimization chapter.`,
   },
   {
-    id: 'reconstruit',
-    title: 'Scène 4 · Le signal reconstruit',
+    id: 'reconstructed',
+    title: 'Scene 4 · The reconstructed signal',
     params: { f: 5, sigma: 0.5, step: 0.05 },
     view: 'time',
     visible: ['sigma', 'f'],
-    notes: `La sinusoïde orange (fréquence f̂) recolle aux points violets.
-Marteler R : le bruit change, f̂ bouge à peine — l'estimation de fréquence
-est étonnamment précise (la CRB décroît en 1/T³). Monter σ à 2 pour trouver
-le point de décrochage.`,
+    notes: `The orange sinusoid, at frequency f̂, sits back on the purple
+observations. Pressing R changes the noise and barely moves f̂ — frequency
+estimation is surprisingly precise, its Cramér–Rao bound falling as 1/T³.
+
+Raising σ toward 2 finds the point where it finally breaks down, which is worth
+locating rather than assuming.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

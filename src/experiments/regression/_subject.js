@@ -3,7 +3,7 @@
 // are the course's.
 // The fit first, then the law of what was fitted.
 export default {
-  title: 'Régression & filtrage',
+  title: 'Regression & filtering',
   order: 3,
   figureOrder: ['fit', 'time', 'sampling'],
 };
