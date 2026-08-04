@@ -72,7 +72,7 @@ export default {
   views: [
     view(
       'scope',
-      "L'oscillo",
+      'The scope',
       line('scopeOut', {
         color: '#D95319',
         width: 1.6,

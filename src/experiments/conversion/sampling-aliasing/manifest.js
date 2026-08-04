@@ -68,7 +68,7 @@ export default {
     // the folding diagram: apparent frequency vs true frequency at this fe
     view(
       'folding',
-      'Fréquence apparente',
+      'Apparent frequency',
       line('foldCurve', {
         color: '#7E2F8E',
         width: 2.4,
