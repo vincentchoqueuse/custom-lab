@@ -185,10 +185,12 @@ export const checks = [
     name: 'NLMS : le désajustement porte la correction L/(L−2), pas l’asymptotique',
     category: 'statistical',
     run() {
-      // μ̃/(2−μ̃) est le résultat des livres, et il est faux d'un facteur 2
-      // à L = 4. Le facteur manquant est E[‖x‖²]·E[1/‖x‖²] = L/(L−2) pour
-      // un régresseur blanc gaussien — mesuré ici de L = 4 à L = 16, où
-      // l'asymptotique se tromperait de 100 %, 37 % et 18 %.
+      // μ̃/(2−μ̃) est le résultat ASYMPTOTIQUE des ouvrages — exact quand L
+      // est grand, et court d'un facteur 2 à L = 4. Le terme manquant est
+      // E[‖x‖²]·E[1/‖x‖²] = L/(L−2) pour un régresseur blanc gaussien.
+      // Vérifié ici de L = 4 à L = 16, où l'asymptotique seul se tromperait
+      // de 98 %, 32 % et 14 % ; un run long (N = 60 000) donne les mêmes
+      // rapports à 1 % près, donc ce n'est pas la fenêtre de mesure.
       const bad = [];
       for (const L of [4, 8, 16]) {
         const o = compute({ ...BASE, algo: 'nlms', mu: 0.5, L }).observables;
