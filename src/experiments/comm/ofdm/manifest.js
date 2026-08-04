@@ -4,7 +4,7 @@ import { view, plane, line, scatter } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'ofdm',
-  order: 6,
+  order: 4, // the first answer to the eye the channel just closed
   random: true,
   title: 'OFDM and the selective channel',
   subtitle: 'The channel digs holes; the FFT flattens it, carrier by carrier',

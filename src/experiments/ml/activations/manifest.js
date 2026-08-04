@@ -4,7 +4,7 @@ import { view, figure, line, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'activations',
-  order: 1,
+  order: 3, // the network starts here, once the linear methods are done
   random: true, // the "noise" input draws
   title: 'Activation functions',
   subtitle: 'A memoryless nonlinearity: what it does to a curve, and to a spectrum',

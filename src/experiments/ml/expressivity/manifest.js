@@ -4,7 +4,7 @@ import { view, figure, line, stem } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'expressivity',
-  order: 2,
+  order: 4,
   random: true, // the weights are drawn
   title: 'Expressive power',
   subtitle: 'Two layers, random weights — and what the structure of the matrix decides',

@@ -12,4 +12,10 @@
 // "Machine learning" and not "neural networks": PCA is not one, and the
 // subject is meant to host k nearest neighbours, SVMs and trees as well, which
 // belong to the same course.
+//
+// Inside, the linear methods come first — a covariance decomposed, then that
+// decomposition spent on an image — and the network after: what a nonlinearity
+// does, what it buys, and the problem that has no answer without it. A hidden
+// layer is worth meeting once it is clear what a purely linear method can and
+// cannot do.
 export default { title: 'Machine learning', order: 12 };

@@ -5,7 +5,7 @@
 // meets the poles BEFORE the frequency response.
 export default {
   title: 'Control',
-  order: 10,
+  order: 9,
   figures: { gain: 'bode', phase: 'bode' },
   figureOrder: ['time', 'response', 'step', 'impulse', 'poles', 'gain', 'phase'],
 };

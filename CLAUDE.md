@@ -857,11 +857,25 @@ export const checks = [
 │       │       ├── compute.js    # the science
 │       │       ├── check.js      # the harness
 │       │       └── views/        # custom views only
-│       ├── stats/ estimation/ regression/ detection/
-│       ├── analog/ conversion/ spectral/ filtering/
-│       └── comm/ control/ numerics/
+│       ├── stats/ estimation/ detection/ regression/     # inference
+│       ├── analog/ conversion/ spectral/ filtering/      # signals & systems
+│       └── control/ comm/ numerics/ ml/                  # applications, tools
 └── tests/                        # optional — the main harness is check.js
 ```
+
+**The subject order IS the reading order**, in four blocks, and the `order` key
+of each `_subject.js` is what writes it: a listener reads the sidebar top to
+bottom and must find each subject where its prerequisites have already been
+met. Inference first (a distribution, then a parameter read off it, then a
+decision made about it, then a model fitted to it); the signal chain next
+(a continuous signal, its sampling, its spectrum, its filtering — windowing
+before FIR design, because the design method IS a window); then the two
+applications, control before communications since a link composes detection,
+filtering and spectral analysis all at once; and the numerical and learning
+toolbox last, where a gradient descent precedes the network trained by one.
+A rank is unique inside its subject and `npm run check` says so — two
+experiments claiming the same one sort by accident, which is the failure this
+project refuses everywhere else.
 
 ## Conventions
 

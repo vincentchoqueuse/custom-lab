@@ -460,6 +460,54 @@ function checkRouter() {
   }
 }
 
+/**
+ * The catalogue's ORDER, checked rather than trusted.
+ *
+ * `order` is what makes the sidebar and the palette read a subject in the
+ * order the course meets its demos, and it is the one declarative key with no
+ * validation anywhere: fields, views, figures and scenes all throw at load
+ * time, `order` was a bare number nobody looked at. Two experiments claiming
+ * rank 2 do not fail — they sort by whatever the engine happens to do, which
+ * is exactly the failure the project refuses elsewhere ("a typo is caught at
+ * load time, never silently ignored"). This check exists because the ML
+ * subject had shipped with two 1s and two 2s.
+ *
+ * An ABSENT order stays legal, and deliberately so (CLAUDE.md: the experiment
+ * lands at the end of its subject, alphabetically, so adding one modifies
+ * nothing else). What is refused is a declared rank that is not a positive
+ * integer, and two siblings claiming the same one.
+ */
+function checkOrdering(subjectRanks, expRanks) {
+  const bad = [];
+  const scan = (label, entries) => {
+    const seen = new Map();
+    for (const [name, order] of entries) {
+      if (order === undefined) continue;
+      if (!Number.isInteger(order) || order < 1) {
+        bad.push(`${label}${name}: order ${JSON.stringify(order)} is not a positive integer`);
+        continue;
+      }
+      if (seen.has(order)) bad.push(`${label}{${seen.get(order)}, ${name}} both claim order ${order}`);
+      else seen.set(order, name);
+    }
+  };
+  scan('', subjectRanks);
+  for (const [sub, entries] of expRanks) scan(`${sub}/`, entries);
+
+  console.log(`  ${dim('order')}`);
+  if (bad.length) {
+    for (const b of bad) console.log(`    ${red('✗')} ${b}`);
+    fail++;
+  } else {
+    const n = [...expRanks.values()].reduce((s, e) => s + e.length, 0);
+    console.log(
+      `    ${green('✓')} every declared rank is unique inside its subject  ` +
+        `${dim(`(${subjectRanks.length} subjects, ${n} experiments)`)}`
+    );
+    pass++;
+  }
+}
+
 async function checkCatalogue() {
   console.log(bold('catalogue'));
   checkLayering();
@@ -473,6 +521,8 @@ async function checkCatalogue() {
   const axisBad = [];
   let nViews = 0;
   let nScenes = 0;
+  const subjectRanks = [];
+  const expRanks = new Map();
   for (const sub of readdirSync(ROOT, { withFileTypes: true })) {
     if (!sub.isDirectory()) continue;
     const dir = join(ROOT, sub.name);
@@ -480,6 +530,8 @@ async function checkCatalogue() {
     const subject = existsSync(subjectFile)
       ? (await import(pathToFileURL(subjectFile).href)).default
       : {};
+    subjectRanks.push([sub.name, subject.order]);
+    expRanks.set(sub.name, []);
     for (const exp of readdirSync(dir, { withFileTypes: true })) {
       const mf = join(dir, exp.name, 'manifest.js');
       if (!exp.isDirectory() || !existsSync(mf)) continue;
@@ -496,6 +548,7 @@ async function checkCatalogue() {
         continue;
       }
       checkAxisLabels(manifest, key, axisBad);
+      expRanks.get(sub.name).push([exp.name, manifest.order]);
       const sf = join(dir, exp.name, 'scenes.js');
       if (!existsSync(sf)) continue;
       const scenes = (await import(pathToFileURL(sf).href)).default ?? [];
@@ -512,6 +565,7 @@ async function checkCatalogue() {
   }
   if (figuresOk)
     console.log(`    ${green('✓')} standard figures: id, title and order  ${dim(`(${nViews} views)`)}`);
+  checkOrdering(subjectRanks, expRanks);
   console.log(`  ${dim('axes')}`);
   if (axisBad.length) {
     for (const b of axisBad) console.log(`    ${red('✗')} ${b}`);

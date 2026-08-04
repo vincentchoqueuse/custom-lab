@@ -4,7 +4,7 @@ import { view, plane, line, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'xor',
-  order: 3,
+  order: 5,
   random: true, // the initialization is drawn — and it decides everything
   title: 'The XOR',
   subtitle: 'The 1969 counter-example, and the two neurons that settle it',

@@ -4,7 +4,7 @@ import { view, plane, line, stem, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'blind-equalization',
-  order: 7, // after OFDM: the last thing the subject meets, and the hardest
+  order: 5, // after OFDM: the other answer to a selective channel, and the hardest
   random: true, // symbols and noise are drawn
   title: 'Blind equalization',
   subtitle: 'Undoing a channel without a training sequence — and what it costs',
