@@ -3,13 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- The GR waymark: a white bar over a red one, what is painted on the
-         rocks of the coastal path — except that the white stroke is a signal
-         here. The name of the application says exactly that: a long route made
-         of short, well-marked stages. -->
+    <!-- The enamelled route plate: a trail is numbered, and this one is numbered
+         34 — the GR that runs the Breton coast. The SAME drawing as
+         ui/AppIcon.svelte, to the last stroke; any retouch happens on BOTH
+         sides, because they diverged once and the tab moved while the screen
+         stayed put.
+         Two differences are deliberate and bounded. The plate carries its own
+         `prefers-color-scheme` here: the digits are masked OUT, so they show the
+         tab strip through them and one ground colour is all that has to flip —
+         no second drawing has to exist. And the digits fall back to the platform
+         UI face: a `data:` URI reaches no webfont, so IBM Plex Sans cannot
+         follow the mark into the tab. Reserved out of a solid ground rather than
+         stroked, the shape survives that substitution at 16 px. -->
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='8' fill='%2318181b'/%3E%3Cpath d='M6 12.5c2.6 0 2.4-5.4 5-5.4s2.4 5.4 5 5.4 2.4-5.4 5-5.4 2.4 5.4 5 5.4' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3Crect x='6' y='18.5' width='20' height='6' rx='1.4' fill='%23C8102E'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cstyle%3E*{color:%2318181b}@media(prefers-color-scheme:dark){*{color:%23fafafa}}%3C/style%3E%3Cmask id='p'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Crect x='3.3' y='3.3' width='25.4' height='25.4' rx='4.4' fill='none' stroke='%23000' stroke-width='1.1'/%3E%3Ctext x='16' y='21.3' text-anchor='middle' fill='%23000' font-size='13.6' font-weight='600' letter-spacing='.1' font-family='system-ui,-apple-system,Segoe UI,Roboto,sans-serif'%3E34%3C/text%3E%3C/mask%3E%3Crect x='.6' y='.6' width='30.8' height='30.8' rx='6.6' fill='currentColor' mask='url(%23p)'/%3E%3C/svg%3E"
     />
     <title>expe34</title>
   </head>
