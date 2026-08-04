@@ -5,7 +5,7 @@ import { view, figure, line, stem } from '../../../core/views.js';
 export default {
   id: 'expressivity',
   order: 2,
-  random: true, // les poids sont tirés
+  random: true, // the weights are drawn
   title: 'Expressive power',
   subtitle: 'Two layers, random weights — and what the structure of the matrix decides',
   tags: ['networks', 'linear layer', 'convolution', 'Toeplitz', 'weight sharing'],
@@ -44,7 +44,7 @@ export default {
       default: 1.5,
       precision: 1,
     }),
-    signal: select('entrée', {
+    signal: select('input', {
       description: 'signal fed to the network',
       options: [
         { value: 'sine', label: 'sinusoid (8 Hz)' },
@@ -63,10 +63,10 @@ export default {
   ],
 
   views: [
-    // Ce que le réseau FAIT au signal, avec son propre témoin : la même
-    // architecture sans activation. L'écart entre les deux courbes EST le
-    // pouvoir que l'activation ajoute — nul quand σ = identité, et le
-    // constater est la moitié de l'expérience.
+    // What the network DOES to the signal, with its own control: the same
+    // architecture without an activation. The gap between the two curves IS the
+    // power the activation adds — zero when σ = identity, and seeing that is
+    // half the experiment.
     figure(
       'time',
       line('xTime', {
@@ -82,8 +82,8 @@ export default {
       })
     ),
 
-    // Le spectre, où la structure se trahit : Toeplitz FILTRE (le spectre
-    // d'entrée multiplié par |H|), dense mélange tout.
+    // The spectrum, where the structure gives itself away: Toeplitz FILTERS
+    // (the input spectrum multiplied by |H|), dense mixes everything.
     figure(
       'spectrum',
       line('specOut', {
@@ -101,9 +101,10 @@ export default {
       })
     ),
 
-    // LA vue qui explique le mot « partage de poids » : deux lignes de la
-    // matrice, prises à deux endroits. Denses, elles n'ont rien en commun ;
-    // Toeplitz, c'est la MÊME, décalée. Il n'y a rien d'autre à comprendre.
+    // THE view that explains the phrase "weight sharing": two rows of the
+    // matrix, taken at two places. Dense, they have nothing in common;
+    // Toeplitz, it is the SAME one, shifted. There is nothing else to
+    // understand.
     view(
       'rows',
       'Two rows of W₁',

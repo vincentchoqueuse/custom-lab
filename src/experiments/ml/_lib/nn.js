@@ -212,7 +212,7 @@ export function trainGD({ X, T, hidden, act, epochs, lr, init, keepEvery = 1 }) 
  * concatenated segments separated by NaN: a single observable, which the
  * generic plot breaks up on its own.
  *
- * @param {Float64Array} field grille (ny × nx) en ligne majeure
+ * @param {Float64Array} field ny × nx grid, row major
  */
 export function contourLines(field, nx, ny, x0, x1, y0, y1, level) {
   const xs = [];
@@ -230,7 +230,7 @@ export function contourLines(field, nx, ny, x0, x1, y0, y1, level) {
       const idx = (v[0] > level ? 1 : 0) | (v[1] > level ? 2 : 0) | (v[2] > level ? 4 : 0) | (v[3] > level ? 8 : 0);
       if (idx === 0 || idx === 15) continue;
       const pts = [];
-      // arêtes : bas, droite, haut, gauche
+      // edges: bottom, right, top, left
       if ((v[0] > level) !== (v[1] > level))
         pts.push([lerp(px(i), px(i + 1), v[0], v[1]), py(j)]);
       if ((v[1] > level) !== (v[2] > level))

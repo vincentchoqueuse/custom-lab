@@ -6,14 +6,14 @@ const BASE = { problem: 'xor', hidden: 2, act: 'tanh', lr: 0.5, epoch: 4000, see
 
 export const checks = [
   {
-    name: 'AUCUNE droite ne classe le XOR — recherche exhaustive',
+    name: 'NO straight line classifies XOR — exhaustive search',
     category: 'numeric',
     run() {
-      // Le théorème de 1969, vérifié par la force brute plutôt que cru sur
-      // parole. La preuve tient d'ailleurs en deux lignes : classer (0,1) et
-      // (1,0) du bon côté impose w₁+w₂+2b > 1, classer (0,0) et (1,1) impose
-      // w₁+w₂+2b ≤ 1. Les deux contraintes s'excluent. La grille ci-dessous
-      // le constate sur 68 921 droites, et le minimum d'erreurs est 1.
+      // The 1969 theorem, verified by brute force rather than taken on trust.
+      // The proof does fit in two lines: classifying (0,1) and (1,0) on the
+      // right side forces w₁+w₂+2b > 1, classifying (0,0) and (1,1) forces
+      // w₁+w₂+2b ≤ 1. The two constraints exclude each other. The grid below
+      // observes it over 68 921 lines, and the minimum error count is 1.
       const T = targets('xor');
       let best = 4;
       const g = [];
@@ -30,54 +30,53 @@ export const checks = [
           }
       return {
         ok: best === 1,
-        detail: `meilleure droite : ${best} point mal classé sur 4 (${g.length ** 3} droites essayées)`,
+        detail: `best line: ${best} point misclassified out of 4 (${g.length ** 3} lines tried)`,
       };
     },
   },
   {
-    name: 'et son optimum au sens des moindres carrés est la constante 1/2',
+    name: 'and its least-squares optimum is the constant 1/2',
     category: 'numeric',
     run() {
-      // Puisqu'aucune droite ne classe, la descente converge vers la
-      // meilleure APPROXIMATION — et celle-ci est remarquable : w₁ = w₂ = 0,
-      // b = 1/2, c'est-à-dire « je réponds toujours un demi ». L'erreur
-      // résiduelle vaut alors 4 × (1/2)² / (2 × 4) = 1/8, la ligne orange de
-      // la vue d'apprentissage.
+      // Since no line classifies, the descent converges to the best
+      // APPROXIMATION — and that one is remarkable: w₁ = w₂ = 0, b = 1/2, that
+      // is, "I always answer one half". The residual error is then
+      // 4 × (1/2)² / (2 × 4) = 1/8, the orange line of the learning view.
       const o = compute({ ...BASE, hidden: 1, act: 'identity' }).observables;
       const outs = o.truth.value.split(' ').map((s) => parseFloat(s.split('→')[1]));
       const worst = Math.max(...outs.map((v) => Math.abs(v - 0.5)));
       return {
         ok: worst < 1e-6 && Math.abs(o.lossEnd.value - 1 / 8) < 1e-9,
-        detail: `sorties à ${worst.toExponential(1)} de 1/2 · erreur ${o.lossEnd.value.toFixed(6)} vs 0.125`,
+        detail: `outputs within ${worst.toExponential(1)} of 1/2 · error ${o.lossEnd.value.toFixed(6)} vs 0.125`,
       };
     },
   },
   {
-    name: 'OU et ET, eux, sont séparables : erreur bien sous le plancher',
+    name: 'OR and AND, by contrast, are separable: error well below the floor',
     category: 'numeric',
     run() {
-      // Le contrepoint qui donne son sens au précédent. Le même réseau
-      // linéaire, sur les deux autres tables, classe les quatre points.
+      // The counterpoint that gives the previous check its meaning. The same
+      // linear network, on the other two tables, classifies all four points.
       const bad = [];
       for (const problem of ['or', 'and']) {
         const o = compute({ ...BASE, problem, hidden: 1, act: 'identity' }).observables;
-        if (o.errors.value !== 0) bad.push(`${problem} : ${o.errors.value} erreurs`);
-        if (o.lossEnd.value > 0.05) bad.push(`${problem} : erreur ${o.lossEnd.value.toFixed(4)}`);
+        if (o.errors.value !== 0) bad.push(`${problem}: ${o.errors.value} errors`);
+        if (o.lossEnd.value > 0.05) bad.push(`${problem}: error ${o.lossEnd.value.toFixed(4)}`);
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : 'OU et ET : 0 erreur, résidu 0.031 (contre 0.125 pour XOR)',
+        detail: bad.length ? bad.join(' · ') : 'OR and AND: 0 errors, residual 0.031 (against 0.125 for XOR)',
       };
     },
   },
   {
-    name: 'la solution ÉCRITE À LA MAIN rend la table exacte',
+    name: 'the HAND-WRITTEN solution gives the exact table',
     category: 'numeric',
     run() {
-      // Deux neurones ReLU suffisent, et on peut poser les poids sans rien
-      // apprendre : y = ReLU(x₁+x₂) − 2·ReLU(x₁+x₂−1). C'est « ou, mais pas
-      // les deux » écrit en deux morceaux linéaires, et c'est EXACT — pas
-      // approché à 1e-3, exact.
+      // Two ReLU neurons suffice, and the weights can be set without learning
+      // anything: y = ReLU(x₁+x₂) − 2·ReLU(x₁+x₂−1). That is "or, but not both"
+      // written as two linear pieces, and it is EXACT — not accurate to 1e-3,
+      // exact.
       const { f } = ACTIVATIONS.relu;
       const T = targets('xor');
       let worst = 0;
@@ -88,33 +87,32 @@ export const checks = [
       }
       return {
         ok: worst === 0,
-        detail: `écart max à la table de vérité : ${worst}`,
+        detail: `max gap to the truth table: ${worst}`,
       };
     },
   },
   {
-    name: 'deux neurones et une tanh y arrivent, à la précision machine',
+    name: 'two neurons and a tanh get there, to machine precision',
     category: 'numeric',
     run() {
       const o = compute(BASE).observables;
       return {
         ok: o.errors.value === 0 && o.lossEnd.value < 1e-12,
-        detail: `erreur ${o.lossEnd.value.toExponential(2)} · ${o.truth.value}`,
+        detail: `error ${o.lossEnd.value.toExponential(2)} · ${o.truth.value}`,
       };
     },
   },
   {
-    name: 'mais le TIRAGE décide, et ReLU échoue neuf fois sur dix à H = 2',
+    name: 'but the DRAW decides, and ReLU fails nine times out of ten at H = 2',
     category: 'statistical',
     run() {
-      // Les quatre nombres de la scène 4, comptés sur 40 graines fixées —
-      // donc reproductibles, malgré la catégorie. Le fait marquant est le
-      // dernier : ReLU, l'activation par défaut du domaine, réussit 4 fois
-      // sur 40 avec deux neurones. Un neurone dont l'entrée est négative sur
-      // les quatre points a un gradient nul : il est MORT, et il ne reste
-      // qu'un neurone pour un problème qui en demande deux. Élargir à H = 4
-      // lui redonne des chances (20/40) sans rien ajouter au pouvoir
-      // d'expression.
+      // The four numbers of scene 4, counted over 40 fixed seeds — hence
+      // reproducible, despite the category. The striking fact is the last one:
+      // ReLU, the default activation of the whole field, succeeds 4 times out of
+      // 40 with two neurons. A neuron whose input is negative at all four points
+      // has zero gradient: it is DEAD, and only one neuron is left for a problem
+      // that needs two. Widening to H = 4 gives it back its chances (20/40)
+      // without adding anything to the expressive power.
       const rate = (act, hidden) => {
         let ok = 0;
         for (let s = 1; s <= 40; s++)
@@ -127,23 +125,23 @@ export const checks = [
       const r4 = rate('relu', 4);
       return {
         ok: t2 >= 30 && t4 >= 38 && r2 <= 10 && r4 > r2,
-        detail: `tanh ${t2}/40 puis ${t4}/40 à H = 4 · ReLU ${r2}/40 puis ${r4}/40 — neurones morts`,
+        detail: `tanh ${t2}/40 then ${t4}/40 at H = 4 · ReLU ${r2}/40 then ${r4}/40 — dead neurons`,
       };
     },
   },
   {
-    name: 'l’époque est bien un paramètre : l’erreur décroît le long du chemin',
+    name: 'the epoch really is a parameter: the error decreases along the path',
     category: 'numeric',
     run() {
-      // Ce qui rend le balayage honnête : l'état lu à l'époque n est bien
-      // celui de l'époque n, pas une interpolation. On vérifie que l'erreur
-      // affichée suit la courbe et qu'elle décroît globalement.
+      // What makes the sweep honest: the state read at epoch n really is that of
+      // epoch n, not an interpolation. The check verifies that the displayed
+      // error follows the curve and decreases overall.
       const at = (epoch) => compute({ ...BASE, epoch }).observables.lossNow.value;
       const v = [0, 200, 800, 4000].map(at);
       const dec = v.every((x, i) => i === 0 || x <= v[i - 1]);
       return {
         ok: dec && v[0] > 1e-2 && v[3] < 1e-12,
-        detail: `époques 0, 200, 800, 4000 → ${v.map((x) => x.toExponential(1)).join(', ')}`,
+        detail: `epochs 0, 200, 800, 4000 → ${v.map((x) => x.toExponential(1)).join(', ')}`,
       };
     },
   },

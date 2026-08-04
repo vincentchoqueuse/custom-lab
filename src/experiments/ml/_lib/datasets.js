@@ -171,10 +171,10 @@ export const IRIS = [
 ];
 
 export const IRIS_FEATURES = [
-  'longueur sépale',
-  'largeur sépale',
-  'longueur pétale',
-  'largeur pétale',
+  'sepal length',
+  'sepal width',
+  'petal length',
+  'petal width',
 ];
 export const IRIS_UNITS = 'cm';
 export const IRIS_SPECIES = ['setosa', 'versicolor', 'virginica'];
@@ -197,7 +197,7 @@ export const IRIS_SPECIES = ['setosa', 'versicolor', 'virginica'];
 // covariance, the first component is the mass and nothing else — the units trap
 // is no longer merely visible there, it is overwhelming.
 
-/** longueur bec (mm), épaisseur bec (mm), nageoire (mm), masse (g), espèce */
+/** bill length (mm), bill depth (mm), flipper (mm), body mass (g), species */
 export const PENGUINS = [
   [39.1, 18.7, 181, 3750, 0],
   [39.5, 17.4, 186, 3800, 0],
@@ -544,10 +544,10 @@ export const PENGUINS = [
 ];
 
 export const PENGUIN_FEATURES = [
-  'longueur du bec',
-  'épaisseur du bec',
-  'longueur nageoire',
-  'masse',
+  'bill length',
+  'bill depth',
+  'flipper length',
+  'body mass',
 ];
 export const PENGUIN_UNITS = ['mm', 'mm', 'mm', 'g'];
-export const PENGUIN_SPECIES = ['Adélie', 'à jugulaire', 'papou'];
+export const PENGUIN_SPECIES = ['Adélie', 'chinstrap', 'gentoo'];

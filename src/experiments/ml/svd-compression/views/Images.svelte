@@ -1,17 +1,17 @@
 <!--
-  CUSTOM view — justification : une IMAGE RASTER n'est aucun des types
-  génériques du catalogue, et ne le sera pas tant qu'une seule expérience en
-  affiche. Trois vignettes côte à côte, l'origine, l'approximation de rang k
-  et le résidu amplifié — c'est la comparaison qui enseigne, et elle ne se
-  fait qu'en les mettant l'une à côté de l'autre.
+  CUSTOM view — justification: a RASTER IMAGE is none of the catalogue's
+  generic types, and will not be one while a single experiment displays any.
+  Three thumbnails side by side — the original, the rank-k approximation and
+  the amplified residual — the comparison is what teaches, and it only happens
+  by putting them next to each other.
 
-  Reste du SVG PUR : un <image> avec un `data:` URI est un nœud SVG comme un
-  autre, donc le gel (F) et l'export le clonent sans rien de particulier.
-  Aucun canvas, aucune manipulation du DOM — c'est ce dont dépendent les deux.
+  It stays PURE SVG: an <image> with a `data:` URI is an SVG node like any
+  other, so freeze (F) and export clone it with nothing special. No canvas, no
+  DOM manipulation — which is exactly what those two depend on.
 
-  Aucun calcul scientifique ici : les trois URI arrivent toutes faites des
-  observables, et il ne reste que du placement en pixels.
-  Promue dans ui/plots/ si une deuxième expérience affiche une image.
+  No scientific computation here: the three URIs arrive ready-made from the
+  observables, and all that is left is pixel placement.
+  Promoted to ui/plots/ if a second experiment displays an image.
 -->
 <script>
   import { FRAME, FONT_UI, typeScale } from '../../../../ui/plots/frame.js';
@@ -37,9 +37,9 @@
 <svg class="plot-svg" viewBox="0 0 {W} {H}" role="img">
   {#each tiles as t, i}
     {#if t.uri}
-      <!-- image-rendering: pixelated — une compression se juge sur les
-           PIXELS, et un lissage du navigateur maquillerait justement ce que
-           l'expérience demande de regarder -->
+      <!-- image-rendering: pixelated — a compression is judged on the PIXELS,
+           and browser smoothing would paper over exactly what the experiment
+           asks one to look at -->
       <image
         href={t.uri}
         x={x0 + i * (side + gap)}

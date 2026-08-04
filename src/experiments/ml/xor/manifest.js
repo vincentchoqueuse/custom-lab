@@ -5,7 +5,7 @@ import { view, plane, line, vline, hline } from '../../../core/views.js';
 export default {
   id: 'xor',
   order: 3,
-  random: true, // l'initialisation est tirée — et elle décide de tout
+  random: true, // the initialization is drawn — and it decides everything
   title: 'The XOR',
   subtitle: 'The 1969 counter-example, and the two neurons that settle it',
   tags: ['networks', 'XOR', 'perceptron', 'separability', 'hidden layer', 'gradient'],
@@ -59,20 +59,20 @@ export default {
   ],
 
   views: [
-    // LE plan, et c'est l'expérience elle-même : quatre points, et la
-    // frontière que le réseau trace entre eux. Équi-aspect, parce qu'un
-    // carré unité déformé en rectangle rendrait les droites cachées
-    // mensongères sur leurs pentes.
-    plane('plane', 'Le plan (x₁, x₂)', {
+    // THE plane, and it is the experiment itself: four points, and the boundary
+    // the network draws between them. Equal aspect, because a unit square
+    // stretched into a rectangle would make the hidden lines lie about their
+    // slopes.
+    plane('plane', 'The (x₁, x₂) plane', {
       curves: [
         { source: 'boundary', color: '#0072BD', width: 2.4, label: 'network boundary' },
         { source: 'hiddenLines', color: '#a1a1aa', width: 1.4, dashed: true, label: 'hidden neurons' },
       ],
       clouds: [
-        // Les RÉGIONS d'abord (donc dessous) : la grille classée par
-        // sign(y − ½), en aplat léger. C'est la figure standard, celle que
-        // tout le monde a déjà vue, et elle répond à la question que la
-        // frontière seule laisse ouverte : de quel côté est quoi.
+        // The REGIONS first (hence underneath): the grid classified by
+        // sign(y − ½), in a light wash. This is the standard figure, the one
+        // everyone has already seen, and it answers the question the boundary
+        // alone leaves open: which side is which.
         { source: 'region0', color: '#D95319', r: 3.5, opacity: 0.16, max: 4000, label: 'decision 0' },
         { source: 'region1', color: '#0072BD', r: 3.5, opacity: 0.16, max: 4000, label: 'decision 1' },
         { source: 'class0', color: '#D95319', r: 8, label: 'class 0' },
@@ -82,11 +82,11 @@ export default {
       axes: { x: 'x₁', y: 'x₂' },
     }),
 
-    // La descente, avec le plancher du modèle linéaire en repère : tant que
-    // la courbe s'y colle, le réseau n'a rien appris que la moyenne.
+    // The descent, with the floor of the linear model as a guide: as long as
+    // the curve sticks to it, the network has learned nothing but the mean.
     view(
       'learning',
-      'Descente du gradient',
+      'Gradient descent',
       line('learning', {
         color: '#0072BD',
         width: 1.8,

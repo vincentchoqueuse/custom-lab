@@ -1,25 +1,25 @@
-// Le XOR — le contre-exemple qui a arrêté la recherche pendant quinze ans.
+// XOR — the counter-example that halted the field for fifteen years.
 //
-// Quatre points, deux classes. (0,0) et (1,1) valent 0 ; (0,1) et (1,0)
-// valent 1. Aucune droite ne sépare les deux classes : c'est démontrable en
-// deux lignes, et Minsky et Papert l'ont écrit en 1969 — après quoi les
-// crédits du perceptron ont disparu jusqu'aux années 1980.
+// Four points, two classes. (0,0) and (1,1) are 0; (0,1) and (1,0) are 1. No
+// straight line separates the two classes: it is provable in two lines, and
+// Minsky and Papert wrote it in 1969 — after which perceptron funding vanished
+// until the 1980s.
 //
-// Ce que l'expérience montre, dans l'ordre :
+// What the experiment shows, in order:
 //
-//   1. UN neurone linéaire échoue, et il échoue d'une façon PRÉCISE : son
-//      optimum est la solution CONSTANTE y = 1/2, qui laisse une erreur de
-//      1/8. Ce n'est pas « il apprend mal », c'est « l'optimum lui-même est
-//      mauvais » — et l'optimum se calcule, il ne se constate pas.
-//   2. DEUX neurones cachés suffisent, et on peut même écrire la solution à
-//      la main : h₁ = OU, h₂ = ET, sortie = h₁ − h₂. Le harnais vérifie que
-//      cette construction rend la table de vérité exacte.
-//   3. La descente de gradient la retrouve seule, et l'ÉPOQUE est un
-//      paramètre : on balaie l'apprentissage au potard, on voit la frontière
-//      se plier, et la scène reste reproductible par son URL.
+//   1. ONE linear neuron fails, and it fails in a PRECISE way: its optimum is
+//      the CONSTANT solution y = 1/2, which leaves an error of 1/8. This is not
+//      "it learns badly", it is "the optimum itself is bad" — and the optimum
+//      is computed, not observed.
+//   2. TWO hidden neurons suffice, and the solution can even be written by
+//      hand: h₁ = OR, h₂ = AND, output = h₁ − h₂. The harness verifies that this
+//      construction gives the exact truth table.
+//   3. Gradient descent finds it on its own, and the EPOCH is a parameter: one
+//      sweeps the training on a slider, watches the boundary fold, and the scene
+//      stays reproducible through its URL.
 //
-// La frontière est tracée par marching squares sur la sortie du réseau, donc
-// c'est la VRAIE frontière et non une droite devinée.
+// The boundary is drawn by marching squares on the network output, so it is the
+// REAL boundary and not a guessed straight line.
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
@@ -33,13 +33,13 @@ const X = [
   [1, 1],
 ];
 const EPOCHS = 4000;
-const KEEP = 10; // une photo des poids toutes les 10 époques
-const GRID = 81; // grille de la frontière
-const RGRID = 45; // grille des RÉGIONS de décision (points coloriés)
+const KEEP = 10; // a snapshot of the weights every 10 epochs
+const GRID = 81; // grid for the boundary
+const RGRID = 45; // grid for the decision REGIONS (coloured points)
 const LO = -0.35;
 const HI = 1.35;
 
-/** Les quatre cibles, selon la table demandée. */
+/** The four targets, for the requested truth table. */
 function targets(problem) {
   if (problem === 'xor') return [0, 1, 1, 0];
   if (problem === 'or') return [0, 1, 1, 1];
@@ -56,8 +56,8 @@ export function compute({ problem, hidden, act, lr, epoch, seed }) {
   const gauss = gaussFrom(mulberry32(seed));
   const H = Math.max(1, Math.round(hidden));
 
-  // Initialisation gaussienne d'écart-type 1/√2 : assez grande pour sortir
-  // du plateau symétrique, assez petite pour ne pas saturer tanh d'emblée.
+  // Gaussian initialization with standard deviation 1/√2: large enough to leave
+  // the symmetric plateau, small enough not to saturate tanh right away.
   const init = {
     W1: Float64Array.from({ length: H * 2 }, () => gauss() / Math.SQRT2),
     b1: Float64Array.from({ length: H }, () => gauss() / Math.SQRT2),
@@ -67,7 +67,7 @@ export function compute({ problem, hidden, act, lr, epoch, seed }) {
 
   const run = trainGD({ X, T, hidden: H, act, epochs: EPOCHS, lr, init, keepEvery: KEEP });
 
-  /* ---------- l'état à l'époque demandée ---------------------------------- */
+  /* ---------- the state at the requested epoch ---------------------------- */
   const ep = Math.min(Math.max(Math.round(epoch), 0), EPOCHS);
   const slot = Math.min(Math.floor(ep / KEEP), Math.floor(EPOCHS / KEEP));
   const off = slot * run.pSize;
@@ -83,7 +83,7 @@ export function compute({ problem, hidden, act, lr, epoch, seed }) {
     return y;
   };
 
-  /* ---------- la frontière, par marching squares -------------------------- */
+  /* ---------- the boundary, by marching squares --------------------------- */
   const field = new Float64Array(GRID * GRID);
   for (let j = 0; j < GRID; j++)
     for (let i = 0; i < GRID; i++) {
@@ -93,11 +93,10 @@ export function compute({ problem, hidden, act, lr, epoch, seed }) {
     }
   const boundary = contourLines(field, GRID, GRID, LO, HI, LO, HI, 0.5);
 
-  // LES RÉGIONS DE DÉCISION, c'est-à-dire la classification elle-même :
-  // sign(y − ½) sur une grille, un point colorié par classe. C'est la figure
-  // que tout le monde connaît, et elle dit ce qu'une frontière seule ne dit
-  // pas — de quel côté est quoi. La frontière reste tracée par-dessus,
-  // puisqu'elle est, elle, exacte à l'interpolation près.
+  // THE DECISION REGIONS, that is, the classification itself: sign(y − ½) on a
+  // grid, one coloured point per class. This is the figure everyone knows, and
+  // it says what a boundary alone does not — which side is which. The boundary
+  // is still drawn on top, since it is exact up to the interpolation.
   const r0x = [];
   const r0y = [];
   const r1x = [];
@@ -115,11 +114,11 @@ export function compute({ problem, hidden, act, lr, epoch, seed }) {
       }
     }
 
-  // Les droites des neurones cachés : w·x + b = 0. C'est ce que CHAQUE
-  // neurone découpe, et voir les deux droites rend la solution évidente.
-  // Chaque droite est DÉCOUPÉE sur la boîte [LO, HI]² : sans cela une droite
-  // presque horizontale sortait à ±30 et étirait le cadre équi-aspect au
-  // point que les quatre points tenaient dans un timbre.
+  // The hidden neurons' lines: w·x + b = 0. That is what EACH neuron cuts, and
+  // seeing the two lines makes the solution obvious. Each line is CLIPPED to the
+  // box [LO, HI]²: without that a nearly horizontal line ran out to ±30 and
+  // stretched the equal-aspect frame so far that the four points fitted on a
+  // postage stamp.
   const hx = [];
   const hy = [];
   for (let i = 0; i < H; i++) {
@@ -145,20 +144,20 @@ export function compute({ problem, hidden, act, lr, epoch, seed }) {
     }
   }
 
-  /* ---------- les points, séparés par classe ------------------------------ */
+  /* ---------- the points, split by class ---------------------------------- */
   const cls = (v) => ({
     x: Float64Array.from(X.filter((_, i) => T[i] === v), (p) => p[0]),
     y: Float64Array.from(X.filter((_, i) => T[i] === v), (p) => p[1]),
   });
 
-  /* ---------- la courbe d'apprentissage ----------------------------------- */
+  /* ---------- the learning curve ------------------------------------------ */
   const eps = new Float64Array(EPOCHS + 1);
   for (let i = 0; i <= EPOCHS; i++) eps[i] = i;
 
-  /* ---------- ce que la salle doit lire ----------------------------------- */
-  // La décision EST le signe : classe 1 si y > ½, 0 sinon. Écrit ainsi
-  // partout — statline, régions, compteur d'erreurs — pour qu'il n'y ait
-  // qu'une seule règle à retenir.
+  /* ---------- what the room has to read ----------------------------------- */
+  // The decision IS the sign: class 1 if y > ½, 0 otherwise. Written that way
+  // everywhere — statline, regions, error counter — so there is only one rule
+  // to remember.
   const decide = (y) => (Math.sign(y - 0.5) > 0 ? 1 : 0);
   const outs = X.map((p) => net(p[0], p[1]));
   const wrong = outs.filter((y, i) => decide(y) !== T[i]).length;
@@ -168,10 +167,10 @@ export function compute({ problem, hidden, act, lr, epoch, seed }) {
     observables: {
       learning: { x: eps, y: run.loss },
       epochLine: ep,
-      // Le plancher du modèle linéaire, tracé en repère. Il vaut 1/8 et non
-      // 1/16 : l'erreur affichée est Σe²/(2n), donc la solution constante
-      // y = 1/2 — l'optimum linéaire, démontré dans le harnais — y laisse
-      // 4 × 0.25 / 8 = 0.125.
+      // The floor of the linear model, drawn as a guide. It is 1/8 and not
+      // 1/16: the displayed error is Σe²/(2n), so the constant solution
+      // y = 1/2 — the linear optimum, proved in the harness — leaves
+      // 4 × 0.25 / 8 = 0.125 there.
       lossFloor: 1 / 8,
 
       boundary,
@@ -187,10 +186,10 @@ export function compute({ problem, hidden, act, lr, epoch, seed }) {
       },
       lossEnd: {
         value: run.loss[EPOCHS],
-        meta: { label: 'erreur finale', precision: 5 },
+        meta: { label: 'final error', precision: 5 },
       },
       errors: { value: wrong, meta: { label: 'misclassified points', precision: 0 } },
-      truth: { value: table, meta: { label: 'sortie' } },
+      truth: { value: table, meta: { label: 'output' } },
       nWeights: {
         value: H * 2 + H + H + 1,
         meta: { label: 'network weights', precision: 0 },

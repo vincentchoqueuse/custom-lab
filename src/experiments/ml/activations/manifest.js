@@ -5,7 +5,7 @@ import { view, figure, line, vline, hline } from '../../../core/views.js';
 export default {
   id: 'activations',
   order: 1,
-  random: true, // l'entrée « bruit » tire
+  random: true, // the "noise" input draws
   title: 'Activation functions',
   subtitle: 'A memoryless nonlinearity: what it does to a curve, and to a spectrum',
   tags: ['networks', 'activation', 'ReLU', 'tanh', 'nonlinearity', 'harmonics'],
@@ -23,7 +23,7 @@ export default {
       ],
       default: 'relu',
     }),
-    signal: select('entrée', {
+    signal: select('input', {
       description: 'signal fed to the activation',
       options: [
         { value: 'sine', label: 'sinusoid (16 Hz)' },
@@ -57,12 +57,12 @@ export default {
   ],
 
   views: [
-    // La courbe D'ABORD, parce que c'est l'objet lui-même — et sa dérivée
-    // avec elle : une activation se choisit autant pour ce qu'elle laisse
-    // passer du gradient que pour sa forme.
+    // The curve FIRST, because it is the object itself — and its derivative
+    // with it: an activation is chosen as much for what it lets through of the
+    // gradient as for its shape.
     view(
       'transfer',
-      'σ(x) et sa dérivée',
+      'σ(x) and its derivative',
       line('transfer', {
         color: '#0072BD',
         width: 2.4,
@@ -78,11 +78,11 @@ export default {
       })
     ),
 
-    // LES DÉRIVÉES, toutes ensemble — la figure de manuel, et la seule qui
-    // réponde à « laquelle choisir ». On y lit d'un regard les trois faits
-    // qui décident : ReLU rend 1 ou 0 sans nuance, tanh part de 1 et
-    // s'effondre, la sigmoïde plafonne à 1/4. Cliquer une pastille éteint
-    // sa courbe, pour les comparer deux à deux.
+    // THE DERIVATIVES, all together — the textbook figure, and the only one
+    // that answers "which to choose". At a glance one reads the three deciding
+    // facts: ReLU returns 1 or 0 with no nuance, tanh starts at 1 and collapses,
+    // the sigmoid caps at 1/4. Clicking a chip switches its curve off, to
+    // compare them two at a time.
     view(
       'derivatives',
       'Derivatives compared',
@@ -97,14 +97,14 @@ export default {
           line('dGelu', { color: '#EDB120', width: 2, label: 'GELU′' }),
         ],
         legend: 'left',
-        // le cadre descend à −0.2 pour montrer que GELU′ passe SOUS zéro
-        // (minimum −0.13) : elle n'est pas monotone, contrairement aux
-        // quatre autres, et c'est une propriété qu'il ne faut pas rogner
+        // the frame goes down to −0.2 to show that GELU′ goes BELOW zero
+        // (minimum −0.13): it is not monotone, unlike the other four, and that
+        // is a property not to be cropped away
         axes: { x: { label: 'x' }, y: { label: 'σ′(x)', domain: [-0.2, 1.2] } },
       })
     ),
 
-    // Le temporel : écrêter, redresser, ou ne rien faire.
+    // The time view: clipping, rectifying, or doing nothing at all.
     figure(
       'time',
       line('xTime', {
@@ -116,9 +116,9 @@ export default {
       })
     ),
 
-    // Et le spectre, qui est le propos : une non-linéarité CRÉE des
-    // fréquences. Les deux spectres sont normalisés à leur propre maximum,
-    // donc ce qui se compare est la RICHESSE, pas le niveau.
+    // And the spectrum, which is the point: a nonlinearity CREATES
+    // frequencies. Both spectra are normalized to their own maximum, so what is
+    // compared is the RICHNESS, not the level.
     figure(
       'spectrum',
       line('specOut', {

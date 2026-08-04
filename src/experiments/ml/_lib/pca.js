@@ -1,24 +1,23 @@
-// L'analyse en composantes principales, réduite à ce qu'elle est : la
-// décomposition propre d'une matrice de covariance.
+// Principal component analysis, reduced to what it is: the eigendecomposition
+// of a covariance matrix.
 //
-// C'est exactement la brique du sujet « techniques haute résolution », où
-// les valeurs propres d'une covariance séparaient le signal du bruit. Ici
-// elles séparent ce qui varie de ce qui ne varie pas — même algèbre, autre
-// lecture. Le Jacobi symétrique vient du cœur, puisqu'il sert maintenant à
-// trois sujets.
+// It is exactly the building block of the high-resolution spectral subject,
+// where the eigenvalues of a covariance separated signal from noise. Here they
+// separate what varies from what does not — same algebra, another reading. The
+// symmetric Jacobi comes from the core, since three subjects now use it.
 //
-// PURE, sans état, sans DOM. Importable depuis compute.js ET check.js.
+// PURE, stateless, no DOM. Importable from compute.js AND check.js.
 
 import { jacobiSym } from '../../../core/linalg.js';
 
-/** Moyenne de chaque colonne. */
+/** Mean of each column. */
 export function colMeans(X, n, p) {
   const m = new Float64Array(p);
   for (let i = 0; i < n; i++) for (let j = 0; j < p; j++) m[j] += X[i * p + j] / n;
   return m;
 }
 
-/** Écart-type (non biaisé) de chaque colonne. */
+/** Standard deviation (unbiased) of each column. */
 export function colSds(X, n, p, means = colMeans(X, n, p)) {
   const s = new Float64Array(p);
   for (let i = 0; i < n; i++)
@@ -28,32 +27,32 @@ export function colSds(X, n, p, means = colMeans(X, n, p)) {
 }
 
 /**
- * L'ACP complète.
+ * The full PCA.
  *
- * `standardize` choisit entre les DEUX ACP, et ce n'est pas un détail de
- * réglage : sans standardisation on diagonalise la COVARIANCE, donc la
- * variable qui porte les plus grands nombres domine — sur l'iris, la
- * longueur de pétale a une variance de 3.1 cm² contre 0.19 pour la largeur
- * de sépale, et la première composante n'est presque qu'elle. Avec
- * standardisation on diagonalise la CORRÉLATION, et les quatre variables
- * pèsent pareil. Changer d'unité (des centimètres aux millimètres)
- * changerait le premier résultat et pas le second.
+ * `standardize` chooses between the TWO PCAs, and that is not a tuning
+ * detail: without standardization one diagonalizes the COVARIANCE, so the
+ * variable carrying the largest numbers dominates — on iris, petal length has
+ * a variance of 3.1 cm² against 0.19 for sepal width, and the first component
+ * is almost nothing but it. With standardization one diagonalizes the
+ * CORRELATION, and the four variables weigh the same. Changing units
+ * (centimetres to millimetres) would change the first result and not the
+ * second.
  *
- * @param {Float64Array|number[]} X données n × p en ligne majeure
+ * @param {Float64Array|number[]} X n × p data, row major
  * @returns {{values, vectors, means, sds, scores, ratio, cumulative, total}}
- *   `vectors` en COLONNES (v_k[j] = vectors[j*p + k]), valeurs décroissantes.
+ *   `vectors` in COLUMNS (v_k[j] = vectors[j*p + k]), values decreasing.
  */
 export function pca(X, n, p, { standardize = false } = {}) {
   const data = Float64Array.from(X);
   const means = colMeans(data, n, p);
   const sds = standardize ? colSds(data, n, p, means) : new Float64Array(p).fill(1);
 
-  // centrage (et réduction si demandée)
+  // centring (and scaling when asked for)
   const Z = new Float64Array(n * p);
   for (let i = 0; i < n; i++)
     for (let j = 0; j < p; j++) Z[i * p + j] = (data[i * p + j] - means[j]) / sds[j];
 
-  // covariance (ou corrélation) — symétrique par construction
+  // covariance (or correlation) — symmetric by construction
   const C = new Float64Array(p * p);
   for (let a = 0; a < p; a++)
     for (let b = a; b < p; b++) {
@@ -66,11 +65,11 @@ export function pca(X, n, p, { standardize = false } = {}) {
 
   const eig = jacobiSym(Float64Array.from(C), p);
 
-  // tri décroissant, et SIGNE FIXÉ : un vecteur propre est défini au signe
-  // près, donc sans convention le nuage se retourne d'un calcul à l'autre.
-  // On impose « la composante de plus grand module est positive », qui est
-  // la convention la plus répandue et la seule qui rende les figures
-  // reproductibles d'une exécution à l'autre.
+  // sorted decreasing, and SIGN FIXED: an eigenvector is defined up to sign,
+  // so without a convention the cloud flips from one compute to the next. The
+  // rule imposed here is "the component of largest modulus is positive", the
+  // most widespread convention and the only one that makes the figures
+  // reproducible from one run to another.
   const order = Array.from({ length: p }, (_, k) => k).sort(
     (a, b) => eig.values[b] - eig.values[a]
   );
@@ -86,7 +85,7 @@ export function pca(X, n, p, { standardize = false } = {}) {
     for (let j = 0; j < p; j++) vectors[j * p + k] = sign * eig.vectors[j * p + src];
   }
 
-  // les scores : les données projetées sur les composantes
+  // the scores: the data projected onto the components
   const scores = new Float64Array(n * p);
   for (let i = 0; i < n; i++)
     for (let k = 0; k < p; k++) {
@@ -110,10 +109,9 @@ export function pca(X, n, p, { standardize = false } = {}) {
 }
 
 /**
- * Reconstruction à partir des k premières composantes, dans les unités
- * d'origine. C'est l'usage « compression » de l'ACP, et l'erreur qu'elle
- * laisse a une valeur EXACTE : la somme des valeurs propres jetées
- * (Eckart–Young). Le harnais l'épingle.
+ * Reconstruction from the first k components, in the original units. This is
+ * the "compression" use of PCA, and the error it leaves has an EXACT value:
+ * the sum of the discarded eigenvalues (Eckart–Young). The harness pins it.
  */
 export function reconstruct(model, n, p, k) {
   const { vectors, scores, means, sds } = model;
@@ -127,7 +125,7 @@ export function reconstruct(model, n, p, k) {
   return out;
 }
 
-/** Erreur quadratique moyenne PAR INDIVIDU entre deux tableaux n × p. */
+/** Mean squared error PER INDIVIDUAL between two n × p arrays. */
 export function meanSquaredError(A, B, n, p) {
   let s = 0;
   for (let i = 0; i < n * p; i++) s += (A[i] - B[i]) ** 2;

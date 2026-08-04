@@ -5,14 +5,14 @@ import { view, plane, line, bars, stem, vline } from '../../../core/views.js';
 export default {
   id: 'pca',
   order: 1,
-  // aucun tirage : les données sont celles de Fisher, le calcul est exact.
-  // Donc pas de graine, pas de dé, pas de `?seed=` dans l'URL.
+  // no draw at all: the data is Fisher's, the computation is exact. Hence no
+  // seed, no dice, and no `?seed=` in the URL.
   title: 'Principal component analysis',
   subtitle: 'Irises and penguins: four measurements, two directions, and the theorem behind them',
   tags: ['PCA', 'iris', 'penguins', 'covariance', 'eigenvalues', 'dimension reduction'],
 
   params: {
-    dataset: select('jeu', {
+    dataset: select('dataset', {
       description: 'dataset analysed',
       options: [
         { value: 'iris', label: 'Fisher iris (150 flowers, cm)' },
@@ -20,7 +20,7 @@ export default {
       ],
       default: 'iris',
     }),
-    standardize: bool('standardiser', {
+    standardize: bool('standardize', {
       description: 'diagonalize the correlation rather than the covariance',
       default: false,
     }),
@@ -30,23 +30,23 @@ export default {
       max: 4,
       default: 2,
     }),
-    xComp: select('abscisse', {
+    xComp: select('x', {
       description: 'component on the horizontal axis',
       options: [
-        { value: 1, label: 'CP1' },
-        { value: 2, label: 'CP2' },
-        { value: 3, label: 'CP3' },
-        { value: 4, label: 'CP4' },
+        { value: 1, label: 'PC1' },
+        { value: 2, label: 'PC2' },
+        { value: 3, label: 'PC3' },
+        { value: 4, label: 'PC4' },
       ],
       default: 1,
     }),
-    yComp: select('ordonnée', {
+    yComp: select('y', {
       description: 'component on the vertical axis',
       options: [
-        { value: 1, label: 'CP1' },
-        { value: 2, label: 'CP2' },
-        { value: 3, label: 'CP3' },
-        { value: 4, label: 'CP4' },
+        { value: 1, label: 'PC1' },
+        { value: 2, label: 'PC2' },
+        { value: 3, label: 'PC3' },
+        { value: 4, label: 'PC4' },
       ],
       default: 2,
     }),
@@ -60,13 +60,13 @@ export default {
   ],
 
   views: [
-    // LE nuage projeté : la meilleure photo plane d'un objet à quatre
-    // dimensions. Plan équi-aspect, parce qu'une ACP produit des DISTANCES
-    // et qu'un axe étiré les rendrait fausses.
+    // THE projected cloud: the best flat photograph of a four-dimensional
+    // object. Equal-aspect plane, because a PCA produces DISTANCES and a
+    // stretched axis would make them false.
     plane('scores', 'The projected cloud', {
-      // Les noms d'espèces sont dans la statline plutôt que dans la légende :
-      // ils changent avec le jeu, et une légende ne peut pas dépendre d'un
-      // paramètre sans mentir la moitié du temps.
+      // The species names are in the statline rather than in the legend: they
+      // change with the dataset, and a legend cannot depend on a parameter
+      // without lying half the time.
       clouds: [
         { source: 'classA', color: '#0072BD', r: 5, label: 'species 1' },
         { source: 'classB', color: '#D95319', r: 5, label: 'species 2' },
@@ -74,11 +74,11 @@ export default {
       ],
       axisLines: true,
       symmetric: false,
-      axes: { x: 'composante en abscisse', y: 'composante en ordonnée' },
+      axes: { x: 'component on x', y: 'component on y' },
     }),
 
-    // L'éboulis : combien de composantes garder. La courbe cumulée répond à
-    // la seule question qu'on se pose vraiment.
+    // The scree plot: how many components to keep. The cumulative curve answers
+    // the only question one really asks.
     view(
       'scree',
       'Scree plot',
@@ -93,8 +93,8 @@ export default {
       })
     ),
 
-    // Les saturations : ce que chaque composante MESURE. Sans cette vue, une
-    // composante principale reste un axe sans nom.
+    // The loadings: what each component MEASURES. Without this view a principal
+    // component stays a nameless axis.
     view(
       'loadings',
       'Variable loadings',
@@ -111,9 +111,9 @@ export default {
       })
     ),
 
-    // Et la preuve : l'erreur de reconstruction mesurée tombe exactement sur
-    // la somme des valeurs propres jetées. Deux courbes qui se superposent,
-    // et c'est un théorème qu'on regarde.
+    // And the proof: the measured reconstruction error falls exactly on the sum
+    // of the discarded eigenvalues. Two curves that superpose, and what one is
+    // looking at is a theorem.
     view(
       'reconstruction',
       'Reconstruction error',

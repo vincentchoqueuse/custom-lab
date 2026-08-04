@@ -23,7 +23,7 @@ Switching to the Palmer penguins — 342 individuals, the same four measurements
 CC0 — repeats the exercise on another bestiary. The separation is less clean on
 the raw data, and the third scene explains why.
 
-Putting CP3 on the horizontal axis and CP4 on the vertical one collapses the
+Putting PC3 on the horizontal axis and PC4 on the vertical one collapses the
 cloud into a round blur. Those two components carry 2.2 % of the variance
 between them and nothing recognizable, which is what "keeping two components"
 means concretely.`,
@@ -34,14 +34,14 @@ means concretely.`,
     view: 'scree',
     params: { dataset: 'iris', standardize: false, k: 2, xComp: 1, yComp: 2 },
     visible: ['k', 'standardize'],
-    notes: `The scree plot. CP1 carries 92.46 % of the variance, CP2 5.31 %, and
+    notes: `The scree plot. PC1 carries 92.46 % of the variance, PC2 5.31 %, and
 the last two 2.2 % between them. The orange curve accumulates: at k = 2 the
 total is 97.77 %.
 
 That is why two components are kept — not because a plane is convenient to
 draw, but because the third would add 1.7 %.
 
-The drop between CP1 and CP2 is the "elbow" everyone looks for in a scree plot,
+The drop between PC1 and PC2 is the "elbow" everyone looks for in a scree plot,
 and here it is unmistakable. It is worth saying that this is not always so: on
 data without strong structure the scree falls gently and the choice of k
 becomes a judgement again.`,
@@ -60,19 +60,19 @@ component. A number like that looks like a triumph, and the room should be
 allowed to react to it.
 
 It is a triumph for the algorithm and a disaster for the analysis. The statline
-says what CP1 measures: mass, and nothing else. The variance of the mass is
+says what PC1 measures: mass, and nothing else. The variance of the mass is
 643 000 g² against 30 mm² for the bill length, and since the covariance is what
 is being diagonalized, the variable carrying the largest numbers takes
 everything. That is a choice of unit, not a biological result.
 
 Ticking "standardize" diagonalizes the correlation instead, giving the four
-variables equal weight. CP1 falls to 68.84 % and becomes FLIPPER LENGTH — a
+variables equal weight. PC1 falls to 68.84 % and becomes FLIPPER LENGTH — a
 quantity that genuinely separates the species, as the cloud view then shows.
 
 The same phenomenon exists on the irises, more discreetly: 92.46 % unstandardized
-with CP1 almost entirely petal length, 72.96 % standardized. The harness adds
+with PC1 almost entirely petal length, 72.96 % standardized. The harness adds
 the direct proof: taking the sepal width ALONE from centimetres to millimetres
-changes the answer on covariance — 92.46 % to 84.64 %, with CP1 becoming sepal
+changes the answer on covariance — 92.46 % to 84.64 %, with PC1 becoming sepal
 width — and does not change it on correlation, to 1e-12.
 
 The rule worth keeping: variables of the same nature and unit, covariance;
