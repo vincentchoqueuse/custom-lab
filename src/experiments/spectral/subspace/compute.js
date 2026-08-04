@@ -41,7 +41,7 @@ import {
   lsAmplitudes,
 } from '../_lib/subspace.js';
 // le cadrage figé, partagé avec le manifeste (frame.js)
-import { F_LO, F_HI, F_HI_FAR } from './frame.js';
+import { F_LO, F_HI, F_HI_FAR, MODEL_FLOOR } from './frame.js';
 
 const FS = 1000; // Hz
 const F1 = 200; // première raie (Hz)
@@ -210,6 +210,13 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
     return worst;
   };
 
+  /** Le socle de bruit en rectangle : de la base du cadre jusqu'au niveau. */
+  const noiseBand = (levelDb) => ({
+    x: Float64Array.of(fLo, fHi),
+    lo: Float64Array.of(MODEL_FLOOR, MODEL_FLOOR),
+    hi: Float64Array.of(levelDb, levelDb),
+  });
+
   /** plus grande erreur d'appariement, en Hz, entre estimations et vérité */
   const worstErr = (hz) => {
     if (hz.length === 0) return NaN;
@@ -294,6 +301,15 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
       nsTrue: dbP(2 * sigma * sigma),
       nsRoot: dbP(lsRoot.noise),
       nsEsprit: dbP(lsEsprit.noise),
+      // Le bruit est une puissance ÉTALÉE sur toute la bande, pas une valeur
+      // à une fréquence : un rectangle le dit, une ligne ne le dit pas. Les
+      // raies montent au-dessus d'un socle, et c'est exactement le modèle
+      // « d exponentielles PLUS du bruit blanc » qu'on est en train de
+      // valider. Le bord supérieur reste tracé par-dessus, parce qu'un
+      // aplat translucide ne se lit pas au décibel près.
+      bandTrue: noiseBand(dbP(2 * sigma * sigma)),
+      bandRoot: noiseBand(dbP(lsRoot.noise)),
+      bandEsprit: noiseBand(dbP(lsEsprit.noise)),
       modelFloor: MODEL_FLOOR,
       noiseRoot: {
         value: dbP(lsRoot.noise),

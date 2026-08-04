@@ -1,161 +1,219 @@
-// The oversampling DAC, the classic chain played in full:
-//   x[n] at Fs → zero-stuffing ×L → digital interpolation FIR (windowed
-//   sinc, cutoff Fs/2) → zero-order hold at L·Fs → the analog staircase
-// Three facts the views make visible and the checks prove:
-//   · the windowed-sinc kernel is EXACTLY 1 at its center and 0 at the
-//     other multiples of L, so the interpolated stream passes through the
-//     original samples to machine precision;
-//   · the ZOH multiplies the spectrum by sinc(f/(L·Fs)): images sit at
-//     k·L·Fs ± f0 under that envelope, and the baseband suffers the sinc
-//     droop 20·log10|sinc(f0/(L·Fs))| — which oversampling erases;
-//   · without the digital filter the stuffed images at k·Fs ± f0 remain
-//     at nearly full level: the analog filter alone cannot save a DAC.
-// The "analog" signal is simulated on a dense grid at 64·Fs.
-// PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+// Le suréchantillonnage, étape par étape — et ce que chacune fait au spectre.
+//
+// La chaîne tient en trois gestes, et l'expérience les fait avancer un par un
+// sur LES MÊMES DEUX FIGURES : le temporel et le spectre. Voir bouger deux
+// dessins qu'on connaît déjà vaut mieux que découvrir six dessins nouveaux —
+// et l'étape étant un PARAMÈTRE, chaque scène s'ouvre là où le cours en est,
+// avec son URL.
+//
+//   1. LES ÉCHANTILLONS, à Fs. Leur spectre est périodique de période Fs, et
+//      on ne le représente donc que sur [0, Fs/2] : au-delà, il n'y a rien à
+//      dire d'un signal cadencé à Fs.
+//   2. LE ZÉRO-STUFFING : on insère L−1 zéros entre les échantillons. Et le
+//      spectre NE CHANGE PAS — X_up(f) = X(f), exactement, à la précision
+//      machine. C'est le cœur de l'expérience, et ça surprend toujours. Ce
+//      qui change est la fréquence d'échantillonnage, donc la BANDE qu'on
+//      regarde : les copies qui vivaient hors bande sont maintenant dedans,
+//      et on les appelle des images.
+//      Le prix se lit sur l'amplitude : un échantillon sur L est non nul,
+//      donc la puissance moyenne est divisée par L — le filtre suivant devra
+//      avoir un gain L pour la rendre.
+//   3. LE FILTRE D'INTERPOLATION, sinc fenêtré de coupure Fs/2 et de gain L.
+//      Il efface les images et rend l'amplitude. Son noyau vaut EXACTEMENT 1
+//      au centre et 0 aux autres multiples de L : le flux interpolé passe
+//      donc par les échantillons d'origine sans les déplacer, ce que le
+//      harnais épingle à 1e-12.
+//
+// Pas de bloqueur d'ordre zéro ici : c'est l'étage ANALOGIQUE du CNA, une
+// autre histoire (son enveloppe en sinc, son affaissement en bord de bande),
+// et la mêler à celle-ci brouillait les deux.
+//
+// PURE, stateless — runs in a worker; entièrement déterministe (pas de tirage).
 import { fft, sinc, toDb, windowValue } from '../../../core/numeric.js';
 
-const FS = 8000; // base sample rate (Hz)
-const N0 = 160; // base samples simulated (20 ms)
-const DENSE = 64; // dense "analog" ticks per base sample (512 kHz)
-const NFFT = 8192; // spectrum window (16 ms → 62.5 Hz bins)
+const FS = 8000; // fréquence d'échantillonnage de départ (Hz)
+const N_PLOT = 24; // échantillons de base tracés (3 ms)
+const N_SPEC = 256; // échantillons de base analysés
+const NFFT = 8192;
 const DB_FLOOR = -90;
 
 /**
- * @param {{f0: number, L: number, digFilter: boolean, seed: number}} params
- * @returns {{observables: Object}}
+ * Noyau d'interpolation : sinc fenêtré. Trois propriétés dont dépend toute
+ * la chaîne — vaut 1 en 0, 0 aux autres multiples de L, gain continu L.
  */
-export function compute({ f0, L, digFilter }) {
-  const nUp = N0 * L; // high-rate length
-  const hold = DENSE / L; // dense ticks per high-rate sample
-
-  // base samples and zero-stuffed stream
-  const x = new Float64Array(N0);
-  for (let n = 0; n < N0; n++) x[n] = Math.sin((2 * Math.PI * f0 * n) / FS);
-  const up = new Float64Array(nUp);
-  for (let n = 0; n < N0; n++) up[n * L] = x[n];
-
-  // windowed-sinc interpolation FIR: 1 at center, 0 at other multiples of L
-  const half = 8 * L;
+export function interpKernel(L, half) {
   const taps = 2 * half + 1;
   const h = new Float64Array(taps);
   for (let k = 0; k < taps; k++) {
     const m = k - half;
     h[k] = sinc(m / L) * (0.5 + 0.5 * Math.cos((Math.PI * m) / (half + 1)));
   }
+  return h;
+}
 
-  // interpolated high-rate stream (delay-compensated linear convolution)
-  const yUp = new Float64Array(nUp);
-  if (digFilter) {
-    for (let n = 0; n < nUp; n++) {
-      let acc = 0;
-      const kMin = Math.max(0, n + half - nUp + 1);
-      const kMax = Math.min(taps - 1, n + half);
-      for (let k = kMin; k <= kMax; k++) acc += h[k] * up[n + half - k];
-      yUp[n] = acc;
-    }
-  } else {
-    yUp.set(up);
+/** Convolution linéaire, retard de groupe compensé. */
+export function filterStream(up, h, half) {
+  const n = up.length;
+  const taps = h.length;
+  const y = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    let acc = 0;
+    const kMin = Math.max(0, i + half - n + 1);
+    const kMax = Math.min(taps - 1, i + half);
+    for (let k = kMin; k <= kMax; k++) acc += h[k] * up[i + half - k];
+    y[i] = acc;
   }
+  return y;
+}
 
-  // zero-order hold onto the dense "analog" grid
-  const nDense = nUp * hold;
-  const a = new Float64Array(nDense);
-  for (let n = 0; n < nUp; n++) a.fill(yUp[n], n * hold, (n + 1) * hold);
-
-  /* ---------- time view: ~4 periods from the middle of the record -------- */
-  const tSpan = Math.min(0.005, 4 / f0); // seconds
-  const nShow = Math.round(tSpan * FS * DENSE);
-  const i0 = Math.round(nDense / 2 / hold) * hold; // start on a hold boundary
-  const dt = new Float64Array(nShow);
-  const stair = new Float64Array(nShow);
-  const ideal = new Float64Array(nShow);
-  for (let i = 0; i < nShow; i++) {
-    const t = (i0 + i) / (FS * DENSE);
-    dt[i] = t * 1000;
-    stair[i] = a[i0 + i];
-    ideal[i] = Math.sin(2 * Math.PI * f0 * t);
-  }
-  const sN = Math.ceil(tSpan * FS);
-  const st = new Float64Array(sN);
-  const sv = new Float64Array(sN);
-  const n0Base = i0 / DENSE;
-  for (let n = 0; n < sN; n++) {
-    st[n] = ((n0Base + n) / FS) * 1000;
-    sv[n] = x[n0Base + n];
-  }
-
-  /* ---------- digital-domain view: 2 base periods of the high-rate stream */
-  const upSpan = Math.min(2 * Math.round((FS / f0) * L), nUp / 2);
-  const u0 = Math.round(nUp / 4);
-  const ut = new Float64Array(upSpan);
-  const uBars = new Float64Array(upSpan);
-  const uLine = new Float64Array(upSpan);
-  for (let i = 0; i < upSpan; i++) {
-    ut[i] = ((u0 + i) / (FS * L)) * 1000;
-    uBars[i] = up[u0 + i];
-    uLine[i] = yUp[u0 + i];
-  }
-
-  /* ---------- spectrum of the analog staircase (Hann window) ------------- */
+/** |X(f)| en dB sur la grille NFFT, fenêtre de Hann, normalisé par `norm`. */
+function spectrumDb(sig, norm) {
   const re = new Float64Array(NFFT);
   const im = new Float64Array(NFFT);
-  const w0 = Math.round((nDense - NFFT) / 2);
-  let sw = 0;
-  for (let i = 0; i < NFFT; i++) {
-    const wv = windowValue('hann', i, NFFT);
-    re[i] = a[w0 + i] * wv;
-    sw += wv;
-  }
+  const n = Math.min(sig.length, NFFT);
+  for (let i = 0; i < n; i++) re[i] = sig[i] * windowValue('hann', i, n);
   fft(re, im);
-  const ref = sw / 2; // a unit sine reads 0 dB
-  const binHz = (FS * DENSE) / NFFT;
-  const fMax = Math.min(L * FS + 1.6 * FS, (FS * DENSE) / 2);
-  const kMax = Math.floor(fMax / binHz);
-  const sf = new Float64Array(kMax + 1);
-  const sy = new Float64Array(kMax + 1);
-  const env = new Float64Array(kMax + 1);
-  for (let k = 0; k <= kMax; k++) {
-    sf[k] = k * binHz;
-    const m = Math.hypot(re[k], im[k]) / ref;
-    sy[k] = toDb(m, DB_FLOOR);
-    env[k] = toDb(Math.abs(sinc(sf[k] / (L * FS))), DB_FLOOR);
+  const out = new Float64Array(NFFT / 2);
+  for (let k = 0; k < NFFT / 2; k++) out[k] = toDb(Math.hypot(re[k], im[k]) / norm, DB_FLOOR);
+  return out;
+}
+
+/**
+ * @param {{f0: number, L: number, stage: string, half: number}} params
+ * @returns {{observables: Object}}
+ */
+export function compute({ f0, L, stage, half }) {
+  const nSpec = N_SPEC * L;
+  const nPlot = N_PLOT * L;
+  const halfTaps = Math.max(1, Math.round(half) * L);
+
+  const x = new Float64Array(N_SPEC);
+  for (let n = 0; n < N_SPEC; n++) x[n] = Math.sin((2 * Math.PI * f0 * n) / FS);
+
+  const up = new Float64Array(nSpec);
+  for (let n = 0; n < N_SPEC; n++) up[n * L] = x[n];
+
+  const h = interpKernel(L, halfTaps);
+  const yUp = filterStream(up, h, halfTaps);
+
+  /* ---------- temporel ---------------------------------------------------- */
+  // Abscisse en millisecondes, la MÊME aux trois étapes : c'est ce qui fait
+  // voir que le signal ne bouge pas et que seule la grille se resserre.
+  const msBase = new Float64Array(N_PLOT);
+  const vBase = new Float64Array(N_PLOT);
+  for (let n = 0; n < N_PLOT; n++) {
+    msBase[n] = (1000 * n) / FS;
+    vBase[n] = x[n];
+  }
+  const msUp = new Float64Array(nPlot);
+  const vStuffed = new Float64Array(nPlot);
+  const vFiltered = new Float64Array(nPlot);
+  for (let i = 0; i < nPlot; i++) {
+    msUp[i] = (1000 * i) / (FS * L);
+    vStuffed[i] = up[i];
+    vFiltered[i] = yUp[i];
+  }
+  const nDense = nPlot * 8;
+  const msDense = new Float64Array(nDense);
+  const vDense = new Float64Array(nDense);
+  for (let i = 0; i < nDense; i++) {
+    const t = i / (FS * L * 8);
+    msDense[i] = 1000 * t;
+    vDense[i] = Math.sin(2 * Math.PI * f0 * t);
   }
 
-  /** Spectrum level (dB) at the bin nearest f. */
-  const levelAt = (f) => sy[Math.round(f / binHz)];
-  const baseDb = levelAt(f0);
-  const img1F = L * FS - f0;
-  const img1Db = levelAt(img1F) - baseDb;
-  const imgFsDb = levelAt(FS - f0) - baseDb; // stuffed image (digital-filter story)
-  const droopTh = 20 * Math.log10(Math.abs(sinc(f0 / (L * FS))));
+  const empty = { x: new Float64Array(0), y: new Float64Array(0) };
+  const stemsX = stage === 'samples' ? msBase : msUp;
+  const stemsY = stage === 'samples' ? vBase : stage === 'stuffed' ? vStuffed : vFiltered;
+
+  /* ---------- spectre ----------------------------------------------------- */
+  // Normalisation commune : le sommet du spectre AVANT filtrage. Les trois
+  // étapes se lisent donc sur la même échelle, et la remontée d'amplitude
+  // apportée par le gain L du filtre se voit au lieu d'être masquée par un
+  // recadrage automatique.
+  const ref = spectrumDb(up, 1);
+  let peak = -Infinity;
+  for (let k = 0; k < NFFT / 2; k++) peak = Math.max(peak, ref[k]);
+  const norm = 10 ** (peak / 20);
+
+  const specStuffed = spectrumDb(up, norm);
+  const specFiltered = spectrumDb(yUp, norm);
+
+  const fx = new Float64Array(NFFT / 2);
+  for (let k = 0; k < NFFT / 2; k++) fx[k] = (k * FS * L) / NFFT;
+
+  // Étape 1 : le tracé s'arrête à Fs/2. Un NaN coupe la courbe — pas besoin
+  // d'une vue de plus ni d'une couche conditionnelle.
+  const specNow = new Float64Array(NFFT / 2);
+  for (let k = 0; k < NFFT / 2; k++) {
+    const val = stage === 'filtered' ? specFiltered[k] : specStuffed[k];
+    specNow[k] = stage === 'samples' && fx[k] > FS / 2 ? NaN : val;
+  }
+
+  // la réponse du filtre, même grille, gain ramené à 0 dB dans la bande
+  const hRe = new Float64Array(NFFT);
+  const hIm = new Float64Array(NFFT);
+  for (let k = 0; k < h.length; k++) hRe[k] = h[k] / L;
+  fft(hRe, hIm);
+  const respDb = new Float64Array(NFFT / 2);
+  for (let k = 0; k < NFFT / 2; k++) respDb[k] = toDb(Math.hypot(hRe[k], hIm[k]), DB_FLOOR);
+
+  /* ---------- ce que la salle doit pouvoir lire --------------------------- */
+  const peakNear = (spec, f, w = 8) => {
+    const c = Math.round((f * NFFT) / (FS * L));
+    let m = -Infinity;
+    for (let k = Math.max(0, c - w); k <= Math.min(NFFT / 2 - 1, c + w); k++)
+      m = Math.max(m, spec[k]);
+    return m;
+  };
+  const imageF = FS - f0; // la première image née du zéro-stuffing
+  const imageStuffed = peakNear(specStuffed, imageF);
+  const imageFiltered = peakNear(specFiltered, imageF);
+  const bandFiltered = peakNear(specFiltered, f0);
+
+  let worst = 0;
+  for (let n = 0; n < N_SPEC; n++) {
+    const i = n * L;
+    if (i < yUp.length) worst = Math.max(worst, Math.abs(yUp[i] - x[n]));
+  }
 
   return {
     observables: {
-      staircase: { x: dt, y: stair },
-      idealSig: { x: dt, y: ideal },
-      samples: { x: st, y: sv },
-      upBars: { x: ut, y: uBars },
-      upLine: { x: ut, y: uLine },
-      spectrum: { x: sf, y: sy },
-      sincEnv: { x: sf, y: env },
-      baseDb, // checks: absolute baseband level ≈ droop
-      imgFsDb, // checks: stuffed image at Fs − f0, relative
-      droopMeas: {
-        value: baseDb,
-        meta: { label: 'droop mesuré', unit: 'dB', precision: 2 },
+      stems: { x: stemsX, y: stemsY },
+      baseSamples: { x: msBase, y: vBase },
+      ideal: { x: msDense, y: vDense },
+      filtered: stage === 'filtered' ? { x: msUp, y: vFiltered } : empty,
+
+      spectrum: { x: fx, y: specNow },
+      response: stage === 'filtered' ? { x: fx, y: respDb } : empty,
+      nyquistBase: FS / 2,
+
+      imageLevel: {
+        value: stage === 'samples' ? NaN : stage === 'filtered' ? imageFiltered : imageStuffed,
+        meta: { label: 'image à Fs − f₀', unit: 'dB', precision: 1 },
       },
-      droopTh: {
-        value: droopTh,
-        meta: { label: 'sinc(f₀/LFs)', unit: 'dB', precision: 2 },
+      bandLevel: {
+        // Le gain rendu par le filtre, en dB au-dessus du flux à zéros. Il
+        // vaut 20·log10(L) et pas 0 : le stuffing avait divisé la puissance
+        // par L, le noyau de gain continu L la rend. C'est le même fait que
+        // le check « puissance ÷ L », lu sur la figure au lieu du tableau.
+        value: stage === 'filtered' ? bandFiltered : 0,
+        meta: { label: 'gain rendu (= 20·log₁₀ L)', unit: 'dB', precision: 2 },
       },
-      img1: {
-        value: img1F / 1000,
-        meta: { label: 'image 1 à L·Fs−f₀', unit: 'kHz', precision: 1 },
+      rejection: {
+        value: stage === 'filtered' ? imageStuffed - imageFiltered : NaN,
+        meta: { label: 'réjection du filtre', unit: 'dB', precision: 1 },
       },
-      img1Db: {
-        value: img1Db,
-        meta: { label: 'niveau image 1', unit: 'dB', precision: 1 },
+      interpErr: {
+        value: stage === 'filtered' ? worst : NaN,
+        meta: { label: 'écart aux échantillons d’origine', precision: 6 },
       },
+      nTaps: { value: h.length, meta: { label: 'coefficients' } },
+      // niveaux bruts, pour le harnais
+      imgStuffedDb: imageStuffed,
+      imgFilteredDb: imageFiltered,
     },
   };
 }
+
+export { FS, N_SPEC, NFFT };

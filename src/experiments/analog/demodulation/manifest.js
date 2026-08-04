@@ -6,7 +6,9 @@ export default {
   id: 'demodulation',
   order: 5,
   random: true, // bruit gaussien additif
-  title: 'Démodulation AM et FM',
+  // pluriel, comme l'expérience miroir « Modulations AM et FM » : les deux
+  // en portent bien deux, et le catalogue se lit par paires
+  title: 'Démodulations AM et FM',
   subtitle: 'Retrouver A(t) et f(t) — une méthode globale, une méthode locale',
   tags: ['démodulation', 'Hilbert', 'Teager-Kaiser', 'DESA', 'enveloppe', 'fréquence instantanée'],
 

@@ -18,3 +18,7 @@ export const F_HI_FAR = 350; // Hz
 
 /** Le domaine de l'axe des fréquences, selon la configuration. */
 export const fWindow = (p) => (Number(p.sources) === 3 ? [F_LO, F_HI_FAR] : [F_LO, F_HI]);
+
+/** La base du cadre de la vue « Spectre estimé », en dB. Les rectangles de
+ *  bruit y descendent exactement, donc le calcul et l'axe la partagent. */
+export const MODEL_FLOOR = -60;
