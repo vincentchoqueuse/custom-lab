@@ -5,6 +5,9 @@ import {
   fitSet,
   trueFreqs,
   neighbourCoherence,
+  synthesize,
+  lassoSolve,
+  lambdaMax,
   N,
   FS,
   DF,
@@ -22,6 +25,7 @@ const BASE = {
   snr: 30,
   algo: 'omp',
   k: 3,
+  lam: 0.1,
   seed: 34,
 };
 
@@ -331,6 +335,213 @@ export const checks = [
         detail:
           `E‖error‖² / 2kσ² = ${ratio.toFixed(4)} (1 ± ${(4 * se).toFixed(3)}) over ${n} draws · ` +
           `support exact ${n - wrongSupport}/${n}`,
+      };
+    },
+  },
+  {
+    name: 'DDᵀ = (nfft/2)·I − ½(11ᵀ + vvᵀ) — so the FISTA step is a closed form',
+    category: 'numeric',
+    run() {
+      // The fact the convex solver rests on, in the form it actually takes.
+      //
+      // This check was first written asserting a TIGHT frame, DDᵀ = (nfft/2)·I,
+      // and it failed by about 8 — which was the check being wrong, not the
+      // solver. Summing cos(2πl(i−j)/nfft) over the FULL bin range gives
+      // nfft·δ_ij; the dictionary here runs over the half spectrum WITHOUT DC
+      // and Nyquist, whose sine atom is identically zero, and folding the two
+      // halves leaves exactly
+      //     DDᵀ = (nfft/2)·I − ½(1·1ᵀ + v·vᵀ),   v_i = (−1)^i
+      // The two missing atoms are precisely the correction. It is negative
+      // semidefinite, so ‖DDᵀ‖ = nfft/2 stands and the step 2/nfft is right —
+      // which is why the solver was correct while the claim about it was not.
+      const bad = [];
+      for (const over of [1, 2, 4, 8]) {
+        const nfft = over * N;
+        const rng = mulberry32(11 + over);
+        const r = Float64Array.from(range(N), () => 2 * rng() - 1);
+        const { cc, cs } = correlate(r, nfft);
+        const L = nfft / 2 + 1;
+        const a = new Float64Array(L);
+        const b = new Float64Array(L);
+        for (let l = 1; l < L - 1; l++) {
+          a[l] = cc[l];
+          b[l] = cs[l];
+        }
+        const back = synthesize(a, b, nfft);
+        // the two rank-one corrections, from the atoms left out
+        let s1 = 0;
+        let sv = 0;
+        for (let i = 0; i < N; i++) {
+          s1 += r[i];
+          sv += (i % 2 ? -1 : 1) * r[i];
+        }
+        const worst = maxGap(
+          range(N),
+          (i) => back[i] - ((nfft / 2) * r[i] - (s1 + (i % 2 ? -1 : 1) * sv) / 2)
+        );
+        if (worst > 1e-9) bad.push(`×${over}: off by ${worst.toExponential(2)}`);
+      }
+
+      // and the eigenvalue that follows, by power iteration on DDᵀ
+      const nfft = 4 * N;
+      let v = Float64Array.from(range(N), (i) => Math.sin(i * 2.7) + 0.3);
+      let lam = 0;
+      for (let it = 0; it < 120; it++) {
+        const { cc, cs } = correlate(v, nfft);
+        const a = new Float64Array(nfft / 2 + 1);
+        const b = new Float64Array(nfft / 2 + 1);
+        for (let l = 1; l < nfft / 2; l++) {
+          a[l] = cc[l];
+          b[l] = cs[l];
+        }
+        const w = synthesize(a, b, nfft);
+        lam = Math.sqrt(energy(w));
+        v = Float64Array.from(w, (u) => u / lam);
+      }
+      if (Math.abs(lam - nfft / 2) > 1e-6) bad.push(`‖DDᵀ‖ = ${lam}, expected ${nfft / 2}`);
+
+      return {
+        ok: bad.length === 0,
+        detail: bad.length
+          ? bad.join(' · ')
+          : `exact at ×1, ×2, ×4, ×8 (1e-9) · ‖DDᵀ‖ = ${lam.toFixed(6)} = nfft/2`,
+      };
+    },
+  },
+  {
+    name: 'lasso: λ ≥ λmax gives EXACTLY zero, and just below it does not',
+    category: 'numeric',
+    run() {
+      // The one point of the whole regularization path that is known in closed
+      // form: c = 0 is optimal precisely when every group correlation with the
+      // data is under λ, so λmax = max_l ‖(Dᵀx)_l‖ is the exact threshold. Both
+      // sides are asserted — a solver that returned zero everywhere would pass
+      // the first half on its own.
+      const nfft = 2 * N;
+      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const lmax = lambdaMax(x, nfft);
+      const nnz = (lam) => {
+        const { a, b } = lassoSolve(x, nfft, lam * lmax);
+        let n = 0;
+        for (let l = 0; l < a.length; l++) if (Math.hypot(a[l], b[l]) > 0) n++;
+        return n;
+      };
+      const above = nnz(1.001);
+      const at = nnz(1);
+      const below = nnz(0.98);
+      return {
+        ok: above === 0 && at === 0 && below > 0,
+        detail: `nonzeros: ${above} at 1.001·λmax, ${at} at λmax, ${below} at 0.98·λmax`,
+      };
+    },
+  },
+  {
+    name: 'lasso on an orthogonal dictionary IS block soft-thresholding — closed form',
+    category: 'numeric',
+    run() {
+      // At ×1 the atom pairs sit on Fourier bins, so they are mutually
+      // orthogonal and DᵀD = (N/2)·I. The lasso then has a closed-form solution
+      // — shrink each pair's amplitude by 2λ/N and clip at zero — and FISTA must
+      // land on it to machine precision. This is the check that says the solver
+      // solves the problem it claims to, rather than something nearby.
+      const nfft = N; // ×1: an orthogonal basis
+      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const lmax = lambdaMax(x, nfft);
+      const bad = [];
+      for (const frac of [0.05, 0.3, 0.7]) {
+        const lambda = frac * lmax;
+        const { a, b } = lassoSolve(x, nfft, lambda, 4000);
+        const { cc, cs } = correlate(x, nfft);
+        const worst = maxGap(range(nfft / 2 + 1), (l) => {
+          if (l === 0 || l === nfft / 2) return 0;
+          // the exact minimizer: (2/N)·Dᵀx shrunk by 2λ/N
+          const m = Math.hypot(cc[l], cs[l]);
+          const s = m > lambda ? (1 - lambda / m) * (2 / N) : 0;
+          return Math.max(Math.abs(a[l] - cc[l] * s), Math.abs(b[l] - cs[l] * s));
+        });
+        if (worst > 1e-10) bad.push(`λ/λmax=${frac}: ${worst.toExponential(2)}`);
+      }
+      return {
+        ok: bad.length === 0,
+        detail: bad.length ? bad.join(' · ') : 'FISTA = soft threshold to 1e-10 at λ/λmax = 0.05, 0.3, 0.7',
+      };
+    },
+  },
+  {
+    name: 'lasso: the KKT cap holds, and the amplitudes are biased low by exactly 2λ/N',
+    category: 'numeric',
+    run() {
+      // Two halves of the same statement, and together they are the scene.
+      //
+      // KKT: at the solution the correlation of the residual may not exceed λ
+      // ANYWHERE — that is what the horizontal line on the third view draws, and
+      // the greedy's notches are its counterpart.
+      //
+      // The bias: on an orthogonal active set the shrinkage is not approximately
+      // but EXACTLY 2λ/N in amplitude, which is why the recovered lines come out
+      // short and why a least-squares refit on the same support puts them back.
+      // The three true frequencies here are integer Fourier bins, so they are
+      // mutually orthogonal and the closed form applies.
+      const nfft = 2 * N;
+      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const lmax = lambdaMax(x, nfft);
+      const lambda = 0.2 * lmax;
+      const { a, b } = lassoSolve(x, nfft, lambda, 4000);
+      const reco = synthesize(a, b, nfft);
+      const { mag } = correlate(
+        Float64Array.from(x, (v, i) => v - reco[i]),
+        nfft
+      );
+      let cap = 0;
+      for (let l = 1; l < nfft / 2; l++) cap = Math.max(cap, mag[l]);
+      const bad = [];
+      if (cap > lambda * (1 + 1e-8)) bad.push(`KKT violated: ${(cap / lambda).toFixed(6)}·λ`);
+
+      const shrink = (2 * lambda) / N;
+      const got = [];
+      for (let l = 1; l < nfft / 2; l++) {
+        const A = Math.hypot(a[l], b[l]);
+        if (A > 1e-9) got.push([(l * FS) / nfft, A]);
+      }
+      if (got.length !== 3) bad.push(`${got.length} nonzero lines, expected 3`);
+      else {
+        got.sort((p, q) => p[0] - q[0]);
+        const worst = maxGap(range(3), (j) => got[j][1] - (AMP[j] - shrink));
+        if (worst > 1e-9) bad.push(`amplitude ≠ A − 2λ/N by ${worst.toExponential(2)}`);
+      }
+      return {
+        ok: bad.length === 0,
+        detail: bad.length
+          ? bad.join(' · ')
+          : `KKT: max|⟨r,d⟩| = ${(cap / lambda).toFixed(6)}·λ · amplitudes = A − 2λ/N (${shrink.toFixed(4)}) to 1e-9`,
+      };
+    },
+  },
+  {
+    name: 'the bias is real and debiasing removes it — greedy pays neither',
+    category: 'numeric',
+    run() {
+      // Why the room should care, in decibels rather than in principle. At the
+      // same support, the lasso's shrunk amplitudes cost real reconstruction
+      // quality; a least-squares refit on that support recovers it; and OMP,
+      // which never shrinks anything, never paid it in the first place.
+      const p = { ...BASE, snr: 20, over: 2 };
+      const lasso = compute({ ...p, algo: 'lasso', lam: 0.2 }).observables;
+      const omp = compute({ ...p, algo: 'omp', k: 3 }).observables;
+      // same three lines found by both
+      const lf = [...lasso.spikes.x].sort((u, v) => u - v);
+      const of = [...omp.spikes.x].sort((u, v) => u - v);
+      const sameSupport =
+        lf.length === 3 && of.length === 3 && maxGap(range(3), (j) => lf[j] - of[j]) < 1e-9;
+      // the shrunk stems sit BELOW the debiased ones, everywhere
+      let below = true;
+      for (let j = 0; j < lasso.spikes.y.length; j++)
+        if (lasso.spikes.y[j] >= lasso.debiased.y[j] - 1e-9) below = false;
+      return {
+        ok: sameSupport && below && omp.snrOut.value > lasso.snrOut.value + 5,
+        detail:
+          `same 3 lines · every lasso stem below its refit · ` +
+          `SNR out: OMP ${omp.snrOut.value.toFixed(1)} dB vs lasso ${lasso.snrOut.value.toFixed(1)} dB`,
       };
     },
   },

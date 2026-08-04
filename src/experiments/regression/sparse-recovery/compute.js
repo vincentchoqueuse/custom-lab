@@ -36,6 +36,7 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { fft } from '../../../core/numeric.js';
+import { ifft } from '../../../core/dsp.js';
 import { solveLinearSystem } from '../../../core/linalg.js';
 
 const FS = 128; // sampling rate (Hz)
@@ -80,6 +81,126 @@ export function correlate(r, nfft) {
     mag[l] = Math.hypot(re[l], im[l]);
   }
   return { cc, cs, mag };
+}
+
+/**
+ * D·c — the synthesis, by ONE inverse FFT. The mirror of `correlate`: that one
+ * is Dᵀ, this one is D, and neither ever forms the 128 × 258 matrix.
+ *
+ * A pair (a_l, b_l) is the complex number a_l − j b_l placed at bin l, halved
+ * and mirrored onto bin nfft−l so the inverse transform comes back real:
+ * S_l e^{jθ} + conj(S_l) e^{−jθ} = a_l cos θ + b_l sin θ, which is the atom
+ * pair. DC and Nyquist stay empty — they are not in the dictionary.
+ */
+export function synthesize(a, b, nfft) {
+  const L = nfft / 2 + 1;
+  const re = new Float64Array(nfft);
+  const im = new Float64Array(nfft);
+  for (let l = 1; l < L - 1; l++) {
+    re[l] = a[l] / 2;
+    im[l] = -b[l] / 2;
+    re[nfft - l] = a[l] / 2;
+    im[nfft - l] = b[l] / 2;
+  }
+  ifft(re, im);
+  const y = new Float64Array(N);
+  for (let i = 0; i < N; i++) y[i] = nfft * re[i];
+  return y;
+}
+
+/**
+ * The OTHER road to the same objective: the convex relaxation.
+ *
+ *     min ½‖x − D c‖² + λ · Σ_l ‖(a_l, b_l)‖₂
+ *
+ * The penalty is on the pair and not on the two coefficients separately —
+ * a group lasso — because a penalty applied to a and b independently would
+ * depend on the PHASE of the line, which is not a physical quantity here. What
+ * gets penalized is the amplitude, which is.
+ *
+ * Solved by FISTA. The gradient step needs the Lipschitz constant of DᵀD, and
+ * for this dictionary it is not estimated but known:
+ *
+ *     D Dᵀ = (nfft/2)·I − ½(1·1ᵀ + v·vᵀ),     v_i = (−1)^i
+ *
+ * — the frame would be tight were DC and Nyquist in the dictionary at half
+ * weight, and those are exactly the two atoms left out because their sine is
+ * identically zero. The correction is negative semidefinite, so the largest
+ * eigenvalue is exactly nfft/2 whatever the oversampling, the step is 2/nfft,
+ * and there is no tuning left. The harness pins the identity, both the exact
+ * rank-2 form and the eigenvalue that follows from it.
+ *
+ * The two algorithms then differ in kind, and both differences are visible:
+ *   · greedy CHOOSES atoms and leaves their amplitudes alone; the lasso keeps
+ *     every atom and SHRINKS them, so its amplitudes are biased low by λ.
+ *   · greedy never revisits a choice; the lasso solves a convex problem and
+ *     its solution does not depend on the order anything was found in.
+ * @returns {{a, b, iters}} the pair coefficients over the whole grid
+ */
+export function lassoSolve(x, nfft, lambda, maxIters = 200) {
+  const L = nfft / 2 + 1;
+  const step = 2 / nfft; // 1/‖DᵀD‖, exactly
+  const tau = lambda * step;
+  const a = new Float64Array(L);
+  const b = new Float64Array(L);
+  let ya = new Float64Array(L);
+  let yb = new Float64Array(L);
+  let t = 1;
+  let used = maxIters;
+
+  for (let it = 0; it < maxIters; it++) {
+    // gradient step at the momentum point: y + step·Dᵀ(x − D y)
+    const r = synthesize(ya, yb, nfft);
+    for (let i = 0; i < N; i++) r[i] = x[i] - r[i];
+    const { cc, cs } = correlate(r, nfft);
+    const na = new Float64Array(L);
+    const nb = new Float64Array(L);
+    for (let l = 1; l < L - 1; l++) {
+      const ga = ya[l] + step * cc[l];
+      const gb = yb[l] + step * cs[l];
+      // prox of the group penalty: shrink the PAIR towards zero by tau, and
+      // set it to exactly zero when it is shorter than that. This is what
+      // makes the solution sparse rather than merely small.
+      const m = Math.hypot(ga, gb);
+      const s = m > tau ? 1 - tau / m : 0;
+      na[l] = ga * s;
+      nb[l] = gb * s;
+    }
+    const tn = (1 + Math.sqrt(1 + 4 * t * t)) / 2;
+    const w = (t - 1) / tn;
+    ya = new Float64Array(L);
+    yb = new Float64Array(L);
+    let move = 0;
+    for (let l = 1; l < L - 1; l++) {
+      ya[l] = na[l] + w * (na[l] - a[l]);
+      yb[l] = nb[l] + w * (nb[l] - b[l]);
+      move = Math.max(move, Math.abs(na[l] - a[l]), Math.abs(nb[l] - b[l]));
+      a[l] = na[l];
+      b[l] = nb[l];
+    }
+    t = tn;
+    // Early exit when the iterate has stopped moving. On a mildly coherent grid
+    // this fires around 120 iterations at machine precision; on a ×8 grid it
+    // never fires within the budget, and that is a fact about the PROBLEM — a
+    // dictionary coherent enough to defeat the greedy also makes the convex
+    // problem ill-conditioned. Nothing is hidden: the KKT ratio in the statline
+    // says how converged the answer on screen actually is.
+    if (move < 1e-12) {
+      used = it + 1;
+      break;
+    }
+  }
+  return { a, b, iters: used };
+}
+
+/** λ above which the lasso solution is EXACTLY zero: the largest group
+ *  correlation with the data. Every λ in the app is a fraction of it, so the
+ *  pill means the same thing whatever the amplitudes and the noise are. */
+export function lambdaMax(x, nfft) {
+  const { cc, cs } = correlate(x, nfft);
+  let m = 0;
+  for (let l = 1; l < nfft / 2; l++) m = Math.max(m, Math.hypot(cc[l], cs[l]));
+  return m;
 }
 
 /** The two atoms of grid frequency `g`, written into ca/sa. */
@@ -201,7 +322,7 @@ export function pursuit(x, nfft, orthogonal) {
  * @param {{K: number, sep: number, offGrid: number, over: number, snr: number,
  *          algo: string, k: number, seed: number}} params
  */
-export function compute({ K, sep, offGrid, over, snr, algo, k, seed }) {
+export function compute({ K, sep, offGrid, over, snr, algo, k, lam, seed }) {
   const rng = mulberry32(seed);
   const gauss = gaussFrom(rng);
   const nfft = over * N;
@@ -228,7 +349,16 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, seed }) {
   const omp = pursuit(x, nfft, true);
   const mp = pursuit(x, nfft, false);
   const kk = Math.min(k, KMAX);
+  const isLasso = algo === 'lasso';
   const main = algo === 'mp' ? mp : omp;
+
+  /* ---------- and the convex road, when it is the one being read ---------- */
+  // Only solved when selected: FISTA is by far the most expensive thing here,
+  // and the three greedy scenes must stay draggable.
+  const lMax = lambdaMax(x, nfft);
+  const lambda = lam * lMax;
+  const sol = isLasso ? lassoSolve(x, nfft, lambda) : null;
+  const lassoReco = sol ? synthesize(sol.a, sol.b, nfft) : null;
 
   /* ---------- the periodogram, and the grid ------------------------------- */
   const gf = new Float64Array(L);
@@ -238,29 +368,52 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, seed }) {
   const toDb = (v) => Math.max(20 * Math.log10(Math.max(v, 1e-300) / pkMax), FLOOR_DB);
   const pdb = Float64Array.from(px, toDb);
 
-  // what the algorithm sees AT iteration kk, on the same dB scale
+  // what the greedy sees AT iteration kk, on the same dB scale
   const seen = kk < KMAX ? main.snapshots[kk] : main.snapshots[KMAX - 1];
-  const seenDb = Float64Array.from(seen, toDb);
   const pickIdx = kk < KMAX ? main.picks[kk] : main.picks[KMAX - 1];
 
-  /* ---------- the recovered lines at iteration kk ------------------------- */
+  /* ---------- the recovered lines ---------------------------------------- */
+  // A sinusoid of amplitude A peaks at A·N/2 in the periodogram, so putting the
+  // amplitudes on that scale makes the stems land exactly on the peaks they
+  // explain — which is the reading both frequency views are for.
+  const ampDb = (A) => toDb((A * N) / 2);
   const chosen = main.support.slice(0, kk);
-  const uniq = [...new Set(chosen)];
-  const spikeF = new Float64Array(uniq.length);
-  const spikeA = new Float64Array(uniq.length);
-  if (uniq.length) {
+  const uniq = isLasso ? [] : [...new Set(chosen)];
+  let spikeF = new Float64Array(0);
+  let spikeA = new Float64Array(0);
+  // the lasso's SECOND set of stems: the same support, refitted by plain least
+  // squares. The gap between the two is the shrinkage, and closing it is what
+  // "debiasing the lasso" means in one gesture.
+  let debiasF = new Float64Array(0);
+  let debiasA = new Float64Array(0);
+
+  if (isLasso) {
+    const active = [];
+    for (let l = 1; l < L - 1; l++) {
+      const A = Math.hypot(sol.a[l], sol.b[l]);
+      if (A > 1e-9) active.push([l, A]);
+    }
+    spikeF = Float64Array.from(active, ([l]) => (l * FS) / nfft);
+    spikeA = Float64Array.from(active, ([, A]) => ampDb(A));
+    // The refit is only drawn while the support is small enough for the core's
+    // pivoted solve to stay in its documented range (≤ ~30 unknowns, so ≤ 12
+    // lines). Past that the lasso has stopped being sparse anyway, which is the
+    // reading the scene wants at small λ.
+    if (active.length && active.length <= 12) {
+      const { coef } = fitSet(
+        x,
+        active.map(([l]) => (l * FS) / nfft)
+      );
+      debiasF = Float64Array.from(spikeF);
+      debiasA = Float64Array.from(active, (_, j) => ampDb(Math.hypot(coef[2 * j], coef[2 * j + 1])));
+    }
+  } else if (uniq.length) {
     const { coef } = fitSet(
       x,
       uniq.map((l) => (l * FS) / nfft)
     );
-    for (let j = 0; j < uniq.length; j++) {
-      spikeF[j] = (uniq[j] * FS) / nfft;
-      // The amplitude of the SINUSOID, not the two coefficients separately —
-      // and put on the periodogram's own dB scale, where a line of amplitude A
-      // peaks at A·N/2. The stems then land exactly on the peaks they explain,
-      // which is the reading the view is for.
-      spikeA[j] = toDb((Math.hypot(coef[2 * j], coef[2 * j + 1]) * N) / 2);
-    }
+    spikeF = Float64Array.from(uniq, (l) => (l * FS) / nfft);
+    spikeA = Float64Array.from(uniq, (_, j) => ampDb(Math.hypot(coef[2 * j], coef[2 * j + 1])));
   }
 
   /* ---------- residual energy vs iteration, both algorithms --------------- */
@@ -268,8 +421,26 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, seed }) {
   const e0 = main.resE[0] || 1;
   const relDb = (e) => Math.max(10 * Math.log10(Math.max(e, 1e-300) / e0), -180);
 
-  const reco = main.recos[kk];
+  const reco = isLasso ? lassoReco : main.recos[kk];
   const dup = chosen.length - uniq.length;
+
+  /* ---------- what each optimality condition LOOKS like ------------------- */
+  // Both algorithms stop for a reason, and both reasons are the same curve read
+  // differently. OMP: the correlation is exactly ZERO at every chosen atom (a
+  // notch). Lasso: the correlation is CAPPED at λ everywhere, with equality on
+  // the support — that is the KKT condition, and drawing λ as a horizontal line
+  // turns it into something a room can check by eye.
+  let seenDb;
+  let kkt = 0;
+  if (isLasso) {
+    const lres = Float64Array.from(x, (v, i) => v - lassoReco[i]);
+    const { mag } = correlate(lres, nfft);
+    seenDb = Float64Array.from(mag, toDb);
+    for (let l = 1; l < L - 1; l++) kkt = Math.max(kkt, mag[l]);
+    kkt = lambda > 0 ? kkt / lambda : 0;
+  } else {
+    seenDb = Float64Array.from(seen, toDb);
+  }
 
   // WHAT THE SPARSITY BUYS, in decibels. The reconstruction is compared with the
   // CLEAN signal, never with the data: a fit that reproduced the data would have
@@ -287,12 +458,15 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, seed }) {
       reco: { x: t, y: reco },
       periodogram: { x: gf, y: pdb },
       correlation: { x: gf, y: seenDb },
-      // a series of one point, not a record: a scatter overlay reads {x, y}
-      pickMark: {
-        x: Float64Array.of((pickIdx * FS) / nfft),
-        y: Float64Array.of(toDb(seen[pickIdx])),
-      },
+      // a series of one point, not a record: a scatter overlay reads {x, y}.
+      // The lasso takes no single atom, so the marker is empty there and the
+      // λ line takes its place.
+      pickMark: isLasso
+        ? { x: new Float64Array(0), y: new Float64Array(0) }
+        : { x: Float64Array.of((pickIdx * FS) / nfft), y: Float64Array.of(toDb(seen[pickIdx])) },
+      lambdaLine: isLasso ? toDb(lambda) : NaN,
       spikes: { x: spikeF, y: spikeA },
+      debiased: { x: debiasF, y: debiasA },
       resOmp: { x: its, y: Float64Array.from(omp.resE, relDb) },
       resMp: { x: its, y: Float64Array.from(mp.resE, relDb) },
 
@@ -315,7 +489,7 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, seed }) {
         value: neighbourCoherence(FS / nfft),
         meta: { label: 'coherence', precision: 3 },
       },
-      resDb: relDb(main.resE[kk]),
+      resDb: relDb(isLasso ? energy(Float64Array.from(x, (v, i) => v - lassoReco[i])) : main.resE[kk]),
       snrOut: {
         value: snrOut,
         meta: { label: 'SNR out', unit: 'dB', precision: 1 },
@@ -324,16 +498,18 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, seed }) {
         value: snrOut - snr,
         meta: { label: 'gain', unit: 'dB', precision: 1 },
       },
-      orthDefect: {
-        value: main.orth[kk],
-        meta: { label: '⟂ defect', precision: 6 },
-      },
-      reselected: {
-        value: dup,
-        meta: { label: 're-selected', precision: 0 },
-      },
+      // The two algorithms' optimality conditions, side by side in the same
+      // slot: the greedy shows how far its residual still leans on what it
+      // chose, the lasso shows how far the KKT cap is respected (≤ 1 means the
+      // solution is optimal; above 1 means FISTA has not finished).
+      orthDefect: isLasso
+        ? { value: kkt, meta: { label: 'KKT ≤ 1', precision: 3 } }
+        : { value: main.orth[kk], meta: { label: '⟂ defect', precision: 6 } },
+      reselected: isLasso
+        ? { value: spikeF.length, meta: { label: 'nonzero lines', precision: 0 } }
+        : { value: dup, meta: { label: 're-selected', precision: 0 } },
       verdict: {
-        value: verdictOf(algo, dup, main.orth[kk], offGrid),
+        value: verdictOf(algo, dup, isLasso ? kkt : main.orth[kk], offGrid, spikeF.length, sol?.iters),
         meta: { label: 'state' },
       },
     },
@@ -352,7 +528,12 @@ export function neighbourCoherence(delta) {
   return Math.abs(Math.sin(a) / (N * Math.sin(a / N)));
 }
 
-function verdictOf(algo, dup, orth, offGrid) {
+function verdictOf(algo, dup, orth, offGrid, nnz, iters) {
+  if (algo === 'lasso') {
+    if (orth > 1.01) return `FISTA stopped at ${iters} steps — not converged`;
+    if (nnz === 0) return 'λ above λmax — the solution is exactly zero';
+    return `${nnz} nonzero line${nnz > 1 ? 's' : ''}, amplitudes shrunk by λ`;
+  }
   if (algo !== 'mp' && orth > 1e-9) return 'not orthogonal — impossible for OMP';
   if (dup > 0) return `${dup} atom${dup > 1 ? 's' : ''} re-selected — MP only`;
   if (offGrid > 0.05) return 'off grid — the signal is not sparse here';

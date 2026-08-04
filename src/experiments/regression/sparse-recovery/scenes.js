@@ -69,8 +69,57 @@ notches are gone, the orthogonality defect is no longer zero, and "atoms chosen
 twice" starts counting. MP spends iterations repairing its own earlier answers.`,
   },
   {
+    id: 'lasso',
+    title: 'Scene 4 · The other road: a penalty instead of a count',
+    view: 'spectrum',
+    params: {
+      K: 3,
+      sep: 3,
+      offGrid: 0,
+      over: 2,
+      snr: 15,
+      algo: 'lasso',
+      k: 3,
+      lam: 0.4,
+      seed: 34,
+    },
+    visible: ['lam', 'algo'],
+    notes: `Everything so far imposed the sparsity by COUNTING: k atoms, stop.
+The other formulation penalizes instead —
+
+    min ‖x − D c‖²  +  λ · Σ ‖c_l‖
+
+— and the dial is no longer a number of atoms but a weight λ. Same objective,
+two roads. Worth stating plainly: OMP has no λ and cannot have one; it is not a
+penalized least squares, it is a combinatorial search done greedily.
+
+Take λ from 1 downwards and narrate the path. At λ = λmax the solution is
+EXACTLY zero — not small, zero, and that threshold is known in closed form. At
+0.7 one line survives, then two, then three at 0.4. The order in which they
+appear is the order OMP chose them in, which is not a coincidence.
+
+Then look at the two stems. The blue ones are the lasso's amplitudes and they
+are SHORT; the green ones are the same frequencies refitted by ordinary least
+squares. The gap is the price of the penalty, and it is exactly 2λ/N — the same
+λ that selected the lines also shrinks them. That is the lasso's bias, and
+"debiasing" is nothing more than the green stems: keep the support, throw the
+penalty away, refit.
+
+The cost in decibels, so nobody takes it as a detail: at λ = 0.4 the
+reconstruction is 5.5 dB, at 0.1 it is 16.9, and OMP with the same three lines
+is at 31.8. Keep going down — 0.03 gives 27 lines and 22.4 dB, 0.01 gives 63
+lines and 18.3. The same bias-variance curve as scene 2, walked in λ instead of
+in k.
+
+Last, switch to "What the algorithm sees". The green horizontal is λ, and the
+correlation curve is CAPPED by it, touching it exactly on the active lines.
+That is the optimality condition of the convex problem — and it is the exact
+counterpart of OMP's notches. Both algorithms stop for a reason; this is what
+each reason looks like.`,
+  },
+  {
     id: 'coherence',
-    title: 'Scene 4 · A finer grid is a HARDER problem',
+    title: 'Scene 5 · A finer grid is a HARDER problem',
     params: { K: 2, sep: 1.5, offGrid: 0, over: 1, snr: 30, algo: 'omp', k: 4, seed: 34 },
     visible: ['over', 'sep'],
     notes: `Two lines, one and a half cells apart. At ×1 the atoms are orthogonal
@@ -90,7 +139,7 @@ set by the grid. It is set by the data.`,
   },
   {
     id: 'offgrid',
-    title: 'Scene 5 · Off the grid, nothing is sparse',
+    title: 'Scene 6 · Off the grid, nothing is sparse',
     params: { K: 3, sep: 3, offGrid: 0, over: 2, snr: 30, algo: 'omp', k: 3, seed: 34 },
     visible: ['offGrid', 'k'],
     notes: `Freeze (F) with δ = 0, then take the offset to ½ a cell — the lines

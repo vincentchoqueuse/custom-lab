@@ -1,5 +1,5 @@
-import { float, int, select } from '../../../core/fields.js';
-import { view, figure, line, stem, scatter, vline } from '../../../core/views.js';
+import { float, int, log, select } from '../../../core/fields.js';
+import { view, figure, line, stem, scatter, vline, hline } from '../../../core/views.js';
 
 /** The true frequencies, as verticals — the same on the two frequency views,
  *  declared once so that they cannot drift apart. A line beyond K comes back
@@ -61,14 +61,35 @@ export default {
       precision: 0,
     }),
     algo: select('algorithm', {
-      description: 'greedy pursuit read on the first three views',
+      description: 'how the sparsity is imposed',
       options: [
-        { value: 'omp', label: 'OMP — refits every selected line' },
-        { value: 'mp', label: 'MP — fits each line once' },
+        { value: 'omp', label: 'OMP — greedy, k atoms, refits each time' },
+        { value: 'mp', label: 'MP — greedy, k atoms, fits each once' },
+        { value: 'lasso', label: 'lasso — convex, penalty λ‖c‖₁' },
       ],
       default: 'omp',
     }),
-    k: int('k', { description: 'iteration read', min: 0, max: 12, default: 3 }),
+    // The two knobs are NOT interchangeable and the drawer says so by showing
+    // one at a time: a greedy method constrains the NUMBER of atoms and its
+    // knob is k, while the convex relaxation penalizes the amplitudes and its
+    // knob is λ. Same objective, two roads, two dials.
+    k: int('k', {
+      description: 'iteration read — greedy only',
+      min: 0,
+      max: 12,
+      default: 3,
+      visibleIf: { algo: ['omp', 'mp'] },
+    }),
+    lam: log('λ', {
+      // as a FRACTION of λmax = ‖Dᵀx‖∞, so the pill means the same thing at any
+      // amplitude or noise level, and λ = λmax is exactly where c becomes zero
+      description: 'penalty, as a fraction of the λ that zeroes everything',
+      min: 1e-3,
+      max: 1,
+      default: 0.1,
+      precision: 4,
+      visibleIf: { algo: 'lasso' },
+    }),
     // seed injected by the core, because random: true
   },
 
@@ -125,6 +146,16 @@ export default {
             baseline: -60,
             label: 'recovered lines',
           }),
+          // lasso only: the same support refitted by plain least squares. The
+          // gap between the two stems IS the shrinkage the penalty costs, and
+          // closing it is what debiasing means.
+          stem('debiased', {
+            color: '#77AC30',
+            size: 4,
+            width: 1.6,
+            baseline: -60,
+            label: 'debiased (LS refit)',
+          }),
           ...TRUTH,
         ],
         axes: {
@@ -147,6 +178,10 @@ export default {
         label: '|⟨residual, atom⟩| at step k',
         overlays: [
           scatter('pickMark', { color: '#D95319', size: 11, label: 'atom taken at step k' }),
+          // lasso only: the KKT cap. The correlation may not exceed λ anywhere,
+          // and touches it exactly on the active lines — the convex method's
+          // stopping condition, drawn, next to the greedy's notches.
+          hline('lambdaLine', { color: '#77AC30', dashed: true, width: 1.8, label: 'λ' }),
           ...TRUTH,
         ],
         axes: {
