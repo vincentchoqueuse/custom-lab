@@ -74,11 +74,11 @@ export default {
       description: 'the system jumps at iteration 1500',
       default: false,
     }),
-    // seed injecté par le cœur, parce que random: true
+    // seed injected by the core, because random: true
   },
 
   derived: {
-    // Ce que la salle doit pouvoir vérifier de tête avant de bouger le pas.
+    // What the room should be able to check in its head before moving the step size.
     bound: { label: 'stability bound 2/tr(R)', calc: (p) => (2 / p.L).toFixed(4) },
     cond: {
       label: 'target conditioning (L → ∞)',
@@ -92,16 +92,15 @@ export default {
     { title: 'Observation', params: ['n'] },
   ],
 
-  // actions omises → défaut du cœur [randomizeSeed, freeze]
+  // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
-    // L'ADAPTATION ELLE-MÊME, et c'est pour cela qu'elle passe en premier :
-    // les L coefficients qui montent de zéro vers leurs valeurs vraies, et
-    // qui ensuite dansent autour. Tout le reste de l'expérience est un
-    // résumé de ce dessin — la courbe d'apprentissage en est la version
-    // quadratique, le plan des poids la version géométrique à L = 2.
-    // Un seul tracé pour les L trajectoires (coupé par des NaN), sans quoi
-    // la légende compterait seize entrées qui ne diraient rien.
+    // THE ADAPTATION ITSELF, and that is why it comes first: the L coefficients
+    // rising from zero towards their true values, and then dancing around them.
+    // All the rest of the experiment is a summary of this drawing — the learning
+    // curve is its quadratic version, the weight plane its geometric version at
+    // L = 2. A single trace for the L trajectories (cut by NaNs), failing which
+    // the legend would hold sixteen entries saying nothing.
     view(
       'tracks',
       'Weights ŵ(n)',
@@ -115,11 +114,11 @@ export default {
       })
     ),
 
-    // LA vue : le sujet de l'expérience EST la convergence, donc elle passe
-    // devant. Deux courbes, et c'est leur écart qui instruit : l'EQM totale
-    // (ce qu'on mesurerait vraiment, bruit compris) et l'excès w̃ᵀRw̃ (ce que
-    // l'adaptation contrôle, sans le bruit). La première ne descend jamais
-    // sous le plancher ; la seconde dit à quelle distance de w* on est.
+    // THE view: the subject of the experiment IS the convergence, so it comes
+    // to the front. Two curves, and it is their gap that instructs: the total
+    // MSE (what would really be measured, noise included) and the excess w̃ᵀRw̃
+    // (what the adaptation controls, without the noise). The first never
+    // descends below the floor; the second says how far from w* one is.
     view(
       'learning',
       'Learning curve',
@@ -141,9 +140,9 @@ export default {
       })
     ),
 
-    // Ce que le filtre a appris, à l'itération n : la réponse impulsionnelle
-    // estimée contre la vraie. C'est ici qu'on voit le filtre « se remplir »
-    // coefficient par coefficient, et sauter quand le système saute.
+    // What the filter has learned, at iteration n: the estimated impulse
+    // response against the true one. This is where the filter is seen "filling
+    // in" coefficient by coefficient, and jumping when the system jumps.
     view(
       'coeffs',
       'Coefficients',
@@ -156,11 +155,11 @@ export default {
       })
     ),
 
-    // La géométrie, et la seule façon de VOIR pourquoi une entrée colorée
-    // coûte : à L = 2, les iso-contours du coût sont les ellipses d'axes les
-    // vecteurs propres de R, et la descente les traverse en zigzag quand
-    // elles s'allongent. Un plan équi-aspect, sinon les ellipses mentiraient
-    // sur leur allongement — c'est exactement le cas d'usage de `plane`.
+    // The geometry, and the only way to SEE why a coloured input costs: at
+    // L = 2 the iso-contours of the cost are ellipses whose axes are the
+    // eigenvectors of R, and the descent crosses them in a zigzag as they
+    // elongate. An equal-aspect plane, otherwise the ellipses would lie about
+    // their elongation — exactly the use case of `plane`.
     plane('weights', 'Plan des poids', {
       curves: [
         { source: 'contour1', color: '#71717a', width: 1, label: 'cost contour' },

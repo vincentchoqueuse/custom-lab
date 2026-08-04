@@ -68,14 +68,14 @@ export function ar1Input(N, a, gauss) {
   return u;
 }
 
-/** Autocorrélation EXACTE d'une AR(1) de variance 1 : R[i][j] = a^|i−j|. */
+/** EXACT autocorrelation of a variance-1 AR(1): R[i][j] = a^|i−j|. */
 export function toeplitzAR1(a, L) {
   const R = new Float64Array(L * L);
   for (let i = 0; i < L; i++) for (let j = 0; j < L; j++) R[i * L + j] = a ** Math.abs(i - j);
   return R;
 }
 
-/** Valeurs propres extrêmes et conditionnement d'une matrice symétrique. */
+/** Extreme eigenvalues and conditioning of a symmetric matrix. */
 export function eigSpread(R, L) {
   const eig = jacobiSym(Float64Array.from(R), L);
   let lo = Infinity;
