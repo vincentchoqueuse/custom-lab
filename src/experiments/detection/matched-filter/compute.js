@@ -104,11 +104,11 @@ export function compute({ shape, N, snr, tau, M, seed }) {
       gainEmp: { x: gN, y: gEmp },
       snrOutDb: {
         value: 10 * Math.log10(E),
-        meta: { label: 'SNR sortie', unit: 'dB', precision: 1 },
+        meta: { label: 'output SNR', unit: 'dB', precision: 1 },
       },
       snrInDb: {
         value: 10 * Math.log10(snr),
-        meta: { label: 'SNR entrée', unit: 'dB', precision: 1 },
+        meta: { label: 'input SNR', unit: 'dB', precision: 1 },
       },
     },
   };

@@ -5,53 +5,53 @@ import { view, custom, line } from '../../../core/views.js';
 export default {
   id: 'gradient-descent',
   order: 2,
-  title: 'Descente : gradient contre Newton',
-  subtitle: 'Trois algorithmes, un paysage — le conditionnement décide de tout',
-  tags: ['optimisation', 'gradient', 'Newton', 'momentum', 'conditionnement', 'Rosenbrock'],
+  title: 'Descent: gradient against Newton',
+  subtitle: 'Three algorithms, one landscape — the conditioning decides everything',
+  tags: ['optimization', 'gradient', 'Newton', 'momentum', 'conditioning', 'Rosenbrock'],
 
   params: {
-    fn: select('fonction', {
-      description: 'paysage à minimiser',
+    fn: select('function', {
+      description: 'landscape to minimize',
       options: [
-        { value: 'quad', label: 'quadratique conditionnée κ' },
-        { value: 'rosenbrock', label: 'Rosenbrock (la banane)' },
+        { value: 'quad', label: 'quadratic with conditioning κ' },
+        { value: 'rosenbrock', label: 'Rosenbrock (the banana)' },
       ],
       default: 'quad',
     }),
     kappa: log('κ', {
-      description: 'conditionnement de la quadratique',
+      description: 'conditioning of the quadratic',
       min: 1,
       max: 100,
       default: 10,
       visibleIf: { fn: 'quad' },
     }),
-    alpha: log('α', { description: 'pas du gradient (et du momentum)', min: 1e-4, max: 2, default: 0.1 }),
-    beta: float('β', { description: 'inertie du momentum', min: 0, max: 0.99, step: 0.01, default: 0.9, precision: 2 }),
-    N: int('N', { description: 'nombre d\'itérations', min: 1, max: 100, default: 30 }),
+    alpha: log('α', { description: 'step size of gradient (and momentum)', min: 1e-4, max: 2, default: 0.1 }),
+    beta: float('β', { description: 'momentum inertia', min: 0, max: 0.99, step: 0.01, default: 0.9, precision: 2 }),
+    N: int('N', { description: 'number of iterations', min: 1, max: 100, default: 30 }),
     // no seed here: injected by the core (unused: fully deterministic)
   },
 
   derived: {
     stab: {
-      label: 'stabilité du gradient : α < 2/κ',
+      label: 'gradient stability: α < 2/κ',
       calc: (p) => (p.fn === 'quad' ? `2/κ = ${(2 / p.kappa).toFixed(3)}` : '—'),
     },
     rate: {
-      label: 'taux optimal ((κ−1)/(κ+1))²',
+      label: 'optimal rate ((κ−1)/(κ+1))²',
       calc: (p) => (p.fn === 'quad' ? (((p.kappa - 1) / (p.kappa + 1)) ** 2).toFixed(3) : '—'),
     },
   },
 
   groups: [
-    { title: 'Paysage', params: ['fn', 'kappa'] },
-    { title: 'Algorithmes', params: ['alpha', 'beta', 'N'] },
+    { title: 'Landscape', params: ['fn', 'kappa'] },
+    { title: 'Algorithms', params: ['alpha', 'beta', 'N'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
     // CUSTOM view: iso-contours + the three iterate trajectories, equal aspect.
-    custom('landscape', 'Lignes de niveau', () => import('./views/ContourDescent.svelte')),
+    custom('landscape', 'Level curves', () => import('./views/ContourDescent.svelte')),
 
     // semi-log convergence: straight line = linear rate, cliff = Newton
     view(
@@ -64,7 +64,7 @@ export default {
           line('gapMomentum', { color: '#77AC30', width: 2.2, label: 'momentum' }),
           line('gapNewton', { color: '#D95319', width: 2.2, label: 'Newton' }),
         ],
-        axes: { x: 'itération k', y: { label: 'f(xₖ) − f*', scale: 'log' } },
+        axes: { x: 'iteration k', y: { label: 'f(xₖ) − f*', scale: 'log' } },
       })
     ),
   ],

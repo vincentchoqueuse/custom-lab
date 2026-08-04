@@ -1,53 +1,64 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'seuil',
-    title: 'Le compromis du seuil',
+    id: 'threshold',
+    title: 'The threshold trade-off',
     params: { snr: 1, pfa: 0.05, N: 10 },
     visible: ['pfa', 'snr'],
-    notes: `Deux gaussiennes : la statistique T sous H₀ (bleu) et sous H₁ (orange).
-Le seuil γ découpe P_FA (aire bleue à droite de γ) et P_D (aire orange).
-Baisser P_FA au slider LOG : γ recule vers la droite, P_D s'effondre —
-on ne choisit pas les deux. C'est tout Neyman-Pearson : fixer P_FA,
-maximiser P_D. Monter le SNR : les bosses s'écartent, le dilemme s'adoucit.`,
+    notes: `Two Gaussians: the statistic T under H₀ in blue and under H₁ in
+orange. The threshold γ cuts out P_FA, the blue area to its right, and P_D, the
+orange one.
+
+Lowering P_FA on the logarithmic slider pushes γ to the right and collapses P_D
+with it, which is the whole of Neyman–Pearson in one gesture: the two cannot be
+chosen independently, so P_FA is fixed and P_D is maximized. Raising the SNR
+separates the two humps and softens the dilemma — that is the only thing that
+does.`,
   },
   {
     id: 'roc',
-    title: 'La courbe ROC',
+    title: 'The ROC curve',
     params: { snr: 1, pfa: 0.05, N: 10, M: 10000 },
     view: 'roc',
     visible: ['snr', 'N'],
-    notes: `Chaque valeur de γ est UN point ; la ROC est le lieu de tous les seuils.
-Bouger P_FA : le point jaune glisse LE LONG de la courbe (même détecteur).
-Monter SNR ou N : la courbe bombe vers le coin idéal (0, 1) — seul un
-meilleur rapport signal à bruit change la courbe elle-même.
-La diagonale pointillée : le détecteur pile-ou-face. Axe P_FA logarithmique :
-le régime des fausses alarmes rares est là où vit la détection réelle.`,
+    notes: `Each value of γ is one point, and the ROC is the locus of all of
+them. Moving P_FA slides the yellow point along the curve without changing the
+detector at all; raising the SNR or N bulges the curve toward the ideal corner
+at (0, 1), which is a different statement entirely.
+
+The dashed diagonal is the coin-flip detector. The P_FA axis is logarithmic
+because the rare-false-alarm regime is where detection actually lives, and a
+linear axis crushes it against the origin.`,
   },
   {
     id: 'integration',
-    title: 'Intégrer aide : P_D vs SNR',
+    title: 'Integrating helps: P_D vs SNR',
     params: { snr: 0.5, pfa: 0.01, N: 10 },
     view: 'pd-vs-snr',
     visible: ['N', 'pfa'],
-    notes: `À P_FA fixée, la courbe P_D(SNR) est une marche adoucie.
-Doubler N : elle se décale de 3 dB vers la gauche (d² = N·SNR) —
-intégrer deux fois plus longtemps vaut deux fois plus de puissance.
-Plancher gris : à très bas SNR, P_D → P_FA (le détecteur devine).
-Question : « pourquoi la pente est-elle si raide ? » — tout se joue
-sur ~10 dB : en dessous on est aveugle, au-dessus c'est gagné.`,
+    notes: `At a fixed P_FA the curve P_D(SNR) is a softened step. Doubling N
+shifts it 3 dB to the left, since d² = N·SNR: integrating for twice as long is
+worth twice the transmitted power, and that equivalence is the design decision
+behind every long observation.
+
+The grey floor is P_D → P_FA at very low SNR, where the detector is guessing.
+The steepness is worth remarking on — everything happens within about 10 dB,
+below which the system is blind and above which the problem is solved.`,
   },
   {
     id: 'rare',
-    title: 'Fausses alarmes rares (P_FA = 10⁻³)',
+    title: 'Rare false alarms (P_FA = 10⁻³)',
     params: { snr: 2, pfa: 1e-3, N: 10, M: 20000 },
     view: 'roc',
     visible: ['pfa', 'M'],
-    notes: `P_FA = 10⁻³ et M = 20 000 tirages : on n'attend que ~20 fausses alarmes.
-Marteler R : le point violet Monte Carlo danse fort en abscisse —
-estimer un événement rare coûte cher en données (variance relative 1/√(M·P_FA)).
-Descendre à 10⁻⁴ : le point violet peut disparaître (zéro fausse alarme
-mesurée → hors de l'axe log). C'est LA raison d'être du slider logarithmique.`,
+    notes: `With P_FA = 10⁻³ and twenty thousand draws, only about twenty false
+alarms are expected. Pressing R makes the purple Monte Carlo point dance along
+the horizontal axis, which is the cost of estimating a rare event: the relative
+variance goes as 1/√(M·P_FA).
+
+Going down to 10⁻⁴ can make the point disappear altogether, when no false alarm
+is measured at all and zero has no place on a logarithmic axis. This is the
+concrete reason the slider is logarithmic.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

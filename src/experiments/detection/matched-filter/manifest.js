@@ -6,30 +6,30 @@ export default {
   id: 'matched-filter',
   order: 2,
   random: true,
-  title: 'Filtre adapté',
-  subtitle: 'Corréler avec ce que l\'on cherche : le pic sort du bruit, gain 10·log₁₀(N)',
-  tags: ['filtre adapté', 'corrélation', 'SNR', 'gain de traitement', 'radar'],
+  title: 'The matched filter',
+  subtitle: 'Correlate with what you are looking for: the peak rises out of the noise, gain 10·log₁₀(N)',
+  tags: ['matched filter', 'correlation', 'SNR', 'processing gain', 'radar'],
 
   params: {
-    shape: select('impulsion', {
-      description: 'forme de l\'impulsion connue',
+    shape: select('pulse', {
+      description: 'shape of the known pulse',
       options: [
-        { value: 'rect', label: 'rectangulaire' },
-        { value: 'halfsine', label: 'demi-sinus' },
-        { value: 'gauss', label: 'gaussienne' },
+        { value: 'rect', label: 'rectangular' },
+        { value: 'halfsine', label: 'half sine' },
+        { value: 'gauss', label: 'Gaussian' },
       ],
       default: 'rect',
     }),
-    N: int('N', { description: 'longueur de l\'impulsion', min: 4, max: 128, default: 32, unit: 'éch.' }),
+    N: int('N', { description: 'pulse length', min: 4, max: 128, default: 32, unit: 'samples' }),
     snr: log('SNR', {
-      description: 'rapport signal à bruit par échantillon (linéaire)',
+      description: 'signal-to-noise ratio per sample (linear)',
       min: 0.01,
       max: 10,
       default: 0.2,
     }),
-    tau: int('τ', { description: 'retard de l\'impulsion', min: 0, max: 256, default: 32, unit: 'éch.' }),
+    tau: int('τ', { description: 'delay of the pulse', min: 0, max: 256, default: 32, unit: 'samples' }),
     M: int('M', {
-      description: 'tirages Monte Carlo (vue Gain)',
+      description: 'Monte Carlo draws (Gain view)',
       min: 100,
       max: 5000,
       step: 100,
@@ -39,7 +39,7 @@ export default {
   },
 
   validate: [
-    { when: (p) => p.tau > 2 * p.N, message: 'τ doit rester ≤ 2N (fenêtre de 3N échantillons)' },
+    { when: (p) => p.tau > 2 * p.N, message: 'τ must stay ≤ 2N (the window is 3N samples)' },
   ],
 
   derived: {
@@ -47,8 +47,8 @@ export default {
   },
 
   groups: [
-    { title: 'Impulsion', params: ['shape', 'N'] },
-    { title: 'Canal', params: ['snr', 'tau'] },
+    { title: 'Pulse', params: ['shape', 'N'] },
+    { title: 'Channel', params: ['snr', 'tau'] },
     { title: 'Monte Carlo', params: ['M'] },
   ],
 
@@ -58,11 +58,11 @@ export default {
     // the pulse is invisible in the raw signal — that is the whole point
     view(
       'signals',
-      'Signal reçu',
+      'Received signal',
       line('received', {
         width: 1.4,
-        label: 'r[n] (reçu)',
-        overlays: [line('pulseClean', { color: '#D95319', width: 2.2, label: 's[n−τ] (vérité)' })],
+        label: 'r[n] (received)',
+        overlays: [line('pulseClean', { color: '#D95319', width: 2.2, label: 's[n−τ] (ground truth)' })],
         axes: { x: 'n', y: 'amplitude' },
       })
     ),
@@ -70,29 +70,29 @@ export default {
     // the correlator output: the peak rises exactly at τ
     view(
       'correlator',
-      'Sortie du corrélateur',
+      'Correlator output',
       line('corrNoisy', {
         width: 2,
-        label: 'y[k] (bruité)',
+        label: 'y[k] (noisy)',
         overlays: [
-          line('corrClean', { color: '#D95319', width: 2, dashed: true, label: 'sans bruit' }),
+          line('corrClean', { color: '#D95319', width: 2, dashed: true, label: 'noiseless' }),
           vline((p) => p.tau, { color: '#EDB120', dashed: true, width: 2, label: 'τ' }),
           vline('tauHat', { color: '#7E2F8E', width: 1.8, label: 'τ̂' }),
         ],
-        axes: { x: 'retard k', y: 'y[k]' },
+        axes: { x: 'lag k', y: 'y[k]' },
       })
     ),
 
     // the processing gain: +3 dB per doubling of N, whatever the shape
     view(
       'processing',
-      'Gain de traitement',
+      'Processing gain',
       line('gainTheory', {
         color: '#7E2F8E',
         width: 2.4,
         label: '10·log₁₀(N·SNR)',
         overlays: [scatter('gainEmp', { color: '#D95319', size: 5, label: 'Monte Carlo' })],
-        axes: { x: { label: 'N', scale: 'log' }, y: { label: 'SNR en sortie', unit: 'dB' } },
+        axes: { x: { label: 'N', scale: 'log' }, y: { label: 'output SNR', unit: 'dB' } },
       })
     ),
   ],
