@@ -25,6 +25,7 @@
 // qui joue toute seule n'est pas.
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { noiseSigma } from '../../../core/dsp.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { toDb } from '../../../core/numeric.js';
 import {
@@ -58,8 +59,8 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
   // « ‖w*‖² = 1 donc puissance 1 », qui serait fausse dès que l'entrée est
   // colorée.
   const sigPow = quadForm(R, wTrue, L);
-  const noisePow = sigPow / 10 ** (snr / 10);
-  const sigmaV = Math.sqrt(noisePow);
+  const sigmaV = noiseSigma(sigPow, snr);
+  const noisePow = sigmaV * sigmaV;
 
   // La courbe d'apprentissage est une MOYENNE D'ENSEMBLE : e²(n) d'une
   // seule réalisation fluctue sur deux décades et l'œil y lit une

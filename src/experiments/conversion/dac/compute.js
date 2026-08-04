@@ -29,7 +29,8 @@
 // et la mêler à celle-ci brouillait les deux.
 //
 // PURE, stateless — runs in a worker; entièrement déterministe (pas de tirage).
-import { fft, sinc, toDb, windowValue } from '../../../core/numeric.js';
+import { fft, sinc } from '../../../core/numeric.js';
+import { magSpectrum, freqAxis, dbAmpAll, peakNear, tone } from '../../../core/dsp.js';
 
 const FS = 8000; // fréquence d'échantillonnage de départ (Hz)
 const N_PLOT = 24; // échantillons de base tracés (3 ms)
@@ -67,16 +68,11 @@ export function filterStream(up, h, half) {
 }
 
 /** |X(f)| en dB sur la grille NFFT, fenêtre de Hann, normalisé par `norm`. */
-function spectrumDb(sig, norm) {
-  const re = new Float64Array(NFFT);
-  const im = new Float64Array(NFFT);
-  const n = Math.min(sig.length, NFFT);
-  for (let i = 0; i < n; i++) re[i] = sig[i] * windowValue('hann', i, n);
-  fft(re, im);
-  const out = new Float64Array(NFFT / 2);
-  for (let k = 0; k < NFFT / 2; k++) out[k] = toDb(Math.hypot(re[k], im[k]) / norm, DB_FLOOR);
-  return out;
-}
+const spectrumDb = (sig, norm) =>
+  dbAmpAll(
+    magSpectrum(sig, { nfft: NFFT, window: 'hann' }).map((m) => m / norm),
+    DB_FLOOR
+  );
 
 /**
  * @param {{f0: number, L: number, stage: string, half: number}} params
@@ -87,8 +83,7 @@ export function compute({ f0, L, stage, half }) {
   const nPlot = N_PLOT * L;
   const halfTaps = Math.max(1, Math.round(half) * L);
 
-  const x = new Float64Array(N_SPEC);
-  for (let n = 0; n < N_SPEC; n++) x[n] = Math.sin((2 * Math.PI * f0 * n) / FS);
+  const x = tone(N_SPEC, f0, { fs: FS });
 
   const up = new Float64Array(nSpec);
   for (let n = 0; n < N_SPEC; n++) up[n * L] = x[n];
@@ -133,19 +128,18 @@ export function compute({ f0, L, stage, half }) {
   // recadrage automatique.
   const ref = spectrumDb(up, 1);
   let peak = -Infinity;
-  for (let k = 0; k < NFFT / 2; k++) peak = Math.max(peak, ref[k]);
+  for (let k = 0; k <= NFFT / 2; k++) peak = Math.max(peak, ref[k]);
   const norm = 10 ** (peak / 20);
 
   const specStuffed = spectrumDb(up, norm);
   const specFiltered = spectrumDb(yUp, norm);
 
-  const fx = new Float64Array(NFFT / 2);
-  for (let k = 0; k < NFFT / 2; k++) fx[k] = (k * FS * L) / NFFT;
+  const fx = freqAxis(NFFT, FS * L);
 
   // Étape 1 : le tracé s'arrête à Fs/2. Un NaN coupe la courbe — pas besoin
   // d'une vue de plus ni d'une couche conditionnelle.
-  const specNow = new Float64Array(NFFT / 2);
-  for (let k = 0; k < NFFT / 2; k++) {
+  const specNow = new Float64Array(NFFT / 2 + 1);
+  for (let k = 0; k <= NFFT / 2; k++) {
     const val = stage === 'filtered' ? specFiltered[k] : specStuffed[k];
     specNow[k] = stage === 'samples' && fx[k] > FS / 2 ? NaN : val;
   }
@@ -155,21 +149,15 @@ export function compute({ f0, L, stage, half }) {
   const hIm = new Float64Array(NFFT);
   for (let k = 0; k < h.length; k++) hRe[k] = h[k] / L;
   fft(hRe, hIm);
-  const respDb = new Float64Array(NFFT / 2);
-  for (let k = 0; k < NFFT / 2; k++) respDb[k] = toDb(Math.hypot(hRe[k], hIm[k]), DB_FLOOR);
+  const respDb = new Float64Array(NFFT / 2 + 1);
+  for (let k = 0; k <= NFFT / 2; k++) respDb[k] = dbAmpAll([Math.hypot(hRe[k], hIm[k])], DB_FLOOR)[0];
 
   /* ---------- ce que la salle doit pouvoir lire --------------------------- */
-  const peakNear = (spec, f, w = 8) => {
-    const c = Math.round((f * NFFT) / (FS * L));
-    let m = -Infinity;
-    for (let k = Math.max(0, c - w); k <= Math.min(NFFT / 2 - 1, c + w); k++)
-      m = Math.max(m, spec[k]);
-    return m;
-  };
+  const levelAt = (spec, f) => peakNear(spec, f, { fs: FS * L, nfft: NFFT, width: 8 });
   const imageF = FS - f0; // la première image née du zéro-stuffing
-  const imageStuffed = peakNear(specStuffed, imageF);
-  const imageFiltered = peakNear(specFiltered, imageF);
-  const bandFiltered = peakNear(specFiltered, f0);
+  const imageStuffed = levelAt(specStuffed, imageF);
+  const imageFiltered = levelAt(specFiltered, imageF);
+  const bandFiltered = levelAt(specFiltered, f0);
 
   let worst = 0;
   for (let n = 0; n < N_SPEC; n++) {

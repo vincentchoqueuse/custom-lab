@@ -9,6 +9,7 @@
 // but LATE by exactly M samples — shown on a square wave, checked on a
 // sine. Fs = 8 kHz throughout (consistent with the DAC experiment).
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { magSpectrum, freqAxis, dbAmpAll } from '../../../core/dsp.js';
 import { fft, sinc, toDb, windowValue } from '../../../core/numeric.js';
 
 const FS = 8000;
@@ -47,18 +48,10 @@ export function compute({ fc, N, win }) {
   }
 
   // frequency response (zero-padded FFT of the taps)
-  const re = new Float64Array(NFFT);
-  const im = new Float64Array(NFFT);
-  re.set(h);
-  fft(re, im);
   const binHz = FS / NFFT;
   const nh = NFFT / 2;
-  const rf = new Float64Array(nh + 1);
-  const ry = new Float64Array(nh + 1);
-  for (let k = 0; k <= nh; k++) {
-    rf[k] = k * binHz;
-    ry[k] = toDb(Math.hypot(re[k], im[k]), DB_FLOOR);
-  }
+  const rf = freqAxis(NFFT, FS);
+  const ry = dbAmpAll(magSpectrum(h, { nfft: NFFT }), DB_FLOOR);
 
   // highest stopband lobe: walk down the transition slope from fc to the
   // FIRST null, then take the max beyond — window-agnostic, and it catches

@@ -11,6 +11,7 @@
 // The spectrum is Hann-windowed, normalized by the coherent gain (an
 // unmodulated carrier reads 0 dB), and sliced around fc.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { magSpectrum } from '../../../core/dsp.js';
 import { fft, toDb, windowValue } from '../../../core/numeric.js';
 
 const FS = 8000; // sampling rate (Hz)
@@ -52,20 +53,12 @@ export function compute({ mode, fm, ka, beta }) {
   meanPow /= NS;
 
   // Hann-windowed spectrum, coherent-gain normalization (carrier alone = 0 dB)
-  const re = new Float64Array(NS);
-  const im = new Float64Array(NS);
+  const mag = magSpectrum(x, { nfft: NS, window: 'hann' });
   let sw = 0;
-  for (let i = 0; i < NS; i++) {
-    const w = windowValue('hann', i, NS);
-    re[i] = x[i] * w;
-    sw += w;
-  }
-  fft(re, im);
-  const ref = sw / 2;
+  for (let i = 0; i < NS; i++) sw += windowValue('hann', i, NS);
+  const ref = sw / 2; // gain cohérent de la fenêtre
   const binHz = FS / NS;
   const nh = NS / 2;
-  const mag = new Float64Array(nh + 1);
-  for (let k = 0; k <= nh; k++) mag[k] = Math.hypot(re[k], im[k]);
 
   // display slice around the carrier, wide enough for the line comb
   const half = Math.max(300, Math.min(2600, (am ? 4 : beta + 5) * fm));

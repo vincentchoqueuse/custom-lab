@@ -21,6 +21,7 @@
 // FFT is zero-padded far beyond the record so what is drawn is the continuous
 // transform of the truncated signal, not a coarse bin grid.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { magHalf, spectrumComplex } from '../../../core/dsp.js';
 import { fft, toDb as coreToDb, windowValue } from '../../../core/numeric.js';
 
 const FS = 8000; // sampling rate (Hz)
@@ -53,14 +54,10 @@ export function windowedSamples(p, Tms) {
 /** |X_T(f)| on the zero-padded grid — the transform of the truncated signal. */
 export function spectrumOf(p, Tms, nfft = NFFT) {
   const xw = windowedSamples(p, Tms);
-  const re = new Float64Array(nfft);
-  const im = new Float64Array(nfft);
-  re.set(xw.subarray(0, Math.min(xw.length, nfft)));
-  fft(re, im);
-  const nh = nfft / 2;
-  const mag = new Float64Array(nh + 1);
-  for (let j = 0; j <= nh; j++) mag[j] = Math.hypot(re[j], im[j]);
-  return { mag, binHz: FS / nfft, n: xw.length, re, im };
+  // le spectre complet EST rendu : le harnais y vérifie Parseval, qui porte
+  // sur les deux moitiés et pas sur le demi-spectre affiché
+  const { re, im } = spectrumComplex(xw, { nfft });
+  return { mag: magHalf(re, im), binHz: FS / nfft, n: xw.length, re, im };
 }
 
 /**

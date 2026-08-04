@@ -14,6 +14,8 @@ import { join, resolve, sep, dirname } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { normalizeViews } from '../src/core/figures.js';
+import * as dsp from '../src/core/dsp.js';
+import { fft } from '../src/core/numeric.js';
 import { validateScene } from '../src/core/scenes.js';
 
 const ROOT = resolve(process.cwd(), 'src/experiments');
@@ -159,10 +161,82 @@ function checkAxisLabels(manifest, key, bad) {
   }
 }
 
+/**
+ * La couche d'appels des computes (core/dsp.js) est vérifiée UNE fois ici,
+ * pas une fois par expérience. C'est tout l'intérêt de l'avoir extraite :
+ * dix-neuf sinusoïdes écrites à la main, ce sont dix-neuf occasions de se
+ * tromper d'indice ; une seule fonction, c'est une identité qu'on épingle.
+ *
+ * Les deux identités qui comptent le plus sont ici : ifft∘fft = identité, et
+ * dbAmp(x) = dbPower(x²) — cette dernière parce que confondre les deux
+ * échelles a déjà coûté un facteur 2 sur un tracé parfaitement plausible.
+ */
+function checkDsp() {
+  const bad = [];
+  const N = 256;
+  const FS = 1000;
+  const worst = (n, f) => Math.max(...Array.from({ length: n }, (_, i) => Math.abs(f(i))));
+
+  // ifft ∘ fft = identité
+  const x = dsp.tone(N, 50, { fs: FS, amp: 1.7, phase: 0.3 });
+  const re = Float64Array.from(x);
+  const im = new Float64Array(N);
+  fft(re, im);
+  dsp.ifft(re, im);
+  const idErr = Math.max(worst(N, (i) => re[i] - x[i]), worst(N, (i) => im[i]));
+  if (idErr > 1e-12) bad.push(`ifft∘fft : ${idErr.toExponential(1)}`);
+
+  // dbAmp(x) = dbPower(x²), exactement
+  const dbErr = worst(60, (i) => {
+    const v = 10 ** (i / 10 - 3);
+    return dsp.dbAmp(v) - dsp.dbPower(v * v);
+  });
+  if (dbErr > 1e-9) bad.push(`dbAmp/dbPower : ${dbErr.toExponential(1)}`);
+
+  // une raie sur un bin : bonne position, et amplitude A·N/2 (fenêtre rect)
+  const A = 1.3;
+  const fBin = (FS * 8) / N; // pile sur le bin 8
+  const mag = dsp.magSpectrum(dsp.tone(N, fBin, { fs: FS, amp: A }), { nfft: N });
+  let kMax = 0;
+  for (let k = 0; k < mag.length; k++) if (mag[k] > mag[kMax]) kMax = k;
+  if (kMax !== 8) bad.push(`raie au bin ${kMax} au lieu de 8`);
+  if (Math.abs(mag[8] - (A * N) / 2) > 1e-9)
+    bad.push(`amplitude ${mag[8].toFixed(4)} au lieu de ${(A * N) / 2}`);
+
+  // le demi-spectre va jusqu'à Nyquist INCLUS, et l'axe aussi
+  const f = dsp.freqAxis(N, FS);
+  if (f.length !== N / 2 + 1 || f[f.length - 1] !== FS / 2)
+    bad.push(`freqAxis : ${f.length} points, dernier ${f[f.length - 1]}`);
+  if (mag.length !== N / 2 + 1) bad.push(`magSpectrum : ${mag.length} points`);
+
+  // σ² = P/10^(SNR/10), exactement
+  const sErr = worst(5, (i) => {
+    const snr = i * 10 - 10;
+    return dsp.noiseSigma(0.5, snr) ** 2 - 0.5 / 10 ** (snr / 10);
+  });
+  if (sErr > 1e-15) bad.push(`noiseSigma : ${sErr.toExponential(1)}`);
+
+  // linspace : bornes exactes, pas d'accumulation d'erreur
+  const g = dsp.linspace(-3, 7, 101);
+  if (g[0] !== -3 || g[100] !== 7) bad.push(`linspace : [${g[0]}, ${g[100]}]`);
+
+  console.log(`  ${dim('dsp')}`);
+  if (bad.length) {
+    for (const b of bad) console.log(`    ${red('✗')} ${b}`);
+    fail++;
+  } else {
+    console.log(
+      `    ${green('✓')} ifft∘fft, dbAmp = dbPower∘carré, raie sur bin, Nyquist inclus, σ(SNR), linspace`
+    );
+    pass++;
+  }
+}
+
 async function checkCatalogue() {
   console.log(bold('catalogue'));
   checkLayering();
   checkRandomness();
+  checkDsp();
   console.log(`  ${dim('vocabulary')}`);
   let figuresOk = true;
   let scenesOk = true;

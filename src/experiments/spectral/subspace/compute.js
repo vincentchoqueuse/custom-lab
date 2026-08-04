@@ -30,6 +30,7 @@
 // qui sert à le choisir.
 //
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
+import { noiseSigma } from '../../../core/dsp.js';
 import { fft, toDb } from '../../../core/numeric.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import {
@@ -66,8 +67,11 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
   const f2 = F1 + df * fourier;
   const freqs = sources === 3 ? [F1, f2, F3] : [F1, f2];
 
-  // bruit blanc complexe circulaire : σ² total, σ²/2 par quadrature
-  const sigma = Math.sqrt(0.5 / 10 ** (snr / 10)); // puissance de raie = 1
+  // Bruit blanc complexe CIRCULAIRE : σ² par quadrature, donc 2σ² au total.
+  // La puissance de référence passée à noiseSigma est donc 0.5 et non 1,
+  // pour une raie de puissance unité — c'est le facteur 2 qu'on ne voit pas
+  // passer quand la conversion est écrite à la main.
+  const sigma = noiseSigma(0.5, snr);
   const xr = new Float64Array(N);
   const xi = new Float64Array(N);
   for (let n = 0; n < N; n++) {
