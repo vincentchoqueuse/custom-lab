@@ -1,40 +1,47 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
-    id: 'vocabulaire',
-    title: 'Quatre tireurs, un vocabulaire',
+    id: 'vocabulary',
+    title: 'Four marksmen, one vocabulary',
     params: { mu: 2, sigma: 1.5, N: 5, lambda: 0.8, M: 400 },
     visible: ['N'],
-    notes: `Quatre estimateurs du même centre, mêmes données. Faire nommer AVANT
-d'expliquer : x̄ est centré et groupé ; la médiane est centrée, un peu
-plus lâche ; λx̄ est DÉCENTRÉ mais très groupé ; x₁ est centré et
-catastrophiquement dispersé. Vocabulaire : centré = sans biais,
-groupé = faible variance. Question piège : « lequel préférez-vous ? »
-— regarder les EQM sous les cibles avant de répondre.`,
+    notes: `Four estimators of the same center, from the same data. The room can
+name what it sees before any of it is explained: x̄ is on target and tight, the
+median is on target and a little looser, λx̄ is off target but very tight, and
+x₁ is on target and catastrophically scattered.
+
+That gives the vocabulary its meaning: on target means unbiased, tight means low
+variance, and the two are independent properties. Asking which estimator is
+preferred, before reading the MSE printed under each target, usually produces
+the wrong answer — which is the point of asking.`,
   },
   {
-    id: 'biais-utile',
-    title: 'Le biais qui fait gagner',
+    id: 'useful-bias',
+    title: 'The bias that wins',
     params: { mu: 2, sigma: 1.5, N: 5, lambda: 0.8, M: 1000 },
     visible: ['lambda', 'N'],
-    notes: `À N = 5, comparer EQM(λx̄) et EQM(x̄) sous les cibles : le tireur
-décentré GAGNE. Geler (F), passer λ à 1 : λx̄ redevient x̄ — l'EQM
-remonte. Le biais est un levier : on échange du centrage contre du
-groupement. Puis monter N à 100 : l'avantage disparaît — avec beaucoup
-d'information, le rétrécissement ne paie plus.`,
+    notes: `At N = 5 the MSE under the targets settles the question: the
+off-target marksman wins. Freezing the figure and taking λ back to 1 turns λx̄
+into x̄ again and sends the MSE back up, which makes the trade visible in one
+gesture — bias bought in exchange for tightness.
+
+Raising N to 100 removes the advantage. With enough data the variance is
+already small, and there is nothing left for shrinkage to buy.`,
   },
   {
-    id: 'u-final',
-    title: 'La courbe en U, en formule fermée',
+    id: 'u-curve',
+    title: 'The U curve, in closed form',
     params: { mu: 2, sigma: 1.5, N: 5, lambda: 0.8, M: 1000 },
     view: 'tradeoff',
     visible: ['lambda', 'N'],
-    notes: `EQM(λ) = 2(1−λ)²μ² + 2λ²σ²/N — tout est exact ici, pas de Monte
-Carlo. Le minimum λ* = μ²/(μ²+σ²/N) est STRICTEMENT inférieur à 1 :
-l'estimateur optimal est toujours (un peu) biaisé. Déplacer λ sur sa
-ligne jaune jusqu'à λ* (ligne verte). Monter N : λ* → 1. C'est la même
-courbe en U que ridge dans la régression polynomiale — même idée,
-habillage différent.`,
+    notes: `MSE(λ) = 2(1−λ)²μ² + 2λ²σ²/N, and everything on this view is exact —
+no Monte Carlo anywhere. The minimum sits at λ* = μ²/(μ²+σ²/N), which is
+strictly below 1: the optimal estimator is always somewhat biased, and that is
+an algebraic fact rather than an accident of the data.
+
+Sliding λ along its yellow line to the green one makes the minimum concrete,
+and raising N pushes λ* toward 1. The same U curve returns as ridge regression
+in the polynomial-fit experiment — one idea, two costumes.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

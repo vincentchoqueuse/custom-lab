@@ -2,8 +2,8 @@
 // information gives Var(μ̂) ≥ σ²/N for any unbiased estimator. Three
 // candidates estimated over M repeated experiments:
 //   x̄           attains the bound (efficient)
-//   médiane      asymptotic variance πσ²/2N — efficiency 2/π ≈ 63.7%
-//   mi-étendue   (min+max)/2 — variance ~ σ²·π²/(24·ln N): efficiency → 0
+//   median       asymptotic variance πσ²/2N — efficiency 2/π ≈ 63.7%
+//   midrange     (min+max)/2 — variance ~ σ²·π²/(24·ln N): efficiency → 0
 // Views feed on the empirical variances across N (log-log against the CRB
 // line), the sampling distributions at the pill's N with the best-possible
 // N(μ, σ²/N) density, and the efficiency CRB/Var vs N.
@@ -98,14 +98,14 @@ export function compute({ mu, sigma, N, M, seed }) {
       effMean: { x: gx, y: effOf(v1) },
       effMedian: { x: gx, y: effOf(v2) },
       effMidrange: { x: gx, y: effOf(v3) },
-      crbValue: { value: crbPill, meta: { label: 'borne sur Var(μ̂) = σ²/N', precision: 4 } },
+      crbValue: { value: crbPill, meta: { label: 'bound on Var(μ̂) = σ²/N', precision: 4 } },
       effMeanS: {
         value: crbPill / variance(d1),
-        meta: { label: 'efficacité de x̄', precision: 3 },
+        meta: { label: 'efficiency of x̄', precision: 3 },
       },
       effMedianS: {
         value: crbPill / variance(d2),
-        meta: { label: 'efficacité de la médiane', precision: 3 },
+        meta: { label: 'efficiency of the median', precision: 3 },
       },
     },
   };

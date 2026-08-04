@@ -6,15 +6,15 @@ export default {
   id: 'uniform-bound',
   order: 3,
   random: true,
-  title: 'Estimer la borne d\'une loi uniforme',
-  subtitle: 'X ~ U[0, θ] : max, max+min ou 2x̄ — trois estimateurs de θ',
-  tags: ['estimateur', 'biais', 'EQM', 'uniforme', 'statistique d\'ordre'],
+  title: 'Estimating the bound of a uniform',
+  subtitle: 'X ~ U[0, θ]: max, max+min or 2x̄ — three estimators of θ',
+  tags: ['estimator', 'bias', 'MSE', 'uniform', 'order statistic'],
 
   params: {
-    theta: float('θ', { description: 'borne droite vraie', min: 0.5, max: 10, step: 0.1, default: 5 }),
-    N: int('N', { description: 'taille d\'échantillon', min: 2, max: 200, default: 10 }),
+    theta: float('θ', { description: 'true upper bound', min: 0.5, max: 10, step: 0.1, default: 5 }),
+    N: int('N', { description: 'sample size', min: 2, max: 200, default: 10 }),
     M: int('M', {
-      description: 'nombre d\'expériences répétées',
+      description: 'number of repeated experiments',
       min: 100,
       max: 20000,
       step: 100,
@@ -24,16 +24,16 @@ export default {
   },
 
   derived: {
-    biasMax: { label: 'biais du max = −θ/(N+1)', calc: (p) => (-p.theta / (p.N + 1)).toFixed(3) },
+    biasMax: { label: 'bias of the max = −θ/(N+1)', calc: (p) => (-p.theta / (p.N + 1)).toFixed(3) },
     ratio: {
-      label: 'EQM(2x̄)/EQM(max) = (N+1)(N+2)/6N',
+      label: 'MSE(2x̄)/MSE(max) = (N+1)(N+2)/6N',
       calc: (p) => (((p.N + 1) * (p.N + 2)) / (6 * p.N)).toFixed(2),
     },
   },
 
   groups: [
-    { title: 'Modèle', params: ['theta'] },
-    { title: 'Échantillonnage répété', params: ['N', 'M'] },
+    { title: 'Model', params: ['theta'] },
+    { title: 'Repeated sampling', params: ['N', 'M'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -42,32 +42,32 @@ export default {
     // One concrete sample: the data rug and where the three candidates land.
     view(
       'realization',
-      'Une réalisation',
+      'One realization',
       scatter('samplePoints', {
         color: '#0072BD',
         size: 4,
         opacity: 0.75,
-        label: 'échantillon',
+        label: 'sample',
         overlays: [
           vline('est1', { color: '#D95319', width: 2, label: 'max' }),
           vline('est2', { color: '#77AC30', width: 2, label: 'max+min' }),
           vline('est3', { color: '#7E2F8E', width: 2, label: '2x̄' }),
           vline((p) => p.theta, { color: '#EDB120', dashed: true, width: 2, label: 'θ' }),
         ],
-        // Légende à GAUCHE : les trois estimateurs tombent forcément près de
-        // θ, donc à droite du cadre, exactement là où la légende se pose par
-        // défaut — elle leur passait dessus. À gauche il n'y a que le rug.
+        // Legend on the LEFT: the three estimators necessarily land near θ,
+        // hence on the right of the frame, exactly where the legend sits by
+        // default — it used to cover them. On the left there is only the rug.
         legend: 'left',
-        // l'ordonnée ne mesure rien : les points sont sur une seule ligne,
-        // et la graduer laisserait chercher un sens qui n'existe pas
-        // L'abscisse PART DE 0, parce que le support est [0, θ] : un cadre
-        // qui commence au plus petit échantillon laisse croire que les
-        // estimateurs visent le bord d'un intervalle flottant. La borne
-        // haute, elle, reste automatique — 2x̄ peut dépasser θ (jusqu'à 2θ
-        // à N = 2), et la figer l'aurait coupé du cadre.
+        // The y axis measures nothing: the points sit on a single line, and
+        // graduating it would invite a reading that does not exist.
+        // The x axis STARTS AT 0, because the support is [0, θ]: a frame
+        // starting at the smallest sample suggests the estimators are aiming
+        // at the edge of a floating interval. The upper end stays automatic —
+        // 2x̄ can exceed θ (up to 2θ at N = 2), and pinning it would have cut
+        // the estimator out of the frame.
         axes: {
           x: { label: 'x', domain: [0, null] },
-          y: { label: 'échantillon', domain: [0, 1], ticks: false },
+          y: { label: 'sample', domain: [0, 1], ticks: false },
         },
       })
     ),
@@ -84,7 +84,7 @@ export default {
           histogram('t3', { color: '#7E2F8E', opacity: 0.45, label: '2x̄' }),
           vline((p) => p.theta, { color: '#EDB120', dashed: true, width: 2, label: 'θ' }),
         ],
-        axes: { x: 'valeur de l\'estimateur', y: 'densité' },
+        axes: { x: 'estimator value', y: 'density' },
       })
     ),
 

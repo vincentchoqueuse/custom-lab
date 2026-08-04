@@ -6,32 +6,32 @@ export default {
   id: 'confidence-intervals',
   order: 6,
   random: true,
-  title: 'Intervalles de confiance',
-  subtitle: 'Couverture fréquentiste et largeur des IC',
-  tags: ['fréquentiste', 'IC', 'Student'],
+  title: 'Confidence intervals',
+  subtitle: 'Frequentist coverage and the width of the interval',
+  tags: ['frequentist', 'interval', 'Student'],
 
   params: {
-    mu: float('μ', { description: 'moyenne vraie', min: 0, max: 10, step: 0.1, default: 5 }),
-    sigma: float('σ', { description: 'écart-type', min: 0.5, max: 5, step: 0.1, default: 2 }),
-    N: int('N', { description: "taille d'échantillon", min: 2, max: 200, default: 30 }),
-    M: int('M', { description: "nombre d'IC", min: 10, max: 100, default: 40 }),
+    mu: float('μ', { description: 'true mean', min: 0, max: 10, step: 0.1, default: 5 }),
+    sigma: float('σ', { description: 'standard deviation', min: 0.5, max: 5, step: 0.1, default: 2 }),
+    N: int('N', { description: 'sample size', min: 2, max: 200, default: 30 }),
+    M: int('M', { description: 'number of intervals', min: 10, max: 100, default: 40 }),
     conf: float('1−α', {
-      description: 'niveau de confiance visé',
+      description: 'target confidence level',
       min: 0.8,
       max: 0.99,
       step: 0.01,
       default: 0.95,
       precision: 2,
     }),
-    known: select('σ connue ?', {
+    known: select('σ known?', {
       options: [
-        { value: false, label: 'non — IC de Student' },
-        { value: true, label: 'oui — IC gaussien' },
+        { value: false, label: 'no — Student interval' },
+        { value: true, label: 'yes — Gaussian interval' },
       ],
       default: false,
     }),
     dof: readonly('ν', {
-      description: 'degrés de liberté',
+      description: 'degrees of freedom',
       visibleIf: { known: false },
       calc: (p) => p.N - 1,
     }),
@@ -39,8 +39,8 @@ export default {
   },
 
   validate: [
-    { when: (p) => p.N < 2, message: 'N doit être ≥ 2' },
-    { when: (p) => p.M * p.N > 1e7, message: 'M×N trop grand pour rester fluide' },
+    { when: (p) => p.N < 2, message: 'N must be ≥ 2' },
+    { when: (p) => p.M * p.N > 1e7, message: 'M×N too large to stay responsive' },
   ],
 
   derived: {
@@ -48,8 +48,8 @@ export default {
   },
 
   groups: [
-    { title: 'Modèle', params: ['mu', 'sigma', 'known', 'dof'] },
-    { title: 'Échantillonnage', params: ['N', 'M', 'conf'] },
+    { title: 'Model', params: ['mu', 'sigma', 'known', 'dof'] },
+    { title: 'Sampling', params: ['N', 'M', 'conf'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -57,26 +57,26 @@ export default {
   views: [
     // CUSTOM view — justification: the M stacked horizontal CI segments with
     // per-interval hit/miss coloring fit no generic plot type.
-    custom('realizations', 'Réalisations', () => import('./views/Realizations.svelte')),
+    custom('realizations', 'Realizations', () => import('./views/Realizations.svelte')),
 
     view(
       'distribution',
-      'Distribution de x̄',
+      'Distribution of x̄',
       histogram('means', {
         overlays: [
           density('theoreticalDensity', { color: '#D95319' }),
           vline('mu', { color: '#EDB120', dashed: true, label: 'μ' }),
         ],
-        axes: { x: 'x̄', y: 'fréquence' },
+        axes: { x: 'x̄', y: 'frequency' },
       })
     ),
 
     view(
       'coverage',
-      'Couverture vs N',
+      'Coverage vs N',
       line('coverageVsN', {
         overlays: [hline((p) => p.conf, { dashed: true, label: '1−α' })],
-        axes: { x: 'N', y: 'couverture empirique' },
+        axes: { x: 'N', y: 'empirical coverage' },
       })
     ),
   ],

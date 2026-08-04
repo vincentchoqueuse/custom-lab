@@ -6,34 +6,34 @@ export default {
   id: 'cramer-rao',
   order: 5,
   random: true,
-  title: 'Borne de Cramér-Rao',
+  title: 'The Cramér–Rao bound',
   subtitle:
-    'Estimer μ à partir de N tirages gaussiens : aucun estimateur ne descend sous σ²/N',
-  tags: ['Cramér-Rao', 'information de Fisher', 'efficacité', 'estimateur'],
+    'Estimating μ from N Gaussian draws: no estimator gets below σ²/N',
+  tags: ['Cramér–Rao', 'Fisher information', 'efficiency', 'estimator'],
 
   params: {
     mu: float('μ', {
-      description: 'LE paramètre à estimer — moyenne vraie de la population',
+      description: 'THE parameter to estimate — true population mean',
       min: 0,
       max: 5,
       step: 0.1,
       default: 2,
     }),
     sigma: float('σ', {
-      description: 'écart-type vrai, supposé CONNU (seul μ est estimé)',
+      description: 'true standard deviation, assumed KNOWN (only μ is estimated)',
       min: 0.5,
       max: 3,
       step: 0.1,
       default: 1.5,
     }),
     N: int('N', {
-      description: 'nombre de tirages X₁…X_N observés à chaque expérience',
+      description: 'draws X₁…X_N observed in each experiment',
       min: 2,
       max: 200,
       default: 20,
     }),
     M: int('M', {
-      description: 'nombre d\'expériences répétées',
+      description: 'number of repeated experiments',
       min: 100,
       max: 10000,
       step: 100,
@@ -43,17 +43,17 @@ export default {
   },
 
   derived: {
-    modele: {
-      label: 'modèle',
-      calc: (p) => `X ~ N(μ = ${p.mu}, σ² = ${(p.sigma ** 2).toFixed(2)}) — on estime μ`,
+    model: {
+      label: 'model',
+      calc: (p) => `X ~ N(μ = ${p.mu}, σ² = ${(p.sigma ** 2).toFixed(2)}) — μ is estimated`,
     },
     fisher: { label: 'information I(μ) = N/σ²', calc: (p) => (p.N / p.sigma ** 2).toFixed(3) },
-    effMedTh: { label: 'efficacité asymptotique de la médiane : 2/π', calc: () => (2 / Math.PI).toFixed(3) },
+    effMedTh: { label: 'asymptotic efficiency of the median: 2/π', calc: () => (2 / Math.PI).toFixed(3) },
   },
 
   groups: [
     { title: 'Population', params: ['mu', 'sigma'] },
-    { title: 'Échantillonnage répété', params: ['N', 'M'] },
+    { title: 'Repeated sampling', params: ['N', 'M'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -62,13 +62,13 @@ export default {
     // the floor: empirical variances against σ²/N in log-log
     view(
       'variance',
-      'Variance de μ̂ vs N',
+      'Variance of μ̂ vs N',
       line('varMean', {
         width: 2.2,
-        label: 'μ̂ = x̄ (moyenne)',
+        label: 'μ̂ = x̄ (mean)',
         overlays: [
-          line('varMedian', { color: '#77AC30', width: 2.2, label: 'μ̂ = médiane' }),
-          line('varMidrange', { color: '#7E2F8E', width: 2.2, label: 'μ̂ = mi-étendue' }),
+          line('varMedian', { color: '#77AC30', width: 2.2, label: 'μ̂ = median' }),
+          line('varMidrange', { color: '#7E2F8E', width: 2.2, label: 'μ̂ = midrange' }),
           line('crbLine', { color: '#EDB120', width: 2, dashed: true, label: 'CRB = σ²/N' }),
         ],
         axes: { x: { label: 'N', scale: 'log' }, y: { label: 'Var(μ̂)', scale: 'log' } },
@@ -81,28 +81,28 @@ export default {
       histogram('dMean', {
         color: '#0072BD',
         opacity: 0.55,
-        label: 'μ̂ = x̄ (moyenne)',
+        label: 'μ̂ = x̄ (mean)',
         overlays: [
-          histogram('dMedian', { color: '#77AC30', opacity: 0.45, label: 'μ̂ = médiane' }),
-          histogram('dMidrange', { color: '#7E2F8E', opacity: 0.35, label: 'μ̂ = mi-étendue' }),
-          density('bestPdf', { color: '#EDB120', width: 2.2, label: 'N(μ, σ²/N) — la loi du meilleur μ̂' }),
+          histogram('dMedian', { color: '#77AC30', opacity: 0.45, label: 'μ̂ = median' }),
+          histogram('dMidrange', { color: '#7E2F8E', opacity: 0.35, label: 'μ̂ = midrange' }),
+          density('bestPdf', { color: '#EDB120', width: 2.2, label: 'N(μ, σ²/N) — the distribution of the best μ̂' }),
           vline((p) => p.mu, { color: '#EDB120', dashed: true, width: 1.6 }),
         ],
-        axes: { x: 'μ̂', y: 'densité' },
+        axes: { x: 'μ̂', y: 'density' },
       })
     ),
 
     // efficiency CRB/Var: 1 for the mean, 2/π for the median, → 0 beyond
     view(
       'efficiency',
-      'Efficacité de μ̂ vs N',
+      'Efficiency of μ̂ vs N',
       line('effMean', {
         width: 2.2,
-        label: 'μ̂ = x̄ (moyenne)',
+        label: 'μ̂ = x̄ (mean)',
         overlays: [
-          line('effMedian', { color: '#77AC30', width: 2.2, label: 'μ̂ = médiane' }),
-          line('effMidrange', { color: '#7E2F8E', width: 2.2, label: 'μ̂ = mi-étendue' }),
-          hline(() => 1, { color: '#EDB120', dashed: true, width: 1.6, label: 'efficace (touche la borne)' }),
+          line('effMedian', { color: '#77AC30', width: 2.2, label: 'μ̂ = median' }),
+          line('effMidrange', { color: '#7E2F8E', width: 2.2, label: 'μ̂ = midrange' }),
+          hline(() => 1, { color: '#EDB120', dashed: true, width: 1.6, label: 'efficient (reaches the bound)' }),
           hline(() => 2 / Math.PI, { color: '#77AC30', dashed: true, width: 1.3, label: '2/π' }),
         ],
         axes: { x: { label: 'N', scale: 'log' }, y: { label: 'CRB / Var(μ̂)', domain: [0, 1.15] } },

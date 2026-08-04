@@ -48,7 +48,7 @@
       {xs}
       {ys}
       xAxis={{ label: 'x' }}
-      yAxis={{ label: 'échantillon m' }}
+      yAxis={{ label: 'sample m' }}
       w={iw}
       h={ih}
       {k}
