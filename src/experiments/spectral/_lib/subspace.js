@@ -17,64 +17,13 @@
 // interdit les tableaux d'objets sur les chemins critiques.
 //
 // PURE : pas de DOM, pas d'état. Importable depuis compute.js et check.js.
-
-/**
- * Valeurs et vecteurs propres d'une matrice SYMÉTRIQUE RÉELLE n×n, par
- * rotations de Jacobi cycliques.
- *
- * Jacobi et pas QR : la matrice est petite (2M ≤ 64), la convergence est
- * garantie sans décalage ni cas particulier, et surtout le résultat est
- * exact au sens où on peut le vérifier — l'orthogonalité est maintenue par
- * construction puisqu'on n'applique que des rotations.
- *
- * @param {Float64Array} a  n×n en ligne majeure — MODIFIÉE en place
- * @returns {{values: Float64Array, vectors: Float64Array}} vecteurs en
- *          COLONNES : v_k[i] = vectors[i*n + k]
- */
-export function jacobiSym(a, n) {
-  const v = new Float64Array(n * n);
-  for (let i = 0; i < n; i++) v[i * n + i] = 1;
-
-  for (let sweep = 0; sweep < 100; sweep++) {
-    let off = 0;
-    for (let p = 0; p < n; p++)
-      for (let q = p + 1; q < n; q++) off += a[p * n + q] * a[p * n + q];
-    if (off < 1e-30) break;
-
-    for (let p = 0; p < n - 1; p++) {
-      for (let q = p + 1; q < n; q++) {
-        const apq = a[p * n + q];
-        if (Math.abs(apq) < 1e-300) continue;
-        const theta = (a[q * n + q] - a[p * n + p]) / (2 * apq);
-        const t =
-          Math.sign(theta || 1) / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
-        const c = 1 / Math.sqrt(t * t + 1);
-        const s = t * c;
-        for (let k = 0; k < n; k++) {
-          const akp = a[k * n + p];
-          const akq = a[k * n + q];
-          a[k * n + p] = c * akp - s * akq;
-          a[k * n + q] = s * akp + c * akq;
-        }
-        for (let k = 0; k < n; k++) {
-          const apk = a[p * n + k];
-          const aqk = a[q * n + k];
-          a[p * n + k] = c * apk - s * aqk;
-          a[q * n + k] = s * apk + c * aqk;
-        }
-        for (let k = 0; k < n; k++) {
-          const vkp = v[k * n + p];
-          const vkq = v[k * n + q];
-          v[k * n + p] = c * vkp - s * vkq;
-          v[k * n + q] = s * vkp + c * vkq;
-        }
-      }
-    }
-  }
-  const values = new Float64Array(n);
-  for (let i = 0; i < n; i++) values[i] = a[i * n + i];
-  return { values, vectors: v };
-}
+//
+// Le Jacobi symétrique réel qui sert de socle a rejoint core/numeric.js le
+// jour où un second sujet en a eu besoin (filtrage adaptatif : le
+// conditionnement de la matrice d'autocorrélation EST la vitesse de LMS).
+// C'est la règle du projet : ce qui sert à UN sujet vit avec lui, ce qui
+// sert à plusieurs monte dans le cœur.
+import { jacobiSym } from '../../../core/numeric.js';
 
 /**
  * Valeurs et vecteurs propres d'une matrice HERMITIENNE complexe M×M,
