@@ -1,6 +1,6 @@
 import { compute, fit } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
-import { solveLinearSystem } from '../../../core/numeric.js';
+import { solveLinearSystem } from '../../../core/linalg.js';
 
 const BASE = { a: 1.5, b: 1, sigma: 1, N: 20, spread: 3, outlier: 0, seed: 34 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;

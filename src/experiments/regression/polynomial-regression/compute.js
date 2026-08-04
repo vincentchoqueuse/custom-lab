@@ -11,7 +11,8 @@
 // solved by core/numeric.js's pivoted Gaussian elimination. On [-1, 1] the
 // normal equations stay well within float64 accuracy for d ≤ 9.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-import { solveLinearSystem, polyval } from '../../../core/numeric.js';
+import { ridgeSolve } from '../../../core/linalg.js';
+import { polyval } from '../../../core/numeric.js';
 
 // λ grid of the Monte Carlo sweep — must span the manifest's [min, max]
 const L_GRID = Array.from({ length: 21 }, (_, g) => 10 ** (-3 + (6 * g) / 20));
@@ -36,15 +37,11 @@ function normalEquations(x, y, K) {
   return { XtX, rhs: Array.from(rhs) };
 }
 
-/** Solve (XᵀX + λD) a = rhs without mutating XtX; λ = 0 gives plain LS. */
-function ridgeSolve(XtX, rhs, lam) {
-  const A = XtX.map((row, j) => {
-    const r = row.slice();
-    if (j > 0) r[j] += lam;
-    return r;
-  });
-  return solveLinearSystem(A, rhs.slice());
-}
+// La résolution ridge vient du cœur : `skipFirst` laisse le terme constant
+// hors de la pénalité, ce qui est la convention — pénaliser l'ordonnée à
+// l'origine ferait préférer les modèles passant près de zéro, donc dépendre
+// de l'endroit où l'on a placé l'origine.
+const solveRidge = (XtX, rhs, lam) => ridgeSolve(XtX, rhs, lam, { skipFirst: true });
 
 /**
  * @param {{a0: number, a1: number, a2: number, a3: number, d: number,
@@ -67,8 +64,8 @@ export function compute({ a0, a1, a2, a3, d, N, sigma, lambda, seed }) {
   }
 
   const { XtX, rhs } = normalEquations(x, y, K);
-  const aHat = ridgeSolve(XtX, rhs, 0);
-  const aRidge = ridgeSolve(XtX, rhs, lambda);
+  const aHat = solveRidge(XtX, rhs, 0);
+  const aRidge = solveRidge(XtX, rhs, lambda);
 
   // residual RMSE of both fits
   const rmseOf = (a) => {
@@ -127,7 +124,7 @@ export function compute({ a0, a1, a2, a3, d, N, sigma, lambda, seed }) {
     predSq.fill(0);
     err2.fill(0);
     for (let m = 0; m < MC; m++) {
-      const a = ridgeSolve(XtX, mcRhs[m], L_GRID[g]);
+      const a = solveRidge(XtX, mcRhs[m], L_GRID[g]);
       for (let i = 0; i < N; i++) {
         const p = polyval(a, x[i]);
         pred[i] += p;

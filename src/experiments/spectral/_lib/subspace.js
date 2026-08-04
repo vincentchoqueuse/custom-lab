@@ -18,12 +18,12 @@
 //
 // PURE : pas de DOM, pas d'état. Importable depuis compute.js et check.js.
 //
-// Le Jacobi symétrique réel qui sert de socle a rejoint core/numeric.js le
+// Le Jacobi symétrique réel qui sert de socle a rejoint core/linalg.js le
 // jour où un second sujet en a eu besoin (filtrage adaptatif : le
 // conditionnement de la matrice d'autocorrélation EST la vitesse de LMS).
 // C'est la règle du projet : ce qui sert à UN sujet vit avec lui, ce qui
 // sert à plusieurs monte dans le cœur.
-import { jacobiSym } from '../../../core/numeric.js';
+import { jacobiSym } from '../../../core/linalg.js';
 
 /**
  * Valeurs et vecteurs propres d'une matrice HERMITIENNE complexe M×M,

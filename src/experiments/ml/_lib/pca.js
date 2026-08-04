@@ -9,7 +9,7 @@
 //
 // PURE, sans état, sans DOM. Importable depuis compute.js ET check.js.
 
-import { jacobiSym } from '../../../core/numeric.js';
+import { jacobiSym } from '../../../core/linalg.js';
 
 /** Moyenne de chaque colonne. */
 export function colMeans(X, n, p) {

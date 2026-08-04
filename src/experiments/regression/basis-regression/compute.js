@@ -9,7 +9,7 @@
 // ever falls with M, test error is U-shaped with a σ² floor.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-import { solveLinearSystem } from '../../../core/numeric.js';
+import { normalEquations, ridgeSolve } from '../../../core/linalg.js';
 
 const NG = 300; // dense display grid
 const N_TEST = 200;
@@ -40,22 +40,15 @@ function makeBasis(basis, M, ell) {
 
 /** Ridge-stabilized LS fit: (ΦᵀΦ + λI) w = Φᵀy. */
 function fit(phis, xs, ys, lambda) {
-  const M = phis.length;
-  const A = Array.from({ length: M }, () => new Array(M).fill(0));
-  const b = new Array(M).fill(0);
-  const row = new Array(M);
-  for (let i = 0; i < xs.length; i++) {
-    for (let j = 0; j < M; j++) row[j] = phis[j](xs[i]);
-    for (let j = 0; j < M; j++) {
-      b[j] += ys[i] * row[j];
-      for (let l = j; l < M; l++) A[j][l] += row[j] * row[l];
-    }
-  }
-  for (let j = 0; j < M; j++) {
-    for (let l = 0; l < j; l++) A[j][l] = A[l][j];
-    A[j][j] += lambda;
-  }
-  return solveLinearSystem(A, b);
+  const { AtA, Aty } = normalEquations(
+    xs.length,
+    phis.length,
+    (i, row) => {
+      for (let j = 0; j < phis.length; j++) row[j] = phis[j](xs[i]);
+    },
+    ys
+  );
+  return ridgeSolve(AtA, Aty, lambda);
 }
 
 const mseOf = (phis, w, xs, ys) => {
