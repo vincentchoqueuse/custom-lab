@@ -9,6 +9,21 @@
 //     must never produce an invalid state or a crash);
 //   - readable format: no escaping needed by construction, commas for lists.
 
+/**
+ * `decodeURIComponent` THROWS on a truncated escape ('%E0%A4%A'), and a link cut
+ * short by a chat client or a slide is exactly the case the contract above
+ * promises to survive. The raw text is the honest fallback: a param that then
+ * fails its cast falls back to its default, which is the intended behaviour
+ * rather than a white screen.
+ */
+function decodeSafe(s) {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+}
+
 /** @returns {{path: string, query: Object<string, string>}} */
 export function parseHash(hash) {
   const h = (hash || '').replace(/^#\/?/, '');
@@ -19,11 +34,31 @@ export function parseHash(hash) {
     for (const pair of h.slice(qi + 1).split('&')) {
       if (!pair) continue;
       const eq = pair.indexOf('=');
-      const k = decodeURIComponent(eq < 0 ? pair : pair.slice(0, eq));
-      query[k] = eq < 0 ? '' : decodeURIComponent(pair.slice(eq + 1));
+      const k = decodeSafe(eq < 0 ? pair : pair.slice(0, eq));
+      query[k] = eq < 0 ? '' : decodeSafe(pair.slice(eq + 1));
     }
   }
   return { path, query };
+}
+
+/**
+ * A number, or undefined — STRICTLY.
+ *
+ * `parseFloat` and `parseInt` stop at the first character they cannot read, so
+ * '12abc' came back as 12 and '0x10' as 0. Both are IN BOUNDS, so nothing
+ * downstream objected: the URL said one thing and the plot showed another,
+ * silently. A σ of 0 read from '0x10' is a flat curve with no explanation.
+ *
+ * Only decimal syntax is a number here — sign, digits, fraction, exponent.
+ * Everything else falls back to the default, which is what the contract at the
+ * top of this file promises. Exponent notation stays in: `?snr=1e-3` is a value
+ * a lecturer types.
+ */
+const DECIMAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+
+function toNumber(str) {
+  const s = String(str).trim();
+  return DECIMAL.test(s) ? Number(s) : undefined;
 }
 
 /**
@@ -34,8 +69,11 @@ export function castParam(spec, str) {
   switch (spec.type) {
     case 'int':
     case 'seed': {
-      const v = parseInt(str, 10);
-      if (!Number.isFinite(v)) return undefined;
+      const v = toNumber(str);
+      // '30.7' is a number and not an int: the URL asks for something the
+      // param cannot hold, so the default wins rather than a silent trunca-
+      // tion to 30.
+      if (v === undefined || !Number.isInteger(v)) return undefined;
       if (spec.min != null && v < spec.min) return undefined;
       if (spec.max != null && v > spec.max) return undefined;
       return v;
@@ -47,19 +85,17 @@ export function castParam(spec, str) {
       return opt ? opt.value : undefined;
     }
     case 'coeffs': {
-      const parts = String(str)
-        .split(',')
-        .map((s) => parseFloat(s));
-      if (parts.length === 0 || parts.length > (spec.maxLen ?? 8)) return undefined;
-      if (!parts.every((v) => Number.isFinite(v))) return undefined;
+      const parts = String(str).split(',').map(toNumber);
+      if (parts.length > (spec.maxLen ?? 8)) return undefined;
+      if (parts.some((v) => v === undefined)) return undefined;
       return parts;
     }
     case 'readonly':
       return undefined;
     default: {
       // float, log
-      const v = parseFloat(str);
-      if (!Number.isFinite(v)) return undefined;
+      const v = toNumber(str);
+      if (v === undefined) return undefined;
       if (spec.min != null && v < spec.min) return undefined;
       if (spec.max != null && v > spec.max) return undefined;
       return v;
