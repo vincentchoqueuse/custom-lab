@@ -103,20 +103,19 @@ export default {
       'kernel',
       'The window under the microscope',
       line('kernel', {
-        // Deux traits, et l'écart entre eux est la leçon : ce que le tracé
-        // MONTRE, et ce que la théorie DIT pour cette fenêtre à ce N —
-        // TFtd en forme close, maximum raffiné par section dorée, jamais
-        // une valeur tabulée. Ils ne coïncident pas exactement, et c'est
-        // honnête : à 16× de bourrage la grille ne tombe pas sur le sommet
-        // du lobe, donc la lecture passe légèrement en dessous. La statline
-        // chiffre l'écart.
+        // Two strokes, and the gap between them is the lesson: what the plot
+        // SHOWS, and what the theory SAYS for this window at this N — a
+        // closed-form DTFT, maximum refined by golden section, never a tabulated
+        // value. They do not coincide exactly, and that is honest: at 16×
+        // zero-padding the grid does not fall on the top of the lobe, so the
+        // reading passes slightly below. The statline gives the gap a number.
         overlays: [
           hline('sidelobe', { color: '#D95319', dashed: true, width: 1.8, label: 'measured' }),
           hline('sidelobeTheoryLine', { color: '#7E2F8E', dashed: true, width: 1.8, label: 'theory' }),
-          // et OÙ la théorie place ce sommet : avec le niveau, cela fait une
-          // croix sur le lobe. Les deux traits horizontaux se confondent dès
-          // que la lecture est bonne — ce qui est le cas visé, donc un
-          // repère qui ne dépend pas de leur écart est nécessaire.
+          // and WHERE the theory places that peak: together with the level, it
+          // makes a cross on the lobe. The two horizontal strokes coincide as
+          // soon as the reading is good — which is the intended case, so a
+          // marker that does not depend on their gap is necessary.
           vline('sidelobeBinLine', { color: '#7E2F8E', dashed: true, width: 1.2 }),
         ],
         axes: {

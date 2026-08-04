@@ -160,7 +160,7 @@ export function musicPseudo(vec, M, d, f) {
 }
 
 /* ---------------------------------------------------------------------- */
-/* Racines d'un polynôme à coefficients COMPLEXES — pour root-MUSIC        */
+/* Roots of a polynomial with COMPLEX coefficients — for root-MUSIC        */
 /* ---------------------------------------------------------------------- */
 //
 // `control/_lib/lti.js` already has a Durand–Kerner, but with REAL
@@ -390,7 +390,7 @@ export function esprit(vec, M, d) {
   return Float64Array.from(f);
 }
 
-/** A X = B, complexe, par élimination de Gauss avec pivot partiel. */
+/** A X = B, complex, by Gaussian elimination with partial pivoting. */
 export function solveComplex(ar, ai, br, bi, n) {
   const A = { re: Float64Array.from(ar), im: Float64Array.from(ai) };
   const X = { re: Float64Array.from(br), im: Float64Array.from(bi) };
@@ -542,7 +542,7 @@ export function eigComplexSmall(mr, mi, n) {
  * concur are worth more than one path taken on trust.
  *
  * @param {Float64Array} xr, xi  the complex record
- * @param {Float64Array} freqs   fréquences normalisées (cycles/échantillon)
+ * @param {Float64Array} freqs   normalized frequencies (cycles/sample)
  * @returns {{re: Float64Array, im: Float64Array, power: Float64Array,
  *            noise: number, residual: number}}
  */
@@ -551,10 +551,10 @@ export function lsAmplitudes(xr, xi, freqs) {
   const d = freqs.length;
   if (d === 0) return { re: new Float64Array(0), im: new Float64Array(0), power: new Float64Array(0), noise: NaN, residual: NaN };
 
-  // VᴴV (d×d) et Vᴴx (d), formés sans jamais matérialiser V (N×d)
+  // VᴴV (d×d) and Vᴴx (d), formed without ever materializing V (N×d)
   const Ar = new Float64Array(d * d);
   const Ai = new Float64Array(d * d);
-  const br = new Float64Array(d * d); // colonne 0 = Vᴴx, le reste à zéro
+  const br = new Float64Array(d * d); // column 0 = Vᴴx, the rest zero
   const bi = new Float64Array(d * d);
   for (let p = 0; p < d; p++) {
     for (let q = 0; q < d; q++) {

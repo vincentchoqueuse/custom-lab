@@ -16,30 +16,30 @@ const KPAD = 16; // fixed padding for the window-kernel view
 const KBINS = 12; // kernel view span (bins of Fs/N)
 
 /* ------------------------------------------------------------------------ */
-/* La THÉORIE des lobes secondaires — calculée, jamais tabulée               */
+/* The THEORY of the sidelobes — computed, never tabulated                   */
 /* ------------------------------------------------------------------------ */
 //
-// La hauteur du plus haut lobe secondaire est LE chiffre du cours : −13 dB
-// pour la rectangulaire, −31 pour Hann, −43 pour Hamming, −58 pour
-// Blackman. On peut l'écrire au tableau ; on peut aussi le calculer et le
-// confronter à ce que l'écran montre, ce qui est l'objet de l'instrument.
+// The height of the highest sidelobe is THE number of the course: −13 dB for
+// the rectangular window, −31 for Hann, −43 for Hamming, −58 for Blackman. One
+// can write it on the board; one can also compute it and confront it with what
+// the screen shows, which is what the instrument is for.
 //
-// Les quatre fenêtres sont des SOMMES DE COSINUS, w[n] = Σ c_m cos(2πmn/N),
-// et la TFtd d'un cosinus fenêtré est un noyau de Dirichlet décalé :
+// The four windows are SUMS OF COSINES, w[n] = Σ c_m cos(2πmn/N), and the DTFT
+// of a windowed cosine is a shifted Dirichlet kernel:
 //
 //   W(b) = Σ_m (c_m/2)·[D(b−m) + D(b+m)],  D(u) = A(u)·e^{−jπu(N−1)/N}
 //   A(u) = sin(πu)/sin(πu/N),  A(0) = N
 //
-// avec b la fréquence EN BINS de Fs/N. La forme close vaut ce que vaut la
-// somme directe (vérifié à 1e-16 sur les quatre fenêtres et N = 64…1024),
-// mais elle coûte trois termes au lieu de N — ce qui compte, parce que le
-// maximum est cherché par balayage puis raffiné, et qu'un curseur se
-// déplace à 30 Hz.
+// with b the frequency IN BINS of Fs/N. The closed form is worth exactly what
+// the direct sum is worth (verified to 1e-16 over the four windows and
+// N = 64…1024), but it costs three terms instead of N — which matters, because
+// the maximum is found by sweeping and then refined, and a slider moves at
+// 30 Hz.
 //
-// Le résultat DÉPEND DE N, et c'est une honnêteté que la table cache : les
-// −42.7 dB de Hamming sont la limite N → ∞, et à N = 64 la fenêtre est
-// trop courte pour les atteindre (−42.4). La théorie affichée est celle de
-// la fenêtre réellement employée, pas d'une fenêtre idéale.
+// The result DEPENDS ON N, and that is an honesty the table hides: the −42.7 dB
+// of Hamming is the N → ∞ limit, and at N = 64 the window is too short to reach
+// it (−42.4). The theory displayed is that of the window actually used, not of
+// an ideal one.
 const WINDOW_COS = Object.freeze({
   rect: [1],
   hann: [0.5, -0.5],
@@ -72,15 +72,15 @@ export function windowSpectrum(win, N, b) {
 }
 
 /**
- * Hauteur théorique du plus haut lobe secondaire, en dB sous le lobe
- * principal, et sa position en bins. Balayage au 1/64 de bin au-delà du
- * premier zéro, puis section dorée sur le sommet trouvé : la valeur ne
- * dépend donc pas du pas de balayage, contrairement à ce que lit l'écran.
+ * Theoretical height of the highest sidelobe, in dB below the main lobe, and its
+ * position in bins. Sweep at 1/64 of a bin past the first zero, then a golden
+ * section on the peak found: the value therefore does not depend on the sweep
+ * step, unlike what the screen reads.
  */
 export function theoreticalSidelobe(win, N, span = 16) {
   const w0 = windowSpectrum(win, N, 0);
   const step = 1 / 64;
-  // sortir du lobe principal : jusqu'au premier minimum
+  // leave the main lobe: as far as the first minimum
   let prev = w0;
   let edge = step;
   for (let b = step; b < span; b += step) {
@@ -141,7 +141,7 @@ export function compute({ N, pad, f1, df, a2, win }) {
   }
   const ref = sw / 2; // coherent gain: a full-scale sine peaks at 0 dB
 
-  // xw porte déjà la fenêtre : le spectre ne doit pas en remettre une
+  // xw already carries the window: the spectrum must not apply another
   const { re, im } = spectrumComplex(xw, { nfft });
   const mag = magHalf(re, im);
 
@@ -188,10 +188,10 @@ export function compute({ N, pad, f1, df, a2, win }) {
   let sidelobe = DB_FLOOR;
   for (let k = edge; k <= kMax; k++) sidelobe = Math.max(sidelobe, ky[k]);
 
-  // ce que la théorie dit du même chiffre, pour la fenêtre RÉELLEMENT
-  // employée — et l'écart avec ce que le tracé montre, qui est celui du pas
-  // de discrétisation : à 16× de bourrage le sommet du lobe n'est pas
-  // échantillonné, la mesure passe donc légèrement EN DESSOUS de la théorie
+  // what the theory says about the same number, for the window ACTUALLY used —
+  // and the gap with what the plot shows, which is that of the discretization
+  // step: at 16× zero-padding the top of the lobe is not sampled, so the
+  // measurement passes slightly BELOW the theory
   const th = theoreticalSidelobe(win, N);
 
   const enbw = (N * sw2) / (sw * sw);

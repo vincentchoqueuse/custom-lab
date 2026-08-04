@@ -70,10 +70,10 @@ export const checks = [
     name: 'sidelobes: the computed theory matches the literature',
     category: 'numeric',
     run() {
-      // Les quatre chiffres du cours (Harris 1978), retrouvés par le calcul
-      // en forme close et non recopiés dans compute.js. À N = 1024 la
-      // fenêtre est assez longue pour que la valeur asymptotique soit
-      // atteinte, donc la comparaison est légitime à 0.02 dB.
+      // The four numbers of the course (Harris 1978), recovered by the
+      // closed-form computation rather than copied into compute.js. At N = 1024
+      // the window is long enough for the asymptotic value to be reached, so the
+      // comparison is legitimate to 0.02 dB.
       const lit = { rect: -13.26, hann: -31.47, hamming: -42.68, blackman: -58.11 };
       const worst = maxGap(
         Object.keys(lit),
@@ -83,17 +83,17 @@ export const checks = [
       const got = Object.keys(lit)
         .map((w) => `${w} ${theoreticalSidelobe(w, 1024).db.toFixed(2)}`)
         .join(', ');
-      return { ok: worst < 0.02, detail: `${got} — écart max ${worst.toFixed(3)} dB` };
+      return { ok: worst < 0.02, detail: `${got} — max gap ${worst.toFixed(3)} dB` };
     },
   },
   {
     name: 'the closed form equals the direct sum (1e-14)',
     category: 'numeric',
     run() {
-      // La forme close n'est pas une approximation : c'est la même TFtd,
-      // réarrangée en noyaux de Dirichlet décalés. Si elle dérivait, la
-      // « théorie » affichée serait une fiction — donc on l'épingle contre
-      // la définition, sur les quatre fenêtres et trois longueurs.
+      // The closed form is not an approximation: it is the same DTFT,
+      // rearranged into shifted Dirichlet kernels. If it drifted, the displayed
+      // "theory" would be a fiction — so it is pinned against the definition,
+      // over the four windows and three lengths.
       let worst = 0;
       for (const win of ['rect', 'hann', 'hamming', 'blackman']) {
         for (const N of [64, 256, 1024]) {
@@ -117,10 +117,10 @@ export const checks = [
     name: 'the plot reads the right lobe: below theory, and by less and less',
     category: 'numeric',
     run() {
-      // La grille du tracé (16× de bourrage) ne tombe pas sur le sommet du
-      // lobe : la lecture est donc TOUJOURS sous la théorie, et l'écart se
-      // resserre quand la fenêtre s'allonge. Une lecture AU-DESSUS
-      // signalerait un bug de normalisation ou de recherche du lobe.
+      // The plot grid (16× zero-padding) does not fall on the top of the lobe:
+      // the reading is therefore ALWAYS below the theory, and the gap tightens as
+      // the window lengthens. A reading ABOVE would signal a bug in the
+      // normalization or in the lobe search.
       const bad = [];
       for (const win of ['rect', 'hann', 'hamming', 'blackman']) {
         const gaps = [64, 256, 1024].map((N) => {
@@ -130,7 +130,7 @@ export const checks = [
         if (gaps.some((g) => g > 1e-9)) bad.push(`${win}: lu au-dessus de la théorie (${gaps.map((g) => g.toFixed(3))})`);
         if (Math.abs(gaps[2]) > 0.35) bad.push(`${win}: écart ${gaps[2].toFixed(3)} dB encore grand à N=1024`);
       }
-      return { ok: bad.length === 0, detail: bad.length ? bad.join(' · ') : 'lu ≤ théorie sur les 4 fenêtres, resserré à N = 1024' };
+      return { ok: bad.length === 0, detail: bad.length ? bad.join(' · ') : 'read ≤ theory on all 4 windows, tightening at N = 1024' };
     },
   },
 ];

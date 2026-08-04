@@ -5,13 +5,13 @@ import { view, figure, line, vline, hline } from '../../../core/views.js';
 export default {
   id: 'periodogram',
   order: 3,
-  random: true, // du bruit gaussien : l'expérience tire, donc elle a un seed
+  random: true, // Gaussian noise: the experiment draws, so it has a seed
   title: 'The periodogram',
   subtitle: 'Estimating a spectrum in noise — and why a longer record is not enough',
   tags: ['PSD', 'periodogram', 'Welch', 'Bartlett', 'consistency', 'noise'],
 
   params: {
-    method: select('méthode', {
+    method: select('method', {
       description: 'power spectral density estimator',
       options: [
         { value: 'raw', label: 'raw periodogram' },
@@ -43,7 +43,7 @@ export default {
       default: 256,
       visibleIf: { method: ['bartlett', 'welch'] },
     }),
-    win: select('fenêtre', {
+    win: select('window', {
       description: 'window applied to each segment',
       options: [
         { value: 'rect', label: 'rectangular' },
@@ -80,7 +80,7 @@ export default {
       unit: 'Hz',
       precision: 0,
     }),
-    // seed injecté par le cœur, parce que random: true
+    // seed injected by the core, because random: true
   },
 
   validate: [
@@ -104,7 +104,7 @@ export default {
   ],
 
   views: [
-    // Le signal brut : on n'y voit RIEN, et c'est le point de départ.
+    // The raw signal: NOTHING is visible in it, and that is the starting point.
     figure(
       'time',
       line('signal', {
@@ -114,14 +114,14 @@ export default {
       })
     ),
 
-    // Le découpage lui-même, en vue séparée : les fenêtres posées là où
-    // elles tombent, et LEUR SOMME. C'est la vue qui explique pourquoi les
+    // The segmentation itself, as a separate view: the windows laid where they
+    // fall, and THEIR SUM. This is the view that explains why the
     // deux autres donnent ce qu'elles donnent, et elle se lit en quatre
-    // cas — rect/disjoint plate à 1, Hann/disjoint qui ondule jusqu'à 0
-    // (les bords sont jetés), Hann/50 % plate à 1 (COLA, reconstruction
-    // parfaite), rect/50 % plate à 2 (tout compté deux fois, d'où des
-    // segments corrélés). Elle porte donc, à elle seule, la raison d'être
-    // de la fenêtre de Welch.
+    // cases — rect/disjoint flat at 1, Hann/disjoint rippling down to 0 (the
+    // edges are thrown away), Hann/50 % flat at 1 (COLA, perfect
+    // reconstruction), rect/50 % flat at 2 (everything counted twice, hence
+    // correlated segments). It therefore carries, on its own, the reason
+    // Welch's window exists.
     view(
       'segments',
       'Segmentation and overlap',
@@ -130,17 +130,17 @@ export default {
         width: 2.6,
         label: 'sum of the windows',
         overlays: [
-          // estompé, et volontairement : il est là pour rappeler qu'on
-          // découpe QUELQUE CHOSE, pas pour être lu en ordonnée. À pleine
-          // opacité il écrasait les fenêtres, qui sont le sujet.
+          // faded, and deliberately: it is there to recall that SOMETHING is
+          // being cut up, not to be read on the ordinate. At full opacity it
+          // crushed the windows, which are the subject.
           line('zoomSignal', {
             color: '#a1a1aa',
             width: 0.8,
             opacity: 0.3,
             label: 'signal (free scale)',
           }),
-          // une seule série, segments séparés par des NaN : le tracé
-          // générique casse le chemin, donc pas de vue sur mesure
+          // a single series, segments separated by NaNs: the generic plot
+          // breaks the path, so no bespoke view
           line('segWindows', { color: '#0072BD', width: 1.6, label: 'windows' }),
           hline(() => 1, { color: '#a1a1aa', width: 1, dashed: true, label: '1' }),
         ],
@@ -148,9 +148,9 @@ export default {
       })
     ),
 
-    // LA vue. Le périodogramme brut reste en gris derrière l'estimateur
-    // choisi : « regardez l'herbe, et regardez ce que Welch en fait » ne se
-    // dit qu'en voyant les deux en même temps.
+    // THE view. The raw periodogram stays in grey behind the chosen estimator:
+    // "look at the grass, and look at what Welch does to it" can only be said
+    // while seeing both at once.
     figure(
       'spectrum',
       line('psd', {
@@ -169,18 +169,19 @@ export default {
       })
     ),
 
-    // La leçon, en droite : moyenner K segments divise la fluctuation par
-    // √K, et le périodogramme brut est le point K = 1 où l'on reste tant
-    // qu'on ne moyenne pas. Log-log, donc pente −1/2 lisible à la règle.
+    // The lesson, as a straight line: averaging K segments divides the
+    // fluctuation by √K, and the raw periodogram is the K = 1 point one stays at
+    // as long as one does not average. Log-log, so the slope −1/2 can be read
+    // with a ruler.
     view(
       'consistency',
       'Fluctuation vs K',
       line('fluctVsK', {
         width: 2.4,
         label: 'measured spread from bin to bin',
-        // 1/√K est la loi des segments INDÉPENDANTS. Bartlett la suit ; Welch,
-          // dont les segments partagent la moitié de leurs échantillons, se tient
-          // légèrement AU-DESSUS — et c'est vérifié plutôt que promis.
+        // 1/√K is the law of INDEPENDENT segments. Bartlett follows it; Welch,
+          // whose segments share half their samples, sits slightly ABOVE — and
+          // that is verified rather than promised.
           overlays: [
             line('fluctTheory', {
               color: '#D95319',

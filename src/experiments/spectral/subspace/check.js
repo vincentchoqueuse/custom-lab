@@ -14,7 +14,7 @@ import {
 const FS = 1000;
 const BASE = { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2, seed: 34 };
 
-/** Un enregistrement de d exponentielles complexes, sans bruit. */
+/** A record of d complex exponentials, noise-free. */
 const tones = (N, freqs) => {
   const xr = new Float64Array(N);
   const xi = new Float64Array(N);
@@ -32,11 +32,11 @@ export const checks = [
     name: 'eigendecomposition: R·v = λ·v with orthonormal vectors',
     category: 'numeric',
     run() {
-      // La brique dont tout dépend, épinglée par sa DÉFINITION plutôt que
-      // par son résultat : sur des hermitiennes tirées au hasard, le couple
-      // (λ, v) doit satisfaire l'équation aux valeurs propres, et la base
-      // doit être orthonormée. Si l'un des deux lâche, MUSIC et ESPRIT
-      // donneraient des nombres plausibles et faux.
+      // The building block everything depends on, pinned by its DEFINITION
+      // rather than by its result: on randomly drawn Hermitian matrices, the
+      // pair (λ, v) must satisfy the eigenvalue equation, and the basis must be
+      // orthonormal. If either gives way, MUSIC and ESPRIT would return
+      // plausible and wrong numbers.
       const g = gaussFrom(mulberry32(7));
       let worstEig = 0;
       let worstOrtho = 0;
@@ -95,10 +95,10 @@ export const checks = [
     name: 'with no noise, the rank of the covariance IS the number of sources',
     category: 'numeric',
     run() {
-      // La structure sur laquelle repose toute la méthode : d exponentielles
-      // engendrent un sous-espace de dimension exactement d, donc M−d
-      // valeurs propres RIGOUREUSEMENT nulles. C'est une identité, pas une
-      // tendance — et c'est ce qui justifie de parler de « sous-espace bruit ».
+      // The structure the whole method rests on: d exponentials span a subspace
+      // of dimension exactly d, hence M−d STRICTLY zero eigenvalues. That is an
+      // identity, not a tendency — and it is what justifies speaking of a "noise
+      // subspace".
       const bad = [];
       for (const freqs of [[200], [200, 240], [200, 201.2, 330]]) {
         const M = 20;
@@ -107,18 +107,18 @@ export const checks = [
         const top = e.values[0];
         let worst = 0;
         for (let k = freqs.length; k < M; k++) worst = Math.max(worst, Math.abs(e.values[k]) / top);
-        if (worst > 1e-11) bad.push(`d=${freqs.length}: λ résiduelle ${worst.toExponential(2)}`);
+        if (worst > 1e-11) bad.push(`d=${freqs.length}: residual λ ${worst.toExponential(2)}`);
       }
-      return { ok: bad.length === 0, detail: bad.length ? bad.join(' · ') : 'λ_{d+1..M} = 0 à 1e-11 pour d = 1, 2, 3' };
+      return { ok: bad.length === 0, detail: bad.length ? bad.join(' · ') : 'λ_{d+1..M} = 0 to 1e-11 for d = 1, 2, 3' };
     },
   },
   {
     name: 'with no noise, ESPRIT returns the frequencies to machine precision',
     category: 'numeric',
     run() {
-      // ESPRIT ne balaie rien : sa précision n'est pas limitée par une
-      // grille mais par le conditionnement. Sans bruit, l'erreur doit être
-      // celle de l'arithmétique flottante, pas celle d'un pas.
+      // ESPRIT sweeps nothing: its precision is limited not by a grid but by
+      // the conditioning. Noise-free, the error must be that of floating-point
+      // arithmetic, not that of a step.
       const M = 20;
       const worst = maxGap(
         [[200, 240], [200, 203.9], [200, 201.2, 330]],
@@ -137,20 +137,19 @@ export const checks = [
         },
         () => 0
       );
-      return { ok: worst < 1e-8, detail: `erreur max ${worst.toExponential(2)} Hz` };
+      return { ok: worst < 1e-8, detail: `max error ${worst.toExponential(2)} Hz` };
     },
   },
   {
     name: 'with no noise, root-MUSIC reaches the floor of its double root',
     category: 'numeric',
     run() {
-      // Et pas la précision machine, POUR UNE RAISON : le polynôme de
-      // root-MUSIC a des racines DOUBLES sur le cercle unité (z_k et son
-      // conjugué-inverse coïncident quand |z| = 1). Sur une racine de
-      // multiplicité m, l'itération de Durand–Kerner plafonne à ε^{1/m},
-      // soit ≈ 1.5e-8 pour m = 2. Mesuré : quelques 1e-9 en fréquence
-      // normalisée. Prendre 1e-15 ici serait exiger de l'algèbre ce qu'elle
-      // ne peut pas donner ; prendre 1e-2 masquerait une vraie régression.
+      // And not machine precision, FOR A REASON: the root-MUSIC polynomial has
+      // DOUBLE roots on the unit circle (z_k and its conjugate inverse coincide
+      // when |z| = 1). On a root of multiplicity m, the Durand–Kerner iteration
+      // caps at ε^{1/m}, so ≈ 1.5e-8 for m = 2. Measured: a few 1e-9 in
+      // normalized frequency. Taking 1e-15 here would demand of the algebra what
+      // it cannot give; taking 1e-2 would mask a real regression.
       const M = 20;
       const worst = maxGap(
         [[200, 240], [200, 203.9], [200, 201.2, 330]],
@@ -169,15 +168,15 @@ export const checks = [
         },
         () => 0
       );
-      return { ok: worst < 1e-4, detail: `erreur max ${worst.toExponential(2)} Hz (plancher √ε de la racine double)` };
+      return { ok: worst < 1e-4, detail: `max error ${worst.toExponential(2)} Hz (√ε floor of the double root)` };
     },
   },
   {
     name: 'the pseudo-spectrum peaks at the true frequencies',
     category: 'numeric',
     run() {
-      // MUSIC balaie, donc sa précision EST celle de la grille : on lui
-      // demande d'être juste à un pas près, pas mieux.
+      // MUSIC sweeps, so its precision IS that of the grid: it is asked to be
+      // right to within one step, no better.
       const M = 20;
       const freqs = [200, 203.9];
       const { xr, xi } = tones(512, freqs);
@@ -193,16 +192,16 @@ export const checks = [
       const ok =
         peaks.length === 2 &&
         freqs.every((f) => peaks.some((p) => Math.abs(p - f) <= step));
-      return { ok, detail: `${peaks.length} pics : ${peaks.map((p) => p.toFixed(3)).join(', ')} Hz (pas ${step.toFixed(4)})` };
+      return { ok, detail: `${peaks.length} peaks: ${peaks.map((p) => p.toFixed(3)).join(', ')} Hz (step ${step.toFixed(4)})` };
     },
   },
   {
     name: 'THE point: MUSIC separates what the periodogram merges into one hump',
     category: 'numeric',
     run() {
-      // La raison d'être de l'expérience, énoncée comme une vérification :
-      // à 0.3 × Fs/N, le périodogramme n'a QU'UN maximum et le
-      // pseudo-spectre en a DEUX, sur le même enregistrement bruité.
+      // The reason the experiment exists, stated as a verification: at
+      // 0.3 × Fs/N the periodogram has ONLY ONE maximum and the pseudo-spectrum
+      // has TWO, on the same noisy record.
       const { observables: o } = compute({ ...BASE });
       const count = (s, thresh) => {
         let c = 0;
@@ -214,7 +213,7 @@ export const checks = [
       const nM = count(o.pseudo, -20);
       return {
         ok: nP === 1 && nM === 2,
-        detail: `périodogramme ${nP} pic, pseudo-spectre ${nM} pics`,
+        detail: `periodogram ${nP} peak, pseudo-spectrum ${nM} peaks`,
       };
     },
   },
@@ -222,21 +221,21 @@ export const checks = [
     name: 'the eigenvalue plateau is the true noise level 2σ²',
     category: 'statistical',
     run() {
-      // Deux corrections de physique par rapport à ce que j'avais écrit.
+      // Two corrections of physics against what was first written here.
       //
-      // 1. Le niveau n'est pas σ² mais 2σ² : le bruit est complexe
-      //    circulaire et porte σ² PAR QUADRATURE. Trois décibels d'écart,
-      //    invisibles à l'œil sur un plateau et faux quand même.
-      // 2. On ne peut pas exiger que CHAQUE valeur propre du plateau vaille
-      //    2σ². Sur une covariance ESTIMÉE avec L instantanés, les valeurs
-      //    propres du bruit s'étalent selon Marchenko–Pastur, entre
-      //    (1±√(M/L))²·2σ² — soit ici −4.0 à +2.9 dB. Cet étalement est
-      //    physique et se VOIT sur la vue ; c'est la MOYENNE du plateau qui
-      //    vaut 2σ², avec une erreur-type de √(M/L)/√(M−d) ≈ 8 %.
+      // 1. The level is not σ² but 2σ²: the noise is circular complex and
+      //    carries σ² PER QUADRATURE. Three decibels apart, invisible to the
+      //    eye on a plateau and wrong all the same.
+      // 2. One cannot demand that EVERY eigenvalue of the plateau equal 2σ². On
+      //    a covariance ESTIMATED from L snapshots, the noise eigenvalues spread
+      //    according to Marchenko–Pastur, between (1±√(M/L))²·2σ² — here −4.0 to
+      //    +2.9 dB. That spread is physical and SHOWS on the view; it is the
+      //    MEAN of the plateau that equals 2σ², with a standard error of
+      //    √(M/L)/√(M−d) ≈ 8 %.
       const { observables: o } = compute({ ...BASE });
       const M = o.eigenvalues.y.length;
       const L = o.snapshots.value;
-      const plateau = Array.from(o.eigenvalues.y).slice(6); // franchement dans le bruit
+      const plateau = Array.from(o.eigenvalues.y).slice(6); // plainly inside the noise
       const mean = plateau.reduce((a, b) => a + b, 0) / plateau.length;
       const c = Math.sqrt(M / L);
       const edges = [10 * Math.log10((1 - c) ** 2), 10 * Math.log10((1 + c) ** 2)];
@@ -246,8 +245,8 @@ export const checks = [
       return {
         ok: Math.abs(mean - o.noiseLine) < tol && lo > edges[0] - 1.5 && hi < edges[1] + 1.5,
         detail:
-          `moyenne ${(mean - o.noiseLine).toFixed(2)} dB de 2σ² (tol ${tol.toFixed(2)}), ` +
-          `étalement [${lo.toFixed(1)}, ${hi.toFixed(1)}] vs Marchenko–Pastur [${edges[0].toFixed(1)}, ${edges[1].toFixed(1)}]`,
+          `mean ${(mean - o.noiseLine).toFixed(2)} dB from 2σ² (tol ${tol.toFixed(2)}), ` +
+          `spread [${lo.toFixed(1)}, ${hi.toFixed(1)}] vs Marchenko–Pastur [${edges[0].toFixed(1)}, ${edges[1].toFixed(1)}]`,
       };
     },
   },
@@ -255,17 +254,17 @@ export const checks = [
     name: 'getting d wrong: too small loses a source, too large invents one',
     category: 'numeric',
     run() {
-      // Deuxième correction de ma propre pédagogie par la mesure. J'avais
-      // écrit que d trop grand faisait apparaître des « pics fantômes » sur
-      // le pseudo-spectre. C'est faux ici : à d = 5 pour 3 sources, les
-      // ondulations parasites restent 50 dB sous les vrais pics et le tracé
-      // reste propre. MUSIC balayé est INDULGENT à une surestimation de d.
+      // A second correction of the intended pedagogy by measurement. It was
+      // written that a d too large made "phantom peaks" appear on the
+      // pseudo-spectrum. That is false here: at d = 5 for 3 sources, the spurious
+      // ripples stay 50 dB below the real peaks and the trace stays clean. Swept
+      // MUSIC is FORGIVING of an overestimated d.
       //
-      // Ce qui casse, et bien plus nettement, ce sont les estimateurs
-      // PARAMÉTRIQUES : root-MUSIC et ESPRIT rendent exactement d nombres,
-      // donc à d = 5 ils rendent cinq fréquences dont deux ne correspondent
-      // à aucune source — mesuré à 443 et 839 Hz. Un chiffre inventé est
-      // plus dangereux qu'un pic bas, parce qu'il a l'air d'un résultat.
+      // What breaks, and far more plainly, are the PARAMETRIC estimators:
+      // root-MUSIC and ESPRIT return exactly d numbers, so at d = 5 they return
+      // five frequencies of which two match no source — measured at 443 and
+      // 839 Hz. An invented figure is more dangerous than a low peak, because it
+      // looks like a result.
       const peaks = (d) => {
         const { observables: o } = compute({ ...BASE, sources: 3, d, snr: 30 });
         let c = 0;
@@ -287,7 +286,7 @@ export const checks = [
       const s5 = spurious(5);
       return {
         ok: p2 < 3 && p3 === 3 && s3 === 0 && s5 >= 2,
-        detail: `d=2 → ${p2} pics · d=3 → ${p3} pics, ${s3} estimation aberrante · d=5 → ${s5} aberrantes sur 5`,
+        detail: `d=2 → ${p2} peaks · d=3 → ${p3} peaks, ${s3} spurious estimate · d=5 → ${s5} spurious out of 5`,
       };
     },
   },
@@ -295,11 +294,11 @@ export const checks = [
     name: 'with no noise, least squares returns the exact amplitudes',
     category: 'numeric',
     run() {
-      // Une fois les fréquences connues, le modèle est LINÉAIRE : le moindres
-      // carrés n'est donc pas une approximation mais une résolution, et sans
-      // bruit il doit rendre l'amplitude au chiffre près et un résidu nul.
-      // Si cette étape dérivait, tout le « spectre estimé » deviendrait un
-      // dessin plausible et faux.
+      // Once the frequencies are known the model is LINEAR: the least squares is
+      // therefore not an approximation but a solution, and noise-free it must
+      // return the amplitude to the digit and a zero residual. If this step
+      // drifted, the whole "estimated spectrum" would become a plausible and
+      // wrong drawing.
       const N = 256;
       const f = [200 / FS, 203.9 / FS, 330 / FS];
       const A = [1, 0.5, 0.25];
@@ -315,7 +314,7 @@ export const checks = [
       const worst = maxGap(range(3), (k) => Math.sqrt(ls.power[k]), (k) => A[k]);
       return {
         ok: worst < 1e-9 && ls.noise < 1e-20,
-        detail: `|ΔA| ≤ ${worst.toExponential(2)}, résidu ${ls.noise.toExponential(2)}`,
+        detail: `|ΔA| ≤ ${worst.toExponential(2)}, residual ${ls.noise.toExponential(2)}`,
       };
     },
   },
@@ -323,32 +322,31 @@ export const checks = [
     name: 'two INDEPENDENT noise estimates land on the true level',
     category: 'statistical',
     run() {
-      // Le résidu du modèle et la moyenne du plateau des valeurs propres ne
-      // partagent aucun calcul : l'un vient d'un moindres carrés dans le
-      // domaine temporel, l'autre d'une décomposition propre. Qu'ils
-      // concordent, et concordent avec la vérité, est ce qui autorise à dire
-      // que le modèle EXPLIQUE la mesure — et pas seulement qu'il a trouvé
-      // des raies au bon endroit.
+      // The model residual and the mean of the eigenvalue plateau share no
+      // computation: one comes from a least squares in the time domain, the
+      // other from an eigendecomposition. That they agree, and agree with the
+      // truth, is what allows saying the model EXPLAINS the measurement — and
+      // not merely that it found lines in the right place.
       //
-      // Tolérance : l'erreur relative d'une puissance estimée sur N points
-      // est ≈ 1/√N = 6 % à N = 256, soit 0.27 dB ; on prend 4 SE, arrondi
-      // à 1.5 dB pour couvrir aussi la dispersion du plateau.
+      // Tolerance: the relative error of a power estimated over N points is
+      // ≈ 1/√N = 6 % at N = 256, so 0.27 dB; 4 SE are taken, rounded to 1.5 dB
+      // to cover the spread of the plateau as well.
       const bad = [];
       for (const snr of [40, 25, 10]) {
         const { observables: o } = compute({ ...BASE, snr });
-        // les DEUX résidus (un par estimateur) et le plateau, contre la vérité
+        // BOTH residuals (one per estimator) and the plateau, against the truth
         for (const [name, v] of [
           ['root-MUSIC', o.noiseRoot.value],
           ['ESPRIT', o.noiseEsprit.value],
-          ['valeurs propres', o.noiseEigen.value],
+          ['eigenvalues', o.noiseEigen.value],
         ]) {
           if (Math.abs(v - o.noiseRef.value) > 1.5)
-            bad.push(`SNR ${snr}, ${name} : ${v.toFixed(2)} vs vrai ${o.noiseRef.value.toFixed(2)} dB`);
+            bad.push(`SNR ${snr}, ${name}: ${v.toFixed(2)} vs true ${o.noiseRef.value.toFixed(2)} dB`);
         }
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : 'accord à 1.5 dB près à 40, 25 et 10 dB',
+        detail: bad.length ? bad.join(' · ') : 'agreement within 1.5 dB at 40, 25 and 10 dB',
       };
     },
   },
@@ -356,10 +354,10 @@ export const checks = [
     name: 'when the model is wrong, the residual says so — it goes ABOVE',
     category: 'numeric',
     run() {
-      // La propriété qui rend la vue utile plutôt que décorative. Avec d trop
-      // petit, une source entière tombe dans le résidu : l'estimation du
-      // bruit ne peut alors plus être basse, et elle dépasse franchement le
-      // vrai niveau. C'est un diagnostic, et il est gratuit.
+      // The property that makes the view useful rather than decorative. With d
+      // too small an entire source falls into the residual: the noise estimate
+      // then cannot be low, and it plainly exceeds the true level. That is a
+      // diagnostic, and it comes free.
       const ok3 = compute({ ...BASE, sources: 3, d: 3, snr: 30 }).observables;
       const bad3 = compute({ ...BASE, sources: 3, d: 1, snr: 30 }).observables;
       return {
@@ -368,8 +366,8 @@ export const checks = [
           bad3.noiseEsprit.value > ok3.noiseRef.value + 6 &&
           bad3.noiseRoot.value > ok3.noiseRef.value + 6,
         detail:
-          `d juste : ${ok3.noiseEsprit.value.toFixed(2)} dB (vrai ${ok3.noiseRef.value.toFixed(2)}) · ` +
-          `d = 1 : ESPRIT ${bad3.noiseEsprit.value.toFixed(2)}, root-MUSIC ${bad3.noiseRoot.value.toFixed(2)} dB`,
+          `d right: ${ok3.noiseEsprit.value.toFixed(2)} dB (true ${ok3.noiseRef.value.toFixed(2)}) · ` +
+          `d = 1: ESPRIT ${bad3.noiseEsprit.value.toFixed(2)}, root-MUSIC ${bad3.noiseRoot.value.toFixed(2)} dB`,
       };
     },
   },
@@ -377,12 +375,12 @@ export const checks = [
     name: 'the frequency framing no longer depends on N or Δf',
     category: 'numeric',
     run() {
-      // Le cadre est figé POUR que la résolution se voie bouger : si la
-      // fenêtre suivait la limite de Fourier, doubler N rapprocherait les
-      // deux raies et resserrerait le cadre d'autant — elles resteraient à
-      // la même distance à l'écran et l'expérience ne montrerait rien.
-      // Les deux grilles de calcul portent donc les bornes de frame.js,
-      // celles-là mêmes que le manifeste donne à l'axe.
+      // The frame is pinned SO THAT the resolution can be seen to move: if the
+      // window followed the Fourier limit, doubling N would bring the two lines
+      // closer and tighten the frame by as much — they would stay the same
+      // distance apart on screen and the experiment would show nothing. Both
+      // computation grids therefore carry the bounds from frame.js, the very
+      // ones the manifest gives the axis.
       const bad = [];
       for (const N of [128, 256, 512, 1024])
         for (const df of [0.05, 0.5, 3]) {
@@ -392,22 +390,22 @@ export const checks = [
           const span = (a) => [a[0], a[a.length - 1]];
           const [pLo, pHi] = span(px);
           const [gLo, gHi] = span(gx);
-          // le périodogramme vit sur la grille FFT : ses extrémités tombent
-          // dans le premier pas de 1000/4096 Hz après les bornes
+          // the periodogram lives on the FFT grid: its ends fall within the
+          // first step of 1000/4096 Hz after the bounds
           const step = 1000 / 4096;
           if (pLo < F_LO || pLo > F_LO + step || pHi > F_HI || pHi < F_HI - step)
-            bad.push(`N=${N} df=${df} périodogramme ${pLo.toFixed(1)}…${pHi.toFixed(1)}`);
+            bad.push(`N=${N} df=${df} periodogram ${pLo.toFixed(1)}…${pHi.toFixed(1)}`);
           if (Math.abs(gLo - F_LO) > 1e-9 || Math.abs(gHi - F_HI) > 1e-9)
-            bad.push(`N=${N} df=${df} pseudo-spectre ${gLo.toFixed(1)}…${gHi.toFixed(1)}`);
+            bad.push(`N=${N} df=${df} pseudo-spectrum ${gLo.toFixed(1)}…${gHi.toFixed(1)}`);
         }
-      // et la fenêtre s'élargit — une seule fois, sur la configuration à
-      // trois sources — pour loger la raie à l'écart
+      // and the window widens — once only, on the three-source configuration —
+      // to make room for the line off to the side
       const far = compute({ ...BASE, sources: 3, d: 3 }).observables.pseudo.x;
       if (Math.abs(far[far.length - 1] - F_HI_FAR) > 1e-9)
-        bad.push(`3 sources : ${far[far.length - 1].toFixed(1)} au lieu de ${F_HI_FAR}`);
+        bad.push(`3 sources: ${far[far.length - 1].toFixed(1)} instead of ${F_HI_FAR}`);
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.join(' · ') : `${F_LO}–${F_HI} Hz sur 12 réglages, ${F_HI_FAR} à 3 sources`,
+        detail: bad.length ? bad.join(' · ') : `${F_LO}–${F_HI} Hz over 12 settings, ${F_HI_FAR} at 3 sources`,
       };
     },
   },
@@ -415,10 +413,10 @@ export const checks = [
     name: 'an invented frequency gets a number, even outside the frame',
     category: 'numeric',
     run() {
-      // Le cadre étant figé, une raie fantôme à 840 Hz n'étire plus l'axe :
-      // elle sort du champ, et c'est ce chiffre qui la dénonce. Il doit
-      // rester au niveau de l'erreur d'estimation tant que d est juste, et
-      // sauter de plusieurs centaines de hertz dès qu'il ne l'est plus.
+      // With the frame pinned, a phantom line at 840 Hz no longer stretches the
+      // axis: it leaves the field, and this figure is what denounces it. It must
+      // stay at the level of the estimation error while d is right, and jump by
+      // several hundred hertz as soon as it is not.
       const ok = compute({ ...BASE, sources: 3, d: 3 }).observables;
       const over = compute({ ...BASE, sources: 3, d: 5 }).observables;
       return {
@@ -428,8 +426,8 @@ export const checks = [
           over.strayRoot.value > 100 &&
           over.strayEsprit.value > 100,
         detail:
-          `d juste : ${ok.strayRoot.value.toFixed(2)} Hz · ` +
-          `d = 5 : root ${over.strayRoot.value.toFixed(1)}, ESPRIT ${over.strayEsprit.value.toFixed(1)} Hz`,
+          `d right: ${ok.strayRoot.value.toFixed(2)} Hz · ` +
+          `d = 5: root ${over.strayRoot.value.toFixed(1)}, ESPRIT ${over.strayEsprit.value.toFixed(1)} Hz`,
       };
     },
   },
