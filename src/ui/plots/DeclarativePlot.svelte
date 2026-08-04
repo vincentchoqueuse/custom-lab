@@ -117,8 +117,16 @@
     });
   });
 
+  /** Une borne `null` suit les données ; l'autre, si elle est un nombre, tient. */
+  const fixedEnds = (domain) => (Array.isArray(domain) ? domain : [null, null]);
+  const merge = (auto, domain) => {
+    const [lo, hi] = fixedEnds(domain);
+    return [lo ?? auto[0], hi ?? auto[1]];
+  };
+
   const xDomainAuto = $derived.by(() => {
-    if (Array.isArray(xAxis.domain)) return xAxis.domain;
+    const [fLo, fHi] = fixedEnds(xAxis.domain);
+    if (fLo != null && fHi != null) return xAxis.domain;
     // a log scale cannot include 0: non-positive values are excluded from the
     // domain (they are unplottable on that axis anyway)
     const isLog = xAxis.scale === 'log';
@@ -146,17 +154,19 @@
     // BOTH ends must exist: a layer that contributed only one usable edge
     // would otherwise build a scale with an infinite bound, and every
     // pixel computed from it would be NaN.
-    if (!Number.isFinite(lo) || !Number.isFinite(hi)) return isLog ? [0.1, 10] : [0, 1];
+    if (!Number.isFinite(lo) || !Number.isFinite(hi))
+      return merge(isLog ? [0.1, 10] : [0, 1], xAxis.domain);
     if (lo === hi) {
-      if (isLog) return [lo / 2, hi * 2];
+      if (isLog) return merge([lo / 2, hi * 2], xAxis.domain);
       lo -= 1;
       hi += 1;
     }
-    return [lo, hi];
+    return merge([lo, hi], xAxis.domain);
   });
 
   const yDomainAuto = $derived.by(() => {
-    if (Array.isArray(yAxis.domain)) return yAxis.domain;
+    const [fLo, fHi] = fixedEnds(yAxis.domain);
+    if (fLo != null && fHi != null) return yAxis.domain;
     // a log scale cannot include 0: non-positive values are excluded, and
     // padding is multiplicative (additive padding would push lo below zero)
     const isLog = yAxis.scale === 'log';
@@ -189,15 +199,16 @@
     // BOTH ends must exist: a layer that contributed only one usable edge
     // would otherwise build a scale with an infinite bound, and every
     // pixel computed from it would be NaN.
-    if (!Number.isFinite(lo) || !Number.isFinite(hi)) return isLog ? [0.1, 10] : [0, 1];
+    if (!Number.isFinite(lo) || !Number.isFinite(hi))
+      return merge(isLog ? [0.1, 10] : [0, 1], yAxis.domain);
     if (lo === hi) {
-      if (isLog) return [lo / 2, hi * 2];
+      if (isLog) return merge([lo / 2, hi * 2], yAxis.domain);
       lo -= 1;
       hi += 1;
     }
-    if (isLog) return [lo / 1.15, hi * 1.15];
+    if (isLog) return merge([lo / 1.15, hi * 1.15], yAxis.domain);
     const pad = (hi - lo) * 0.06;
-    return [lo === 0 ? 0 : lo - pad, hi + pad];
+    return merge([lo === 0 ? 0 : lo - pad, hi + pad], yAxis.domain);
   });
 
   // Axis lock: the frame is pinned to the domains it had when the lock was

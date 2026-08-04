@@ -60,7 +60,15 @@ export default {
         legend: 'left',
         // l'ordonnée ne mesure rien : les points sont sur une seule ligne,
         // et la graduer laisserait chercher un sens qui n'existe pas
-        axes: { x: 'x', y: { label: 'échantillon', domain: [0, 1], ticks: false } },
+        // L'abscisse PART DE 0, parce que le support est [0, θ] : un cadre
+        // qui commence au plus petit échantillon laisse croire que les
+        // estimateurs visent le bord d'un intervalle flottant. La borne
+        // haute, elle, reste automatique — 2x̄ peut dépasser θ (jusqu'à 2θ
+        // à N = 2), et la figer l'aurait coupé du cadre.
+        axes: {
+          x: { label: 'x', domain: [0, null] },
+          y: { label: 'échantillon', domain: [0, 1], ticks: false },
+        },
       })
     ),
 
