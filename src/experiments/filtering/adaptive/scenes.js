@@ -2,121 +2,117 @@
 export default [
   {
     id: 'converge',
-    title: 'Scène 1 · Un filtre qui apprend',
+    title: 'Scene 1 · A filter that learns',
     view: 'learning',
     params: { algo: 'lms', mu: 0.01, lambda: 1, L: 8, a: 0, snr: 20, n: 3000, track: false },
     visible: ['mu', 'n'],
-    notes: `Le montage : un système inconnu à 8 coefficients, une entrée blanche,
-une sortie bruitée à 20 dB. Le filtre part de ZÉRO et ne voit jamais w*.
+    notes: `The setup: an unknown system with eight coefficients, a white input,
+and an output measured at 20 dB of SNR. The filter starts from ZERO and never
+sees w*.
 
-Balayer n de 1 à 3000 et regarder l'onglet Coefficients : le filtre se
-remplit. Puis revenir ici et lire les deux courbes.
+Sweeping n from 1 to 3000 while watching the coefficients tab shows the filter
+filling in. Back on this tab there are three curves to read:
 
-  bleue    l'EQM qu'on mesurerait vraiment — elle descend et s'arrête
-  orange   l'excès w̃ᵀRw̃, la distance à w*, sans le bruit
-  jaune    le plancher σ² : la bleue ne passera JAMAIS dessous
+  blue     the MSE one would actually measure — it falls and then stops
+  orange   the excess w̃ᵀRw̃, the distance to w*, without the noise
+  yellow   the σ² floor, which the blue curve will NEVER go below
 
-Question à poser avant de bouger μ :
-« Si je double le pas, où va la courbe ? »
-Deux réponses viendront, elles sont toutes les deux vraies et c'est le
-sujet de la scène suivante.`,
+The question before touching μ: if the step is doubled, where does the curve
+go? Two answers will come back, both of them true, and that is the subject of
+the next scene.`,
   },
   {
     id: 'tradeoff',
-    title: 'Scène 2 · Vite ou juste, il faut choisir',
+    title: 'Scene 2 · Fast or accurate, pick one',
     view: 'learning',
     params: { algo: 'lms', mu: 0.05, lambda: 1, L: 8, a: 0, snr: 20, n: 3000, track: false },
     visible: ['mu', 'snr'],
-    notes: `μ = 0.05 : la descente est cinq fois plus rapide (41 itérations pour
-arriver à 3 dB du palier, contre 206), et le palier est cinq fois plus
-haut. C'est UNE loi, pas deux :
+    notes: `At μ = 0.05 the descent is five times faster — 41 iterations to come
+within 3 dB of the plateau against 206 — and the plateau is five times higher.
+That is ONE law, not two:
 
-    désajustement = μ·tr(R) / (2 − μ·tr(R))
+    misadjustment = μ·tr(R) / (2 − μ·tr(R))
 
-La statline donne les deux nombres, mesuré et théorique, et ils tombent
-l'un sur l'autre à quelques pour-cent près. Le faire remarquer : c'est
-une formule de cours qui se vérifie à l'écran, en direct.
+The statline gives both numbers, measured and theoretical, and they land on each
+other within a few per cent. Worth pointing out: a formula from the lecture,
+verified on screen, live.
 
-Puis monter μ vers la divergence, et faire prédire OÙ elle arrive. La
-salle proposera 2/tr(R) = 0.25, la borne des livres. C'est faux, et de
-peu : ça part à 0.195. La borne des livres fait converger la MOYENNE de
-ŵ ; c'est sa VARIANCE qui décide, et sa condition à elle est
-Σ μλᵢ/(1−μλᵢ) < 2, soit 0.200 ici. La statline donne les deux.
+Then push μ toward divergence and have the room predict WHERE it happens. They
+will propose 2/tr(R) = 0.25, the textbook bound. It is wrong, and only just: it
+goes at 0.195. The textbook bound makes the MEAN of ŵ converge; it is the
+VARIANCE that decides, and its own condition is Σ μλᵢ/(1−μλᵢ) < 2, which gives
+0.200 here. The statline shows both.
 
-Au-dessus, la courbe part en ligne droite vers le haut et le régime
-affiche « divergé ». Un filtre adaptatif mal réglé ne se dégrade pas :
-il explose.
+Above that the curve leaves in a straight line upward and the regime reads
+"diverged". A badly tuned adaptive filter does not degrade — it explodes.
 
-Et le pire est pour la scène suivante : ces deux bornes supposent le
-régresseur indépendant du filtre. Sur une entrée corrélée (a = 0.9) le
-seuil réel tombe à 0.037 quand la théorie en annonce 0.104 — un réglage
-« dans les clous » y diverge.
+And the worst is in the next scene: both bounds assume the regressor independent
+of the filter. On a correlated input (a = 0.9) the real threshold falls to 0.037
+where the theory announces 0.104, so a setting that is "within spec" diverges.
 
-Le remède n'est pas de baisser μ — c'est de changer d'algorithme.
-Passer en NLMS : le pas y est SANS UNITÉ, la borne vaut 2 quelle que
-soit la puissance d'entrée. C'est pour ça que personne n'utilise LMS tel
-quel en pratique.`,
+The remedy is not to lower μ but to change algorithm. NLMS makes the step
+DIMENSIONLESS and its bound is 2 whatever the input power, which is why nobody
+uses plain LMS in practice.`,
   },
   {
     id: 'colored',
-    title: 'Scène 3 · L’entrée colorée, ou ce que RLS achète',
+    title: 'Scene 3 · A coloured input, or what RLS buys',
     view: 'learning',
     params: { algo: 'lms', mu: 0.01, lambda: 1, L: 8, a: 0.9, snr: 20, n: 3000, track: false },
     visible: ['a', 'algo'],
-    notes: `Même filtre, même pas, même bruit. Une seule chose a changé : l'entrée
-est corrélée (a = 0.9), à puissance IDENTIQUE — le facteur √(1−a²) est là
-pour ça, sinon on confondrait l'effet du conditionnement avec celui d'un
-pas devenu trop grand.
+    notes: `Same filter, same step, same noise. One thing changed: the input is
+correlated (a = 0.9) at IDENTICAL power — the √(1−a²) factor is there for that,
+otherwise the effect of conditioning would be confused with that of a step grown
+too large.
 
-LMS met 722 itérations à arriver à 3 dB du palier, contre 206 sur
-l'entrée blanche : 3.5 fois plus lent, pour un signal de même
-puissance. La statline dit pourquoi : conditionnement λmax/λmin = 113
-(à L = 8 ; il tend vers ((1+a)/(1−a))² = 361 quand L grandit). Chaque
-mode propre converge à sa propre vitesse, et le plus lent tient tout le
-monde.
+LMS takes 722 iterations to come within 3 dB of the plateau, against 206 on the
+white input: three and a half times slower for a signal of the same power. The
+statline says why — a conditioning λmax/λmin of 113 at L = 8, tending to
+((1+a)/(1−a))² = 361 as L grows. Each eigenmode converges at its own rate, and
+the slowest holds everyone up.
 
-Aller voir le plan des poids avec L = 2 : les cercles sont devenus des
-ellipses, et la descente zigzague au lieu de plonger. C'est la MÊME
-information, en géométrie.
+The weight plane at L = 2 says the same thing geometrically: the circles have
+become ellipses, and the descent zigzags instead of diving.
 
-Puis basculer algo sur RLS, sans rien changer d'autre.
-15 itérations. Exactement le même nombre que sur l'entrée blanche, avec
-un conditionnement inchangé à 113.
-RLS ne subit pas λmax/λmin parce qu'il inverse R au lieu de la suivre.
-Le prix est dans le compteur d'opérations : L² au lieu de L. À L = 8 on
-s'en moque ; sur un annuleur d'écho à 512 coefficients, c'est 262 144
-multiplications par échantillon contre 512.`,
+Then switch the algorithm to RLS and change nothing else. Fifteen iterations —
+exactly the same number as on the white input, with the conditioning unchanged
+at 113. RLS does not suffer λmax/λmin because it inverts R rather than following
+it.
+
+The price is in the operation count: L² instead of L. At L = 8 nobody cares; on
+an echo canceller with 512 coefficients it is 262 144 multiplications per sample
+against 512.`,
   },
   {
     id: 'track',
-    title: 'Scène 4 · Poursuivre un système qui bouge',
+    title: 'Scene 4 · Tracking a system that moves',
     view: 'learning',
     params: { algo: 'rls', mu: 0.01, lambda: 1, L: 8, a: 0, snr: 20, n: 3000, track: true },
     visible: ['lambda', 'algo'],
-    notes: `Le système change brutalement à l'itération 1500 (verticale violette).
-C'est le cas réel : un locuteur bouge, un canal évolue, une pièce change.
+    notes: `The system changes abruptly at iteration 1500, marked by the purple
+vertical. That is the real case: a speaker moves, a channel drifts, a room
+changes.
 
-Faire CONSTATER avant d'expliquer. Avec λ = 1, RLS est le meilleur des
-trois AVANT le saut — excès à −44 dB, personne n'approche. Après le
-saut il remonte à +4 dB, et 1500 itérations plus tard il est encore à
-−1 dB. Il n'a pas rattrapé. Le meilleur algorithme de la scène
-précédente est ici le pire, et de très loin.
+Let the room OBSERVE before explaining. With λ = 1, RLS is the best of the three
+BEFORE the jump — an excess of −44 dB, with nothing close. After the jump it
+climbs to +4 dB, and 1500 iterations later it is still at −1 dB. It never caught
+up. The best algorithm of the previous scene is the worst here, by a wide
+margin.
 
-La raison tient en un mot : λ = 1, c'est une mémoire INFINIE. RLS a
-accumulé 1500 équations qui décrivent l'ancien système, et il lui faut
-autant de temps pour les noyer sous les nouvelles.
+The reason is one word: λ = 1 means INFINITE memory. RLS has accumulated 1500
+equations describing the old system, and it needs as long again to drown them
+under new ones.
 
-Descendre λ à 0.99 : la mémoire devient d'environ 1/(1−λ) = 100
-échantillons. L'excès repart de −34 dB et il est revenu à −34 dB dès
-l'itération 2200. Le prix : le palier d'avant le saut est passé de −44 à
-−34 dB, soit exactement le désajustement (1−λ)L/2 — encore le même
-marché, sous un autre nom.
+Lowering λ to 0.99 makes the memory about 1/(1−λ) = 100 samples. The excess
+restarts from −34 dB and is back to −34 dB by iteration 2200. The price is that
+the pre-jump plateau went from −44 to −34 dB, which is exactly the
+misadjustment (1−λ)L/2 — the same bargain again, under another name.
 
-Puis repasser en LMS, μ = 0.01 : mêmes chiffres que RLS à λ = 0.99, à
-0.2 dB près. Et pousser μ à 0.05 : le saut ne se voit presque plus
-(−25.7 dB avant, −24.2 juste après), au prix d'un palier 8 dB plus haut.
-« Le plus bête des trois est le meilleur quand le monde bouge » est une
-phrase qui reste — et ici elle est mesurée.`,
+Switching back to LMS at μ = 0.01 gives the same figures as RLS at λ = 0.99, to
+within 0.2 dB. And pushing μ to 0.05 nearly hides the jump altogether — −25.7 dB
+before, −24.2 just after — at the cost of a plateau 8 dB higher. "The dumbest of
+the three is the best when the world moves" is a sentence that sticks, and here
+it is measured.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

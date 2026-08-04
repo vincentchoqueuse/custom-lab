@@ -91,7 +91,7 @@ export function compute({ structure, D, g, source, f0 }) {
         meta: { label: 'espacement des dents Fs/D', unit: 'Hz', precision: 1 },
       },
       peakDb: { value: toDb(peak), meta: { label: 'dents', unit: 'dB', precision: 1 } },
-      dipDb: { value: toDb(dip), meta: { label: 'creux', unit: 'dB', precision: 1 } },
+      dipDb: { value: toDb(dip), meta: { label: 'notches', unit: 'dB', precision: 1 } },
     },
   };
 }

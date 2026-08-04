@@ -80,12 +80,12 @@ export function compute({ b, source, f0 }) {
       dcGain: { value: dc, meta: { label: 'H(0) = Σb', precision: 4 } },
       nyqGain: {
         value: toDb(Math.abs(nyq), DB_FLOOR), // an exact null reads as the floor
-        meta: { label: 'gain à Fs/2', unit: 'dB', precision: 1 },
+        meta: { label: 'gain at Fs/2', unit: 'dB', precision: 1 },
       },
       order: { value: b.length - 1, meta: { label: 'ordre', precision: 0 } },
       delayMs: {
         value: linPhase ? (((b.length - 1) / 2) * 1000) / FS : NaN,
-        meta: { label: 'retard (phase linéaire)', unit: 'ms', precision: 2 },
+        meta: { label: 'delay (linear phase)', unit: 'ms', precision: 2 },
       },
     },
   };

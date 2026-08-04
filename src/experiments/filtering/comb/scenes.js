@@ -2,71 +2,82 @@
 export default [
   {
     id: 'through',
-    title: 'Scène 1 · Le signal entre, les échos sortent',
+    title: 'Scene 1 · The signal goes in, the echoes come out',
     view: 'response',
     params: { structure: 'fb', D: 40, g: 0.9, source: 'square', f0: 110 },
     visible: ['D', 'g'],
-    notes: `Le filtre récursif le plus simple qui soit : la sortie se rajoute à
-elle-même, retardée de D échantillons. Un écho de l'écho de l'écho — d'où le
-IIR : une entrée finie donne une sortie qui ne s'arrête jamais tout à fait.
-Bouger g vers 0.95 : la traîne s'éternise. Bouger D : les répétitions se
-rapprochent.
-Question à poser AVANT de passer en fréquence : « un simple écho, ça s'entend
-comment sur un spectre ? » Réponse attendue : « ça ne change rien ».
-Les deux onglets suivants montrent que si — un peigne, dents à Fs/D.`,
+    notes: `The simplest recursive filter there is: the output adds to itself,
+delayed by D samples. An echo of the echo of the echo — hence IIR, since a
+finite input gives an output that never quite stops.
+
+Raising g toward 0.95 makes the tail last; changing D brings the repetitions
+closer together.
+
+The question to ask before switching to frequency: what does a simple echo look
+like on a spectrum? The expected answer is that it changes nothing. The next two
+tabs show a comb, with teeth at Fs/D.`,
   },
   {
     id: 'teeth',
-    title: 'Scène 2 · L\'écho fait un peigne',
+    title: 'Scene 2 · The echo makes a comb',
     view: 'gain',
     params: { structure: 'fb', D: 40, g: 0.9, source: 'square', f0: 110 },
     visible: ['D', 'g'],
-    notes: `Le spectre devient un peigne : des RÉSONANCES à k·Fs/D = k·200 Hz, très
-pointues (+20 dB à g = 0.9), et des creux doux entre elles (−5.6 dB).
-Bouger D : les dents se resserrent — l'espacement, c'est Fs/D, RIEN d'autre.
-Bouger g : la hauteur des résonances, 1/(1−g), qui explose quand g approche 1.
-Deux paramètres, deux effets orthogonaux — le filtre le plus lisible du cours.
-Basculer sur « écho simple » (RIF) : les mêmes 200 Hz, mais les rôles
-s'échangent, +5.6 dB de dents contre −20 dB de creux. Le récursif creuse peu
-et résonne fort ; le non récursif fait l'inverse.`,
+    notes: `The spectrum becomes a comb: sharp RESONANCES at k·Fs/D = k·200 Hz,
+reaching +20 dB at g = 0.9, with soft notches between them at −5.6 dB.
+
+Changing D tightens the teeth — the spacing is Fs/D and nothing else. Changing g
+sets the height of the resonances, 1/(1−g), which explodes as g approaches 1.
+Two parameters, two orthogonal effects, and the most legible filter of the
+course.
+
+Switching to the simple echo keeps the same 200 Hz and swaps the roles: +5.6 dB
+of teeth against −20 dB of notches. The recursive form notches little and
+resonates hard; the non-recursive one does the opposite.`,
   },
   {
     id: 'echo',
-    title: 'Scène 3 · Deux pics, ou une infinité',
+    title: 'Scene 3 · Two spikes, or infinitely many',
     view: 'impulse',
     params: { structure: 'fb', D: 40, g: 0.7, source: 'square', f0: 110 },
     visible: ['structure', 'g'],
-    notes: `Réponse impulsionnelle du récursif : le train géométrique gᵏ, un pic
-tous les D échantillons qui décroît sans jamais s'annuler (le harnais vérifie
-h[kD] = gᵏ à la machine près). C'est ça, une réponse impulsionnelle INFINIE.
-Basculer sur « écho simple » : il ne reste que DEUX pics. Toute la différence
-entre RIF et IIR tient dans cette bascule, et elle se voit d'un coup d'œil.
-Teaser : pincez le récursif avec du bruit et vous avez une corde de guitare
-(Karplus-Strong).`,
+    notes: `The impulse response of the recursive form is the geometric train
+gᵏ: one spike every D samples, decaying without ever reaching zero — the harness
+verifies h[kD] = gᵏ to machine precision. That is what an INFINITE impulse
+response means.
+
+Switching to the simple echo leaves TWO spikes. The whole difference between FIR
+and IIR is in that toggle, and it is visible at a glance.
+
+A teaser for later: pluck the recursive form with noise and you have a guitar
+string (Karplus–Strong).`,
   },
   {
     id: 'align',
-    title: 'Scène 4 · Dents sur harmoniques',
+    title: 'Scene 4 · Teeth on harmonics',
     view: 'gain',
     params: { structure: 'fb', D: 32, g: 0.8, source: 'square', f0: 250 },
     visible: ['D', 'g'],
-    notes: `f₀ = 250 Hz et Fs/D = 250 Hz : CHAQUE harmonique est assis sur une
-résonance — tout est amplifié de 14 dB d'un coup (statline). Geler (F), passer
-D à 35 : les harmoniques glissent dans les creux, le timbre se vide — c'est le
-flanger. La question qui tue : « pourquoi l'effet dépend-il de f₀ alors que
-le filtre n'a pas changé ? »`,
+    notes: `With f₀ = 250 Hz and Fs/D = 250 Hz, EVERY harmonic sits on a
+resonance and the whole signal is lifted by 14 dB at once, as the statline
+reports.
+
+Freezing and moving D to 35 slides the harmonics into the notches and empties
+the timbre — that is a flanger. The question that lands: why does the effect
+depend on f₀ when the filter has not changed?`,
   },
   {
     id: 'sign',
-    title: 'Scène 5 · Le peigne complémentaire',
+    title: 'Scene 5 · The complementary comb',
     view: 'gain',
     params: { structure: 'fb', D: 40, g: 0.9, source: 'saw', f0: 110 },
     visible: ['g'],
-    notes: `Glisser g de +0.9 à −0.9 : résonances et creux S'ÉCHANGENT — les
-résonances se posent maintenant entre les k·Fs/D, et le continu est mangé
-(|H(0)| = 1/(1+|g|), soit −5.6 dB).
-Physique de l'écho inversé : à ces fréquences, l'écho revient en opposition
-de phase. C'est le même déphasage qui creuse la réponse d'une salle près
-d'un mur réfléchissant.`,
+    notes: `Sliding g from +0.9 to −0.9 SWAPS resonances and notches: the
+resonances now sit between the k·Fs/D, and DC is eaten — |H(0)| = 1/(1+|g|),
+which is −5.6 dB.
+
+The physics of an inverted echo is the same: at those frequencies the echo comes
+back in antiphase. It is the phase shift that digs holes in the response of a
+room near a reflecting wall.`,
   },
 ];

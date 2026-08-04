@@ -283,7 +283,7 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
 
       spread: {
         value: spread,
-        meta: { label: 'conditionnement λmax/λmin', precision: 1 },
+        meta: { label: 'conditioning λmax/λmin', precision: 1 },
       },
       lambdaMax: { value: lMax, meta: { label: 'λmax', precision: 2 } },
       muMax: {
@@ -300,16 +300,16 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
         value: msBound(eigVals),
         meta: { label: 'borne quadratique', precision: 4 },
       },
-      misMeas: { value: misMeas, meta: { label: 'désajustement mesuré', precision: 3 } },
+      misMeas: { value: misMeas, meta: { label: 'measured misadjustment', precision: 3 } },
       misTheo: {
         value: diverged || !(misTheo >= 0) ? NaN : misTheo,
-        meta: { label: 'théorie', precision: 3 },
+        meta: { label: 'theory', precision: 3 },
       },
-      n3: { value: n3, meta: { label: 'itérations pour −3 dB du palier', precision: 0 } },
+      n3: { value: n3, meta: { label: 'iterations to −3 dB of the plateau', precision: 0 } },
       wErrObs: { value: wErr, meta: { label: '‖ŵ(n) − w*‖', precision: 4 } },
       state: {
-        value: diverged ? '⚠ divergé' : settled ? 'palier atteint' : 'convergence en cours',
-        meta: { label: 'régime' },
+        value: diverged ? '⚠ diverged' : settled ? 'plateau reached' : 'still converging',
+        meta: { label: 'regime' },
       },
       excess: { x: iters, y: excDb },
     },

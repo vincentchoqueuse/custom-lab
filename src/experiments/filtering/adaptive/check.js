@@ -26,7 +26,7 @@ const BASE = {
 
 export const checks = [
   {
-    name: 'NLMS à μ̃ = 1 annule EXACTEMENT l’erreur a posteriori',
+    name: 'NLMS at μ̃ = 1 cancels the a posteriori error EXACTLY',
     category: 'numeric',
     run() {
       // L'identité qui DÉFINIT NLMS, et la raison de la normalisation : le
@@ -59,7 +59,7 @@ export const checks = [
     },
   },
   {
-    name: 'RLS sans bruit retrouve le système en EXACTEMENT L itérations',
+    name: 'RLS with no noise recovers the system in EXACTLY L iterations',
     category: 'numeric',
     run() {
       // RLS n'approche pas la solution des moindres carrés : il EST cette
@@ -98,7 +98,7 @@ export const checks = [
     },
   },
   {
-    name: 'le pas critique est celui de la MOYENNE QUADRATIQUE, pas 2/tr(R)',
+    name: 'the critical step is the MEAN-SQUARE one, not 2/tr(R)',
     category: 'numeric',
     run() {
       // μ < 2/tr(R) est la borne des livres : elle fait converger la MOYENNE
@@ -111,7 +111,7 @@ export const checks = [
         let hi = 2 / L;
         for (let i = 0; i < 16; i++) {
           const m = (lo + hi) / 2;
-          const div = compute({ ...BASE, L, a, mu: m }).observables.state.value === '⚠ divergé';
+          const div = compute({ ...BASE, L, a, mu: m }).observables.state.value === '⚠ diverged';
           if (div) hi = m;
           else lo = m;
         }
@@ -136,7 +136,7 @@ export const checks = [
     },
   },
   {
-    name: 'sur entrée colorée, la borne théorique devient franchement optimiste',
+    name: 'on a coloured input, the theoretical bound turns frankly optimistic',
     category: 'numeric',
     run() {
       // Le corollaire, et il vaut d'être projeté : toutes ces bornes
@@ -150,7 +150,7 @@ export const checks = [
       let hi = 2 / L;
       for (let i = 0; i < 16; i++) {
         const m = (lo + hi) / 2;
-        const div = compute({ ...BASE, L, a, mu: m }).observables.state.value === '⚠ divergé';
+        const div = compute({ ...BASE, L, a, mu: m }).observables.state.value === '⚠ diverged';
         if (div) hi = m;
         else lo = m;
       }
@@ -161,7 +161,7 @@ export const checks = [
     },
   },
   {
-    name: 'désajustement mesuré = μ·tr(R)/(2−μ·tr(R)), sur trois pas',
+    name: 'measured misadjustment = μ·tr(R)/(2−μ·tr(R)), over three step sizes',
     category: 'statistical',
     run() {
       // La loi du marché vitesse/précision, celle que la scène 2 projette.
@@ -182,7 +182,7 @@ export const checks = [
     },
   },
   {
-    name: 'NLMS : le désajustement porte la correction L/(L−2), pas l’asymptotique',
+    name: 'NLMS: the misadjustment carries the L/(L−2) correction, not the asymptotic form',
     category: 'statistical',
     run() {
       // μ̃/(2−μ̃) est le résultat ASYMPTOTIQUE des ouvrages — exact quand L
@@ -205,7 +205,7 @@ export const checks = [
     },
   },
   {
-    name: 'RLS ne subit pas le conditionnement, LMS le subit tout entier',
+    name: 'RLS does not suffer the conditioning, LMS suffers all of it',
     category: 'statistical',
     run() {
       // LE résultat de l'expérience, et il ne s'illustre pas : il se
@@ -231,7 +231,7 @@ export const checks = [
     },
   },
   {
-    name: 'le conditionnement mesuré reste sous sa limite de Szegő et y monte',
+    name: 'the measured conditioning stays below its Szegő limit and climbs to it',
     category: 'numeric',
     run() {
       // Les valeurs propres d'une Toeplitz sont encadrées par les extrêmes
@@ -252,7 +252,7 @@ export const checks = [
     },
   },
   {
-    name: 'l’entrée colorée garde EXACTEMENT sa puissance',
+    name: 'the coloured input keeps EXACTLY its power',
     category: 'statistical',
     run() {
       // Le détail sans lequel toute la scène 3 serait un artefact : si
@@ -276,7 +276,7 @@ export const checks = [
     },
   },
   {
-    name: 'la puissance utile annoncée est bien w*ᵀRw*',
+    name: 'the announced useful power really is w*ᵀRw*',
     category: 'statistical',
     run() {
       // Le SNR affiché doit être le vrai : la puissance du signal utile

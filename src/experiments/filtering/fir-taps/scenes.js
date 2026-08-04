@@ -4,62 +4,71 @@
 export default [
   {
     id: 'through',
-    title: 'Scène 1 · Le signal entre, le signal sort',
+    title: 'Scene 1 · The signal goes in, the signal comes out',
     view: 'response',
     params: { b: [0.25, 0.25, 0.25, 0.25], source: 'square', f0: 125 },
     visible: ['source', 'f0'],
-    notes: `Commencer par ce que fait le filtre, avant de dire comment il le fait :
-un carré entre (orange), quelque chose de plus rond sort (bleu). Quatre
-coefficients égaux à 1/4, rien d'autre.
-Question à poser AVANT de changer d'onglet : « qu'est-ce qui a disparu ? »
-Les angles — c'est-à-dire les harmoniques élevés. Les trois onglets suivants
-répondent chacun à leur façon : les coefficients, puis le spectre.
-Changer de source ou de f₀ : la sortie suit, le filtre ne change pas.`,
+    notes: `Starting with what the filter does, before how it does it: a square
+wave goes in, in orange, and something rounder comes out, in blue. Four
+coefficients equal to 1/4, and nothing else.
+
+The question to ask before changing tab: what disappeared? The corners — that
+is, the high harmonics. The next tabs answer it twice over, first with the
+coefficients and then with the spectrum.
+
+Changing source or f₀ moves the output and leaves the filter alone.`,
   },
   {
     id: 'moving-average',
-    title: 'Scène 2 · La moyenne glissante',
+    title: 'Scene 2 · The moving average',
     view: 'gain',
     params: { b: [0.25, 0.25, 0.25, 0.25], source: 'square', f0: 125 },
     visible: ['b'],
-    notes: `Quatre coefficients égaux à 1/4 : le filtre le plus naïf du monde —
-et il a des ZÉROS PARFAITS à k·Fs/L = 2, 4, 6 kHz (le harnais le vérifie à
-1e-15). Taper 0.125 huit fois : les zéros se resserrent, la coupure descend.
-Question : « pourquoi 1/L et pas 1 ? » — regarder H(0) = Σb dans la statline,
-c'est le gain continu, il doit valoir 1.`,
+    notes: `Four coefficients equal to 1/4: the most naive filter in the world,
+and it has PERFECT zeros at k·Fs/L = 2, 4 and 6 kHz, which the harness verifies
+to 1e-15. Typing 0.125 eight times tightens the zeros and lowers the cutoff.
+
+Why 1/L and not 1 is worth asking: H(0) = Σb is the DC gain, shown in the
+statline, and it has to be 1.`,
   },
   {
     id: 'delay',
-    title: 'Scène 3 · Le retard pur',
+    title: 'Scene 3 · The pure delay',
     view: 'response',
     params: { b: [0, 0, 0, 1], source: 'square', f0: 125 },
     visible: ['b'],
-    notes: `b = 0,0,0,1 : le filtre ne fait RIEN… sauf attendre. La sortie est
-l'entrée décalée de 3 échantillons, bit pour bit (vérifié). Onglet fréquentiel :
-|H| = 1 partout — un passe-tout. Moralité : le module ne dit pas tout, la phase
-existe. Rajouter des zéros devant pour allonger l'attente.`,
+    notes: `With b = 0,0,0,1 the filter does nothing except wait. The output is
+the input shifted by three samples, bit for bit, and the harness checks it.
+
+The frequency tab reads |H| = 1 everywhere — an all-pass. The moral is that the
+magnitude does not tell the whole story: the phase exists. Adding zeros in front
+lengthens the wait.`,
   },
   {
     id: 'difference',
-    title: 'Scène 4 · Le différentiateur',
+    title: 'Scene 4 · The differentiator',
     view: 'gain',
     params: { b: [1, -1], source: 'saw', f0: 125 },
     visible: ['b'],
-    notes: `b = 1,−1 : la différence de deux échantillons. Σb = 0 → le continu
-est ANNULÉ, et |H(f)| = 2·|sin(πf/Fs)| monte avec la fréquence : un passe-haut
-qui amplifie le bruit (+6 dB par octave). Geler (F), essayer 1,0,−1 (dérivée
-centrée) : même annulation du continu, mais un zéro apparaît aussi à Fs/2.`,
+    notes: `With b = 1,−1 the filter is the difference of two samples. Σb = 0, so
+DC is ANNIHILATED, and |H(f)| = 2·|sin(πf/Fs)| rises with frequency: a high-pass
+that amplifies noise at 6 dB per octave.
+
+Freezing and trying 1,0,−1 — the centred derivative — kills DC in the same way
+but adds a zero at Fs/2 as well.`,
   },
   {
     id: 'design',
-    title: 'Scène 5 · Fabriquer un passe-bande à la main',
+    title: 'Scene 5 · Building a band-pass by hand',
     view: 'gain',
     params: { b: [0.5, 0, -0.5], source: 'square', f0: 125 },
     visible: ['b', 'f0'],
-    notes: `0.5,0,−0.5 : zéros au continu ET à Fs/2, une bosse au milieu — un
-passe-bande à trois coefficients. Faire proposer des jeux par la salle et les
-tester en direct (le lien URL porte les coefficients : chaque essai est
-partageable). Puis comparer avec l'expérience « RIF par fenêtrage » : la
-méthode systématique fait en une formule ce qu'on tâtonne ici à la main.`,
+    notes: `With 0.5,0,−0.5 there are zeros at DC AND at Fs/2, with a hump in
+between: a band-pass in three coefficients.
+
+Having the room propose coefficient sets and testing them live works well, and
+the URL carries them, so every attempt is a shareable link. Comparing with the
+FIR-by-windowing experiment closes the loop: the systematic method does in one
+formula what is being groped for by hand here.`,
   },
 ];

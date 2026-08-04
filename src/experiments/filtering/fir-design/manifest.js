@@ -6,13 +6,13 @@ import { timeView, impulseView } from '../../../core/response-views.js';
 export default {
   id: 'fir-design',
   order: 4,
-  title: 'Design RIF par fenêtrage',
-  subtitle: 'Tronquer, fenêtrer, retarder — le design RIF en trois gestes',
-  tags: ['numérique', 'RIF', 'FIR', 'fenêtrage', 'Gibbs', 'phase linéaire'],
+  title: 'FIR design by windowing',
+  subtitle: 'Truncate, window, delay — FIR design in three moves',
+  tags: ['digital', 'FIR', 'windowing', 'Gibbs', 'linear phase'],
 
   params: {
     fc: float('f_c', {
-      description: 'fréquence de coupure (Fs = 8 kHz)',
+      description: 'cutoff frequency (Fs = 8 kHz)',
       min: 200,
       max: 3500,
       step: 10,
@@ -21,16 +21,16 @@ export default {
       precision: 0,
     }),
     N: int('N', {
-      description: 'nombre de coefficients (impair : type I, phase linéaire)',
+      description: 'number of coefficients (odd: type I, linear phase)',
       min: 5,
       max: 101,
       step: 2,
       default: 21,
     }),
     win: select('fenêtre', {
-      description: 'fenêtre appliquée à la troncature',
+      description: 'window applied to the truncation',
       options: [
-        { value: 'rect', label: 'rectangulaire (troncature brute)' },
+        { value: 'rect', label: 'rectangular (raw truncation)' },
         { value: 'hann', label: 'Hann' },
         { value: 'hamming', label: 'Hamming' },
         { value: 'blackman', label: 'Blackman' },
@@ -40,7 +40,7 @@ export default {
   },
 
   derived: {
-    delay: { label: 'retard (N−1)/2', calc: (p) => `${(p.N - 1) / 2} échantillons` },
+    delay: { label: 'retard (N−1)/2', calc: (p) => `${(p.N - 1) / 2} samples` },
   },
 
   views: [
@@ -49,7 +49,7 @@ export default {
       source: 'taps',
       label: 'h[n] (N coefficients)',
       overlays: [
-        line('idealIR', { color: '#D95319', dashed: true, label: 'sinc idéal (infini)' }),
+        line('idealIR', { color: '#D95319', dashed: true, label: 'ideal sinc (infinite)' }),
         vline((p) => (p.N - 1) / 2, { color: '#EDB120', dashed: true, label: '(N−1)/2' }),
       ],
     }),
@@ -61,7 +61,7 @@ export default {
       line('response', {
         width: 1.8,
         overlays: [
-          hline('sidelobe', { color: '#D95319', dashed: true, label: 'lobe max' }),
+          hline('sidelobe', { color: '#D95319', dashed: true, label: 'peak lobe' }),
           vline('fc', { color: '#EDB120', dashed: true, label: 'f_c' }),
         ],
         axes: {

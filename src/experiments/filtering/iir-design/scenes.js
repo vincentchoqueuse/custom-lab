@@ -2,67 +2,77 @@
 export default [
   {
     id: 'through',
-    title: 'Scène 1 · Le signal entre, le signal sort',
+    title: 'Scene 1 · The signal goes in, the signal comes out',
     view: 'response',
     params: { method: 'bilinear', family: 'butter', n: 4, fc: 1000, Amax: 1,
               source: 'square', f0: 200 },
     visible: ['fc', 'n'],
-    notes: `Avant les méthodes de discrétisation, le résultat : les coefficients b
-et a calculés par la bilinéaire font tourner une équation aux différences, et
-voilà ce qu'elle rend. Un carré entre, un carré arrondi sort.
-Bouger l'ordre n : les flancs se raidissent, la sortie s'arrondit davantage.
-Question : « ce filtre-là, on l'a obtenu comment ? » — les onglets suivants
-répondent : sa réponse impulsionnelle, sa réponse fréquentielle comparée au
-prototype analogique, ses pôles et zéros, et le warping qui relie les deux
-mondes.`,
+    notes: `Before any discretization method, the result: the b and a
+coefficients computed by the bilinear transform drive a difference equation, and
+this is what it returns. A square goes in, a rounded square comes out.
+
+Raising the order n steepens the skirts and rounds the output further.
+
+How this filter was obtained is the question, and the next tabs answer it: its
+impulse response, its frequency response against the analog prototype, its poles
+and zeros, and the warping that ties the two worlds together.`,
   },
   {
     id: 'match',
-    title: 'Scène 2 · Le prototype passe au numérique',
+    title: 'Scene 2 · The prototype goes digital',
     view: 'response',
     params: { method: 'bilinear', family: 'butter', n: 4, fc: 1000, Amax: 1 },
     visible: ['family', 'n'],
-    notes: `La courbe numérique (bleue) épouse le prototype analogique
-(orange) dans toute la bande utile — statline : coupure obtenue = 1000 Hz,
-pile. Puis elle PLONGE à Nyquist là où l'analogique se contente de rouler :
-la bilinéaire met n zéros en z = −1. Ce n'est pas un défaut, c'est la
-signature de la méthode — tout l'axe jω est enroulé sur le cercle unité.`,
+    notes: `The digital curve, in blue, sits on the analog prototype, in orange,
+across the whole useful band — the statline reads a cutoff of exactly 1000 Hz.
+
+Then it DIVES at Nyquist where the analog response merely rolls off, because the
+bilinear transform puts n zeros at z = −1. That is not a defect but the
+signature of the method: the entire jω axis has been wrapped onto the unit
+circle.`,
   },
   {
     id: 'warping',
-    title: 'Scène 3 · Oublier le pre-warping',
+    title: 'Scene 3 · Forgetting the pre-warping',
     view: 'response',
     params: { method: 'naive', family: 'butter', n: 4, fc: 1000, Amax: 1 },
     visible: ['method', 'fc'],
-    notes: `Bilinéaire sans pre-warping, f_c = 1000 Hz : coupure obtenue
-948 Hz. Monter f_c à 3000 : obtenue 2204 Hz — 800 Hz d'erreur ! L'onglet
-Warping montre pourquoi : la tangente s'écarte de l'identité en montant vers
-Nyquist. Geler (F), réactiver le pre-warping : la coupure retombe exactement
-sur la cible. Le pre-warping ne corrige qu'UN point — mais c'est le bon.`,
+    notes: `Bilinear without pre-warping at f_c = 1000 Hz gives a cutoff of
+948 Hz. Raising f_c to 3000 gives 2204 Hz — an error of 800 Hz.
+
+The warping tab shows why: the tangent departs from the identity as it climbs
+toward Nyquist. Freezing and switching pre-warping back on drops the cutoff
+exactly onto the target. Pre-warping corrects ONE point only — but it is the
+right one.`,
   },
   {
     id: 'zplane',
-    title: "Scène 4 · Le demi-plan gauche s'enroule",
+    title: 'Scene 4 · The left half-plane wraps around',
     view: 'poles',
     params: { method: 'bilinear', family: 'butter', n: 6, fc: 1000, Amax: 1 },
     visible: ['n', 'fc'],
-    notes: `Les pôles analogiques du demi-plan gauche atterrissent DANS le
-cercle unité (stabilité préservée, c'est le théorème), les n zéros s'empilent
-en z = −1. Monter f_c : les pôles migrent vers z = −1 — la bande utile
-s'étale sur le cercle. Basculer en invariance impulsionnelle : mêmes pôles
-analogiques, autre carte (z = e^{pT}), plus de zéros à −1.`,
+    notes: `The analog poles of the left half-plane land INSIDE the unit circle —
+stability is preserved, and that is the theorem — while the n zeros pile up at
+z = −1.
+
+Raising f_c migrates the poles toward z = −1, spreading the useful band around
+the circle. Switching to impulse invariance keeps the same analog poles under a
+different map, z = e^{pT}, and there are no zeros at −1 any more.`,
   },
   {
     id: 'aliasing',
-    title: "Scène 5 · L'invariance impulsionnelle et son repliement",
+    title: 'Scene 5 · Impulse invariance and its aliasing',
     view: 'response',
     params: { method: 'impulse', family: 'butter', n: 2, fc: 1000, Amax: 1 },
     visible: ['method', 'n'],
-    notes: `h[n] = T·h_a(nT) EXACTEMENT — c'est sa définition, et le harnais
-le vérifie à 3e-16. Mais regarder près de Nyquist : la numérique remonte
-au-dessus de l'analogique — la queue du spectre analogique au-delà de Fs/2
-se REPLIE dedans. Monter n : la queue raccourcit, le repliement fond.
-Question de synthèse : « quelle méthode choisir pour un passe-bas audio ?
-et pour préserver une réponse temporelle ? » — les deux réponses diffèrent.`,
+    notes: `h[n] = T·h_a(nT) EXACTLY — that is its definition, and the harness
+verifies it to 3e-16.
+
+But near Nyquist the digital response climbs above the analog one: the tail of
+the analog spectrum beyond Fs/2 has FOLDED back into the band. Raising n
+shortens the tail and the aliasing melts away.
+
+The synthesis question: which method for an audio low-pass, and which one to
+preserve a time response? The two answers differ.`,
   },
 ];

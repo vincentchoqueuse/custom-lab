@@ -6,21 +6,21 @@ export default {
   id: 'adaptive',
   order: 6,
   random: true, // entrée aléatoire et bruit de mesure
-  title: 'Filtrage adaptatif',
-  subtitle: 'LMS, NLMS, RLS — vitesse, précision, complexité : on en choisit deux',
-  tags: ['adaptatif', 'LMS', 'NLMS', 'RLS', 'gradient stochastique', 'identification'],
+  title: 'Adaptive filtering',
+  subtitle: 'LMS, NLMS, RLS — speed, accuracy, complexity: pick two',
+  tags: ['adaptive', 'LMS', 'NLMS', 'RLS', 'stochastic gradient', 'identification'],
 
   params: {
     algo: select('algorithme', {
       options: [
-        { value: 'lms', label: 'LMS — gradient stochastique' },
-        { value: 'nlms', label: 'NLMS — pas normalisé' },
-        { value: 'rls', label: 'RLS — moindres carrés récursifs' },
+        { value: 'lms', label: 'LMS — stochastic gradient' },
+        { value: 'nlms', label: 'NLMS — normalized step' },
+        { value: 'rls', label: 'RLS — recursive least squares' },
       ],
       default: 'lms',
     }),
     mu: log('μ', {
-      description: 'pas d’adaptation (normalisé, dans ]0, 2[, pour NLMS)',
+      description: 'adaptation step (normalized, in ]0, 2[, for NLMS)',
       min: 1e-3,
       max: 1.5,
       default: 0.01,
@@ -28,7 +28,7 @@ export default {
       visibleIf: { algo: ['lms', 'nlms'] },
     }),
     lambda: float('λ', {
-      description: 'facteur d’oubli — 1 = mémoire infinie',
+      description: 'forgetting factor — 1 means infinite memory',
       min: 0.95,
       max: 1,
       step: 0.001,
@@ -37,9 +37,9 @@ export default {
       visibleIf: { algo: 'rls' },
     }),
     L: select('L', {
-      description: 'longueur du filtre (et du système à identifier)',
+      description: 'filter length (and length of the system to identify)',
       options: [
-        { value: 2, label: '2 (le plan des poids est alors exact)' },
+        { value: 2, label: '2 (the weight plane is then exact)' },
         { value: 4, label: '4' },
         { value: 8, label: '8' },
         { value: 16, label: '16' },
@@ -47,7 +47,7 @@ export default {
       default: 8,
     }),
     a: float('a', {
-      description: 'couleur de l’entrée — AR(1), à variance constante',
+      description: 'colour of the input — AR(1), at constant variance',
       min: 0,
       max: 0.95,
       step: 0.05,
@@ -55,7 +55,7 @@ export default {
       precision: 2,
     }),
     snr: float('SNR', {
-      description: 'rapport signal à bruit de mesure',
+      description: 'measurement signal-to-noise ratio',
       min: 0,
       max: 40,
       step: 1,
@@ -64,14 +64,14 @@ export default {
       precision: 0,
     }),
     n: int('n', {
-      description: 'itération observée — le potard qui remplace une animation',
+      description: 'iteration observed — the dial that replaces an animation',
       min: 1,
       max: 3000,
       step: 1,
       default: 3000,
     }),
     track: bool('poursuite', {
-      description: 'le système saute à l’itération 1500',
+      description: 'the system jumps at iteration 1500',
       default: false,
     }),
     // seed injecté par le cœur, parce que random: true
@@ -79,15 +79,15 @@ export default {
 
   derived: {
     // Ce que la salle doit pouvoir vérifier de tête avant de bouger le pas.
-    bound: { label: 'borne de stabilité 2/tr(R)', calc: (p) => (2 / p.L).toFixed(4) },
+    bound: { label: 'stability bound 2/tr(R)', calc: (p) => (2 / p.L).toFixed(4) },
     cond: {
-      label: 'conditionnement visé (L → ∞)',
+      label: 'target conditioning (L → ∞)',
       calc: (p) => (((1 + p.a) / (1 - p.a)) ** 2).toFixed(1),
     },
   },
 
   groups: [
-    { title: 'Algorithme', params: ['algo', 'mu', 'lambda', 'L'] },
+    { title: 'Algorithm', params: ['algo', 'mu', 'lambda', 'L'] },
     { title: 'Signal', params: ['a', 'snr', 'track'] },
     { title: 'Observation', params: ['n'] },
   ],
@@ -104,14 +104,14 @@ export default {
     // la légende compterait seize entrées qui ne diraient rien.
     view(
       'tracks',
-      'Poids ŵ(n)',
+      'Weights ŵ(n)',
       line('wRefs', {
         color: '#D95319',
         width: 1.4,
         dashed: true,
-        label: 'valeurs vraies w*ₖ',
+        label: 'true values w*ₖ',
         overlays: [line('wTracks', { color: '#0072BD', width: 1.4, label: 'ŵₖ(n)' })],
-        axes: { x: { label: 'itération' }, y: { label: 'coefficient' } },
+        axes: { x: { label: 'iteration' }, y: { label: 'coefficient' } },
       })
     ),
 
@@ -122,21 +122,21 @@ export default {
     // sous le plancher ; la seconde dit à quelle distance de w* on est.
     view(
       'learning',
-      'Courbe d’apprentissage',
+      'Learning curve',
       line('learning', {
         color: '#0072BD',
         width: 1.6,
-        label: 'EQM E[e²]',
+        label: 'MSE E[e²]',
         overlays: [
-          line('excess', { color: '#D95319', width: 2, label: 'excès w̃ᵀRw̃' }),
-          hline('floorDb', { color: '#EDB120', dashed: true, width: 1.6, label: 'plancher σ²' }),
-          hline('plateauDb', { color: '#77AC30', dashed: true, width: 1.6, label: 'palier atteint' }),
-          vline('switchLine', { color: '#7E2F8E', width: 1.6, label: 'saut du système' }),
-          vline('nLine', { color: '#71717a', dashed: true, width: 1.2, label: 'itération n' }),
+          line('excess', { color: '#D95319', width: 2, label: 'excess w̃ᵀRw̃' }),
+          hline('floorDb', { color: '#EDB120', dashed: true, width: 1.6, label: 'floor σ²' }),
+          hline('plateauDb', { color: '#77AC30', dashed: true, width: 1.6, label: 'plateau reached' }),
+          vline('switchLine', { color: '#7E2F8E', width: 1.6, label: 'system jump' }),
+          vline('nLine', { color: '#71717a', dashed: true, width: 1.2, label: 'iteration n' }),
         ],
         axes: {
-          x: { label: 'itération', scale: 'log' },
-          y: { label: 'EQM', unit: 'dB', domain: [-45, 15] },
+          x: { label: 'iteration', scale: 'log' },
+          y: { label: 'MSE', unit: 'dB', domain: [-45, 15] },
         },
       })
     ),
@@ -150,8 +150,8 @@ export default {
       stem('tapsTrue', {
         color: '#0072BD',
         size: 6,
-        label: 'système w*',
-        overlays: [stem('taps', { color: '#D95319', size: 4, label: 'filtre ŵ(n)' })],
+        label: 'system w*',
+        overlays: [stem('taps', { color: '#D95319', size: 4, label: 'filter ŵ(n)' })],
         axes: { x: { label: 'k' }, y: { label: 'coefficient' } },
       })
     ),
@@ -163,12 +163,12 @@ export default {
     // sur leur allongement — c'est exactement le cas d'usage de `plane`.
     plane('weights', 'Plan des poids', {
       curves: [
-        { source: 'contour1', color: '#71717a', width: 1, label: 'iso-coût' },
+        { source: 'contour1', color: '#71717a', width: 1, label: 'cost contour' },
         { source: 'contour2', color: '#71717a', width: 1 },
         { source: 'contour3', color: '#71717a', width: 1 },
-        { source: 'wTrack', color: '#0072BD', width: 1.8, label: 'descente ŵ(0…n)' },
+        { source: 'wTrack', color: '#0072BD', width: 1.8, label: 'descent ŵ(0…n)' },
       ],
-      clouds: [{ source: 'wStart', color: '#7E2F8E', r: 5, label: 'départ ŵ = 0' }],
+      clouds: [{ source: 'wStart', color: '#7E2F8E', r: 5, label: 'start ŵ = 0' }],
       markers: { source: 'wOpt', color: '#D95319', label: 'optimum w*' },
       axisLines: true,
       symmetric: false,

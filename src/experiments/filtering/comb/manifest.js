@@ -6,27 +6,27 @@ import { timeView, impulseView, spectrumView } from '../../../core/response-view
 export default {
   id: 'comb',
   order: 2,
-  title: 'Filtre IIR en peigne',
-  subtitle: 'Un écho dans le temps, un peigne en fréquence — D règle les dents, g leur profondeur',
-  tags: ['numérique', 'comb', 'écho', 'flanger', 'Karplus-Strong'],
+  title: 'The IIR comb filter',
+  subtitle: 'An echo in time, a comb in frequency — D sets the teeth, g their depth',
+  tags: ['digital', 'comb', 'echo', 'flanger', 'Karplus–Strong'],
 
   params: {
     structure: select('structure', {
-      description: 'écho simple (RIF) ou récursif (IIR)',
+      description: 'simple echo (FIR) or recursive (IIR)',
       options: [
-        { value: 'ff', label: 'écho simple : y = x + g·x[n−D]' },
-        { value: 'fb', label: 'écho récursif : y = x + g·y[n−D]' },
+        { value: 'ff', label: 'simple echo: y = x + g·x[n−D]' },
+        { value: 'fb', label: 'recursive echo: y = x + g·y[n−D]' },
       ],
       default: 'fb',
     }),
     D: int('D', {
-      description: 'retard en échantillons (dents espacées de Fs/D, Fs = 8 kHz)',
+      description: 'delay in samples (teeth spaced by Fs/D, Fs = 8 kHz)',
       min: 8,
       max: 160,
       default: 40,
     }),
     g: float('g', {
-      description: "gain de l'écho (négatif : dents et creux s'échangent)",
+      description: 'echo gain (negative swaps teeth and notches)',
       min: -0.95,
       max: 0.95,
       step: 0.01,
@@ -34,15 +34,15 @@ export default {
       precision: 2,
     }),
     source: select('source', {
-      description: "signal périodique d'entrée",
+      description: 'periodic input signal',
       options: [
-        { value: 'square', label: 'carré' },
-        { value: 'saw', label: 'dent de scie' },
+        { value: 'square', label: 'square' },
+        { value: 'saw', label: 'sawtooth' },
       ],
       default: 'square',
     }),
     f0: float('f₀', {
-      description: 'fondamentale du signal',
+      description: 'fundamental of the signal',
       min: 50,
       max: 400,
       step: 1,
@@ -53,7 +53,7 @@ export default {
   },
 
   groups: [
-    { title: 'Filtre', params: ['structure', 'D', 'g'] },
+    { title: 'Filter', params: ['structure', 'D', 'g'] },
     { title: 'Signal', params: ['source', 'f0'] },
   ],
 

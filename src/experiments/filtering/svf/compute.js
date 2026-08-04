@@ -141,11 +141,11 @@ export function compute({ source, f0, fc, Q, output }) {
       f1, // checks
       gainFc: {
         value: toDb(svfGain(output, fc, f1, q1)),
-        meta: { label: 'gain à f_c', unit: 'dB', precision: 1 },
+        meta: { label: 'gain at f_c', unit: 'dB', precision: 1 },
       },
       resGain: {
         value: toDb(svfGain('bp', fc, f1, q1)) ,
-        meta: { label: 'résonance BP à f_c', unit: 'dB', precision: 1 },
+        meta: { label: 'BP resonance at f_c', unit: 'dB', precision: 1 },
       },
     },
   };
