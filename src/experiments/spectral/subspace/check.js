@@ -1,4 +1,5 @@
 import { compute } from './compute.js';
+import { F_LO, F_HI, F_HI_FAR } from './frame.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import {
@@ -369,6 +370,66 @@ export const checks = [
         detail:
           `d juste : ${ok3.noiseEsprit.value.toFixed(2)} dB (vrai ${ok3.noiseRef.value.toFixed(2)}) · ` +
           `d = 1 : ESPRIT ${bad3.noiseEsprit.value.toFixed(2)}, root-MUSIC ${bad3.noiseRoot.value.toFixed(2)} dB`,
+      };
+    },
+  },
+  {
+    name: 'le cadrage en fréquence ne dépend plus de N ni de Δf',
+    category: 'numeric',
+    run() {
+      // Le cadre est figé POUR que la résolution se voie bouger : si la
+      // fenêtre suivait la limite de Fourier, doubler N rapprocherait les
+      // deux raies et resserrerait le cadre d'autant — elles resteraient à
+      // la même distance à l'écran et l'expérience ne montrerait rien.
+      // Les deux grilles de calcul portent donc les bornes de frame.js,
+      // celles-là mêmes que le manifeste donne à l'axe.
+      const bad = [];
+      for (const N of [128, 256, 512, 1024])
+        for (const df of [0.05, 0.5, 3]) {
+          const o = compute({ ...BASE, N, df }).observables;
+          const px = o.periodogram.x;
+          const gx = o.pseudo.x;
+          const span = (a) => [a[0], a[a.length - 1]];
+          const [pLo, pHi] = span(px);
+          const [gLo, gHi] = span(gx);
+          // le périodogramme vit sur la grille FFT : ses extrémités tombent
+          // dans le premier pas de 1000/4096 Hz après les bornes
+          const step = 1000 / 4096;
+          if (pLo < F_LO || pLo > F_LO + step || pHi > F_HI || pHi < F_HI - step)
+            bad.push(`N=${N} df=${df} périodogramme ${pLo.toFixed(1)}…${pHi.toFixed(1)}`);
+          if (Math.abs(gLo - F_LO) > 1e-9 || Math.abs(gHi - F_HI) > 1e-9)
+            bad.push(`N=${N} df=${df} pseudo-spectre ${gLo.toFixed(1)}…${gHi.toFixed(1)}`);
+        }
+      // et la fenêtre s'élargit — une seule fois, sur la configuration à
+      // trois sources — pour loger la raie à l'écart
+      const far = compute({ ...BASE, sources: 3, d: 3 }).observables.pseudo.x;
+      if (Math.abs(far[far.length - 1] - F_HI_FAR) > 1e-9)
+        bad.push(`3 sources : ${far[far.length - 1].toFixed(1)} au lieu de ${F_HI_FAR}`);
+      return {
+        ok: bad.length === 0,
+        detail: bad.length ? bad.join(' · ') : `${F_LO}–${F_HI} Hz sur 12 réglages, ${F_HI_FAR} à 3 sources`,
+      };
+    },
+  },
+  {
+    name: 'une fréquence inventée se chiffre, même hors du cadre',
+    category: 'numeric',
+    run() {
+      // Le cadre étant figé, une raie fantôme à 840 Hz n'étire plus l'axe :
+      // elle sort du champ, et c'est ce chiffre qui la dénonce. Il doit
+      // rester au niveau de l'erreur d'estimation tant que d est juste, et
+      // sauter de plusieurs centaines de hertz dès qu'il ne l'est plus.
+      const ok = compute({ ...BASE, sources: 3, d: 3 }).observables;
+      const over = compute({ ...BASE, sources: 3, d: 5 }).observables;
+      return {
+        ok:
+          ok.strayRoot.value < 1 &&
+          ok.strayEsprit.value < 1 &&
+          over.strayRoot.value > 100 &&
+          over.strayEsprit.value > 100,
+        detail:
+          `d juste : ${ok.strayRoot.value.toFixed(2)} Hz · ` +
+          `d = 5 : root ${over.strayRoot.value.toFixed(1)}, ESPRIT ${over.strayEsprit.value.toFixed(1)} Hz`,
       };
     },
   },

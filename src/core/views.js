@@ -40,6 +40,15 @@ function validateAxis(axis, where) {
   if (axis.ticks != null && axis.ticks !== false)
     throw new ViewError(`${where}: axis ticks accepts only false (hide them)`);
   if (axis.domain != null) {
+    // `p => [lo, hi]` : un cadrage fixe qui dépend d'une configuration
+    // (une source supplémentaire, à l'écart, présente ou non). Ses bornes
+    // ne sont pas connaissables au chargement, comme la source d'un vline
+    // fonction — la forme, elle, l'est, et c'est ce qu'on vérifie.
+    if (typeof axis.domain === 'function') {
+      if (axis.domain.length !== 1)
+        throw new ViewError(`${where}: a function axis domain takes the params, as p => [min, max]`);
+      return;
+    }
     if (!Array.isArray(axis.domain) || axis.domain.length !== 2)
       throw new ViewError(`${where}: axis domain must be [min, max]`);
     const [lo, hi] = axis.domain;

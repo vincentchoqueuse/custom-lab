@@ -1,5 +1,15 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, figure, line, scatter, stem, vline, hline } from '../../../core/views.js';
+import { view, figure, line, scatter, stem, vline, hline, band } from '../../../core/views.js';
+// le cadrage figé et la base du cadre, partagés avec le calcul : les
+// rectangles de bruit descendent exactement jusqu'à cette base
+import { fWindow, MODEL_FLOOR } from './frame.js';
+
+/** L'axe des fréquences, FIGÉ, et le même sur les trois vues qui en portent
+ *  un : le périodogramme, le spectre estimé et le pseudo-spectre se lisent
+ *  l'un après l'autre, et un cadre qui bouge d'un onglet à l'autre — ou
+ *  quand N change — fait croire à un déplacement des raies. Les bornes
+ *  viennent de frame.js, partagées avec la grille de calcul. */
+const F_AXIS = { label: 'f', unit: 'Hz', domain: fWindow };
 
 /** Les fréquences vraies, en verticales — les mêmes sur les trois vues,
  *  déclarées une fois pour qu'elles ne puissent pas diverger. */
@@ -103,7 +113,7 @@ export default {
         width: 2,
         label: 'périodogramme',
         overlays: TRUTH,
-        axes: { x: { label: 'f', unit: 'Hz' }, y: { label: '|X(f)|', unit: 'dB' } },
+        axes: { x: F_AXIS, y: { label: '|X(f)|', unit: 'dB' } },
       })
     ),
 
@@ -155,17 +165,21 @@ export default {
         overlays: [
           stem('linesRoot', { color: '#D95319', size: 4.5, baseline: -60, label: 'root-MUSIC' }),
           stem('linesEsprit', { color: '#7E2F8E', size: 4.5, baseline: -60, label: 'ESPRIT' }),
-          // une ligne de bruit par spectre, dans sa couleur : le modèle
-          // complet d'un estimateur, ce sont SES raies ET son niveau de
-          // fond, et les deux se lisent ensemble ou pas du tout
+          // Un SOCLE par spectre, dans sa couleur, et pas une ligne : le
+          // bruit est une puissance étalée sur toute la bande, les raies
+          // montent au-dessus de lui. C'est le modèle « d exponentielles
+          // PLUS du bruit blanc » dessiné tel qu'il est écrit, et c'est
+          // aussi ce qui rend visible d'un coup d'œil qu'un socle est
+          // remonté. Le bord supérieur reste tracé par-dessus : un aplat
+          // translucide ne se lit pas au décibel près.
+          band('bandTrue', { color: '#EDB120', opacity: 0.16, label: 'vérité' }),
+          band('bandRoot', { color: '#D95319', opacity: 0.16, label: 'root-MUSIC' }),
+          band('bandEsprit', { color: '#7E2F8E', opacity: 0.16, label: 'ESPRIT' }),
           hline('nsTrue', { color: '#EDB120', width: 1.6, label: 'vérité' }),
           hline('nsRoot', { color: '#D95319', dashed: true, width: 1.6, label: 'root-MUSIC' }),
           hline('nsEsprit', { color: '#7E2F8E', dashed: true, width: 1.6, label: 'ESPRIT' }),
         ],
-        axes: {
-          x: { label: 'f', unit: 'Hz' },
-          y: { label: 'puissance', unit: 'dB', domain: [-60, 8] },
-        },
+        axes: { x: F_AXIS, y: { label: 'puissance', unit: 'dB', domain: [MODEL_FLOOR, 8] } },
       })
     ),
 
@@ -184,7 +198,7 @@ export default {
           scatter('rootMusicMarks', { color: '#D95319', size: 10, label: 'root-MUSIC' }),
           scatter('espritMarks', { color: '#7E2F8E', size: 10, label: 'ESPRIT' }),
         ],
-        axes: { x: { label: 'f', unit: 'Hz' }, y: { label: 'pseudo-spectre', unit: 'dB' } },
+        axes: { x: F_AXIS, y: { label: 'pseudo-spectre', unit: 'dB' } },
       })
     ),
   ],

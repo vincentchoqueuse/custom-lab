@@ -44,8 +44,17 @@
     color: dataColor(s.color ?? KIND_DEFAULTS[kind] ?? '#0072BD'),
   });
 
-  const xAxis = $derived(axisSpec(spec.axes?.x));
-  const yAxis = $derived(axisSpec(spec.axes?.y));
+  // `domain` accepte une FONCTION des paramètres, même grammaire que
+  // vline/hline qui prennent déjà `p => …`. Résolue ici, une seule fois :
+  // tout l'aval — auto-échelle, verrou d'axes, Axes — ne voit qu'un
+  // tableau. Une expérience dont le cadrage doit rester fixe MAIS dépend
+  // d'une configuration (une troisième raie à l'écart, présente ou non)
+  // n'a alors pas à choisir entre un cadre qui saute et une raie hors champ.
+  const resolveDomain = (a, p) =>
+    typeof a.domain === 'function' ? { ...a, domain: a.domain(p) } : a;
+
+  const xAxis = $derived(resolveDomain(axisSpec(spec.axes?.x), params));
+  const yAxis = $derived(resolveDomain(axisSpec(spec.axes?.y), params));
 
   function seriesPoints(o) {
     if (!o) return [];
@@ -223,10 +232,21 @@
   const xs = $derived(mkScale(xAxis, xDomain, [0, iw]));
   const ys = $derived(mkScale(yAxis, yDomain, [ih, 0]));
 
-  // data layers carrying a `label` get a legend chip (vline/hline draw their
-  // own inline labels). A layer that resolved to NO point is a layer the
-  // current params do not have — it is not advertised, same rule as a
-  // non-finite vline.
+  // TOUTE couche étiquetée a une pastille, lignes de repère comprises.
+  // Elles écrivaient leur nom au sommet du trait : lisible pour un seuil
+  // isolé, illisible dès que trois estimateurs tombent au même endroit —
+  // les noms se recouvrent entre eux et recouvrent la légende. Un seul
+  // endroit où lire le nom d'une couche, et les traits deviennent
+  // extinguibles au clic comme les courbes.
+  //
+  // Dédoublonnage par libellé : une même grandeur peut être dessinée par
+  // deux couches — les raies en stems ET son plancher de bruit en ligne,
+  // même nom, même couleur (spectral/subspace). C'est UNE entrée de
+  // légende, et la pastille éteint les deux, puisque `hidden` porte sur le
+  // libellé.
+  //
+  // A layer that resolved to NO point is a layer the current params do not
+  // have — it is not advertised, same rule as a non-finite vline.
   const DEFAULT_COLORS = { density: '#D95319' };
   // Les couches éteintes depuis la légende ne sont pas rendues du tout —
   // pas juste transparentes. C'est ce qui fait que l'export SVG et le
@@ -235,12 +255,24 @@
   // une couche sans libellé n'a pas de pastille, donc rien à cliquer.
   const shown = $derived(layers.filter((l) => !l.s.label || !app.hidden.includes(l.s.label)));
 
-  const legend = $derived(
-    layers
-      .filter((l) => l.s.label && l.kind !== 'vline' && l.kind !== 'hline' && l.kind !== 'none')
-      .filter((l) => !l.pts || l.pts.length > 0)
-      .map((l) => ({ label: l.s.label, color: l.s.color ?? DEFAULT_COLORS[l.kind] ?? '#0072BD' }))
-  );
+  const legend = $derived.by(() => {
+    const out = [];
+    const seen = new Set();
+    for (const l of layers) {
+      if (!l.s.label || l.kind === 'none') continue;
+      if (l.pts && l.pts.length === 0) continue;
+      // une ligne de repère hors domaine n'est pas tracée : ne pas l'annoncer
+      if ((l.kind === 'vline' || l.kind === 'hline') && !Number.isFinite(l.v)) continue;
+      if (seen.has(l.s.label)) continue;
+      seen.add(l.s.label);
+      out.push({
+        label: l.s.label,
+        color: l.s.color ?? DEFAULT_COLORS[l.kind] ?? (l.kind === 'vline' || l.kind === 'hline' ? '#EDB120' : '#0072BD'),
+        dashed: !!l.s.dashed,
+      });
+    }
+    return out;
+  });
 </script>
 
 <svg class="plot-svg" viewBox="0 0 {W} {H}" role="img">
