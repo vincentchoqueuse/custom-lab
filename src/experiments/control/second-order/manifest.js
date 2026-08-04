@@ -6,14 +6,14 @@ import { at, gainView, phaseView, polesView, GUIDE, GUIDE_COLOR } from '../../..
 export default {
   id: 'second-order',
   order: 2,
-  title: 'Réponse d\'un second ordre',
-  subtitle: 'm et ω₀ racontent tout : temporel, pôles et fréquentiel du même système',
-  tags: ['second ordre', 'amortissement', 'pôles', 'résonance', 'réponse indicielle'],
+  title: 'Second-order response',
+  subtitle: 'm and ω₀ tell the whole story: time, poles and frequency of one system',
+  tags: ['second order', 'damping', 'poles', 'resonance', 'step response'],
 
   params: {
-    K: float('K', { description: 'gain statique', min: 0.2, max: 2, step: 0.05, default: 1 }),
+    K: float('K', { description: 'static gain', min: 0.2, max: 2, step: 0.05, default: 1 }),
     m: float('m', {
-      description: 'coefficient d\'amortissement',
+      description: 'damping ratio',
       min: 0.05,
       max: 2,
       step: 0.05,
@@ -21,7 +21,7 @@ export default {
       precision: 2,
     }),
     w0: log('ω₀', {
-      description: 'pulsation propre',
+      description: 'natural frequency',
       min: 0.5,
       max: 20,
       default: 2,
@@ -32,15 +32,15 @@ export default {
 
   derived: {
     regime: {
-      label: 'régime',
+      label: 'regime',
       calc: (p) =>
         p.m < 1 ? 'pseudo-périodique (m < 1)' : p.m === 1 ? 'critique (m = 1)' : 'apériodique (m > 1)',
     },
-    q: { label: 'facteur de qualité Q = 1/2m', calc: (p) => (1 / (2 * p.m)).toFixed(2) },
+    q: { label: 'quality factor Q = 1/2m', calc: (p) => (1 / (2 * p.m)).toFixed(2) },
   },
 
   groups: [
-    { title: 'Système', params: ['K', 'm', 'w0'] },
+    { title: 'System', params: ['K', 'm', 'w0'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -53,7 +53,7 @@ export default {
         width: 2.5,
         label: 'y(t)',
         overlays: [
-          line('envHi', { color: '#D95319', width: 1.3, dashed: true, label: 'enveloppe' }),
+          line('envHi', { color: '#D95319', width: 1.3, dashed: true, label: 'envelope' }),
           line('envLo', { color: '#D95319', width: 1.3, dashed: true }),
           hline((p) => p.K, { color: '#EDB120', dashed: true, width: 1.6, label: 'K' }),
           hline((p) => 1.05 * p.K, { color: GUIDE_COLOR, width: 1 }),
@@ -89,7 +89,7 @@ export default {
     // leaving an empty legend entry
     polesView({
       zeros: null,
-      circle: { radius: (p) => p.w0, label: 'cercle |s| = ω₀' },
+      circle: { radius: (p) => p.w0, label: 'circle |s| = ω₀' },
       minHalf: (p) => Math.max(1.3 * p.w0, 1),
       maxHalf: 60,
     }),

@@ -40,7 +40,7 @@ export const checks = [
     },
   },
   {
-    name: '|H(jω₀)| = K/(2m) et arg H(jω₀) = −90° exactement (le centre EST ω₀)',
+    name: '|H(jω₀)| = K/(2m) and arg H(jω₀) = −90° exactly (the centre IS ω₀)',
     category: 'numeric',
     run() {
       // the curve is stored in dB now, so the identity is asserted against
@@ -60,7 +60,7 @@ export const checks = [
     },
   },
   {
-    name: 'la phase part de 0° et finit à −180° (deux pôles, deux fois −90°)',
+    name: 'the phase starts at 0° and ends at −180° (two poles, twice −90°)',
     category: 'numeric',
     run() {
       // what a first order can never do, and the reason a second order can
@@ -111,7 +111,7 @@ export const checks = [
     },
   },
   {
-    name: 'h(t) est la dérivée de y(t), dans les trois régimes',
+    name: 'h(t) is the derivative of y(t), in all three regimes',
     category: 'numeric',
     run() {
       // central difference on the step response against the closed-form
@@ -129,7 +129,7 @@ export const checks = [
     },
   },
   {
-    name: 'impulsionnelle : premier passage par zéro à T_d/2 (m < 1)',
+    name: 'impulse response: first zero crossing at T_d/2 (m < 1)',
     category: 'numeric',
     run() {
       // h ∝ sin(ω_d t): the zeros are at multiples of π/ω_d, exactly

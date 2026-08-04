@@ -173,12 +173,12 @@ export function compute({ w0, m, K }) {
       criticalBlack: { x: Float64Array.from([-180]), y: Float64Array.from([0]) },
       // les nombres de la boucle fermée, tous en forme close
       w0bf: { value: bf.w0, meta: { label: "ω₀ en boucle fermée", unit: 'rad/s', precision: 3 } },
-      mbf: { value: bf.m, meta: { label: 'm en boucle fermée', precision: 3 } },
+      mbf: { value: bf.m, meta: { label: 'closed-loop m', precision: 3 } },
       staticGain: { value: bf.K, meta: { label: 'gain statique BF', precision: 4 } },
       staticError: { value: 1 / (1 + K), meta: { label: 'erreur statique 1/(1+K)', precision: 4 } },
-      overshoot: { value: overshoot, meta: { label: 'dépassement BF', unit: '%', precision: 1 } },
-      mrDb: { value: mrDb, meta: { label: 'résonance BF', unit: 'dB', precision: 2 } },
-      wrOut: { value: wr, meta: { label: 'ω de résonance BF', unit: 'rad/s', precision: 3 } },
+      overshoot: { value: overshoot, meta: { label: 'closed-loop overshoot', unit: '%', precision: 1 } },
+      mrDb: { value: mrDb, meta: { label: 'closed-loop resonance', unit: 'dB', precision: 2 } },
+      wrOut: { value: wr, meta: { label: 'closed-loop resonance ω', unit: 'rad/s', precision: 3 } },
       envelope: {
         value: m * w0,
         meta: { label: 'mω₀ — identique en BO et en BF', unit: 'rad/s', precision: 3 },

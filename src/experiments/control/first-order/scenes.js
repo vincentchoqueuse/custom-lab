@@ -2,92 +2,98 @@
 export default [
   {
     id: 'tau',
-    title: 'Scène 1 · τ, et rien d\'autre',
+    title: 'Scene 1 · τ, and nothing else',
     params: { K: 1, tau: 1, tz: 0 },
     view: 'step',
     visible: ['tau'],
-    notes: `Le premier ordre pur : une exponentielle, un seul paramètre de forme.
-Faire les trois lectures graphiques du cours à voix haute :
- · à t = τ la sortie vaut 63 % de la valeur finale ;
- · à t = 3τ elle en vaut 95 % — c'est le temps de réponse à 5 %, celui
-   qu'on annonce dans un cahier des charges (statline : 3τ à l'affichage) ;
- · la tangente à l'origine coupe la valeur finale exactement en t = τ.
-Bouger τ : la courbe s'étire, les quatre repères la suivent sans effort.
-Question : « et le gain K, ça change quoi à la vitesse ? » — rien du tout,
-c'est ce qui rend τ intéressant.`,
+    notes: `The pure first order: an exponential with a single shape parameter.
+The three graphical readings of the course are worth saying out loud. At t = τ
+the output is at 63 % of its final value. At t = 3τ it is at 95 %, which is the
+5 % settling time quoted in a specification, and the statline displays 3τ. And
+the tangent at the origin meets the final value exactly at t = τ.
+
+Moving τ stretches the curve while all four markers follow effortlessly. The
+question to ask: what does the gain K change about the speed? Nothing at all,
+which is what makes τ interesting.`,
   },
   {
     id: 'impulse',
-    title: 'Scène 2 · L\'impulsionnelle, c\'est la dérivée',
+    title: 'Scene 2 · The impulse response is the derivative',
     params: { K: 1, tau: 1, tz: 0 },
     view: 'impulse',
     visible: ['tau'],
-    notes: `Même système, autre entrée : h(t) = (K/τ)·e^{−t/τ}, qui part de K/τ et
-décroît avec la MÊME constante de temps.
-Faire le lien explicitement : h est la dérivée de la réponse indicielle
-(le harnais le vérifie numériquement). C'est pour ça que les deux courbes
-partagent τ — et pourquoi un système lent est aussi un système « mou ».
-L'aire sous h vaut K, le gain statique : intégrer une impulsion redonne
-l'échelon.`,
+    notes: `The same system with a different input: h(t) = (K/τ)·e^{−t/τ}, which
+starts at K/τ and decays with the SAME time constant.
+
+The link is worth making explicitly: h is the derivative of the step response,
+and the harness verifies it numerically. That is why both curves share τ — and
+why a slow system is also a soft one. The area under h is K, the static gain:
+integrating an impulse gives the step back.`,
   },
   {
     id: 'pole',
-    title: 'Scène 3 · Un pôle, une vitesse',
+    title: 'Scene 3 · One pole, one speed',
     params: { K: 1, tau: 1, tz: 0 },
     view: 'poles',
     visible: ['tau'],
-    notes: `Le pôle est en −1/τ, seul sur l'axe réel. Bouger τ et le regarder
-glisser : plus il s'éloigne de l'axe imaginaire, plus le système est rapide.
-Question à poser : « que se passerait-il s'il passait à DROITE de l'axe ? »
-Réponse : e^{+t/|τ|}, la sortie diverge — c'est l'instabilité, et c'est tout
-ce qu'il y a à retenir du demi-plan droit.
-Revenir sur l'onglet indicielle pour associer position du pôle et allure.`,
+    notes: `The pole sits at −1/τ, alone on the real axis. Moving τ slides it: the
+further from the imaginary axis, the faster the system.
+
+The question to ask is what would happen if it crossed to the RIGHT. The answer
+is e^{+t/|τ|} and a diverging output — that is instability, and it is all there
+is to remember about the right half-plane. Going back to the step tab ties the
+pole position to the shape.`,
   },
   {
     id: 'bode',
-    title: 'Scène 4 · Le même système, vu en fréquence',
+    title: 'Scene 4 · The same system, seen in frequency',
     params: { K: 1, tau: 1, tz: 0 },
     view: 'gain',
     visible: ['tau'],
     lock: true,
-    notes: `Axes figés : bouger τ fait glisser la cassure sans que le cadre bouge.
-La coupure est en ω = 1/τ, exactement le pôle changé de signe — même nombre,
-deux lectures. Au-delà, la pente est de −20 dB par décade, toujours.
-Onglet Phase : −45° pile à la coupure, −90° à l'infini.
-Rapide dans le temps ⟺ large en fréquence : c'est le même compromis que la
-troncature, vu depuis l'automatique.`,
+    notes: `The axes are pinned, so moving τ slides the corner without the frame
+moving. The cutoff is at ω = 1/τ, exactly the pole with its sign changed — one
+number, two readings — and beyond it the slope is −20 dB per decade, always.
+
+The phase tab reads −45° exactly at the corner and −90° at infinity. Fast in
+time means wide in frequency: the same trade-off as truncation, seen from
+control.`,
   },
   {
     id: 'zero',
-    title: 'Scène 5 · Un zéro, et la sortie saute',
+    title: 'Scene 5 · One zero, and the output jumps',
     params: { K: 1, tau: 1, tz: 0.5 },
     view: 'step',
     visible: ['tz'],
-    notes: `Les repères 63 %/τ et 95 %/3τ ont disparu, et c'est voulu : ils ne
-valent que pour le premier ordre PUR. La tangente, elle, reste — son identité
-survit au zéro.
-Ajouter un zéro : la sortie ne part plus de zéro, elle SAUTE à K·τ_z/τ
-(valeur initiale dans la statline). Le numérateur dérive l'entrée, et une
-dérivée d'échelon, c'est une marche.
-Monter τ_z au-delà de τ : le saut dépasse la valeur finale, puis on redescend
-— l'avance de phase, celle qu'un correcteur PD fabrique exprès.
-Aller voir l'impulsionnelle : le zéro y ajoute un Dirac, dont le poids est
-affiché. Un système qui répond instantanément, c'est ça.`,
+    notes: `The 63 %/τ and 95 %/3τ markers have gone, deliberately: they only hold
+for the PURE first order. The tangent stays, its identity surviving the zero.
+
+With a zero, the output no longer starts from zero but JUMPS to K·τ_z/τ, the
+initial value shown in the statline. The numerator differentiates the input, and
+the derivative of a step is a step.
+
+Raising τ_z past τ pushes the jump above the final value, so the response comes
+back down — that is phase lead, the thing a PD controller manufactures on
+purpose. The impulse tab shows what the zero added: a Dirac, whose weight is
+displayed. A system that responds instantaneously looks like that.`,
   },
   {
     id: 'nmp',
-    title: 'Scène 6 · Phase non minimale : ça part à l\'envers',
+    title: 'Scene 6 · Non-minimum phase: it starts the wrong way',
     params: { K: 1, tau: 1, tz: -0.6 },
     view: 'step',
     visible: ['tz'],
-    notes: `τ_z négatif : le zéro passe dans le demi-plan DROIT et la sortie commence
-par partir du mauvais côté avant de revenir (dépassement inverse, en statline).
-Ce n'est pas une curiosité : c'est le comportement d'un avion qui pique quand
-on tire sur le manche, d'un réacteur nucléaire, d'un ballon d'eau chaude.
-Question : « peut-on corriger ça en accélérant la boucle ? » Non — et c'est
-la limite fondamentale que tout le cours d'asservissement va rencontrer.
-Onglet Pôles : le zéro est visiblement à droite. Onglet Phase : elle plonge
-vers −180° au lieu de −90°, alors que le gain, lui, ne dit rien.`,
+    notes: `A negative τ_z puts the zero in the RIGHT half-plane, and the output
+starts by going the wrong way before coming back — the inverse overshoot, in the
+statline.
+
+This is not a curiosity: it is the behaviour of an aircraft that dips when the
+stick is pulled, of a nuclear reactor, of a domestic hot-water tank. Whether it
+can be fixed by speeding up the loop is the question, and the answer is no —
+that is the fundamental limit the whole control course will meet.
+
+The poles tab shows the zero plainly on the right. The phase tab dives toward
+−180° instead of −90°, while the gain says nothing at all.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

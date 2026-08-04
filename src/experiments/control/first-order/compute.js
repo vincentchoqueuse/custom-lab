@@ -99,10 +99,10 @@ export function compute({ K, tau, tz }) {
       // −3 dB below the static gain: an hline in the SAME dB unit as the plot
       gain3dB: toDb((K * Math.hypot(1, tz / tau)) / Math.SQRT2),
       initial: { value: y0, meta: { label: 'valeur initiale y(0⁺)', precision: 3 } },
-      t5: { value: t5, meta: { label: 'temps de réponse à 5 %', unit: 's', precision: 3 } },
+      t5: { value: t5, meta: { label: 'settling time to 5 %', unit: 's', precision: 3 } },
       undershoot: {
         value: trough < -EPS ? (100 * trough) / K : 0,
-        meta: { label: 'dépassement inverse', unit: '%', precision: 1 },
+        meta: { label: 'inverse overshoot', unit: '%', precision: 1 },
       },
       dirac: {
         value: (K * tz) / tau,
@@ -110,7 +110,7 @@ export function compute({ K, tau, tz }) {
       },
       fc: {
         value: wc / (2 * Math.PI),
-        meta: { label: 'fréquence de coupure', unit: 'Hz', precision: 3 },
+        meta: { label: 'cutoff frequency', unit: 'Hz', precision: 3 },
       },
     },
   };

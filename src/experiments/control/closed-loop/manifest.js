@@ -8,8 +8,8 @@ const CLOSED = '#D95319'; // la boucle fermée, partout la même couleur
 export default {
   id: 'closed-loop',
   order: 5,
-  title: 'Boucler un second ordre',
-  subtitle: 'Un seul potard K — et le système change de vitesse, de dépassement et d’erreur',
+  title: 'Closing the loop on a second order',
+  subtitle: 'One dial K — and the system changes speed, overshoot and error',
   tags: [
     'boucle fermée',
     'retour unitaire',
@@ -22,14 +22,14 @@ export default {
 
   params: {
     K: log('K', {
-      description: 'gain proportionnel de la boucle',
+      description: 'proportional loop gain',
       min: 0.1,
       max: 30,
       default: 4,
       precision: 2,
     }),
     w0: log('ω₀', {
-      description: 'pulsation propre du procédé',
+      description: 'natural frequency of the plant',
       min: 0.2,
       max: 20,
       default: 1,
@@ -37,7 +37,7 @@ export default {
       precision: 2,
     }),
     m: float('m', {
-      description: 'amortissement du procédé',
+      description: 'damping of the plant',
       min: 0.05,
       max: 2,
       step: 0.05,
@@ -49,21 +49,21 @@ export default {
 
   derived: {
     closed: {
-      label: 'boucle fermée',
+      label: 'closed loop',
       calc: (p) => {
         const r = Math.sqrt(1 + p.K);
         return `ω₀√(1+K) = ${(p.w0 * r).toFixed(3)} · m/√(1+K) = ${(p.m / r).toFixed(3)}`;
       },
     },
     invariant: {
-      label: 'mω₀ (inchangé)',
+      label: 'mω₀ (unchanged)',
       calc: (p) => `${(p.m * p.w0).toFixed(3)} rad/s — même enveloppe en BO et en BF`,
     },
   },
 
   groups: [
-    { title: 'La boucle', params: ['K'] },
-    { title: 'Le procédé', params: ['w0', 'm'] },
+    { title: 'The loop', params: ['K'] },
+    { title: 'The plant', params: ['w0', 'm'] },
   ],
 
   // actions omitted → core default [randomizeSeed, freeze]
@@ -77,10 +77,10 @@ export default {
       line('stepClosed', {
         color: CLOSED,
         width: 2.6,
-        label: 'boucle fermée',
+        label: 'closed loop',
         overlays: [
-          line('stepOpen', { width: 1.8, dashed: true, label: 'boucle ouverte' }),
-          hline('setpoint', { color: '#EDB120', width: 1.6, dashed: true, label: 'consigne' }),
+          line('stepOpen', { width: 1.8, dashed: true, label: 'open loop' }),
+          hline('setpoint', { color: '#EDB120', width: 1.6, dashed: true, label: 'setpoint' }),
         ],
         axes: { x: { label: 't', unit: 's' }, y: 'y(t)' },
       })
@@ -89,18 +89,18 @@ export default {
     // Les deux diagrammes de Bode superposés : |L| traverse 0 dB, |T| part du
     // gain statique K/(1+K) et bosse d'autant plus que la boucle est serrée.
     gainView('gain', {
-      label: 'boucle ouverte |L(jω)|',
+      label: 'open loop |L(jω)|',
       overlays: [
-        line('gainClosed', { color: CLOSED, width: 2.4, label: 'boucle fermée' }),
+        line('gainClosed', { color: CLOSED, width: 2.4, label: 'closed loop' }),
         vline('wrOut', { color: '#EDB120', dashed: true, width: 1.6, label: 'ω_r' }),
         at(0, '0 dB'),
       ],
     }),
 
     phaseView('phase', {
-      label: 'boucle ouverte arg L(jω)',
+      label: 'open loop arg L(jω)',
       overlays: [
-        line('phaseClosed', { color: CLOSED, width: 2.4, label: 'boucle fermée' }),
+        line('phaseClosed', { color: CLOSED, width: 2.4, label: 'closed loop' }),
         at(-90, '−90°'),
         at(-180, '−180°'),
       ],
@@ -115,16 +115,16 @@ export default {
     // place SOUS la courbe qu'on lit dessus.
     view(
       'black',
-      'Black — abaque',
+      'Black — Nichols chart',
       line('isoGain', {
         color: GUIDE_COLOR,
         width: 1,
         dashed: true,
-        label: 'iso-gain BF',
+        label: 'closed-loop iso-gain',
         overlays: [
-          line('isoPeak', { color: '#EDB120', width: 1.8, label: 'résonance BF' }),
-          line('black', { color: '#0072BD', width: 2.6, label: 'lieu de L(jω)' }),
-          scatter('criticalBlack', { color: GUIDE_COLOR, size: 6, label: 'point critique' }),
+          line('isoPeak', { color: '#EDB120', width: 1.8, label: 'closed-loop resonance' }),
+          line('black', { color: '#0072BD', width: 2.6, label: 'locus of L(jω)' }),
+          scatter('criticalBlack', { color: GUIDE_COLOR, size: 6, label: 'critical point' }),
           hline(() => 0, { color: GUIDE_COLOR, width: 1 }),
           vline(() => -180, { ...GUIDE, label: '−180°' }),
         ],

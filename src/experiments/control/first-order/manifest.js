@@ -6,14 +6,14 @@ import { at, gainView, phaseView, polesView, GUIDE, GUIDE_COLOR } from '../../..
 export default {
   id: 'first-order',
   order: 1,
-  title: 'Réponse d\'un premier ordre',
-  subtitle: 'τ gouverne tout — et un zéro suffit à faire partir la sortie à l\'envers',
-  tags: ['premier ordre', 'constante de temps', 'pôle', 'zéro', 'phase non minimale'],
+  title: 'First-order response',
+  subtitle: 'τ governs everything — and one zero is enough to send the output backwards',
+  tags: ['first order', 'time constant', 'pole', 'zero', 'non-minimum phase'],
 
   params: {
-    K: float('K', { description: 'gain statique', min: 0.2, max: 3, step: 0.05, default: 1 }),
+    K: float('K', { description: 'static gain', min: 0.2, max: 3, step: 0.05, default: 1 }),
     tau: log('τ', {
-      description: 'constante de temps',
+      description: 'time constant',
       min: 0.05,
       max: 5,
       default: 1,
@@ -21,7 +21,7 @@ export default {
       precision: 2,
     }),
     tz: float('τ_z', {
-      description: 'constante de temps du zéro (0 : aucun zéro ; négative : phase non minimale)',
+      description: 'time constant of the zero (0: no zero; negative: non-minimum phase)',
       min: -2,
       max: 2,
       step: 0.05,
@@ -34,7 +34,7 @@ export default {
 
   derived: {
     nature: {
-      label: 'nature du système',
+      label: 'nature of the system',
       calc: (p) =>
         p.tz === 0
           ? 'premier ordre pur'
@@ -44,10 +44,10 @@ export default {
               ? 'avance de phase (τ_z > τ)'
               : 'retard de phase (τ_z < τ)',
     },
-    t95: { label: 'temps de montée à 95 % ≈ 3τ', calc: (p) => `${(3 * p.tau).toFixed(2)} s` },
+    t95: { label: 'rise time to 95 % ≈ 3τ', calc: (p) => `${(3 * p.tau).toFixed(2)} s` },
   },
 
-  groups: [{ title: 'Système', params: ['K', 'tau', 'tz'] }],
+  groups: [{ title: 'System', params: ['K', 'tau', 'tz'] }],
 
   // actions omitted → core default [randomizeSeed, freeze]
 
@@ -65,18 +65,18 @@ export default {
         width: 2.5,
         label: 'y(t)',
         overlays: [
-          line('tangent', { color: '#D95319', width: 1.4, dashed: true, label: 'tangente en 0' }),
+          line('tangent', { color: '#D95319', width: 1.4, dashed: true, label: 'tangent at 0' }),
           hline((p) => p.K, { color: '#EDB120', dashed: true, width: 1.6, label: 'K' }),
           hline((p) => (p.tz === 0 ? 0.632 * p.K : NaN), {
             color: GUIDE_COLOR,
             width: 1,
-            label: '63 % de K',
+            label: '63 % of K',
           }),
           vline((p) => (p.tz === 0 ? p.tau : NaN), { ...GUIDE, label: 'τ' }),
           hline((p) => (p.tz === 0 ? 0.95 * p.K : NaN), {
             color: GUIDE_COLOR,
             width: 1,
-            label: '95 % de K',
+            label: '95 % of K',
           }),
           vline((p) => (p.tz === 0 ? 3 * p.tau : NaN), { ...GUIDE, label: '3τ' }),
         ],
@@ -92,7 +92,7 @@ export default {
       line('impulseResponse', {
         color: '#0072BD',
         width: 2.5,
-        label: 'h(t) — partie continue',
+        label: 'h(t) — continuous part',
         overlays: [
           vline((p) => (p.tz === 0 ? NaN : 0), {
             color: '#D95319',

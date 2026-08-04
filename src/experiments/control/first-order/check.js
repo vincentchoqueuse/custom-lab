@@ -6,7 +6,7 @@ const obs = (p) => compute({ ...BASE, ...p }).observables;
 
 export const checks = [
   {
-    name: 'réponse indicielle : 63.2 % à t = τ, 95 % à 3τ, 99.3 % à 5τ',
+    name: 'step response: 63.2 % at t = τ, 95 % at 3τ, 99.3 % at 5τ',
     category: 'numeric',
     run() {
       // the three numbers said in every first-order lecture, checked exactly
@@ -22,7 +22,7 @@ export const checks = [
     },
   },
   {
-    name: 'la tangente à l\'origine coupe la valeur finale en t = τ, zéro ou pas',
+    name: 'the tangent at the origin meets the final value at t = τ, zero or not',
     category: 'numeric',
     run() {
       // y(0) + y'(0)·τ = K holds for every τ_z — the graphical construction
@@ -38,7 +38,7 @@ export const checks = [
     },
   },
   {
-    name: 'h(t) est la dérivée de y(t) — deux formes closes, une identité',
+    name: 'h(t) is the derivative of y(t) — two closed forms, one identity',
     category: 'numeric',
     run() {
       // central difference on the step response against the closed-form
@@ -56,7 +56,7 @@ export const checks = [
     },
   },
   {
-    name: 'l\'aire sous h(t) vaut le gain statique K (τ_z = 0)',
+    name: 'the area under h(t) is the static gain K (τ_z = 0)',
     category: 'numeric',
     run() {
       // ∫₀^∞ (K/τ)e^{−t/τ} dt = K, by Simpson over 40τ
@@ -75,7 +75,7 @@ export const checks = [
     },
   },
   {
-    name: 'la valeur initiale vaut K·τ_z/τ, la finale vaut K',
+    name: 'the initial value is K·τ_z/τ, the final one is K',
     category: 'numeric',
     run() {
       // Theorems of the initial and final value, read on the drawn curve. The
@@ -100,7 +100,7 @@ export const checks = [
     },
   },
   {
-    name: 'coupure à −3 dB exactement en ω = 1/τ (sans zéro)',
+    name: 'the −3 dB cutoff is exactly at ω = 1/τ (with no zero)',
     category: 'numeric',
     run() {
       const gap = maxGap([0.2, 1, 3.5], (tau) => {
@@ -112,7 +112,7 @@ export const checks = [
     },
   },
   {
-    name: 'la phase vaut −45° à la coupure et tend vers −90°',
+    name: 'the phase is −45° at the cutoff and tends to −90°',
     category: 'numeric',
     run() {
       const o = obs({ tau: 0.8 });
@@ -126,7 +126,7 @@ export const checks = [
     },
   },
   {
-    name: 'phase non minimale : τ_z < 0 fait partir la sortie à l\'envers',
+    name: 'non-minimum phase: τ_z < 0 sends the output backwards first',
     category: 'numeric',
     run() {
       // the sign of y(0⁺) is the sign of τ_z, and nothing else decides it
@@ -147,7 +147,7 @@ export const checks = [
     },
   },
   {
-    name: 'le gain ne distingue pas un zéro de son symétrique, la phase si',
+    name: 'the gain cannot tell a zero from its mirror image, the phase can',
     category: 'numeric',
     run() {
       // |H| is even in τ_z, arg H is not: the whole point of "non-minimum
@@ -165,7 +165,7 @@ export const checks = [
     },
   },
   {
-    name: 'pôle en −1/τ, zéro en −1/τ_z (et aucun zéro si τ_z = 0)',
+    name: 'pole at −1/τ, zero at −1/τ_z (and no zero if τ_z = 0)',
     category: 'numeric',
     run() {
       const a = obs({ tau: 0.35, tz: -0.5 });

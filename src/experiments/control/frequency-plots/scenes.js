@@ -2,109 +2,121 @@
 export default [
   {
     id: 'first',
-    title: 'Scène 1 · Un premier ordre, lu quatre fois',
+    title: 'Scene 1 · A first order, read four times',
     params: { sys: 'first', K: 1, tau: 1, wc: 1 },
     view: 'gain',
     visible: ['wc'],
-    notes: `Poser la règle du jeu : les quatre onglets tracent LE MÊME nombre
-complexe H(jω). Rien d'autre ne change entre eux que la façon de le regarder.
-Placer ω_c sur 1 rad/s = 1/τ et faire lire les deux valeurs de la statline :
-−3.01 dB et −45°. Puis faire retrouver ces deux mêmes nombres :
- · sur Bode gain, la hauteur du trait jaune ;
- · sur Bode phase, sa hauteur là aussi ;
- · sur Nyquist, la longueur du segment origine→point jaune et son angle ;
- · sur Black, l'abscisse et l'ordonnée du point jaune.
-Quatre lectures, deux nombres. Ensuite seulement, glisser ω_c et regarder le
-point jaune courir sur les quatre courbes en même temps.`,
+    notes: `The rule of the game belongs first: all four tabs plot THE SAME
+complex number H(jω). Nothing changes between them except the way of looking at
+it.
+
+Put ω_c on 1 rad/s = 1/τ and read the two statline values, −3.01 dB and −45°.
+Then find those same two numbers everywhere: on the Bode gain, the height of the
+yellow line; on the Bode phase, its height there too; on Nyquist, the length of
+the segment from the origin to the yellow point, and its angle; on Black, the
+abscissa and the ordinate of the yellow point.
+
+Four readings, two numbers. Only then slide ω_c and watch the yellow point run
+along all four curves at once.`,
   },
   {
     id: 'halfcircle',
-    title: 'Scène 2 · Le premier ordre EST un demi-cercle',
+    title: 'Scene 2 · The first order IS a half-circle',
     params: { sys: 'first', K: 1, tau: 1, wc: 1 },
     view: 'nyquist',
     visible: ['wc', 'K'],
-    notes: `Le lieu de Nyquist d'un premier ordre est un demi-cercle exact, de
-centre K/2 sur l'axe réel et de rayon K/2 — le harnais le vérifie à 1e-15.
-Le faire constater : à ω = 0 on part de K sur l'axe réel, à ω → ∞ on arrive
-à l'origine, et ω_c = 1/τ est pile au SOMMET, à −45°.
-Question : « pourquoi la phase ne descend-elle jamais sous −90° ? » Parce que
-le demi-cercle reste dans le quadrant inférieur droit — la géométrie répond
-avant le calcul. Bouger K : le cercle grandit, les angles ne changent pas.`,
+    notes: `The Nyquist locus of a first order is an exact half-circle, centred at
+K/2 on the real axis with radius K/2, which the harness verifies to 1e-15.
+
+Let it be observed: at ω = 0 it starts at K on the real axis, at ω → ∞ it
+arrives at the origin, and ω_c = 1/τ sits exactly at the TOP, at −45°.
+
+Why the phase never goes below −90° then answers itself: the half-circle stays
+in the lower right quadrant, and the geometry replies before the algebra does.
+Moving K grows the circle and leaves the angles alone.`,
   },
   {
     id: 'damped',
-    title: 'Scène 3 · Second ordre amorti (m = 1.2)',
+    title: 'Scene 3 · A damped second order (m = 1.2)',
     params: { sys: 'second', K: 1, w0: 1, m: 1.2, wc: 1 },
     view: 'gain',
     visible: ['m', 'wc'],
-    notes: `m = 1.2 > 0.707 : aucune bosse. Le gain descend sagement, la phase
-va jusqu'à −180° (deux pôles, deux fois −90°), le lieu de Nyquist fait un
-demi-tour complet et Black descend en diagonale.
-Poser ω_c sur ω₀ = 1 rad/s : la statline affiche exactement −90° — c'est
-toujours vrai à ω₀, quel que soit m, et le harnais le vérifie.
-Garder cette image en tête : la scène suivante ne change QUE m.`,
+    notes: `At m = 1.2 > 0.707 there is no bump at all. The gain falls quietly,
+the phase goes to −180° (two poles, twice −90°), the Nyquist locus makes a
+complete half-turn and Black descends diagonally.
+
+Putting ω_c on ω₀ = 1 rad/s gives exactly −90° in the statline — always true at
+ω₀, whatever m is, and the harness verifies it. Keep this picture in mind: the
+next scene changes ONLY m.`,
   },
   {
     id: 'resonant',
-    title: 'Scène 4 · Second ordre résonant (m = 0.3)',
+    title: 'Scene 4 · A resonant second order (m = 0.3)',
     params: { sys: 'second', K: 1, w0: 1, m: 0.3, wc: 1 },
     view: 'gain',
     visible: ['m', 'wc'],
     lock: true,
-    notes: `Même système, m descendu à 0.3. La bosse apparaît : +4.85 dB à
-ω_r = ω₀√(1−2m²) = 0.91 rad/s (trait orange, valeurs en statline).
-Faire le tour des trois autres vues avec ω_c posé sur ω_r :
- · Nyquist : le lieu S'ENFLE, le point jaune s'éloigne de l'origine ;
- · Black : une NEZ apparaît vers la gauche, c'est la même bosse couchée.
-Puis remonter m lentement vers 0.707 et faire annoncer le moment où la bosse
-disparaît. Le seuil est exact, pas approximatif : au-dessus de 1/√2 il n'y a
-plus de maximum, et le tiroir l'affiche.
-La question qui reste : « le temporel, lui, dépasse dès m < 1 — pourquoi deux
-seuils différents ? » (à traiter avec l'expérience Réponse d'un second ordre).`,
+    notes: `The same system with m brought down to 0.3. The bump appears:
++4.85 dB at ω_r = ω₀√(1−2m²) = 0.91 rad/s, marked in orange with the values in
+the statline.
+
+Touring the other views with ω_c on ω_r is worth the time. On Nyquist the locus
+SWELLS and the yellow point moves away from the origin; on Black a nose appears
+toward the left, which is the same bump lying down.
+
+Then raise m slowly toward 0.707 and have the moment the bump disappears
+announced. The threshold is exact rather than approximate: above 1/√2 there is
+no maximum at all, and the drawer says so. The question that remains — the time
+response overshoots as soon as m < 1, so why two different thresholds? — belongs
+with the second-order response experiment.`,
   },
   {
     id: 'margins',
-    title: 'Scène 5 · Les marges, lues sur les trois diagrammes',
+    title: 'Scene 5 · The margins, read on all three diagrams',
     params: { sys: 'openloop', K: 1, tau: 1, wc: 0.78 },
     view: 'gain',
     visible: ['K', 'wc'],
-    notes: `Enfin un système où le point −1 sert à quelque chose. Un premier ou
-un second ordre stables ont des marges INFINIES : leur phase n'atteint jamais
-−180°. La boucle ouverte K/(jω(1+jωτ)(1+jωτ/5)), elle, y arrive à une
-pulsation finie, et les deux marges existent.
-Deux traits verticaux sont tracés sur les deux Bode :
- · violet ω à 0 dB = 0.78 rad/s — c'est LÀ qu'on lit la marge de phase, sur
-   le diagramme de phase : l'écart jusqu'à −180°, ici 43.2° ;
- · orange ω à −180° = 2.24 rad/s — c'est LÀ qu'on lit la marge de gain, sur
-   le diagramme de gain : l'écart jusqu'à 0 dB, ici 15.6 dB.
-Deux traits, deux écarts, deux nombres — et la statline les affiche.
-Puis passer à Nyquist, où les deux mêmes nombres sont deux constructions :
- · marge de gain : la courbe coupe l'axe réel négatif en −1/6 ≈ −0.167 ; il
-   reste un facteur 6 avant d'atteindre −1, et 20·log₁₀(6) = 15.6 dB ;
- · marge de phase : là où la courbe sort du cercle unité (tracé), l'angle qui
-   reste jusqu'à la demi-droite −180°, soit 43.2°.
-Et sur Black : la marge de phase est l'écart HORIZONTAL au point critique, la
-marge de gain l'écart VERTICAL. Le point critique est le même partout, les
-marges aussi — seuls les axes ont tourné.`,
+    notes: `At last a system where the −1 point is good for something. A stable
+first or second order has INFINITE margins, because its phase never reaches
+−180°. The open loop K/(jω(1+jωτ)(1+jωτ/5)) does reach it at a finite frequency,
+so both margins exist.
+
+Two vertical lines are drawn on the two Bode plots. The purple one, ω at 0 dB =
+0.78 rad/s, is where the phase margin is read on the phase diagram: the gap up
+to −180°, here 43.2°. The orange one, ω at −180° = 2.24 rad/s, is where the gain
+margin is read on the gain diagram: the gap up to 0 dB, here 15.6 dB. Two lines,
+two gaps, two numbers, all in the statline.
+
+On Nyquist the same two numbers are two constructions. For the gain margin, the
+curve crosses the negative real axis at −1/6 ≈ −0.167, leaving a factor of 6
+before −1, and 20·log₁₀(6) = 15.6 dB. For the phase margin, where the curve
+leaves the drawn unit circle, the angle remaining to the −180° ray is 43.2°.
+
+And on Black the phase margin is the HORIZONTAL gap to the critical point and
+the gain margin the VERTICAL one. The critical point is the same everywhere and
+so are the margins; only the axes have turned.`,
   },
   {
     id: 'unstable',
-    title: 'Scène 6 · Monter K jusqu\'à faire diverger la boucle',
+    title: 'Scene 6 · Raising K until the loop diverges',
     params: { sys: 'openloop', K: 1, tau: 1, wc: 2.24 },
     view: 'nyquist',
     visible: ['K'],
-    notes: `Une seule commande : K. Geler (F) à K = 1, puis monter.
-Poser la question AVANT : « qu'est-ce qui bouge quand j'augmente K ? »
-Réponse à obtenir : le lieu GRANDIT (homothétie de centre origine), le point
-−1 ne bouge pas — c'est toute l'idée du critère de Nyquist.
-ω à −180° = √5/τ ne dépend PAS de K : le lieu coupe toujours l'axe réel au
-même endroit sur la courbe, mais de plus en plus loin de l'origine.
-Faire monter K jusqu'à 6 : le lieu passe EXACTEMENT par −1, les deux marges
-tombent à zéro en même temps (statline), le tiroir affiche « instable ».
-K_crit = (τ₁+τ₂)/(τ₁τ₂) = 6/τ, exact, vérifié par le harnais.
-Au-delà, les marges deviennent négatives : la boucle fermée diverge. Le faire
-constater sur Black aussi — la courbe passe à gauche du point critique.
-Dernier geste : redescendre τ à 0.5 et faire prédire K_crit avant de le lire.`,
+    notes: `One control: K. Freeze at K = 1, then climb.
+
+Ask first what moves when K increases. The answer to obtain: the locus GROWS,
+scaled about the origin, and the −1 point does not move — which is the whole
+idea of the Nyquist criterion. The frequency at −180°, √5/τ, does NOT depend on
+K: the locus always crosses the real axis at the same point along the curve,
+only further and further from the origin.
+
+At K = 6 the locus passes EXACTLY through −1, both margins fall to zero together
+in the statline, and the drawer reads "unstable". K_crit = (τ₁+τ₂)/(τ₁τ₂) = 6/τ
+exactly, verified by the harness.
+
+Beyond it the margins go negative and the closed loop diverges; Black shows the
+same thing, the curve passing to the left of the critical point. A last gesture:
+bring τ down to 0.5 and have K_crit predicted before it is read.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

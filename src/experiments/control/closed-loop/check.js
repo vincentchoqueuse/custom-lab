@@ -13,7 +13,7 @@ const CASES = [
 
 export const checks = [
   {
-    name: 'la boucle fermée EST un second ordre : ω₀√(1+K), m/√(1+K), K/(1+K)',
+    name: 'the closed loop IS a second order: ω₀√(1+K), m/√(1+K), K/(1+K)',
     category: 'numeric',
     run() {
       // L'identité qui porte toute l'expérience : la réponse calculée en
@@ -32,7 +32,7 @@ export const checks = [
     },
   },
   {
-    name: 'le retour proportionnel NE DÉPLACE PAS la partie réelle des pôles',
+    name: 'proportional feedback DOES NOT MOVE the real part of the poles',
     category: 'numeric',
     run() {
       // m'ω₀' = (m/√(1+K))·(ω₀√(1+K)) = mω₀ : le coefficient en s est le même
@@ -70,7 +70,7 @@ export const checks = [
     },
   },
   {
-    name: 'Bode : la courbe fermée est bien L/(1+L), point par point',
+    name: 'Bode: the closed-loop curve really is L/(1+L), point by point',
     category: 'numeric',
     run() {
       const gap = maxGap(CASES, ({ w0, m, K }) => {
@@ -122,7 +122,7 @@ export const checks = [
     },
   },
   {
-    name: 'seuil de résonance : m/√(1+K) < 1/√2, et pas de pic au-dessus',
+    name: 'resonance threshold: m/√(1+K) < 1/√2, and no peak above it',
     category: 'numeric',
     run() {
       // Fermer la boucle DÉSAMORTIT : un procédé qui ne résonne pas peut se
@@ -149,7 +149,7 @@ export const checks = [
     },
   },
   {
-    name: 'les contours tracés vérifient |L/(1+L)| = M à la machine',
+    name: 'the drawn contours satisfy |L/(1+L)| = M to machine precision',
     category: 'numeric',
     run() {
       const gap = maxGap([-12, -6, -3, -1, 0, 1, 3, 6, 12], (db) => {
