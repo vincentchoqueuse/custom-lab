@@ -37,7 +37,7 @@
         return JSON.stringify(o.value[0] ?? {}).slice(0, 48);
       case 'text':
         return o.value.slice(0, 48);
-      // le type MIME suffit : la valeur est une URI de vingt mille caractères
+      // the MIME type is enough: the value is a twenty-thousand-character URI
       case 'image':
         return o.value.slice(5, o.value.indexOf(';'));
       default:

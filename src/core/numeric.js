@@ -249,10 +249,10 @@ export function polyval(coeffs, x) {
  * @param {Float64Array} re — real part (mutated)
  * @param {Float64Array} im — imaginary part (mutated)
  */
-// jacobiSym et solveLinearSystem ont déménagé dans core/linalg.js le jour où
-// l'algèbre matricielle a servi trois sujets : numeric.js garde le SCALAIRE
-// (erf, Student, trapz), linalg.js prend tout ce qui est matrice, dsp.js le
-// signal. Trois modules, trois frontières lisibles.
+// jacobiSym and solveLinearSystem moved to core/linalg.js the day matrix
+// algebra served three subjects: numeric.js keeps the SCALAR side (erf,
+// Student, trapz), linalg.js takes everything matrix-shaped, dsp.js the signal
+// layer. Three modules, three readable borders.
 
 export function fft(re, im) {
   const n = re.length;

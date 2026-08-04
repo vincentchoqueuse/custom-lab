@@ -1,17 +1,16 @@
 <script>
-  // App icon: LA BALISE DE GR — rectangle blanc sur rectangle rouge, ce qui
-  // est peint sur les rochers du sentier côtier pour dire « c'est par ici ».
-  // Sauf que la barre blanche est ici un signal, et c'est exactement ce que
-  // le nom de l'application raconte : une longue route faite d'étapes
-  // courtes et bien balisées.
+  // App icon: THE GR WAYMARK — a white rectangle over a red one, what is
+  // painted on the rocks of the coastal path to say "this way". Except that
+  // here the white bar is a signal, which is exactly what the name of the
+  // application tells: a long route made of short, well-marked stages.
   //
-  // Le MÊME dessin que le favicon d'index.html, au geste près. Ce sont deux
-  // fichiers séparés, et ils ont divergé une fois — le favicon changé, ce
-  // composant oublié, donc le logo inchangé à l'écran là où l'onglet, lui,
-  // avait bougé. Toute retouche se fait des DEUX côtés.
+  // The SAME drawing as the favicon in index.html, to the last stroke. They are
+  // two separate files, and they diverged once — the favicon changed, this
+  // component forgotten, so the logo on screen stayed put while the tab moved.
+  // Any retouch happens on BOTH sides.
   //
-  // Toujours sombre, comme le veut le chrome shadcn ; le liseré discret le
-  // garde visible sur la sidebar sombre aussi. Reste lisible jusqu'à 16 px.
+  // Always dark, as the shadcn chrome requires; the discreet rim keeps it
+  // visible on the dark sidebar too. Stays legible down to 16 px.
   let { size = 24 } = $props();
 </script>
 

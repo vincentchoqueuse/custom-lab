@@ -33,17 +33,17 @@ function validateAxis(axis, where) {
     throw new ViewError(`${where}: axis must be a string label or an object`);
   if (axis.scale != null && axis.scale !== 'linear' && axis.scale !== 'log')
     throw new ViewError(`${where}: axis scale must be 'linear' or 'log' (got '${axis.scale}')`);
-  // Un axe peut légitimement ne rien mesurer — le rug d'un échantillon est
-  // posé sur une ligne dont la hauteur n'a pas de sens. Le graduer laisserait
-  // croire le contraire : `ticks: false` supprime les repères et ne garde que
-  // le nom, qui dit alors ce que l'axe PORTE et non ce qu'il mesure.
+  // An axis may legitimately measure nothing — the rug of a sample sits on a
+  // line whose height has no meaning. Graduating it would suggest otherwise:
+  // `ticks: false` removes the marks and keeps only the name, which then says
+  // what the axis CARRIES rather than what it measures.
   if (axis.ticks != null && axis.ticks !== false)
     throw new ViewError(`${where}: axis ticks accepts only false (hide them)`);
   if (axis.domain != null) {
-    // `p => [lo, hi]` : un cadrage fixe qui dépend d'une configuration
-    // (une source supplémentaire, à l'écart, présente ou non). Ses bornes
-    // ne sont pas connaissables au chargement, comme la source d'un vline
-    // fonction — la forme, elle, l'est, et c'est ce qu'on vérifie.
+    // `p => [lo, hi]`: a fixed framing that depends on a configuration (an
+    // extra source, further off, present or not). Its bounds are not knowable
+    // at load time, like the source of a function vline — the shape is, and
+    // that is what gets checked.
     if (typeof axis.domain === 'function') {
       if (axis.domain.length !== 1)
         throw new ViewError(`${where}: a function axis domain takes the params, as p => [min, max]`);
@@ -51,12 +51,12 @@ function validateAxis(axis, where) {
     }
     if (!Array.isArray(axis.domain) || axis.domain.length !== 2)
       throw new ViewError(`${where}: axis domain must be [min, max]`);
-    // UNE SEULE borne peut être figée, l'autre restant automatique : `null`
-    // dit « celle-ci suit les données ». Le cas qui l'a demandé : une loi
-    // uniforme sur [0, θ]: l'abscisse DOIT partir de 0, sinon on ne voit pas
-    // que les estimateurs visent le bord d'un support qui commence là — mais
-    // 2x̄ peut dépasser θ (jusqu'à 2θ à N = 2), et une borne haute figée
-    // l'aurait purement et simplement coupé du cadre.
+    // ONE bound only may be pinned, the other staying automatic: `null` says
+    // "this one follows the data". The case that asked for it: a uniform
+    // distribution on [0, θ], whose abscissa MUST start at 0, or the estimators
+    // are not seen aiming at the edge of a support that starts there — but 2x̄
+    // can exceed θ (up to 2θ at N = 2), and a pinned upper bound would simply
+    // have cut it out of the frame.
     const [lo, hi] = axis.domain;
     const num = (v) => typeof v === 'number' && Number.isFinite(v);
     if (!(num(lo) || lo === null) || !(num(hi) || hi === null))
@@ -94,10 +94,10 @@ function makePlot(type, source, opts = {}) {
     validateAxis(opts.axes.x, `${where} axes.x`);
     validateAxis(opts.axes.y, `${where} axes.y`);
   }
-  // La légende se pose en haut à DROITE par défaut, et c'est le bon coin
-  // presque partout. Presque : quand les couches se pressent à droite — trois
-  // estimateurs qui tombent près de la borne qu'ils estiment — elle leur
-  // passe dessus. `legend: 'left'` la met en face. Liste fermée, comme le
+  // The legend sits at the top RIGHT by default, and that is the right corner
+  // almost everywhere. Almost: when the layers crowd the right — three
+  // estimators landing near the bound they estimate — it covers them.
+  // `legend: 'left'` puts it opposite. A closed list, like the
   // reste du vocabulaire.
   if (opts.legend != null && opts.legend !== 'left' && opts.legend !== 'right')
     throw new ViewError(`${where}: legend accepts 'left' or 'right' (got '${opts.legend}')`);
@@ -128,7 +128,7 @@ export function view(id, title, spec) {
 /**
  * A STANDARD figure (core/figures.js): the manifest NAMES the figure and the
  * registry stamps its id and its title — the subject's title, since the same
- * plot is honestly "Bode — gain" in automatique and "Réponse fréquentielle" in
+ * plot is honestly "Bode — gain" in control and "Frequency response" in
  * filtrage. `variant` picks another name from the figure's CLOSED list when an
  * experiment needs one its subject does not default to. No free text, ever:
  * a title you never type is a title you can never mistype.

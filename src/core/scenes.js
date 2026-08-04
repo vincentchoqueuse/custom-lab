@@ -1,21 +1,21 @@
-// Le vocabulaire d'une SCÈNE, et sa validation — le pendant de
-// core/figures.js pour l'autre moitié du contrat déclaratif.
+// The vocabulary of a SCENE, and its validation — the counterpart of
+// core/figures.js for the other half of the declarative contract.
 //
-// Une scène est de la donnée pure : sur les 198 scènes du catalogue, aucune
-// ne contient de fonction. Toute sa forme est donc vérifiable, et elle l'est
-// — parce que le seul défaut qu'une scène puisse avoir est une FAUTE DE
-// FRAPPE, et qu'une faute de frappe silencieuse est la pire espèce.
-// `visble: ['N']` ne faisait rien du tout, sans un mot, et on s'en
-// apercevait devant les étudiants.
+// A scene is pure data: across the 198 scenes of the catalogue, not one holds
+// a function. Its whole shape is therefore checkable, and it is checked —
+// because the only defect a scene can have is a TYPO, and a silent typo is the
+// worst kind.
+// `visble: ['N']` did nothing at all, silently, and it was discovered in front
+// of the students.
 //
-// Quatre choses sont vérifiées, toutes au chargement (et répétées par
-// `npm run check`, donc avant même d'ouvrir un navigateur) :
-//   · la clé existe, et porte le bon type ;
-//   · la vue sur laquelle la scène s'ouvre existe ;
-//   · les paramètres qu'elle règle existent ;
-//   · les pills qu'elle montre ou masque existent.
+// Four things are checked, all at load time (and repeated by `npm run check`,
+// so before a browser is even opened):
+//   · the key exists, and carries the right type;
+//   · the view the scene opens on exists;
+//   · the parameters it sets exist;
+//   · the pills it shows or masks exist.
 //
-// PURE : pas de DOM, pas d'état, pas de glob.
+// PURE: no DOM, no state, no glob.
 
 export class SceneError extends Error {
   constructor(message) {
@@ -24,7 +24,7 @@ export class SceneError extends Error {
   }
 }
 
-/** La liste FERMÉE des clés d'une scène, avec le type attendu. */
+/** The CLOSED list of a scene's keys, with the expected type. */
 export const SCENE_KEYS = Object.freeze({
   id: 'string',
   title: 'string',
@@ -40,10 +40,10 @@ export const SCENE_KEYS = Object.freeze({
 const typeOf = (v) => (Array.isArray(v) ? 'array' : typeof v);
 
 /**
- * @param {object} s        la scène telle qu'écrite dans scenes.js
- * @param {number} i        son rang, pour nommer une scène sans id
+ * @param {object} s        the scene as written in scenes.js
+ * @param {number} i        its rank, to name a scene that has no id
  * @param {{views: Array, params: object}} manifest
- * @param {string} key      'sujet/experience', pour le message d'erreur
+ * @param {string} key      'subject/experiment', for the error message
  */
 export function validateScene(s, i, manifest, key) {
   if (!s || typeof s !== 'object') throw new SceneError(`experiment '${key}': scene #${i} must be an object`);

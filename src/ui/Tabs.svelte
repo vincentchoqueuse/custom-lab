@@ -5,8 +5,8 @@
   // once — which is what a lecture wants, since the room sees that there ARE
   // four readings before the professor opens any of them.
   //
-  // On a phone: a native <select>. Six tabs the length of "Réponse
-  // impulsionnelle" do not fit in 380 px; they overflow the bar or wrap it
+  // On a phone: a native <select>. Six tabs the length of "Impulse
+  // response" do not fit in 380 px; they overflow the bar or wrap it
   // onto three lines and eat the plot. A native select beats a hand-built
   // dropdown here — it opens the platform's own picker (the iOS wheel, the
   // Android sheet), it is keyboard- and screen-reader-accessible for free, and
