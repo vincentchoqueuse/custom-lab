@@ -20,6 +20,7 @@ overlap at about half height.`,
   {
     id: 'square-wave',
     title: 'The square wave separates the bases',
+    view: 'fit',
     params: { basis: 'fourier', target: 'square', M: 19, ell: 0.05, lambda: 1e-8, N: 150, sigma: 0.02 },
     visible: ['basis', 'M'],
     notes: `One target, four philosophies. Fourier produces the Gibbs

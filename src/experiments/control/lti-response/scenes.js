@@ -3,6 +3,7 @@ export default [
   {
     id: 'step',
     title: 'Type in your system',
+    view: 'response',
     params: { num: [1], den: [1, 2, 1], input: 'step' },
     visible: ['num', 'den', 'input'],
     notes: `The num and den pills are EDITABLE: click, then type the coefficients
@@ -17,6 +18,7 @@ the system is stable.`,
   {
     id: 'ramp',
     title: 'The ramp measures the lag',
+    view: 'response',
     params: { num: [1], den: [1, 2, 1], input: 'ramp' },
     visible: ['den', 'num'],
     notes: `With a static gain of 1 the output eventually follows the ramp — with
@@ -32,6 +34,7 @@ at all: it opens as (1−H(0))·t. The ramp is a stopwatch.`,
   {
     id: 'sine',
     title: 'The living definition of H(jω)',
+    view: 'response',
     params: { num: [1], den: [1, 2, 1], input: 'sine', f: 0.5 },
     visible: ['f'],
     notes: `After the transient, the output is a sinusoid at the SAME frequency,

@@ -3,6 +3,7 @@ export default [
   {
     id: 'scope',
     title: 'What the scope shows',
+    view: 'scope',
     params: { system: 'rc', fc: 500, f: 100, sigma: 0.05 },
     visible: ['f'],
     notes: `At f = 100 Hz, well below f_c = 500 Hz, the orange output follows the
@@ -16,6 +17,7 @@ response is contained in those two readings, repeated at enough frequencies.`,
   {
     id: 'cutoff',
     title: 'The −3 dB point',
+    view: 'scope',
     params: { system: 'rc', fc: 500, f: 500, sigma: 0.05 },
     visible: ['f', 'fc'],
     notes: `At exactly f = f_c the statline reads a gain of −3.01 dB, an output

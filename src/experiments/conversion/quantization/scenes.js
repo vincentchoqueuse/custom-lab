@@ -3,6 +3,7 @@ export default [
   {
     id: 'staircase',
     title: 'The staircase',
+    view: 'time',
     params: { b: 3, A: 0.9, f: 7.3, dither: false },
     visible: ['b'],
     notes: `At b = 3 there are eight levels and the staircase is impossible to

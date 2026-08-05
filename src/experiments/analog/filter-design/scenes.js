@@ -3,6 +3,7 @@ export default [
   {
     id: 'families',
     title: 'One specification, four families',
+    view: 'gain',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
     visible: ['family'],
     notes: `The specification is fixed: 1 dB of ripple, 40 dB of attenuation, one
@@ -16,6 +17,7 @@ order, why is Butterworth everywhere?`,
   {
     id: 'tighten',
     title: 'Tightening the specification',
+    view: 'gain',
     params: { family: 'ellip', fp: 1000, fstop: 1400, Amax: 0.5, Amin: 60 },
     visible: ['fstop', 'Amin'],
     notes: `A 1.4× transition at 60 dB is met by an elliptic of order 6.

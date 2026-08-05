@@ -22,6 +22,7 @@ export default [
   {
     id: 'count',
     title: 'Nobody said how many lines there are',
+    view: 'time',
     params: { ...BASE, k: 0 },
     visible: ['k'],
     notes: `Arrive here straight from "High-resolution methods", on purpose: same
@@ -176,6 +177,7 @@ between the two roads, and it is not about speed.`,
   {
     id: 'offgrid',
     title: 'Off the grid, nothing is sparse',
+    view: 'time',
     params: { ...BASE, k: 2, snr: 40 },
     visible: ['offGrid', 'k'],
     notes: `Freeze (F) with δ = 0, then take the offset to ½ a search cell — the

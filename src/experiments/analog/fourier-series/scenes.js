@@ -3,6 +3,7 @@ export default [
   {
     id: 'harmonics',
     title: 'A square wave, harmonic by harmonic',
+    view: 'time',
     params: { wave: 'square', N: 1, A: 1 },
     visible: ['N'],
     notes: `Starting at N = 1 gives a plain sinusoid of the same frequency.
@@ -17,6 +18,7 @@ The spectrum view makes the structure explicit — odd orders only, decaying as
   {
     id: 'gibbs',
     title: 'The Gibbs phenomenon',
+    view: 'time',
     params: { wave: 'square', N: 10, A: 1 },
     visible: ['N'],
     lock: true,
@@ -32,6 +34,7 @@ filters to spectral truncation.`,
   {
     id: 'continuity',
     title: 'Continuity sets the rate',
+    view: 'time',
     params: { wave: 'triangle', N: 3, A: 1 },
     visible: ['wave', 'N'],
     notes: `The triangle at N = 3 is already nearly perfect, its coefficients

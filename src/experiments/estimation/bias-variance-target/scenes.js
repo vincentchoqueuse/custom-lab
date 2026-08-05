@@ -3,6 +3,7 @@ export default [
   {
     id: 'vocabulary',
     title: 'Four marksmen, one vocabulary',
+    view: 'targets',
     params: { mu: 2, sigma: 1.5, N: 5, lambda: 0.8, M: 400 },
     visible: ['N'],
     notes: `Four estimators of the same center, from the same data. The room can
@@ -18,6 +19,7 @@ the wrong answer — which is the point of asking.`,
   {
     id: 'useful-bias',
     title: 'The bias that wins',
+    view: 'targets',
     params: { mu: 2, sigma: 1.5, N: 5, lambda: 0.8, M: 1000 },
     visible: ['lambda', 'N'],
     notes: `At N = 5 the MSE under the targets settles the question: the

@@ -3,6 +3,7 @@ export default [
   {
     id: 'threshold',
     title: 'The threshold trade-off',
+    view: 'densities',
     params: { snr: 1, pfa: 0.05, N: 10 },
     visible: ['pfa', 'snr'],
     notes: `Two Gaussians: the statistic T under H₀ in blue and under H₁ in

@@ -3,6 +3,7 @@ export default [
   {
     id: 'healthy',
     title: 'Reading a healthy eye',
+    view: 'eye',
     params: { levels: 2, alpha: 0.35, bt: 8, sigma: 0.02, Nsym: 200 },
     visible: ['alpha'],
     notes: `Two hundred slices of 2T superimposed make the eye. Between the
@@ -17,6 +18,7 @@ for timing tolerance.`,
   {
     id: 'isi',
     title: 'The channel closes the eye',
+    view: 'eye',
     params: { levels: 2, alpha: 0.35, bt: 8, sigma: 0.02, Nsym: 200 },
     visible: ['bt', 'sigma'],
     notes: `Freezing the healthy eye and then reducing B·T shows a channel too
@@ -30,6 +32,7 @@ instant — and the statline measures the agony, the opening falling from about
   {
     id: '4pam',
     title: '4-PAM: three eyes stacked',
+    view: 'eye',
     params: { levels: 4, alpha: 0.35, bt: 8, sigma: 0.02, Nsym: 400 },
     visible: ['levels', 'sigma'],
     notes: `Two bits per symbol means four levels and THREE eyes, each a third of

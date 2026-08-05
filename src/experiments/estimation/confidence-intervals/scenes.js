@@ -4,6 +4,7 @@ export default [
   {
     id: 'all-is-well',
     title: 'All is well (N = 30)',
+    view: 'realizations',
     params: { N: 30, conf: 0.95 },
     visible: ['N', 'conf'], // Prompt Bar pills
     masked: [], // black box: pill shows "?", revealHidden action
@@ -17,6 +18,7 @@ It does not. The intervals get narrower and the proportion containing μ stays a
   {
     id: 'level-80',
     title: 'Level α = 0.20',
+    view: 'realizations',
     params: { conf: 0.8 },
     visible: ['conf'],
     notes: `At 1−α = 0.80 the red intervals become common enough to count, and

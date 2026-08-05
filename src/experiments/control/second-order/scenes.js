@@ -3,6 +3,7 @@ export default [
   {
     id: 'regimes',
     title: 'The three regimes',
+    view: 'step',
     params: { K: 1, m: 0.3, w0: 2 },
     visible: ['m'],
     notes: `At m = 0.3 the system rings: oscillations under an exponential

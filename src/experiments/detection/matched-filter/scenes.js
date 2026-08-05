@@ -3,6 +3,7 @@ export default [
   {
     id: 'invisible',
     title: 'Where is the pulse?',
+    view: 'signals',
     params: { shape: 'rect', N: 32, snr: 0.1, tau: 32, M: 800 },
     visible: ['snr'],
     notes: `At an SNR of 0.1 per sample, which is −10 dB, the orange pulse is

@@ -9,6 +9,7 @@ export default [
   {
     id: 'mixture',
     title: 'Two symbols at once, and two mixtures',
+    view: 'antennas',
     params: { ...BASE, rho: 0.5 },
     visible: ['rho'],
     notes: `Two QPSK symbols leave at the same instant, on the same frequency,

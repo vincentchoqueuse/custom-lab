@@ -3,6 +3,7 @@ export default [
   {
     id: 'shannon-ok',
     title: 'All is well (f ≪ Fs/2)',
+    view: 'time',
     params: { source: 'sine', f: 5, Fs: 50 },
     visible: ['f', 'Fs'],
     notes: `Five hertz sampled at fifty: the orange curve, reconstructed by sinc
@@ -17,6 +18,7 @@ care.`,
   {
     id: 'wagon-wheel',
     title: 'Aliasing: the wagon wheel',
+    view: 'time',
     params: { source: 'sine', f: 45, Fs: 50 },
     visible: ['f'],
     notes: `Forty-five hertz sampled at fifty: the samples trace a 5 Hz signal,

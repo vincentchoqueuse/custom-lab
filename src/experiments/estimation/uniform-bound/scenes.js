@@ -3,6 +3,7 @@ export default [
   {
     id: 'candidates',
     title: 'Three candidates for θ',
+    view: 'realization',
     params: { theta: 5, N: 10, M: 3000 },
     visible: ['N'],
     notes: `The yellow line should be ignored for a moment: θ is not known, and

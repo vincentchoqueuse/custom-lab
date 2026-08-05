@@ -339,7 +339,12 @@ registry at load time):
   `_subject.js` carries the same key for the subjects themselves.
 - **`scenes.js` is auto-discovered** by the registry (same glob as manifests) and
   merged as `presets`. In a scene: `view` defaults to the first view, `drawer` to
-  `false`, `masked` to `[]`, `lock` to `false`.
+  `false`, `masked` to `[]`, `lock` to `false`. **Past two views the default
+  stops applying**: a scene of an experiment with three or more views must SAY
+  which one it opens on, and the registry refuses one that does not. The default
+  is a convention for a main figure and its companion; on four tabs it means the
+  scene silently follows any reordering and opens on a figure its notes do not
+  describe.
 - **`story`** absent → reserved extension point (state-machine lead noted in phase 5).
 - **Params are declared with field factories** from `core/fields.js` (Django-style):
   `float`, `int`, `bool`, `select`, `log`, `readonly`. Factories return the plain

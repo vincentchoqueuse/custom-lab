@@ -3,6 +3,7 @@ export default [
   {
     id: 'euler-inflates',
     title: 'Euler invents energy',
+    view: 'trajectory',
     params: { system: 'pendulum', h: 0.1, theta0: 2.5 },
     visible: ['h'],
     notes: `A large-amplitude pendulum at h = 0.1 s: Euler, in orange, adds
@@ -34,6 +35,7 @@ LTspice.`,
   {
     id: 'second-order',
     title: 'Simulating the second order',
+    view: 'trajectory',
     params: { system: 'linear', h: 0.3 },
     visible: ['h'],
     notes: `This is the system of the second-order response experiment, m = 0.2

@@ -3,6 +3,7 @@ export default [
   {
     id: 'p-alone',
     title: 'P alone: fast, but off target',
+    view: 'regulated',
     params: { Kp: 3, Ki: 0, Kd: 0, sigma: 0 },
     visible: ['Kp'],
     notes: `With Ki = Kd = 0 the output rises and then stops BELOW the setpoint:
@@ -17,6 +18,7 @@ Because at zero error u = 0, so nobody is pushing any more.`,
   {
     id: 'integral',
     title: 'I erases everything',
+    view: 'regulated',
     params: { Kp: 3, Ki: 1.5, Kd: 0, sigma: 0 },
     visible: ['Ki'],
     notes: `Freezing the P-only curve and adding Ki makes the steady-state error
@@ -30,6 +32,7 @@ back: an integral is a memory, and memory has inertia.`,
   {
     id: 'derivative',
     title: 'D calms — and amplifies noise',
+    view: 'regulated',
     params: { Kp: 6, Ki: 1.5, Kd: 1.5, sigma: 0 },
     visible: ['Kd', 'sigma'],
     notes: `With Kp pushed to 6 the loop oscillates. Raising Kd makes the

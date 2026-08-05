@@ -3,6 +3,7 @@ export default [
   {
     id: 'at-work',
     title: 'The filter at work',
+    view: 'tracking',
     params: { sigw: 0.1, sigv: 1, N: 120 },
     visible: ['sigv', 'sigw'],
     notes: `Pressing R changes the purple measurements while the orange estimate
@@ -16,6 +17,7 @@ the model, not on the measurements.`,
   {
     id: 'good-sensor',
     title: 'Excellent sensor, uncertain model',
+    view: 'tracking',
     params: { sigw: 0.5, sigv: 0.05, N: 120 },
     visible: ['sigv', 'sigw'],
     notes: `Freezing the previous scene before switching to this one makes the
@@ -29,6 +31,7 @@ landed.`,
   {
     id: 'good-model',
     title: 'Poor sensor, trusted model',
+    view: 'tracking',
     params: { sigw: 0.01, sigv: 3, N: 120 },
     visible: ['sigv', 'sigw'],
     notes: `The opposite regime: K∞ is near zero, the estimate is heavily

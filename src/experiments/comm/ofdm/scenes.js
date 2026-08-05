@@ -3,6 +3,7 @@ export default [
   {
     id: 'prefix-object',
     title: 'The frame, and the prefix at its head',
+    view: 'time',
     params: { Nc: 64, L: 6, cp: 8, snr: 25, M: 50 },
     visible: ['cp'],
     notes: `The transmitted signal in time, before the channel. On its own it is

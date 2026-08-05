@@ -8,10 +8,11 @@
 // `visble: ['N']` did nothing at all, silently, and it was discovered in front
 // of the students.
 //
-// Four things are checked, all at load time (and repeated by `npm run check`,
+// Five things are checked, all at load time (and repeated by `npm run check`,
 // so before a browser is even opened):
 //   · the key exists, and carries the right type;
 //   · the view the scene opens on exists;
+//   · that view is STATED, once the experiment has more than two of them;
 //   · the parameters it sets exist;
 //   · the pills it shows or masks exist.
 //
@@ -64,6 +65,23 @@ export function validateScene(s, i, manifest, key) {
   if (s.view && !viewIds.has(s.view))
     throw new SceneError(
       `${where}: opens on view '${s.view}', which does not exist (${[...viewIds].join(', ')})`
+    );
+
+  // Beyond two views, `view` stops being optional. The default — open on the
+  // first one — is a fine convention for an experiment that has a main figure
+  // and a companion, and a trap for one that has four: adding a view at the
+  // FRONT then silently moves every scene that relied on the default, and the
+  // scene lands on a figure its notes do not describe. That happened here, on
+  // the OFDM experiment, when two time views were put ahead of the channel
+  // one; nothing failed, the lecture just opened on the wrong picture. So a
+  // scene of a 3-view experiment says where it opens, and reordering the tabs
+  // becomes what it should be — a change to the tab grammar and to nothing
+  // else.
+  if (manifest.views.length >= 3 && !s.view)
+    throw new SceneError(
+      `${where}: must declare the view it opens on — the experiment has ` +
+        `${manifest.views.length} views (${[...viewIds].join(', ')}), and beyond two ` +
+        `the "first view" default silently follows any reordering`
     );
 
   // The registry injects `seed` into a RANDOM experiment's schema, so a

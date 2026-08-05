@@ -3,6 +3,7 @@ export default [
   {
     id: 'right-model',
     title: 'The right model (d = 3)',
+    view: 'fit',
     params: { d: 3, N: 30, sigma: 0.3, lambda: 0.001 },
     visible: ['d', 'sigma'],
     notes: `The true polynomial has degree 3 and a degree 3 is estimated, so
@@ -15,6 +16,7 @@ in numbers: the orange estimated bars bracket the blue true values.`,
   {
     id: 'underfitting',
     title: 'Underfitting (d = 1)',
+    view: 'fit',
     params: { d: 1, N: 30, sigma: 0.3, lambda: 0.001 },
     visible: ['d'],
     notes: `A straight line cannot follow a cubic, and what is left over is bias
@@ -28,6 +30,7 @@ becomes rich enough to hold the truth.`,
   {
     id: 'overfitting',
     title: 'Overfitting (d = 9)',
+    view: 'fit',
     params: { d: 9, N: 15, sigma: 0.4, lambda: 0.001 },
     visible: ['d', 'N'],
     notes: `Ten coefficients for fifteen points: the polynomial fits the noise.
