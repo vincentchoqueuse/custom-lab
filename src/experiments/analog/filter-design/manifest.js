@@ -12,7 +12,7 @@ export default {
   tags: ['analog', 'filter', 'Butterworth', 'Chebyshev', 'elliptic', 'specification'],
 
   params: {
-    family: select('famille', {
+    family: select('family', {
       description: 'approximation family',
       options: [
         { value: 'butter', label: 'Butterworth' },

@@ -2,7 +2,7 @@
 export default [
   {
     id: 'staircase',
-    title: 'Scene 1 · The staircase',
+    title: 'The staircase',
     params: { b: 3, A: 0.9, f: 7.3, dither: false },
     visible: ['b'],
     notes: `At b = 3 there are eight levels and the staircase is impossible to
@@ -14,7 +14,7 @@ first.`,
   },
   {
     id: 'uniform-error',
-    title: 'Scene 2 · The error is (almost) uniform',
+    title: 'The error is (almost) uniform',
     view: 'error-hist',
     params: { b: 8, A: 0.9, f: 7.3, dither: false },
     visible: ['b'],
@@ -28,7 +28,7 @@ that condition stops being a formality.`,
   },
   {
     id: 'six-db',
-    title: 'Scene 3 · 6 dB per bit',
+    title: '6 dB per bit',
     view: 'snr',
     params: { b: 8, A: 0.9, f: 7.3, dither: false },
     visible: ['b', 'A'],
@@ -40,7 +40,7 @@ filled, and getting the input gain right is the entire art.`,
   },
   {
     id: 'dither',
-    title: 'Scene 4 · Dither, or the noise that helps',
+    title: 'Dither, or the noise that helps',
     view: 'error',
     params: { b: 3, A: 0.8, f: 7.3, dither: true },
     visible: ['b', 'dither'],

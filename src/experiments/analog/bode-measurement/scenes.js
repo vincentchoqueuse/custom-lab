@@ -2,7 +2,7 @@
 export default [
   {
     id: 'scope',
-    title: 'Scene 1 · What the scope shows',
+    title: 'What the scope shows',
     params: { system: 'rc', fc: 500, f: 100, sigma: 0.05 },
     visible: ['f'],
     notes: `At f = 100 Hz, well below f_c = 500 Hz, the orange output follows the
@@ -15,7 +15,7 @@ response is contained in those two readings, repeated at enough frequencies.`,
   },
   {
     id: 'cutoff',
-    title: 'Scene 2 · The −3 dB point',
+    title: 'The −3 dB point',
     params: { system: 'rc', fc: 500, f: 500, sigma: 0.05 },
     visible: ['f', 'fc'],
     notes: `At exactly f = f_c the statline reads a gain of −3.01 dB, an output
@@ -27,7 +27,7 @@ asymptote. Freezing and then moving f_c makes the point follow.`,
   },
   {
     id: 'campaign',
-    title: 'Scene 3 · The measurement campaign',
+    title: 'The measurement campaign',
     view: 'gain',
     params: { system: 'rc', fc: 500, f: 500, sigma: 0.05 },
     visible: ['sigma'],
@@ -42,7 +42,7 @@ circuit.`,
   },
   {
     id: 'resonance',
-    title: 'Scene 4 · Resonance',
+    title: 'Resonance',
     view: 'gain',
     params: { system: 'order2', f0: 500, Q: 2, f: 500, sigma: 0.05 },
     visible: ['Q'],

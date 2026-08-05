@@ -39,7 +39,7 @@ export default {
       ],
       default: 'rect',
     }),
-    f0: float('f₀', {
+    f0: float('f', {
       description: 'signal frequency',
       min: 100,
       max: 800,

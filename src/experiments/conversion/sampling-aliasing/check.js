@@ -1,7 +1,7 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 
-const BASE = { source: 'sine', f: 5, fe: 50, seed: 34 };
+const BASE = { source: 'sine', f: 5, Fs: 50, seed: 34 };
 
 export const checks = [
   {
@@ -41,13 +41,13 @@ export const checks = [
     },
   },
   {
-    name: 'square wave: every folded harmonic lands inside [0, fe/2]',
+    name: 'square wave: every folded harmonic lands inside [0, Fs/2]',
     category: 'numeric',
     run() {
       const { observables: o } = compute({ ...BASE, source: 'square', f: 15 });
       let ok = o.specAlias.x.length > 2;
       for (let i = 0; i < o.specAlias.x.length; i++) {
-        if (o.specAlias.x[i] < 0 || o.specAlias.x[i] > BASE.fe / 2 + 1e-12) ok = false;
+        if (o.specAlias.x[i] < 0 || o.specAlias.x[i] > BASE.Fs / 2 + 1e-12) ok = false;
       }
       // 3rd harmonic 45 Hz must fold to 5 Hz
       const h3 = Math.abs(o.specAlias.x[1] - 5) < 1e-12;

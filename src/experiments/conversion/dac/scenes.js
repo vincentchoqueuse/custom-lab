@@ -2,7 +2,7 @@
 export default [
   {
     id: 'samples',
-    title: 'Scene 1 · What we have: samples',
+    title: 'What we have: samples',
     params: { stage: 'samples', L: 4, f0: 1000, half: 8 },
     visible: ['f0'],
     notes: `A 1 kHz sinusoid sampled at 8 kHz, and nothing else so far: numbers,
@@ -19,7 +19,7 @@ nothing at all.`,
   },
   {
     id: 'stuffing',
-    title: 'Scene 2 · Zeros — and the spectrum does not move',
+    title: 'Zeros — and the spectrum does not move',
     params: { stage: 'stuffed', L: 4, f0: 1000, half: 8 },
     visible: ['L', 'stage'],
     notes: `The first step inserts L−1 ZEROS between the samples. No arithmetic,
@@ -39,7 +39,7 @@ has been divided by L. The filter will have to give it back.`,
   },
   {
     id: 'filter',
-    title: 'Scene 3 · The filter erases the images',
+    title: 'The filter erases the images',
     params: { stage: 'filtered', L: 4, f0: 1000, half: 8 },
     visible: ['stage', 'L'],
     notes: `The second step is a low-pass with cutoff Fs/2 and gain L. Its
@@ -65,7 +65,7 @@ the time: the whole chain is in that alternation.`,
   },
   {
     id: 'short',
-    title: 'Scene 4 · A filter that is too short',
+    title: 'A filter that is too short',
     params: { stage: 'filtered', L: 4, f0: 1000, half: 1 },
     visible: ['half', 'L'],
     notes: `At M = 1 the filter has nine coefficients and the image is at −7 dB —

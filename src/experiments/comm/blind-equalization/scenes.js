@@ -2,7 +2,7 @@
 export default [
   {
     id: 'blind',
-    title: 'Scene 1 · It works, and nothing was taught to it',
+    title: 'It works, and nothing was taught to it',
     params: { mod: 'qpsk', h: [1, 0.5, -0.2], phi: 0, snr: 25, L: 11, mu: 0.002, n: 0, seed: 34 },
     visible: ['n', 'mu'],
     notes: `Start at n = 0: the equalizer is a single spike, so the blue cloud sits
@@ -20,7 +20,7 @@ channel undone.`,
   },
   {
     id: 'rotation',
-    title: 'Scene 2 · It converges up to a rotation',
+    title: 'It converges up to a rotation',
     params: { mod: 'qpsk', h: [1, 0.5, -0.2], phi: 40, snr: 25, L: 11, mu: 0.002, n: 8000, seed: 34 },
     visible: ['phi', 'n'],
     notes: `The receiver now ignores a carrier phase of 40°. Freeze (F), then move φ.
@@ -37,7 +37,7 @@ differentially so that only phase DIFFERENCES carry information.`,
   },
   {
     id: 'qam',
-    title: 'Scene 3 · What a constant modulus was really buying',
+    title: 'What a constant modulus was really buying',
     params: { mod: '16qam', h: [1, 0.5, -0.2], phi: 0, snr: 30, L: 11, mu: 0.002, n: 8000, seed: 34 },
     visible: ['mod', 'mu'],
     notes: `Switch the constellation to 16-QAM and watch the cost view. An orange
@@ -60,7 +60,7 @@ enough.`,
   },
   {
     id: 'step',
-    title: 'Scene 4 · The step size, with nobody to warn you',
+    title: 'The step size, with nobody to warn you',
     params: { mod: 'qpsk', h: [1, 0.5, -0.2], phi: 0, snr: 25, L: 11, mu: 0.008, n: 8000, seed: 34 },
     visible: ['mu', 'seed'],
     notes: `The same trade-off as the supervised experiment — a large step converges

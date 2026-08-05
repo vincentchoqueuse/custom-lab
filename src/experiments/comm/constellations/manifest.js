@@ -56,7 +56,7 @@ export default {
     // circles must be circles) plus ML decision boundaries — no generic
     // 1D-oriented plot type fits. Same justification as GaussianPlane;
     // promotion candidate if a third equal-aspect view appears.
-    plane('iq', 'Plan I/Q', {
+    plane('iq', 'I/Q plane', {
       clouds: [
         { source: 'rxOk', color: '#0072BD', r: 1.7, opacity: 0.3, label: 'decided correctly' },
         { source: 'rxErr', color: '#D95319', r: 2.4, opacity: 0.85, label: 'error' },

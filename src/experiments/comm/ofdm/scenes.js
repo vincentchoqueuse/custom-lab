@@ -2,7 +2,7 @@
 export default [
   {
     id: 'selective',
-    title: 'Scene 1 · The channel digs holes',
+    title: 'The channel digs holes',
     params: { Nc: 64, L: 6, cp: 8, snr: 15, M: 50 },
     visible: ['L'],
     notes: `Six paths, and the channel spectrum becomes a landscape of ridges and
@@ -15,7 +15,7 @@ again — the selectivity comes from the ECHOES.`,
   },
   {
     id: 'one-tap',
-    title: 'Scene 2 · The miracle of the FFT',
+    title: 'The miracle of the FFT',
     view: 'constellation',
     params: { Nc: 64, L: 6, cp: 8, snr: 20, M: 50 },
     visible: ['snr', 'L'],
@@ -29,7 +29,7 @@ single-carrier system has become 64 divisions.`,
   },
   {
     id: 'prefix',
-    title: 'Scene 3 · Sabotaging the prefix',
+    title: 'Sabotaging the prefix',
     view: 'constellation',
     params: { Nc: 64, L: 6, cp: 8, snr: 25, M: 50, seed: 5 },
     visible: ['cp'],
@@ -46,7 +46,7 @@ the prefix are the price of the diagonalization.`,
   },
   {
     id: 'fades',
-    title: 'Scene 4 · The errors live in the holes',
+    title: 'The errors live in the holes',
     view: 'ber',
     params: { Nc: 64, L: 6, cp: 8, snr: 12, M: 200 },
     visible: ['snr', 'M'],

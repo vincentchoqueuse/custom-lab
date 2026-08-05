@@ -21,7 +21,7 @@ const BASE = {
 export default [
   {
     id: 'count',
-    title: 'Scene 1 · Nobody said how many lines there are',
+    title: 'Nobody said how many lines there are',
     params: { ...BASE, k: 0 },
     visible: ['k'],
     notes: `Arrive here straight from "High-resolution methods", on purpose: same
@@ -44,7 +44,7 @@ this exact problem.`,
   },
   {
     id: 'denoise',
-    title: 'Scene 2 · What the sparsity buys: a denoiser',
+    title: 'What the sparsity buys: a denoiser',
     view: 'time',
     params: { ...BASE, snr: 5, k: 2 },
     visible: ['snr', 'k'],
@@ -68,7 +68,7 @@ estimation problem — and it is the same problem MUSIC solves by being told d.`
   },
   {
     id: 'orthogonal',
-    title: 'Scene 3 · Where the O of OMP is',
+    title: 'Where the O of OMP is',
     view: 'correlations',
     params: { ...BASE, k: 1 },
     visible: ['algo', 'k'],
@@ -88,7 +88,7 @@ starts counting. MP spends iterations repairing its own earlier answers.`,
   },
   {
     id: 'resolution',
-    title: 'Scene 4 · Δf = 0.5 — where MUSIC wins and this does not',
+    title: 'Δf = 0.5 — where MUSIC wins and this does not',
     view: 'spectrum',
     params: { ...BASE, df: 0.5, k: 2 },
     visible: ['df', 'over'],
@@ -117,7 +117,7 @@ free — this is its invoice.`,
   },
   {
     id: 'lasso',
-    title: 'Scene 5 · The other road: a penalty instead of a count',
+    title: 'The other road: a penalty instead of a count',
     view: 'spectrum',
     params: { ...BASE, algo: 'lasso', lam: 0.4 },
     visible: ['lam', 'algo'],
@@ -148,7 +148,7 @@ like.`,
   },
   {
     id: 'fista',
-    title: 'Scene 6 · Calibrating the step: a guarantee is not an optimum',
+    title: 'Calibrating the step: a guarantee is not an optimum',
     view: 'spectrum',
     params: { ...BASE, algo: 'lasso', lam: 0.1, alpha: 1 },
     visible: ['alpha', 'lam'],
@@ -175,7 +175,7 @@ between the two roads, and it is not about speed.`,
   },
   {
     id: 'offgrid',
-    title: 'Scene 7 · Off the grid, nothing is sparse',
+    title: 'Off the grid, nothing is sparse',
     params: { ...BASE, k: 2, snr: 40 },
     visible: ['offGrid', 'k'],
     notes: `Freeze (F) with δ = 0, then take the offset to ½ a search cell — the

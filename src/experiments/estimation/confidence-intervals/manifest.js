@@ -24,6 +24,7 @@ export default {
       precision: 2,
     }),
     known: select('σ known?', {
+      description: 'which interval the model justifies',
       options: [
         { value: false, label: 'no — Student interval' },
         { value: true, label: 'yes — Gaussian interval' },

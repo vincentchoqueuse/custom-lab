@@ -26,6 +26,42 @@ When a term is missing here, add it in the same commit that first uses it.
 6. **British or American?** American, because the literature is: *normalize*,
    *center*, *modeled*, *analog*.
 
+## Symbols: what is a symbol, and what is a word
+
+A param's `name` is what the pill shows. It is either a **symbol** — greek, a
+single letter, an acronym: `σ`, `μ`, `Δf`, `N`, `SNR` — or, for a `select` whose
+value is a choice rather than a number, a **word**: `window`, `family`,
+`method`, `algorithm`, `activation`. The words are a **closed list**, held in
+`scripts/run-checks.js` and enforced by `npm run check`, because that is the
+slot French crept back into: five param names sat in the interface reading
+`algorithme`, `famille`, `méthode`, `étape` and `poursuite` long after the
+catalogue was converted, since nobody re-reads a one-word select label.
+
+Two rules settle the recurring ambiguities:
+
+- **`f` when it is the only frequency, `f₀` when there are harmonics.** A lone
+  sinusoid being sampled, quantized or truncated has an `f`; the fundamental of
+  a square wave or of an FM modulator has an `f₀`.
+- **`Fs` is the sampling rate**, everywhere and in that spelling — not `fe`,
+  which is *fréquence d'échantillonnage* wearing an English coat, and which one
+  experiment carried in its params, its subtitle, its axis labels and its scene
+  notes.
+
+### Collisions that are deliberate
+
+The same symbol carries different quantities in different subjects, and that is
+the terminology rules working as intended (rule 1: the subject's own field
+wins). They are listed here so that nobody "fixes" them later:
+
+| Symbol | Meanings, by subject | Why both stay |
+|---|---|---|
+| `μ` | true mean (stats, estimation) · step size (adaptive filtering, CMA) | Kay writes one, Haykin the other |
+| `λ` | ridge and lasso penalty (regression) · forgetting factor (RLS) · rate (Poisson) | three literatures, three λ |
+| `N` | sample size, record length, number of draws — always "how many" | one concept, many clothes |
+| `M` | Monte-Carlo replications (stats) · covariance order (spectral) · PAM levels (comm) | never in the same room |
+| `Δf` | gap between two lines (spectral) · frequency deviation (FM) · grid step (LS estimation) | standard in each |
+| `σ` | noise standard deviation everywhere — and NEVER the activation function, which is a select and therefore carries the word `activation`, even though the ML literature writes σ(·). A pill reading `σ = ReLU` two experiments after `σ = 0.3` is the one collision the catalogue refuses. |
+
 ## Core vocabulary
 
 | French | English | Never |
@@ -135,6 +171,23 @@ These name the app's own machinery and are already fixed in
 | the line of readings under the plot | statline |
 | a named quantity produced by `compute` | observable |
 | the developer panel | Inspector |
+
+## Scene titles
+
+A scene title says what the scene is FOR, in sentence case, and carries **no
+number**: not `Scene 3 · The three regimes` but `The three regimes`.
+
+The rank is the engine's to know. The preset picker already draws it — `3/7` on
+the collapsed button, `3` beside the title in the list — derived from the
+position, so it cannot be wrong. Typed into the title it was duplicated data,
+and duplicated data drifts: half the catalogue carried the prefix and half did
+not, five subjects carried both at once, and inserting a scene meant renumbering
+every title below it by hand. That happened twice in one afternoon before the
+prefix was removed from all 166 titles that had it.
+
+Good titles are short and say the finding, not the setup: `Two free decibels`,
+`I erases everything`, `The bias that wins`, `Four marksmen, one vocabulary`.
+The median is 27 characters; past about 50 the collapsed picker wraps.
 
 ## Scene notes
 

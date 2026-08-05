@@ -2,7 +2,7 @@
 export default [
   {
     id: 'through',
-    title: 'Scene 1 · The signal goes in, the signal comes out',
+    title: 'The signal goes in, the signal comes out',
     view: 'response',
     params: { source: 'square', f0: 110, fc: 500, Q: 2, output: 'lp' },
     visible: ['fc', 'output'],
@@ -16,7 +16,7 @@ The high-pass, which keeps the corners and throws away the slope.`,
   },
   {
     id: 'sculpt',
-    title: 'Scene 2 · Sculpting the harmonics',
+    title: 'Sculpting the harmonics',
     view: 'gain',
     params: { source: 'square', f0: 110, fc: 500, Q: 2, output: 'lp' },
     visible: ['fc', 'output'],
@@ -31,7 +31,7 @@ back to the time view for the rounded square that results. Taking f_c below
   },
   {
     id: 'resonance',
-    title: 'Scene 3 · Resonance sings',
+    title: 'Resonance sings',
     view: 'gain',
     params: { source: 'saw', f0: 110, fc: 550, Q: 12, output: 'lp' },
     visible: ['fc', 'Q'],
@@ -46,7 +46,7 @@ the higher Q is.`,
   },
   {
     id: 'four',
-    title: 'Scene 4 · Four filters for two multiplications',
+    title: 'Four filters for two multiplications',
     view: 'gain',
     params: { source: 'square', f0: 110, fc: 600, Q: 2, output: 'lp' },
     visible: ['Q', 'fc'],
@@ -59,7 +59,7 @@ different numerators. That is why the SVF has ruled synthesizers since the
   },
   {
     id: 'notch',
-    title: 'Scene 5 · The surgical notch',
+    title: 'The surgical notch',
     view: 'gain',
     params: { source: 'square', f0: 110, fc: 330, Q: 8, output: 'notch' },
     visible: ['fc', 'Q'],

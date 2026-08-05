@@ -26,7 +26,7 @@ export default {
       max: 8,
       default: 2,
     }),
-    act: select('σ', {
+    act: select('activation', {
       description: 'activation of the hidden layer',
       options: [
         { value: 'tanh', label: 'tanh' },

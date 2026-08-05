@@ -19,7 +19,7 @@ export default {
       ],
       default: 'toeplitz',
     }),
-    act: select('σ', {
+    act: select('activation', {
       description: 'activation between the two layers',
       options: [
         { value: 'identity', label: 'identity — none' },

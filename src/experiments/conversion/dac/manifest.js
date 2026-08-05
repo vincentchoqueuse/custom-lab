@@ -13,7 +13,7 @@ export default {
     // THE STEP is a parameter, not a tab: the two figures stay the same and it
     // is the chain that advances on them. A scene therefore opens at the step
     // the lecture has reached, and its URL carries it.
-    stage: select('étape', {
+    stage: select('stage', {
       description: 'stage reached in the chain',
       options: [
         { value: 'samples', label: '1 — the samples, at Fs' },
@@ -31,7 +31,7 @@ export default {
       ],
       default: 4,
     }),
-    f0: float('f₀', {
+    f0: float('f', {
       description: 'signal frequency (Fs = 8 kHz)',
       min: 100,
       max: 3500,

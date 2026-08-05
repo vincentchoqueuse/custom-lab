@@ -103,7 +103,7 @@ export default {
     // knob is k, while the convex relaxation penalizes the amplitudes and its
     // knob is λ. Same objective, two roads, two dials.
     k: int('k', {
-      description: 'iteration read — greedy only',
+      description: 'iteration observed — the dial that replaces an animation (greedy only)',
       min: 0,
       max: 12,
       default: 2,

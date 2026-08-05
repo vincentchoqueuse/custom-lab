@@ -2,7 +2,7 @@
 export default [
   {
     id: 'families',
-    title: 'Scene 1 · One specification, four families',
+    title: 'One specification, four families',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
     visible: ['family'],
     notes: `The specification is fixed: 1 dB of ripple, 40 dB of attenuation, one
@@ -15,7 +15,7 @@ order, why is Butterworth everywhere?`,
   },
   {
     id: 'tighten',
-    title: 'Scene 2 · Tightening the specification',
+    title: 'Tightening the specification',
     params: { family: 'ellip', fp: 1000, fstop: 1400, Amax: 0.5, Amin: 60 },
     visible: ['fstop', 'Amin'],
     notes: `A 1.4× transition at 60 dB is met by an elliptic of order 6.
@@ -28,7 +28,7 @@ selectivity alongside.`,
   },
   {
     id: 'geometry',
-    title: 'Scene 3 · The geometry of the families',
+    title: 'The geometry of the families',
     view: 'poles',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
     visible: ['family'],
@@ -41,7 +41,7 @@ design in one figure.`,
   },
   {
     id: 'price',
-    title: 'Scene 4 · What selectivity costs',
+    title: 'What selectivity costs',
     view: 'delay',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
     visible: ['family'],

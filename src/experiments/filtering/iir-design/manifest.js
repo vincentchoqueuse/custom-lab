@@ -11,7 +11,7 @@ export default {
   tags: ['digital', 'IIR', 'bilinear', 'impulse invariance', 'warping'],
 
   params: {
-    method: select('méthode', {
+    method: select('method', {
       description: 'discretization of the analog prototype (Fs = 8 kHz)',
       options: [
         { value: 'bilinear', label: 'bilinear with pre-warping' },
@@ -20,7 +20,7 @@ export default {
       ],
       default: 'bilinear',
     }),
-    family: select('famille', {
+    family: select('family', {
       description: 'analog prototype (all-pole)',
       options: [
         { value: 'butter', label: 'Butterworth' },

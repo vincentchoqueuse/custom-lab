@@ -2,7 +2,7 @@
 export default [
   {
     id: 'harmonics',
-    title: 'Scene 1 · A square wave, harmonic by harmonic',
+    title: 'A square wave, harmonic by harmonic',
     params: { wave: 'square', N: 1, A: 1 },
     visible: ['N'],
     notes: `Starting at N = 1 gives a plain sinusoid of the same frequency.
@@ -16,7 +16,7 @@ The spectrum view makes the structure explicit — odd orders only, decaying as
   },
   {
     id: 'gibbs',
-    title: 'Scene 2 · The Gibbs phenomenon',
+    title: 'The Gibbs phenomenon',
     params: { wave: 'square', N: 10, A: 1 },
     visible: ['N'],
     lock: true,
@@ -31,7 +31,7 @@ filters to spectral truncation.`,
   },
   {
     id: 'continuity',
-    title: 'Scene 3 · Continuity sets the rate',
+    title: 'Continuity sets the rate',
     params: { wave: 'triangle', N: 3, A: 1 },
     visible: ['wave', 'N'],
     notes: `The triangle at N = 3 is already nearly perfect, its coefficients
@@ -45,7 +45,7 @@ discontinuity is paid for in harmonics.`,
   },
   {
     id: 'pulse',
-    title: 'Scene 4 · The pulse train and its sinc envelope',
+    title: 'The pulse train and its sinc envelope',
     params: { wave: 'pulse', N: 40, A: 1, alpha: 0.25 },
     view: 'spectrum',
     visible: ['alpha'],
@@ -61,7 +61,7 @@ gives the widest spectrum is a question the dial answers.`,
   },
   {
     id: 'duty-half',
-    title: 'Scene 5 · α = 1/2: the square wave returns',
+    title: 'α = 1/2: the square wave returns',
     params: { wave: 'pulse', N: 40, A: 1, alpha: 0.5 },
     view: 'spectrum',
     visible: ['alpha'],

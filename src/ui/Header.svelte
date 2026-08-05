@@ -19,6 +19,7 @@
   const subjectTitle = $derived(
     subjects.find((s) => s.id === m?.subject)?.title ?? m?.subject ?? ''
   );
+  const sceneIndex = $derived(m?.presets.findIndex((p) => p.id === app.preset) ?? -1);
 
   let menuOpen = $state(false);
   let qrOpen = $state(false);
@@ -76,7 +77,15 @@
   <div class="right">
     <div class="preset-picker" bind:this={pickerEl}>
       {#if m?.presets.length}
+        <!-- The scene's rank is DERIVED, here and in the list below, and never
+             written into the title. It used to be typed into the title itself
+             ("Scene 3 · …") in half the catalogue, which duplicated what this
+             span already draws and went stale the moment a scene was inserted
+             — twice, in one afternoon. The position is the engine's to know. -->
         <button onclick={() => (menuOpen = !menuOpen)} aria-haspopup="listbox">
+          {#if sceneIndex >= 0}
+            <span class="idx">{sceneIndex + 1}/{m.presets.length}</span>
+          {/if}
           <span>{scene?.title ?? STR.SCENE}</span>
           <Icon name="chevron-down" size={14} />
         </button>

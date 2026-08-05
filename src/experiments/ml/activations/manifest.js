@@ -11,7 +11,7 @@ export default {
   tags: ['networks', 'activation', 'ReLU', 'tanh', 'nonlinearity', 'harmonics'],
 
   params: {
-    act: select('σ', {
+    act: select('activation', {
       description: 'activation function',
       options: [
         { value: 'identity', label: 'identity — none' },

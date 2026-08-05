@@ -2,7 +2,7 @@
 export default [
   {
     id: 'floor',
-    title: 'Scene 1 · The problem, then the floor',
+    title: 'The problem, then the floor',
     params: { mu: 2, sigma: 1.5, N: 20, M: 3000 },
     view: 'variance',
     visible: ['sigma'],
@@ -22,7 +22,7 @@ helps it. Raising σ lifts the whole floor as σ².`,
   },
   {
     id: 'price',
-    title: 'Scene 2 · Three widths for one N',
+    title: 'Three widths for one N',
     params: { mu: 2, sigma: 1.5, N: 50, M: 5000 },
     view: 'sampling',
     visible: ['N'],
@@ -37,7 +37,7 @@ estimator actually consumes.`,
   },
   {
     id: 'efficiency',
-    title: 'Scene 3 · Efficiency, as a number',
+    title: 'Efficiency, as a number',
     params: { mu: 2, sigma: 1.5, N: 100, M: 5000 },
     view: 'efficiency',
     visible: ['N', 'M'],

@@ -2,7 +2,7 @@
 export default [
   {
     id: 'phantom',
-    title: 'Scene 1 · An image is a matrix',
+    title: 'An image is a matrix',
     view: 'images',
     params: { image: 'phantom', k: 3 },
     visible: ['k'],
@@ -28,7 +28,7 @@ was and which the IEEE dropped in 2019.`,
   },
   {
     id: 'spectrum',
-    title: 'Scene 2 · What decides is the spectrum',
+    title: 'What decides is the spectrum',
     view: 'singular',
     params: { image: 'phantom', k: 12 },
     visible: ['image', 'k'],
@@ -62,7 +62,7 @@ are unrelated.`,
   },
   {
     id: 'exact',
-    title: 'Scene 3 · The error is known in advance',
+    title: 'The error is known in advance',
     view: 'energy',
     params: { image: 'phantom', k: 12 },
     visible: ['k', 'image'],

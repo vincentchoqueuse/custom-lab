@@ -11,7 +11,8 @@ export default {
   tags: ['adaptive', 'LMS', 'NLMS', 'RLS', 'stochastic gradient', 'identification'],
 
   params: {
-    algo: select('algorithme', {
+    algo: select('algorithm', {
+      description: 'adaptive rule updating the coefficients',
       options: [
         { value: 'lms', label: 'LMS — stochastic gradient' },
         { value: 'nlms', label: 'NLMS — normalized step' },
@@ -70,7 +71,7 @@ export default {
       step: 1,
       default: 3000,
     }),
-    track: bool('poursuite', {
+    track: bool('tracking', {
       description: 'the system jumps at iteration 1500',
       default: false,
     }),

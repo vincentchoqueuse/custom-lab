@@ -108,7 +108,7 @@ export default {
     // CUSTOM view: a time-frequency matrix fits no generic SVG type — see the
     // justification comment in views/Spectrogram.svelte (canvas-rasterized,
     // embedded as an SVG <image> so freeze/export keep working).
-    custom('map', 'Spectrogramme', () => import('./views/Spectrogram.svelte')),
+    custom('map', 'Spectrogram', () => import('./views/Spectrogram.svelte')),
 
     // The two readings the map exists to improve on, under the catalogue's
     // own names so they are recognised for what they are — the same

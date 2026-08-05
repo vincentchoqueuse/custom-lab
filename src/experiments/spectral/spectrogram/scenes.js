@@ -2,7 +2,7 @@
 export default [
   {
     id: 'gabor',
-    title: 'Scene 1 · The Gabor trade-off',
+    title: 'The Gabor trade-off',
     params: { source: 'chirp', f1: 900, N: 256, win: 'hann', tcut: 1 },
     visible: ['N'],
     notes: `A chirp is a diagonal. Freezing at N = 64 gives a sharp time axis and
@@ -14,7 +14,7 @@ its signal-processing form.`,
   },
   {
     id: 'tones',
-    title: 'Scene 2 · Two notes: how long to tell them apart?',
+    title: 'Two notes: how long to tell them apart?',
     params: { source: 'tones', df: 15, N: 64, win: 'hann', tcut: 1 },
     visible: ['N', 'df'],
     notes: `Two tones 15 Hz apart with a short window give a single band. The
@@ -26,7 +26,7 @@ answer into a measurement. The ear performs exactly this calculation.`,
   },
   {
     id: 'aliasing',
-    title: 'Scene 3 · The bounce off Nyquist',
+    title: 'The bounce off Nyquist',
     params: { source: 'chirp', f1: 2800, N: 256, win: 'hann', tcut: 1 },
     visible: ['f1'],
     notes: `The prediction belongs before f₁ is raised: the chirp climbs, so what
@@ -38,7 +38,7 @@ time in the time–frequency plane.`,
   },
   {
     id: 'am',
-    title: 'Scene 4 · Two descriptions of the same signal',
+    title: 'Two descriptions of the same signal',
     params: { source: 'am', fm: 8, N: 128, win: 'hann', tcut: 1 },
     visible: ['N', 'fm'],
     notes: `An AM signal at f_m = 8 Hz. With a short window — N = 128, so
@@ -51,7 +51,7 @@ resolutions.`,
   },
   {
     id: 'fm',
-    title: 'Scene 5 · Two ridges crossing',
+    title: 'Two ridges crossing',
     params: { source: 'fm', f1: 900, fmod: 1, fdev: 150, N: 256, win: 'hann', tcut: 0.5 },
     visible: ['fmod', 'fdev'],
     notes: `A chirp AND a sinusoid whose frequency oscillates slowly: a rising

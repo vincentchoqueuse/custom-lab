@@ -234,6 +234,82 @@ function checkDsp() {
 }
 
 /**
+ * Principle 6, made checkable: THE CATALOGUE IS WRITTEN IN ENGLISH.
+ *
+ * The conversion to English swept comments, notes and titles — and missed seven
+ * strings, because they were neither prose nor comments: five param names
+ * (`algorithme`, `famille` twice, `méthode`, `étape`, `poursuite`), two view
+ * titles (`Spectrogramme`, `Plan I/Q`) and a symbol (`fe`, for *fréquence
+ * d'échantillonnage*). They sat in the interface for months. Prose is what gets
+ * re-read; a one-word select label is not.
+ *
+ * Three rules, each catching a different way the French comes back:
+ *
+ *   1. FRENCH FUNCTION WORDS anywhere in a user-visible string. Fifty-seven
+ *      words that are unambiguously not English — the list is checked to give
+ *      zero hits on the 1300 strings the catalogue has today, so any hit is a
+ *      regression and not a judgement call. This is the guard for scene notes,
+ *      which are the most-edited pedagogical content in the repository.
+ *   2. ACCENTED WORDS outside a whitelist. `moiré` and `Cramér` are English
+ *      (a loanword and a proper noun); `fréquence` and `méthode` are not.
+ *   3. WORD-SHAPED PARAM NAMES against a CLOSED LIST. A param `name` is meant to
+ *      be a symbol; when it is a word instead — which is the convention for a
+ *      select — it must be one the catalogue already uses. This is the rule that
+ *      catches the five that got through, and it doubles as the terminology
+ *      guard the project asks for: one word per concept, chosen once.
+ *
+ * What it does NOT catch, stated so nobody trusts it further than it goes: a
+ * French word with no accent inside free prose, such as a view title reading
+ * "Spectrogramme". Titles are open text and no closed list can hold them.
+ */
+const FRENCH_WORDS =
+  'le|la|les|des|du|une|dans|avec|pour|qui|que|dont|être|était|sont|cette|ces|leur|leurs|' +
+  'nous|vous|ils|elles|aussi|donc|alors|encore|entre|chaque|même|ainsi|selon|chez|sous|' +
+  'depuis|pendant|avant|après|jamais|toujours|rien|celui|celle|ceux|aux|très|trop|beaucoup|' +
+  'comme|mais|parce|lorsque|tandis|plusieurs|ensuite|puis|déjà|ici';
+const ACCENTED_OK = new Set(['moiré', 'Cramér']);
+/** Word-shaped param names, the closed list. A symbol is not a word. */
+const NAME_WORDS = new Set([
+  'activation', 'algorithm', 'basis', 'code', 'dataset', 'den', 'distribution', 'dither',
+  'family', 'function', 'grid', 'image', 'input', 'mapping', 'method', 'mode', 'modulation',
+  'num', 'outlier', 'output', 'pulse', 'signal', 'source', 'sources', 'stage', 'standardize',
+  'structure', 'system', 'table', 'target', 'tracking', 'window', 'zero-padding',
+]);
+
+function checkLanguage(strings, names) {
+  const bad = [];
+  const fr = new RegExp(`\\b(${FRENCH_WORDS})\\b`, 'i');
+  const accented = /\b\w*[éèêàùûôîçëï]\w*\b/gi;
+  for (const [where, s] of strings) {
+    const m = fr.exec(s);
+    if (m) bad.push(`${where}: French word '${m[0]}' in ${JSON.stringify(s.slice(0, 52))}`);
+    for (const a of s.match(accented) ?? [])
+      if (!ACCENTED_OK.has(a)) bad.push(`${where}: '${a}' is not an English word`);
+  }
+  for (const [where, name] of names) {
+    // Symbols are exempt, and the test is the shape: a WORD here is all
+    // lower-case latin letters, three or more. That leaves out the greek
+    // (σ, μ, Δf), the short ones (f, N, h) and the acronyms (SNR, BER), which
+    // are symbols and belong to their field rather than to a house list.
+    if (!/^[a-z][a-z-]{2,}$/.test(name)) continue;
+    if (!NAME_WORDS.has(name.toLowerCase()))
+      bad.push(`${where}: param name '${name}' is a word but not one the catalogue uses`);
+  }
+  console.log(`  ${dim('language')}`);
+  if (bad.length) {
+    for (const b of bad.slice(0, 10)) console.log(`    ${red('✗')} ${b}`);
+    if (bad.length > 10) console.log(`    ${dim(`… and ${bad.length - 10} more`)}`);
+    fail++;
+  } else {
+    console.log(
+      `    ${green('✓')} no French in ${strings.length} visible strings, ` +
+        `and every word-shaped param name is on the list`
+    );
+    pass++;
+  }
+}
+
+/**
  * medianInPlace agrees with median, EXACTLY, on every shape of input.
  *
  * A median is an order statistic, so selecting the middle rank and sorting for
@@ -573,6 +649,8 @@ async function checkCatalogue() {
   let nScenes = 0;
   const subjectRanks = [];
   const expRanks = new Map();
+  const visible = []; // every string a listener can read, for the language check
+  const paramNames = [];
   for (const sub of readdirSync(ROOT, { withFileTypes: true })) {
     if (!sub.isDirectory()) continue;
     const dir = join(ROOT, sub.name);
@@ -599,11 +677,19 @@ async function checkCatalogue() {
       }
       checkAxisLabels(manifest, key, axisBad);
       expRanks.get(sub.name).push([exp.name, manifest.order]);
+      visible.push([key, manifest.title ?? ''], [key, manifest.subtitle ?? '']);
+      for (const [pk, p] of Object.entries(manifest.params ?? {})) {
+        if (p.name) paramNames.push([`${key}.${pk}`, String(p.name)]);
+        if (p.description) visible.push([`${key}.${pk}`, p.description]);
+        for (const o of p.options ?? []) if (o.label) visible.push([`${key}.${pk}`, String(o.label)]);
+      }
+      for (const v of views) if (v.title) visible.push([`${key}/${v.id}`, v.title]);
       const sf = join(dir, exp.name, 'scenes.js');
       if (!existsSync(sf)) continue;
       const scenes = (await import(pathToFileURL(sf).href)).default ?? [];
       for (const [i, sc] of scenes.entries()) {
         nScenes++;
+        visible.push([`${key}#${sc.id}`, sc.title ?? ''], [`${key}#${sc.id}`, sc.notes ?? '']);
         try {
           validateScene(sc, i, { views, params: manifest.params, random: manifest.random }, key);
         } catch (err) {
@@ -616,6 +702,7 @@ async function checkCatalogue() {
   if (figuresOk)
     console.log(`    ${green('✓')} standard figures: id, title and order  ${dim(`(${nViews} views)`)}`);
   checkOrdering(subjectRanks, expRanks);
+  checkLanguage(visible.filter(([, s]) => s), paramNames);
   console.log(`  ${dim('axes')}`);
   if (axisBad.length) {
     for (const b of axisBad) console.log(`    ${red('✗')} ${b}`);

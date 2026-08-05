@@ -551,10 +551,19 @@ kbd {
   font-weight: 600;
 }
 
-.preset-picker .menu .idx {
+.preset-picker .idx {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted-fg);
+}
+
+/* On the collapsed button the rank reads "3/7": where in the script we are and
+   how long the script is. It replaces the "Scene 3 · " that used to be typed
+   into the titles themselves — same information, derived from the position
+   instead of maintained by hand. */
+.preset-picker > button .idx {
+  flex: none;
+  padding-right: 2px;
 }
 
 

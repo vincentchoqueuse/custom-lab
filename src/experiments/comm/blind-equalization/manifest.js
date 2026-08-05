@@ -54,7 +54,7 @@ export default {
       precision: 5,
     }),
     n: int('n', {
-      description: 'iteration read on the constellation',
+      description: 'iteration observed — the dial that replaces an animation',
       min: 0,
       max: 8000,
       step: 50,
