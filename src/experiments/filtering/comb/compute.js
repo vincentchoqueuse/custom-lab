@@ -36,6 +36,14 @@ export function combGain(structure, f, D, g) {
  *          f0: number, seed: number}} params
  * @returns {{observables: Object}}
  */
+/** [1, 0, …, 0, v] — a bulk delay of D samples with a single tap at its end. */
+function tapsAt(D, v) {
+  const t = new Float64Array(D + 1);
+  t[0] = 1;
+  t[D] = v;
+  return t;
+}
+
 export function compute({ structure, D, g, source, f0 }) {
   const x = periodicSignal(source, f0);
   const N = x.length;
@@ -85,6 +93,13 @@ export function compute({ structure, D, g, source, f0 }) {
       resp,
       impulse: { x: hn, y: hVal },
       hImp: hVal, // raw echo train (checks: h[kD] = g^k exactly)
+      // The structure tab, and this filter is where it says the most: a comb
+      // needs ONE multiplication and D memories, which is the opposite trade
+      // from every other filter in the module. The chain is drawn tapped at
+      // its far end only — the schematic elides the middle, so the room reads
+      // "a long delay line, one tap" rather than counting forty blocks.
+      structB: structure === 'ff' ? tapsAt(D, g) : Float64Array.of(1),
+      structA: structure === 'ff' ? Float64Array.of(1) : tapsAt(D, -g),
       maxPole: structure === 'ff' ? 0 : Math.abs(g) ** (1 / D), // checks
       toothHz: {
         value: FS / D,

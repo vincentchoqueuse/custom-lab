@@ -1,6 +1,7 @@
 import { float, int, select } from '../../../core/fields.js';
 import { vline } from '../../../core/views.js';
 import { timeView, impulseView, spectrumView } from '../../../core/response-views.js';
+import { structureView } from '../_lib/structure.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -60,6 +61,7 @@ export default {
   views: [
     timeView(),
     impulseView(),
+    structureView(),
     spectrumView({
       overlays: [vline((p) => 8000 / p.D, { color: '#EDB120', dashed: true, label: 'Fs/D' })],
     }),

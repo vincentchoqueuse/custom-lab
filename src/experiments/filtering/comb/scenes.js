@@ -80,4 +80,26 @@ The physics of an inverted echo is the same: at those frequencies the echo comes
 back in antiphase. It is the phase shift that digs holes in the response of a
 room near a reflecting wall.`,
   },
+  {
+    id: 'cost',
+    title: 'Forty memories, two multiplications',
+    view: 'structure',
+    params: { structure: 'fb', D: 40, g: 0.9, source: 'square', f0: 110 },
+    visible: ['structure', 'D', 'g'],
+    notes: `The tab nobody asks for until they have to write the code. This is
+the difference equation as a processor executes it: a chain of z⁻¹ — each one a
+memory — with a gain on every tap and an adder collecting them.
+
+The comb is the extreme case of the whole module, and the caption says it in
+one line: forty memories, TWO multiplications. Every one of the thirty-nine
+intermediate coefficients is zero, which is why nobody implements this as forty
+multiply-accumulates and everybody implements it as a circular buffer with one
+gain at its end. Compare with the FIR design tab, where forty-four memories
+carry forty-three multiplications.
+
+Then flip the structure to feed-forward. The taps move from the LEFT bus to the
+RIGHT one — the loop is gone, and with it the echo that never stops. Same
+delays, same one gain, and an entirely different filter: the loop is the whole
+difference between FIR and IIR, and here it is a single wire.`,
+  },
 ];

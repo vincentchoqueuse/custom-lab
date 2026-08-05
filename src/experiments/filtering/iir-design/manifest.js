@@ -1,6 +1,7 @@
 import { float, int, select } from '../../../core/fields.js';
 import { view, line, vline } from '../../../core/views.js';
 import { timeView, impulseView, polesView, spectrumView } from '../../../core/response-views.js';
+import { structureView } from '../_lib/structure.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -75,6 +76,7 @@ export default {
   views: [
     timeView(),
     impulseView({ source: 'impulseDig', label: 'h[n] of the digital filter' }),
+    structureView(),
 
     // The module's figure — input and output spectra under the response — with
     // this experiment's own second curve on it: the ANALOG prototype the
@@ -101,7 +103,10 @@ export default {
     }),
     view(
       'warp',
-      'Frequency warping',
+      // 'Frequency warping' made a sixth tab wrap the segmented control onto a
+      // second row and pushed the statline off the bottom of the screen. The
+      // abscissa of the figure already says 'digital f'; the tab needs the verb.
+      'Warping',
       line('warp', {
         width: 2,
         label: 'warping Ω(f) = 2Fs·tan(πf/Fs)',

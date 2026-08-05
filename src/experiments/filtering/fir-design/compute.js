@@ -111,6 +111,8 @@ export function compute({ fc, N, win }) {
       tIn: { x: ts, y: xin },
       tOut: { x: ts, y: yout },
       hTaps: h, // raw taps (Inspector download, symmetry check)
+      structB: h,
+      structA: Float64Array.of(1),
       sidelobe: {
         value: sidelobe,
         meta: { label: 'peak stop-band lobe', unit: 'dB', precision: 1 },

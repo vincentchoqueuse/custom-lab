@@ -1,6 +1,7 @@
 import { float, int, select } from '../../../core/fields.js';
 import { line, vline, hline } from '../../../core/views.js';
 import { timeView, impulseView, spectrumView } from '../../../core/response-views.js';
+import { structureView } from '../_lib/structure.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -53,6 +54,7 @@ export default {
         vline((p) => (p.N - 1) / 2, { color: '#EDB120', dashed: true, label: '(N−1)/2' }),
       ],
     }),
+    structureView(),
 
     // The module's figure, with this experiment's own reading on top: the peak
     // stop-band lobe. It used to be |H| alone — the level was readable and the
