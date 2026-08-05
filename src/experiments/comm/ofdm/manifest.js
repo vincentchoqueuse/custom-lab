@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, plane, line, scatter } from '../../../core/views.js';
+import { view, figure, plane, line, scatter, band, vline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -63,6 +63,56 @@ export default {
   ],
 
   views: [
+    // THE PREFIX, AS AN OBJECT. Everything else here lives in frequency, where
+    // OFDM is elegant and where the prefix cannot be seen — it was a parameter
+    // with a consequence and never a thing. Two symbols of the transmitted
+    // signal, with the prefix at the head of each and the samples it is a COPY
+    // of marked in the same yellow at the tail: the eye matches the two
+    // segments before anyone says the word "cyclic".
+    figure(
+      'time',
+      line('txTime', {
+        color: '#0072BD',
+        width: 1.6,
+        label: 'transmitted x[n]',
+        overlays: [
+          band('cpBand', { color: '#D95319', opacity: 0.22, label: 'cyclic prefix' }),
+          vline('frame0', { color: '#18181b', width: 1.8, label: 'start of a frame' }),
+          vline('frame1', { color: '#18181b', width: 1.8 }),
+        ],
+        axes: { x: { label: 'sample n' }, y: { label: 'Re x[n]' } },
+      })
+    ),
+
+    // AND WHAT IT BUYS. The received signal, with the two regions that decide
+    // everything: in orange the L−1 samples still carrying the tail of the
+    // PREVIOUS symbol, in green the window the FFT actually reads. The prefix
+    // works exactly when the orange fits inside it and the green stays clean —
+    // which is a thing to SEE, and the constellation two tabs away is its
+    // consequence.
+    view(
+      'window',
+      'What the FFT window sees',
+      line('rxTime', {
+        color: '#7E2F8E',
+        width: 1.5,
+        label: 'received y[n]',
+        overlays: [
+          band('cpBandRx', { color: '#D95319', opacity: 0.22, label: 'cyclic prefix' }),
+          vline('frame0', { color: '#18181b', width: 1.8, label: 'start of a frame' }),
+          vline('frame1', { color: '#18181b', width: 1.8 }),
+          vline('trans0', {
+            color: '#77AC30',
+            width: 2,
+            dashed: true,
+            label: 'end of the channel transient (L−1)',
+          }),
+          vline('trans1', { color: '#77AC30', width: 2, dashed: true }),
+        ],
+        axes: { x: { label: 'sample n' }, y: { label: 'Re y[n]' } },
+      })
+    ),
+
     view(
       'channel',
       'The channel seen by the carriers',

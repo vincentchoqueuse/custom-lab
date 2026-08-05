@@ -84,6 +84,15 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
   const sigma = Math.sqrt(1 / snrLin); // complex noise std per carrier
   const inv2 = Math.SQRT1_2;
 
+  // THE TIME-DOMAIN PICTURE, captured over the first two symbols. Everything
+  // else in this experiment lives in frequency, which is where OFDM is elegant
+  // and where the cyclic prefix is invisible: it was a parameter with a
+  // consequence and never an object. These arrays make it one.
+  const SPAN = 2; // symbols drawn
+  const S = Nc + cp; // one symbol, prefix included
+  const txT = new Float64Array(SPAN * S);
+  const rxT = new Float64Array(SPAN * S);
+
   const errsPerCarrier = new Float64Array(Nc);
   const rawI = [];
   const rawQ = [];
@@ -112,6 +121,11 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
     }
     ifftU(xr, xi);
 
+    // the transmitted samples of this symbol, prefix first — the same formula
+    // the channel loop below uses, so the two cannot drift apart
+    if (m < SPAN)
+      for (let n = 0; n < S; n++) txT[m * S + n] = xr[(n - cp + Nc) % Nc];
+
     // cyclic prefix + linear convolution with the channel + noise, with the
     // previous symbol's channel tail added at the head (streaming reality)
     yr.fill(0);
@@ -138,6 +152,8 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
       yr[n] += ns * gauss();
       yi[n] += ns * gauss();
     }
+
+    if (m < SPAN) for (let n = 0; n < S; n++) rxT[m * S + n] = yr[n];
 
     // receiver: drop the prefix, FFT the window, one-tap ZF per carrier
     const zr = new Float64Array(Nc);
@@ -184,8 +200,64 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
   const berMeas = errTot / (2 * M * Nc);
   const berSe = Math.sqrt(varTot) / (2 * M * Nc); // SE of the mean (checks)
 
+  /* ---------- the bands that make the prefix an object -------------------- */
+  // A band is {x, lo, hi} and NaN breaks it, so ONE observable draws one
+  // rectangle per symbol — the same NaN-separator trick the catalogue uses for
+  // spaghetti lines. The vertical bounds are deliberately generous: these are
+  // regions of the ABSCISSA, and their height carries no meaning.
+  // The band's HEIGHT carries no meaning — these mark regions of the abscissa.
+  // But it takes part in the auto-scaling all the same, so a generous constant
+  // flattens the very signal it is meant to frame. Each band is therefore sized
+  // to the trace it sits behind.
+  const amp = (a) => {
+    let m = 0;
+    for (let i = 0; i < a.length; i++) m = Math.max(m, Math.abs(a[i]));
+    return 1.12 * (m || 1);
+  };
+  const HI_TX = amp(txT);
+  const HI_RX = amp(rxT);
+  const band = (from, width, HI) => {
+    const x = [];
+    const lo = [];
+    const hi = [];
+    for (let m = 0; m < SPAN; m++) {
+      const a = m * S + from;
+      const b = a + Math.max(width, 0);
+      x.push(a, b, NaN);
+      lo.push(-HI, -HI, NaN);
+      hi.push(HI, HI, NaN);
+    }
+    return { x: Float64Array.from(x), lo: Float64Array.from(lo), hi: Float64Array.from(hi) };
+  };
+
+  const nT = Float64Array.from({ length: SPAN * S }, (_, i) => i);
+  const memory = L - 1; // the channel's memory, in samples
+  const absorbed = cp >= memory;
+
   return {
     observables: {
+      /* --- time domain: what the prefix IS, and what it buys --- */
+      txTime: { x: nT, y: txT },
+      rxTime: { x: nT, y: rxT },
+      // The prefix, at the head of each symbol, and NOTHING else shaded: the
+      // frame boundaries are drawn as verticals instead. A first version also
+      // shaded the tail the prefix is a copy of, which was true and unreadable
+      // — two bands of the same colour at both ends of a noise-like trace read
+      // as decoration rather than as an identity.
+      cpBand: band(0, cp, HI_TX),
+      cpBandRx: band(0, cp, HI_RX),
+
+      // Where each frame starts, as verticals. This is the "découpage": without
+      // them the signal is one continuous noise and the symbol structure — the
+      // thing being explained — is invisible.
+      frame0: 0,
+      frame1: S,
+      // and where the channel's transient ENDS, L−1 samples after each start.
+      // The prefix is long enough exactly when this line falls inside the
+      // orange: one comparison, made by eye, before it is written as L−1 ≤ L_cp.
+      trans0: memory,
+      trans1: S + memory,
+
       channel: { x: ks, y: HdB },
       berMeasured: { x: ks, y: berK },
       berTheory: { x: ks, y: berThK },
@@ -202,6 +274,14 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
       berThAvg: {
         value: berTh,
         meta: { label: 'BER theory (ZF)', precision: 4 },
+      },
+      // The reading that ties the two pictures together, and the one the room
+      // should be able to predict before looking at the constellation.
+      absorbed: {
+        value: absorbed
+          ? `prefix ${cp} ≥ memory ${memory} — the channel is absorbed`
+          : `prefix ${cp} < memory ${memory} — ${memory - cp} sample${memory - cp > 1 ? 's' : ''} of ISI leak in`,
+        meta: { label: 'prefix' },
       },
     },
   };

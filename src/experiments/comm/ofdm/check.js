@@ -66,5 +66,73 @@ export const checks = [
       };
     },
   },
+  {
+    name: 'the prefix IS the tail of the block — bit for bit, and only that',
+    category: 'numeric',
+    run() {
+      // What the first view claims, and it is a copy rather than a computation:
+      // the L_cp samples at the head of a symbol are the LAST L_cp of the useful
+      // block. Not approximately — the same doubles. Checked over both drawn
+      // symbols and over several prefix lengths, because a copy that were merely
+      // close would mean an index was wrong somewhere.
+      const bad = [];
+      for (const cp of [2, 8, 16]) {
+        const o = compute({ Nc: 64, L: 6, cp, snr: 30, M: 4, seed: 11 }).observables;
+        const S = 64 + cp;
+        for (let m = 0; m < 2; m++)
+          for (let n = 0; n < cp; n++) {
+            const head = o.txTime.y[m * S + n];
+            const tail = o.txTime.y[m * S + cp + 64 - cp + n];
+            if (head !== tail) bad.push(`cp=${cp}, symbol ${m}, sample ${n}: ${head} ≠ ${tail}`);
+          }
+        // and the bands drawn over them cover exactly those samples
+        if (o.cpBand.x[0] !== 0 || o.cpBand.x[1] !== cp) bad.push(`cp=${cp}: prefix band misplaced`);
+        if (o.cpBand.x[1] - o.cpBand.x[0] !== cp) bad.push(`cp=${cp}: prefix band wrong width`);
+        // the frame verticals are the "découpage": one per symbol, S apart
+        if (o.frame0 !== 0 || o.frame1 !== S) bad.push(`cp=${cp}: frame marks at ${o.frame0}, ${o.frame1}`);
+      }
+      return {
+        ok: bad.length === 0,
+        detail: bad.length ? bad.slice(0, 3).join(' · ') : 'identical at L_cp = 2, 8 and 16, both symbols',
+      };
+    },
+  },
+  {
+    name: 'the FFT window is clean exactly when the memory fits in the prefix',
+    category: 'numeric',
+    run() {
+      // The geometric statement the second view draws, checked as geometry: the
+      // smeared region is L−1 samples long at the head of each symbol, and the
+      // FFT window starts at L_cp. The window is therefore clean if and only if
+      // L−1 ≤ L_cp — which is the same inequality the error floor obeys, and
+      // the reason the two views belong side by side.
+      const bad = [];
+      for (const [L, cp] of [
+        [6, 8],
+        [6, 5],
+        [1, 0],
+        [9, 8],
+      ]) {
+        const o = compute({ Nc: 64, L, cp, snr: 30, M: 4, seed: 3 }).observables;
+        const memory = L - 1;
+        // the transient ends L−1 after each frame start, and the prefix band
+        // ends at L_cp: the whole reading is which of the two comes first
+        if (o.trans0 !== memory) bad.push(`L=${L}: transient ends at ${o.trans0}, expected ${memory}`);
+        if (o.trans1 - o.trans0 !== 64 + cp) bad.push(`L=${L}: the two transients are not one symbol apart`);
+        if (o.cpBandRx.x[1] - o.cpBandRx.x[0] !== cp) bad.push(`cp=${cp}: prefix band wrong width`);
+        // and the eye's verdict — transient line inside the orange — must be
+        // the same statement as the inequality the statline prints
+        const insideByEye = o.trans0 <= o.cpBandRx.x[1];
+        if (insideByEye !== memory <= cp) bad.push(`L=${L}, cp=${cp}: the picture and the inequality disagree`);
+        // the verdict in the statline must agree with the inequality
+        const says = /absorbed/.test(o.absorbed.value);
+        if (says !== memory <= cp) bad.push(`L=${L}, cp=${cp}: statline says ${o.absorbed.value}`);
+      }
+      return {
+        ok: bad.length === 0,
+        detail: bad.length ? bad.join(' · ') : 'smeared = L−1, window at L_cp, verdict = (L−1 ≤ L_cp), on 4 settings',
+      };
+    },
+  },
   standardChecks.determinism(compute, BASE, 'berMeasured'),
 ];
