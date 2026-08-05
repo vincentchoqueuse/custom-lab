@@ -126,9 +126,16 @@ export function synthesize(a, b, nfft) {
  * — the frame would be tight were DC and Nyquist in the dictionary at half
  * weight, and those are exactly the two atoms left out because their sine is
  * identically zero. The correction is negative semidefinite, so the largest
- * eigenvalue is exactly nfft/2 whatever the oversampling, the step is 2/nfft,
- * and there is no tuning left. The harness pins the identity, both the exact
- * rank-2 form and the eigenvalue that follows from it.
+ * eigenvalue is exactly nfft/2 whatever the oversampling, and 1/L = 2/nfft is
+ * the step the convergence proof certifies. The harness pins the identity, both
+ * the exact rank-2 form and the eigenvalue that follows from it.
+ *
+ * That certified step is exposed as a MULTIPLE α, not frozen, because it is a
+ * guarantee and not an optimum and the difference is worth showing: α = 1.5 is
+ * measurably faster here, and somewhere just above that the guarantee stops
+ * being optional. What does not change is the ANSWER — every α that converges
+ * lands on the same solution, which is what convexity means and what the greedy
+ * road cannot claim.
  *
  * The two algorithms then differ in kind, and both differences are visible:
  *   · greedy CHOOSES atoms and leaves their amplitudes alone; the lasso keeps
@@ -137,9 +144,15 @@ export function synthesize(a, b, nfft) {
  *     its solution does not depend on the order anything was found in.
  * @returns {{a, b, iters}} the pair coefficients over the whole grid
  */
-export function lassoSolve(x, nfft, lambda, maxIters = 200) {
+export function lassoSolve(x, nfft, lambda, alpha = 1, maxIters = 200) {
   const L = nfft / 2 + 1;
-  const step = 2 / nfft; // 1/‖DᵀD‖, exactly
+  // The step is α/‖DᵀD‖ = α·2/nfft. α = 1 is the CERTIFIED value — the one the
+  // convergence proof needs — and it is deliberately a knob rather than a
+  // constant, because it is not the fastest one and a lecture should be able to
+  // find that out. Measured on this problem: 61 iterations at α = 0.5, 29 at
+  // α = 1, 17 at α = 1.5, and divergence past α ≈ 1.57 (≈ 1.94 with the restart
+  // below). 1/L is a guarantee, not an optimum.
+  const step = (alpha * 2) / nfft;
   const tau = lambda * step;
   const a = new Float64Array(L);
   const b = new Float64Array(L);
@@ -147,6 +160,9 @@ export function lassoSolve(x, nfft, lambda, maxIters = 200) {
   let yb = new Float64Array(L);
   let t = 1;
   let used = maxIters;
+  let prevObj = Infinity;
+  let diverged = false;
+  const obj = [];
 
   for (let it = 0; it < maxIters; it++) {
     // gradient step at the momentum point: y + step·Dᵀ(x − D y)
@@ -166,6 +182,33 @@ export function lassoSolve(x, nfft, lambda, maxIters = 200) {
       na[l] = ga * s;
       nb[l] = gb * s;
     }
+    // The objective, which is what tells convergence from divergence and what
+    // the restart below watches.
+    const fit = synthesize(na, nb, nfft);
+    let f = 0;
+    for (let i = 0; i < N; i++) f += (x[i] - fit[i]) ** 2;
+    f /= 2;
+    for (let l = 1; l < L - 1; l++) f += lambda * Math.hypot(na[l], nb[l]);
+    obj.push(f);
+
+    // A step above the stable range does not fail gracefully on its own — it
+    // runs to Infinity and paints NaN across the plot. Caught here, the last
+    // finite iterate is kept and the verdict says what happened, so pushing the
+    // step past the edge is a demonstration and not a broken screen.
+    if (!Number.isFinite(f) || f > 1e10) {
+      diverged = true;
+      used = it + 1;
+      break;
+    }
+
+    // ADAPTIVE RESTART (O'Donoghue–Candès): FISTA's momentum overshoots and the
+    // objective ripples; dropping the momentum whenever the objective goes UP
+    // costs one comparison and is what makes the coherent ×8 grid solvable at
+    // all — 271 iterations instead of never, within the same budget. It also
+    // widens the stable step range, from α ≈ 1.57 to ≈ 1.94.
+    if (f > prevObj) t = 1;
+    prevObj = f;
+
     const tn = (1 + Math.sqrt(1 + 4 * t * t)) / 2;
     const w = (t - 1) / tn;
     ya = new Float64Array(L);
@@ -190,7 +233,7 @@ export function lassoSolve(x, nfft, lambda, maxIters = 200) {
       break;
     }
   }
-  return { a, b, iters: used };
+  return { a, b, iters: used, diverged, obj };
 }
 
 /** λ above which the lasso solution is EXACTLY zero: the largest group
@@ -322,7 +365,7 @@ export function pursuit(x, nfft, orthogonal) {
  * @param {{K: number, sep: number, offGrid: number, over: number, snr: number,
  *          algo: string, k: number, seed: number}} params
  */
-export function compute({ K, sep, offGrid, over, snr, algo, k, lam, seed }) {
+export function compute({ K, sep, offGrid, over, snr, algo, k, lam, alpha, seed }) {
   const rng = mulberry32(seed);
   const gauss = gaussFrom(rng);
   const nfft = over * N;
@@ -357,7 +400,7 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, lam, seed }) {
   // and the three greedy scenes must stay draggable.
   const lMax = lambdaMax(x, nfft);
   const lambda = lam * lMax;
-  const sol = isLasso ? lassoSolve(x, nfft, lambda) : null;
+  const sol = isLasso ? lassoSolve(x, nfft, lambda, alpha) : null;
   const lassoReco = sol ? synthesize(sol.a, sol.b, nfft) : null;
 
   /* ---------- the periodogram, and the grid ------------------------------- */
@@ -509,7 +552,7 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, lam, seed }) {
         ? { value: spikeF.length, meta: { label: 'nonzero lines', precision: 0 } }
         : { value: dup, meta: { label: 're-selected', precision: 0 } },
       verdict: {
-        value: verdictOf(algo, dup, isLasso ? kkt : main.orth[kk], offGrid, spikeF.length, sol?.iters),
+        value: verdictOf(algo, dup, isLasso ? kkt : main.orth[kk], offGrid, spikeF.length, sol?.iters, sol?.diverged),
         meta: { label: 'state' },
       },
     },
@@ -528,11 +571,12 @@ export function neighbourCoherence(delta) {
   return Math.abs(Math.sin(a) / (N * Math.sin(a / N)));
 }
 
-function verdictOf(algo, dup, orth, offGrid, nnz, iters) {
+function verdictOf(algo, dup, orth, offGrid, nnz, iters, diverged) {
   if (algo === 'lasso') {
-    if (orth > 1.01) return `FISTA stopped at ${iters} steps — not converged`;
+    if (diverged) return `DIVERGED after ${iters} steps — the step is above the stable range`;
+    if (orth > 1.01) return `${iters} steps, KKT still ${orth.toFixed(2)}·λ — not converged`;
     if (nnz === 0) return 'λ above λmax — the solution is exactly zero';
-    return `${nnz} nonzero line${nnz > 1 ? 's' : ''}, amplitudes shrunk by λ`;
+    return `${nnz} line${nnz > 1 ? 's' : ''} in ${iters} FISTA steps, shrunk by λ`;
   }
   if (algo !== 'mp' && orth > 1e-9) return 'not orthogonal — impossible for OMP';
   if (dup > 0) return `${dup} atom${dup > 1 ? 's' : ''} re-selected — MP only`;

@@ -90,13 +90,27 @@ export default {
       precision: 4,
       visibleIf: { algo: 'lasso' },
     }),
+    alpha: float('α', {
+      // The FISTA step, as a multiple of the certified 1/‖DᵀD‖. A knob and not
+      // a constant on purpose: α = 1 is what the convergence proof requires,
+      // and it is NOT the fastest — the useful lesson is the gap between a
+      // guarantee and an optimum, and the edge where the guarantee stops being
+      // optional.
+      description: 'FISTA step, in units of the certified 1/L',
+      min: 0.25,
+      max: 2,
+      step: 0.05,
+      default: 1,
+      precision: 2,
+      visibleIf: { algo: 'lasso' },
+    }),
     // seed injected by the core, because random: true
   },
 
   groups: [
     { title: 'Signal', params: ['K', 'sep', 'snr'] },
     { title: 'Dictionary', params: ['over', 'offGrid'] },
-    { title: 'Algorithm', params: ['algo', 'k'] },
+    { title: 'Algorithm', params: ['algo', 'k', 'lam', 'alpha'] },
   ],
 
   derived: {

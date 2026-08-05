@@ -26,6 +26,7 @@ const BASE = {
   algo: 'omp',
   k: 3,
   lam: 0.1,
+  alpha: 1,
   seed: 34,
 };
 
@@ -450,7 +451,7 @@ export const checks = [
       const bad = [];
       for (const frac of [0.05, 0.3, 0.7]) {
         const lambda = frac * lmax;
-        const { a, b } = lassoSolve(x, nfft, lambda, 4000);
+        const { a, b } = lassoSolve(x, nfft, lambda, 1, 4000);
         const { cc, cs } = correlate(x, nfft);
         const worst = maxGap(range(nfft / 2 + 1), (l) => {
           if (l === 0 || l === nfft / 2) return 0;
@@ -486,7 +487,7 @@ export const checks = [
       const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
       const lmax = lambdaMax(x, nfft);
       const lambda = 0.2 * lmax;
-      const { a, b } = lassoSolve(x, nfft, lambda, 4000);
+      const { a, b } = lassoSolve(x, nfft, lambda, 1, 4000);
       const reco = synthesize(a, b, nfft);
       const { mag } = correlate(
         Float64Array.from(x, (v, i) => v - reco[i]),
@@ -542,6 +543,89 @@ export const checks = [
         detail:
           `same 3 lines · every lasso stem below its refit · ` +
           `SNR out: OMP ${omp.snrOut.value.toFixed(1)} dB vs lasso ${lasso.snrOut.value.toFixed(1)} dB`,
+      };
+    },
+  },
+  {
+    name: 'every step that converges reaches the SAME solution — that is convexity',
+    category: 'numeric',
+    run() {
+      // The property that separates the two roads, stated as an identity rather
+      // than as a preference. The convex problem has one minimizer, so the step
+      // size changes only how LONG the solver takes to arrive; the answer is
+      // the same to machine precision whether the step is a quarter of the
+      // certified one or half again bigger.
+      //
+      // Greedy owes nothing of the sort: its answer is the path it happened to
+      // take, which is exactly why a coherent dictionary can ruin it.
+      const nfft = 2 * N;
+      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const lambda = 0.15 * lambdaMax(x, nfft);
+      const ref = lassoSolve(x, nfft, lambda, 1, 4000);
+      const bad = [];
+      const iters = [];
+      for (const alpha of [0.25, 0.5, 1, 1.5]) {
+        const s = lassoSolve(x, nfft, lambda, alpha, 4000);
+        iters.push(`α=${alpha}: ${s.iters}`);
+        if (s.diverged) bad.push(`α=${alpha} diverged`);
+        const gap = maxGap(range(ref.a.length), (l) =>
+          Math.max(Math.abs(s.a[l] - ref.a[l]), Math.abs(s.b[l] - ref.b[l]))
+        );
+        if (gap > 1e-10) bad.push(`α=${alpha}: solution differs by ${gap.toExponential(2)}`);
+      }
+      return {
+        ok: bad.length === 0,
+        detail: bad.length ? bad.join(' · ') : `identical to 1e-10 · ${iters.join(', ')}`,
+      };
+    },
+  },
+  {
+    name: 'the certified step converges, and there IS an edge above it',
+    category: 'numeric',
+    run() {
+      // Why the step is a knob and not a constant. α = 1 is 1/‖DᵀD‖, the value
+      // the convergence proof requires — so it must never diverge. But it is a
+      // guarantee, not an optimum: a larger step is measurably faster here,
+      // until an edge past which the iteration blows up. Both halves are
+      // asserted, because a solver that converged for every α would mean the
+      // step had no effect and the scene nothing to show.
+      const nfft = 2 * N;
+      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const lambda = 0.1 * lambdaMax(x, nfft);
+      const at = (alpha) => lassoSolve(x, nfft, lambda, alpha, 400);
+      const bad = [];
+      const one = at(1);
+      if (one.diverged) bad.push('α = 1 diverged — the certified step must not');
+      const fast = at(1.5);
+      if (fast.diverged || fast.iters >= one.iters) bad.push(`α = 1.5 not faster (${fast.iters} vs ${one.iters})`);
+      // the edge: measured at α ≈ 1.94 with the adaptive restart in place
+      const over = at(2.2);
+      if (!over.diverged) bad.push('α = 2.2 did not diverge — no edge');
+      return {
+        ok: bad.length === 0,
+        detail: bad.length
+          ? bad.join(' · ')
+          : `α=1: ${one.iters} steps · α=1.5: ${fast.iters} · α=2.2 diverges after ${over.iters}`,
+      };
+    },
+  },
+  {
+    name: 'a diverging step is REPORTED, never rendered as NaN',
+    category: 'numeric',
+    run() {
+      // The lecture guard, at the experiment's own level. Pushing the step past
+      // the edge in front of a room must produce a sentence, not a plot full of
+      // holes: the solver keeps its last finite iterate and the verdict says
+      // what happened. Every observable that reaches a view is checked finite.
+      const o = compute({ ...BASE, algo: 'lasso', alpha: 2.5 }).observables;
+      const finite = (s) => [...s.x, ...s.y].every(Number.isFinite);
+      const bad = [];
+      for (const key of ['reco', 'periodogram', 'correlation', 'spikes'])
+        if (!finite(o[key])) bad.push(`${key} carries NaN`);
+      if (!/DIVERGED/.test(o.verdict.value)) bad.push(`verdict says "${o.verdict.value}"`);
+      return {
+        ok: bad.length === 0,
+        detail: bad.length ? bad.join(' · ') : `all series finite · "${o.verdict.value}"`,
       };
     },
   },

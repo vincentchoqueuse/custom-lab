@@ -118,8 +118,52 @@ counterpart of OMP's notches. Both algorithms stop for a reason; this is what
 each reason looks like.`,
   },
   {
+    id: 'fista',
+    title: 'Scene 5 · Calibrating the step: a guarantee is not an optimum',
+    view: 'spectrum',
+    params: {
+      K: 3,
+      sep: 3,
+      offGrid: 0,
+      over: 2,
+      snr: 15,
+      algo: 'lasso',
+      k: 3,
+      lam: 0.1,
+      alpha: 1,
+      seed: 34,
+    },
+    visible: ['alpha', 'lam'],
+    notes: `The convex road needs a step, and this one is not guessed: the data
+term is a quadratic, so its Lipschitz constant is ‖DᵀD‖, and for this dictionary
+that is exactly nfft/2 — no line search, no tuning. The certified step is 1/L,
+which is α = 1 here.
+
+Now the part worth an amphitheatre. Move α and read the step count in the
+statline: 65 steps at α = 0.5, 43 at α = 1, 36 at α = 1.5. The certified step is
+NOT the fastest. 1/L is what the proof needs to promise convergence — a
+sufficient condition — and the promise is bought with a margin the proof cannot
+know how to spend.
+
+Keep going. At α = 2 it says DIVERGED, and the boundary sits just under 1.94.
+So the picture is: a range where it works, a range where it works faster, and a
+cliff. Ask the room which of the three a proof can tell you about.
+
+The other half, and the one to insist on: while it converges, the ANSWER never
+moves. Same three lines, same amplitudes, same 16.9 dB at every α. The step
+changes how long the solver takes and nothing else, because the problem is
+convex and has one minimum. Put that next to scene 3 — greedy's answer IS the
+path it took, which is exactly why a coherent dictionary can ruin it. That is
+the real trade between the two roads, and it is not about speed.
+
+(One thing hiding in the code, worth a sentence if the room is with you: the
+momentum is restarted whenever the objective rises. It costs one comparison,
+and it is what makes the ×8 grid of the next scene solvable at all — 271 steps
+instead of never.)`,
+  },
+  {
     id: 'coherence',
-    title: 'Scene 5 · A finer grid is a HARDER problem',
+    title: 'Scene 6 · A finer grid is a HARDER problem',
     params: { K: 2, sep: 1.5, offGrid: 0, over: 1, snr: 30, algo: 'omp', k: 4, seed: 34 },
     visible: ['over', 'sep'],
     notes: `Two lines, one and a half cells apart. At ×1 the atoms are orthogonal
@@ -139,7 +183,7 @@ set by the grid. It is set by the data.`,
   },
   {
     id: 'offgrid',
-    title: 'Scene 6 · Off the grid, nothing is sparse',
+    title: 'Scene 7 · Off the grid, nothing is sparse',
     params: { K: 3, sep: 3, offGrid: 0, over: 2, snr: 30, algo: 'omp', k: 3, seed: 34 },
     visible: ['offGrid', 'k'],
     notes: `Freeze (F) with δ = 0, then take the offset to ½ a cell — the lines
