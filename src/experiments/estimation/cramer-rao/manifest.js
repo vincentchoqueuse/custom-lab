@@ -1,5 +1,5 @@
 import { float, int } from '../../../core/fields.js';
-import { view, histogram, line, density, vline, hline, figure } from '../../../core/views.js';
+import { view, histogram, line, density, band, vline, hline, figure } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -27,13 +27,15 @@ export default {
       default: 1.5,
     }),
     N: int('N', {
-      description: 'draws X₁…X_N observed in each experiment',
+      // N and M are the two numbers this experiment lives on and the two a
+      // reader mixes up. N is INSIDE one experiment; M is HOW MANY experiments.
+      description: 'sample size — draws X₁…X_N inside ONE experiment',
       min: 2,
       max: 200,
       default: 20,
     }),
     M: int('M', {
-      description: 'number of repeated experiments',
+      description: 'repetitions — how many times that experiment is redone, to measure the spread',
       min: 100,
       max: 10000,
       step: 100,
@@ -58,7 +60,50 @@ export default {
 
   // actions omitted → core default [randomizeSeed, freeze]
 
+  derived: {
+    // Said in a sentence, because "N draws, M times" is the whole distinction
+    // and neither symbol says it on its own.
+    budget: {
+      label: 'what is drawn',
+      calc: (p) =>
+        `${p.M} experiments of ${p.N} draws — ${(p.M * p.N).toLocaleString('en-US')} numbers, ` +
+        `${p.M} estimates of μ`,
+    },
+  },
+
   views: [
+    // ONE RECORD, GROWING — the estimator at work, before any talk of variance.
+    // The other tabs are statements about M repetitions; this is a single
+    // experiment watched while its sample size increases, which is what a
+    // measurement actually looks like. The three curves are three readings of
+    // the SAME record, so their separation is a property of the estimators and
+    // not of three different draws.
+    //
+    // The band is the Cramér–Rao bound wearing the units of the estimate: ±√(σ²/n)
+    // is where the best possible unbiased estimator would still be at that n.
+    // The mean's curve lives inside it and the midrange's wanders out — which is
+    // the whole experiment, said once, before a single variance is computed.
+    view(
+      'realization',
+      'One record, growing',
+      band('crbBand', {
+        color: '#0072BD',
+        opacity: 0.14,
+        label: 'μ ± √(σ²/N) — the bound',
+        overlays: [
+          hline('muLine', { color: '#18181b', width: 1.4, label: 'μ' }),
+          line('runMean', { color: '#0072BD', width: 2.2, label: 'x̄' }),
+          line('runMedian', { color: '#D95319', width: 1.8, label: 'median' }),
+          line('runMidrange', { color: '#7E2F8E', width: 1.8, label: 'midrange' }),
+        ],
+        axes: {
+          x: { label: 'N — draws seen so far' },
+          y: { label: 'estimate of μ' },
+        },
+      })
+    ),
+
+
     // the floor: empirical variances against σ²/N in log-log
     view(
       'variance',

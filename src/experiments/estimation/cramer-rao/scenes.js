@@ -4,7 +4,7 @@ export default [
     id: 'floor',
     title: 'The problem, then the floor',
     params: { mu: 2, sigma: 1.5, N: 20, M: 3000 },
-    view: 'variance',
+    view: 'realization',
     visible: ['sigma'],
     notes: `The statement belongs on the board before anything is shown: N
 independent values are drawn from N(μ, σ²) with σ known, and μ is to be

@@ -59,9 +59,12 @@ export default {
     view(
       'error-hist',
       'Distribution of the error',
-      histogram('error', {
-        overlays: [density('errPdf', { label: 'uniform ±Δ/2' })],
-        axes: { x: 'error', y: 'density' },
+      histogram('errorLsb', {
+        overlays: [density('errPdfLsb', { label: 'uniform on [−½, ½]' })],
+        // PINNED to the quantizer's own frame. In signal units the frame moved
+        // with every bit added, so the one thing worth seeing — that the shape
+        // does not change, only the width — was the one thing hidden.
+        axes: { x: { label: 'error', unit: 'LSB', domain: [-0.5, 0.5] }, y: 'density' },
       })
     ),
     view(

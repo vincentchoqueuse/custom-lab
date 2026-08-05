@@ -99,6 +99,16 @@ export function compute({ family, fp, fstop, Amax, Amin }) {
     lo: Float64Array.from([DB_FLOOR, DB_FLOOR]),
     hi: Float64Array.from([-Amax, -Amax]),
   };
+  // The passband forbids TWO things and the template only drew one. A response
+  // may not fall below −Amax, and it may not rise above 0 dB either: a
+  // normalized filter that amplifies in its passband has not met the
+  // specification, it has changed it. Drawing only the floor let a peaking
+  // Chebyshev look compliant while it sat 2 dB over the line.
+  const zone1b = {
+    x: Float64Array.from([fMin, fp]),
+    lo: Float64Array.from([0, 0]),
+    hi: Float64Array.from([5, 5]),
+  };
   const zone2 = {
     x: Float64Array.from([fstop, fMax]),
     lo: Float64Array.from([-Amin, -Amin]),
@@ -135,6 +145,7 @@ export function compute({ family, fp, fstop, Amax, Amin }) {
     observables: {
       response: { x: rf, y: ry },
       zone1,
+      zone1b,
       zone2,
       delay: { x: gf, y: gy },
       // {x, y} series: the shape a declarative plane consumes

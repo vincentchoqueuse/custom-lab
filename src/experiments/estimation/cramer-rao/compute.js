@@ -44,6 +44,47 @@ export function compute({ mu, sigma, N, M, seed }) {
     o2[m] = medianInPlace(views.get(n));
   };
 
+  // ONE REALIZATION, GROWING. The other views are about M repetitions; this one
+  // is about a single experiment watched while its sample size increases, which
+  // is the picture an estimator actually has in a room: one record, getting
+  // longer, three numbers computed from it, and a band saying how far from μ
+  // the best possible estimator would still be at that n.
+  //
+  // The three estimates are recomputed from the SAME growing sample, so the
+  // curves are three readings of one record rather than three experiments —
+  // which is what makes their separation a property of the estimators.
+  const NMAX = 200;
+  const grow = new Float64Array(NMAX);
+  for (let i = 0; i < NMAX; i++) grow[i] = mu + sigma * gauss();
+  const rn = new Float64Array(NMAX - 1);
+  const rMean = new Float64Array(NMAX - 1);
+  const rMedian = new Float64Array(NMAX - 1);
+  const rMid = new Float64Array(NMAX - 1);
+  const bLo = new Float64Array(NMAX - 1);
+  const bHi = new Float64Array(NMAX - 1);
+  const scratch = new Float64Array(NMAX);
+  let run = grow[0];
+  for (let n = 2; n <= NMAX; n++) {
+    const j = n - 2;
+    run += grow[n - 1];
+    rn[j] = n;
+    rMean[j] = run / n;
+    let lo = Infinity;
+    let hi = -Infinity;
+    for (let i = 0; i < n; i++) {
+      scratch[i] = grow[i];
+      if (grow[i] < lo) lo = grow[i];
+      if (grow[i] > hi) hi = grow[i];
+    }
+    rMid[j] = (lo + hi) / 2;
+    rMedian[j] = medianInPlace(scratch.subarray(0, n));
+    // ±1 standard deviation of the BEST possible unbiased estimator: √(σ²/n),
+    // which is the Cramér–Rao bound wearing the units of the estimate itself
+    const sd = sigma / Math.sqrt(n);
+    bLo[j] = mu - sd;
+    bHi[j] = mu + sd;
+  }
+
   // sampling distributions at the pill's N
   const d1 = new Float64Array(M);
   const d2 = new Float64Array(M);
@@ -85,6 +126,13 @@ export function compute({ mu, sigma, N, M, seed }) {
   const crbPill = (sigma * sigma) / N;
   return {
     observables: {
+      /* --- one record, growing: the estimators at work --- */
+      runMean: { x: rn, y: rMean },
+      runMedian: { x: rn, y: rMedian },
+      runMidrange: { x: rn, y: rMid },
+      crbBand: { x: rn, lo: bLo, hi: bHi },
+      muLine: mu,
+
       dMean: d1,
       dMedian: d2,
       dMidrange: d3,

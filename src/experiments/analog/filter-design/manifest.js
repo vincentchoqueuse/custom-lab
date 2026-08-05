@@ -84,6 +84,10 @@ export default {
       width: 2,
       overlays: [
         band('zone1', { color: '#EDB120', opacity: 0.18, label: 'specification' }),
+        // the passband's OTHER bound: a normalized response may not rise above
+        // 0 dB either, and drawing only the floor let a peaking design look
+        // compliant while it sat over the line
+        band('zone1b', { color: '#EDB120', opacity: 0.18 }),
         band('zone2', { color: '#EDB120', opacity: 0.18 }),
         vline('fp', { color: '#EDB120', dashed: true, label: 'f_p' }),
         vline('fstop', { color: '#EDB120', dashed: true, label: 'f_a' }),

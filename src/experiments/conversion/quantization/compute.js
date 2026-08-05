@@ -85,8 +85,18 @@ export function compute({ b, A, f, dither, seed }) {
       cleanT: { x: ts, y: x.subarray(0, NSHOW) },
       quantT: { x: ts, y: cur.xq.subarray(0, NSHOW) },
       errT: { x: ts, y: cur.e.subarray(0, NSHOW) },
-      error: cur.e, // full record (histogram, checks)
+      error: cur.e, // full record, in signal units (checks)
+      // The SAME record in units of the quantization step, which is the only
+      // frame the distribution has a fixed shape in: whatever the resolution,
+      // a midrise error lives on [−½, +½] LSB and is uniform there. In signal
+      // units the histogram rescales with every bit added and the room cannot
+      // see that the SHAPE never changes — which is the whole claim.
+      errorLsb: Float64Array.from(cur.e, (v) => v / cur.delta),
       errPdf: { x: [-d2, -d2, d2, d2], y: [0, h, h, 0] },
+      // the same density on the LSB frame: unit width, unit height, at every
+      // resolution — which is what makes the overlay a statement rather than a
+      // coincidence
+      errPdfLsb: { x: [-0.5, -0.5, 0.5, 0.5], y: [0, 1, 1, 0] },
       snrCurve: { x: bitsAxis, y: snrMeasCurve },
       snrTh: { x: bitsAxis, y: snrThCurve },
       errPower: cur.power, // checks
