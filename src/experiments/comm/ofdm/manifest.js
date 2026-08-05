@@ -4,7 +4,7 @@ import { view, figure, plane, line, scatter, band, vline, figureStack, stack } f
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'ofdm',
-  order: 4, // the first answer to the eye the channel just closed
+  order: 3, // the first answer to the eye the channel just closed
   random: true,
   title: 'OFDM and the selective channel',
   subtitle: 'The channel digs holes; the FFT flattens it, carrier by carrier',

@@ -5,7 +5,7 @@ import { basebandFigure } from '../_lib/baseband.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'blind-equalization',
-  order: 6, // after OFDM: the other answer to a selective channel, and the hardest
+  order: 5, // after OFDM: the other answer to a selective channel, and the hardest
   random: true, // symbols and noise are drawn
   title: 'Blind equalization',
   subtitle: 'Undoing a channel without a training sequence — and what it costs',

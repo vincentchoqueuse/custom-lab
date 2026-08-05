@@ -8,7 +8,7 @@ export default {
   // After the channel has been met in time (the eye), in frequency (OFDM) and
   // adaptively (blind equalization), it is met in SPACE. Same link, fourth
   // dimension.
-  order: 7,
+  order: 6,
   random: true, // symbols, noise and the channel's rotation are drawn
   title: 'MIMO 2×2 and its three receivers',
   subtitle: 'Two symbols at once — and what it costs to pull them apart',

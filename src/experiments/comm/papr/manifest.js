@@ -4,7 +4,7 @@ import { view, line, stem, scatter, vline, hline } from '../../../core/views.js'
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'papr',
-  order: 5, // straight after OFDM: the price of the modulation it just built
+  order: 4, // straight after OFDM: the price of the modulation it just built
   random: true, // the subcarrier symbols are drawn
   title: 'PAPR and the sampling rate',
   subtitle: 'Why an OFDM peak is bigger than the IFFT says, and how it grows with N',
