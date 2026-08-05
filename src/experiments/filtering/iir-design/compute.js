@@ -13,7 +13,7 @@
 // Digital b/a coefficients are exported — downloadable from the Inspector.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { toDb, polyEvalComplex } from '../../../core/numeric.js';
-import { periodicSignal, steadyTime } from '../_lib/bench.js';
+import { periodicSignal, steadyTime, steadySpectrumDb } from '../_lib/bench.js';
 import { designButter, designCheby1, polyFromRoots } from '../../../core/filters.js';
 
 const FS = 8000;
@@ -217,6 +217,11 @@ export function compute({ family, n, fc, Amax, method, source, f0 }) {
     observables: {
       tIn,
       tOut,
+      // what went in and what came out, in frequency — the module's figure.
+      // The same record the time view reads, past the transient the bench
+      // discards, so the two tabs are two readings of ONE signal.
+      specIn: steadySpectrumDb(xin),
+      specOut: steadySpectrumDb(yout),
       impulseDig: { x: Float64Array.from({ length: NH }, (_, i) => i), y: hImp },
       respDig: { x: rf, y: rd },
       respAna: { x: rf, y: ra },

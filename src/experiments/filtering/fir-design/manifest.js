@@ -1,6 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, line, vline, hline, figure } from '../../../core/views.js';
-import { timeView, impulseView } from '../../../core/response-views.js';
+import { line, vline, hline } from '../../../core/views.js';
+import { timeView, impulseView, spectrumView } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -54,21 +54,17 @@ export default {
       ],
     }),
 
-    // hand-written: this experiment reads its own |H| against a sidelobe
-    // level, with no input/output spectra to compare
-    figure(
-      'gain',
-      line('response', {
-        width: 1.8,
-        overlays: [
-          hline('sidelobe', { color: '#D95319', dashed: true, label: 'peak lobe' }),
-          vline('fc', { color: '#EDB120', dashed: true, label: 'f_c' }),
-        ],
-        axes: {
-          x: { label: 'f', unit: 'Hz' },
-          y: { label: '|H(f)|', unit: 'dB', domain: [-100, 8] },
-        },
-      })
-    ),
+    // The module's figure, with this experiment's own reading on top: the peak
+    // stop-band lobe. It used to be |H| alone — the level was readable and the
+    // consequence was not. With the square wave's harmonics under it, a lobe at
+    // −21 dB stops being a number about a curve and becomes the harmonics that
+    // survived it, which is what a filter is judged on.
+    spectrumView({
+      domain: [-100, 10],
+      overlays: [
+        hline('sidelobe', { color: '#EDB120', dashed: true, label: 'peak lobe' }),
+        vline('fc', { color: '#EDB120', dashed: true, label: 'f_c' }),
+      ],
+    }),
   ],
 };

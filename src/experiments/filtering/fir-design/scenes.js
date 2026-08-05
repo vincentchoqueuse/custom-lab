@@ -31,7 +31,7 @@ sample, and more delay, which is scene 5.`,
   {
     id: 'gibbs',
     title: 'Gibbs does not give way',
-    view: 'response',
+    view: 'gain',
     params: { fc: 1000, N: 21, win: 'rect' },
     visible: ['N'],
     notes: `With raw truncation the first stop-band lobe sits at −21 dB.
@@ -44,7 +44,7 @@ the method has to change.`,
   {
     id: 'windows',
     title: 'The window buys decibels',
-    view: 'response',
+    view: 'gain',
     params: { fc: 1000, N: 45, win: 'rect' },
     visible: ['win', 'N'],
     notes: `Same N, different window: rectangular −21 dB, Hann −44, Hamming −53,

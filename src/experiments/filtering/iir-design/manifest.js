@@ -1,6 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, line, vline, figure } from '../../../core/views.js';
-import { timeView, impulseView, polesView } from '../../../core/response-views.js';
+import { view, line, vline } from '../../../core/views.js';
+import { timeView, impulseView, polesView, spectrumView } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -76,21 +76,19 @@ export default {
     timeView(),
     impulseView({ source: 'impulseDig', label: 'h[n] of the digital filter' }),
 
-    figure(
-      'gain',
-      line('respDig', {
-        width: 2,
-        label: 'digital',
-        overlays: [
-          line('respAna', { color: '#D95319', dashed: true, label: 'analog' }),
-          vline('fc', { color: '#EDB120', dashed: true, label: 'target f_c' }),
-        ],
-        axes: {
-          x: { label: 'f', unit: 'Hz' },
-          y: { label: '|H|', unit: 'dB', domain: [-80, 5] },
-        },
-      })
-    ),
+    // The module's figure — input and output spectra under the response — with
+    // this experiment's own second curve on it: the ANALOG prototype the
+    // digital filter is trying to be. That comparison was the whole tab and it
+    // showed no signal, so the discretization error was a gap between two
+    // curves rather than a harmonic that came out at the wrong level.
+    spectrumView({
+      resp: 'respDig',
+      domain: [-80, 10],
+      overlays: [
+        line('respAna', { color: '#77AC30', dashed: true, label: 'analog prototype' }),
+        vline('fc', { color: '#EDB120', dashed: true, label: 'target f_c' }),
+      ],
+    }),
     polesView({
       variable: 'z',
       circle: { radius: 1, label: 'unit circle (stability)' },

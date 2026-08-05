@@ -11,6 +11,7 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { magSpectrum, freqAxis, dbAmpAll } from '../../../core/dsp.js';
 import { fft, sinc, toDb, windowValue } from '../../../core/numeric.js';
+import { BENCH, periodicSignal, steadySpectrumDb, responseGrid } from '../_lib/bench.js';
 
 const FS = 8000;
 const NFFT = 4096; // response resolution (1.95 Hz bins)
@@ -75,11 +76,38 @@ export function compute({ fc, N, win }) {
   const ts = new Float64Array(N_SIG);
   for (let n = 0; n < N_SIG; n++) ts[n] = (n / FS) * 1000;
 
+  // The SAME square wave, on the module's bench, so that the frequency tab can
+  // show what went in and what came out beside |H(f)| — the figure every other
+  // filtering experiment draws. The time view keeps its own short record, which
+  // starts at n = 0 on purpose: the delay is read on the FIRST edge, and the
+  // bench discards exactly that transient before it reads a steady state.
+  const bx = periodicSignal('square', F_SQ);
+  const by = new Float64Array(bx.length);
+  for (let n = 0; n < bx.length; n++) {
+    let acc = 0;
+    for (let k = 0; k < N && k <= n; k++) acc += h[k] * bx[n - k];
+    by[n] = acc;
+  }
+  // |H(f)| on the bench's own frequency grid, from the taps themselves
+  const gainAt = (f) => {
+    const w = (2 * Math.PI * f) / FS;
+    let re = 0;
+    let im = 0;
+    for (let k = 0; k < N; k++) {
+      re += h[k] * Math.cos(w * k);
+      im -= h[k] * Math.sin(w * k);
+    }
+    return Math.hypot(re, im);
+  };
+
   return {
     observables: {
       taps: { x: tapIdx, y: h },
       idealIR: { x: ix, y: iy },
       response: { x: rf, y: ry },
+      specIn: steadySpectrumDb(bx, DB_FLOOR),
+      specOut: steadySpectrumDb(by, DB_FLOOR),
+      resp: responseGrid(gainAt, DB_FLOOR),
       tIn: { x: ts, y: xin },
       tOut: { x: ts, y: yout },
       hTaps: h, // raw taps (Inspector download, symmetry check)
