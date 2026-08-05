@@ -169,7 +169,11 @@ and the chrome — Parameters, Draw, Presets, Search… — in English, like eve
 active item in neutral gray (never a color accent). Top button: "Search
 experiments" (`⌘K`). Tree: subjects (small muted sentence-case labels,
 ChatGPT-style, collapsible with a hover-only chevron) → experiments.
-Footer: light/dark theme toggle for the central area, Teacher Mode button (🗒).
+Footer: light/dark theme toggle for the central area, the source link, settings,
+inspector. **Teacher Mode is not here** — its switch lives in the info panel, in
+the heading of the notes block it gates, which is the only place its state means
+anything; in the sidebar it was a toggle with no visible effect until you
+happened to land on a scene that had notes.
 
 **Clean header.** Breadcrumb `Subject / Experiment`. **Central preset selector**,
 LLM-model-picker style — one click applies the full scene. Right side: copyable URL
@@ -220,6 +224,7 @@ Canonical table — any shortcut change happens HERE and nowhere else:
 | `R` | `randomizeSeed` action (draw again) | **R**andomize |
 | `F` | `freeze` action — freeze/unfreeze the plot for before/after comparison (phase 3) | **F**reeze |
 | `A` | Lock / unlock the plot axes (the frame stays put while the curve moves) | **A**xes |
+| `C` | Switch the **C**rosshair readout on / off (also a button in the statline) | **C**ursor |
 | `L` | **L**ecture Presentation Mode: **fullscreen** (Fullscreen API) + strokes ×1.6 + type ×1.3 + minimal chrome | **L**ecture |
 | `←` / `→` | Previous / next preset (the lecture script on keys) | — |
 | `Esc` | Exit fullscreen / close the info panel / clear freeze ghost / close popover or palette / show hidden series | — |
@@ -260,7 +265,15 @@ the browser Fullscreen API (native `Esc` exit).
   numbers. A frozen picture answers "has the shape changed"; the room's next
   question is always "by how much", and the old number used to be gone the
   instant the slider moved.
-- **Crosshair readout**: pointing at a declarative plot draws a rule at the
+- **Crosshair readout** (`C`, or the Cursor button in the statline): OFF until
+  asked for. Pointer-only and always-on, it was invisible — nothing said it
+  existed, it does nothing on a plane or in a custom view, and it ignored touch:
+  three different ways to look broken. The switch says the feature is there and
+  whether it is on; it is offered only on the views that can honour it; and
+  because it is the reader ASKING, a finger is tracked too — capturing touch
+  costs the page its scroll over the plot, which is a fair trade for somebody
+  who wants the readout and no trade at all for somebody who does not. The
+  preference persists (localStorage, cosmetic). Pointing at a declarative plot draws a rule at the
   sample under the pointer, a dot on every visible series and its value beside
   it, with the abscissa on the axis. "And at 3 Hz, what is it?" is the question
   a room asks most often about a curve, and reading it off pixels was the only

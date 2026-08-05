@@ -31,8 +31,11 @@
   // agree to within a pixel and disagree in the reading, on the one figure
   // built to be read straight down.
   let cursorX = $state(null);
+  // a view change reuses this component with a new spec, and switching the
+  // readout off must take the rule with it
   $effect(() => {
     spec;
+    app.ui.crosshair;
     cursorX = null;
   });
   const panelH = $derived((F.ih - gap * (spec.panels.length - 1)) / spec.panels.length);
@@ -78,7 +81,7 @@
       xDomainForced={xDomain}
       {cursorX}
       dataX={cursorX}
-      onhover={(v) => (cursorX = v)}
+      onhover={app.ui.crosshair ? (v) => (cursorX = v) : null}
       showXTicks={i === panelSpecs.length - 1}
       showLegend={i === 0}
       uid={`stack-${i}`}

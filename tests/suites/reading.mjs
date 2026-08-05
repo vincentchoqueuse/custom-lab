@@ -24,6 +24,13 @@ const CURVE = 'analog/bode-measurement?view=gain'; // two curves, log abscissa
 const STACK = 'comm/constellations?view=time'; // two panels, one abscissa
 const FROZEN = 'estimation/confidence-intervals'; // random: R moves the readings
 
+/** The readout is OFF until asked for — a switch in the statline, or C. */
+async function enableCrosshair(page) {
+  if (await page.$('.statline .export button.on')) return;
+  await page.keyboard.press('c');
+  await page.waitForTimeout(200);
+}
+
 /** Puts the pointer at a fraction of the plot and lets the crosshair settle. */
 async function point(page, fx = 0.45, fy = 0.4) {
   const box = await page.locator('svg.plot-svg').first().boundingBox();
@@ -47,6 +54,13 @@ export default () =>
   run('reading', async (t, page, h) => {
     /* ---------- the crosshair reads ------------------------------------- */
     await h.go('#/' + CURVE);
+    // OFF by default, and off means no capture surface at all: pointing at the
+    // plot must draw nothing until the switch has been thrown
+    await point(page);
+    t('nothing until the switch is thrown', (await readout(page)).length === 0);
+    t('and the switch is offered here', !!(await page.$('.statline .export button[title*="pointer" i]')));
+
+    await enableCrosshair(page);
     t('no crosshair before the pointer arrives', (await readout(page)).length === 0);
 
     await point(page);
@@ -73,6 +87,7 @@ export default () =>
     // Two panels each tracking their own pointer would agree to within a pixel
     // and disagree in the reading — on the one figure built to be read down.
     await h.go('#/' + STACK);
+    await enableCrosshair(page);
     await point(page, 0.45, 0.25);
     const s = await readout(page);
     t('a stack draws a rule in every panel', s.length === 2, `${s.length} groups`);
@@ -84,6 +99,7 @@ export default () =>
 
     /* ---------- the reading never becomes permanent --------------------- */
     await h.go('#/' + CURVE);
+    await enableCrosshair(page);
     await point(page);
     await page.keyboard.press('f'); // freeze WITH the pointer on the curve
     await page.waitForTimeout(400);
@@ -100,6 +116,13 @@ export default () =>
       return btns.map((b) => b.textContent.trim()).join(',');
     });
     t('the export buttons are still there', /SVG/.test(svg), svg);
+
+    // a plane carries no readout, so it must not offer a switch either
+    await h.go('#/comm/mimo?view=antennas');
+    t(
+      'a plane offers no switch, because it has no readout',
+      !(await page.$('.statline .export button[title*="pointer" i]'))
+    );
 
     /* ---------- the statline freezes with the picture ------------------- */
     await h.go('#/' + FROZEN);

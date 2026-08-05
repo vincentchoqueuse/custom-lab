@@ -2,7 +2,7 @@
   // The plot card: SVG view + statline (key scalar observables, computation
   // status) + export (SVG source of truth, PNG 2×, PNG to clipboard).
   import { onMount } from 'svelte';
-  import { app, registerGhostCapturer, toggleAxisLock } from '../core/store.svelte.js';
+  import { app, manifest, registerGhostCapturer, toggleAxisLock, toggleCrosshair } from '../core/store.svelte.js';
   import { STR } from '../core/strings.js';
   import { formatValue } from '../core/scales.js';
   import ViewHost from './ViewHost.svelte';
@@ -39,6 +39,16 @@
 
   const obs = $derived(app.result.observables);
   const status = $derived(app.result.status);
+
+  // The switch is offered only where there is something to switch on. An
+  // equal-aspect plane and a custom view draw their own marks and carry no
+  // readout, and a button that did nothing on a third of the catalogue would
+  // teach the room that the feature is broken rather than absent.
+  const viewKind = $derived.by(() => {
+    const m = manifest();
+    return (m?.views.find((v) => v.id === app.view) ?? m?.views[0])?.kind;
+  });
+  const canRead = $derived(viewKind === 'plot' || viewKind === 'stack');
   // scalars AND text: a regime name is a reading like any other
   const scalars = $derived(
     obs
@@ -186,6 +196,11 @@
       <span class="status">{app.notice || app.result.message}</span>
     {/if}
     <span class="export">
+      {#if canRead}
+        <button class:on={app.ui.crosshair} onclick={toggleCrosshair} title={STR.READ_VALUES}>
+          <Icon name="crosshair" size={11} /> {STR.CURSOR}
+        </button>
+      {/if}
       <button class:on={app.axisLock} onclick={toggleAxisLock} title={STR.LOCK_AXES}>
         <Icon name="lock" size={11} /> {STR.AXES}
       </button>

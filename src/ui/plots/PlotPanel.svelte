@@ -178,13 +178,14 @@
    * Pointer → data abscissa. `xs.invert` is pixel arithmetic, which is the one
    * computation a view is allowed.
    *
-   * MOUSE AND PEN ONLY. Tracking a finger would need `touch-action: none` on
-   * the plot, and the plot is most of a phone screen: the page would stop
-   * scrolling under the reader's thumb. A phone reads the figure; a lecture
-   * hall reads the values.
+   * A FINGER IS TRACKED TOO, but only because the capture surface exists at
+   * all only when the reader has switched the readout on. Tracking touch means
+   * `touch-action: none` over most of a phone screen — the page stops
+   * scrolling under the thumb — which is a fair trade for somebody who asked
+   * for the readout and no trade at all for somebody who did not.
    */
   function track(e) {
-    if (!onhover || e.pointerType === 'touch') return;
+    if (!onhover) return;
     const r = e.currentTarget.getBoundingClientRect();
     if (r.width === 0) return;
     onhover(xs.invert(((e.clientX - r.left) / r.width) * iw));
@@ -240,6 +241,7 @@
       width={iw}
       height={ih}
       fill="transparent"
+      onpointerdown={track}
       onpointermove={track}
       onpointerleave={() => onhover(null)}
     />
@@ -258,5 +260,8 @@
 <style>
   .crosshair-capture {
     cursor: crosshair;
+    /* the surface exists only while the readout is on, so this never costs
+       the page a scroll it was going to need */
+    touch-action: none;
   }
 </style>

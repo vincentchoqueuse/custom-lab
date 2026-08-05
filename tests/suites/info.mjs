@@ -34,6 +34,14 @@ export default () =>
   run('info', async (t, page, h) => {
     await h.go('#/' + DOC);
     t('the banner above the plot is gone', !(await page.$('.teacher-banner')));
+    // the source link sits with the application's switches, not with the
+    // header's sharing buttons — and exactly once
+    t(
+      'the GitHub link is in the sidebar',
+      (await page.$$eval('a[href*="github.com"]', (a) => a.length)) >= 1 &&
+        !(await page.$('.header a[href*="github.com"]')),
+      `${await page.$$eval('.sidebar a[href*="github.com"]', (a) => a.length)} in the sidebar`
+    );
     t('and no panel until it is asked for', (await panel(page)) === null);
 
     await page.keyboard.press('i');
@@ -66,17 +74,18 @@ export default () =>
     const off = await panel(page);
     t('with Teacher Mode off there are no notes', off?.notes === null);
     t('only a note that there are some', off?.hint === true);
+    t('and a switch to reveal them', !!(await page.$('.teacher-switch')));
 
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(200);
-    await page.click('.sidebar button[title*="Teacher" i]');
-    await page.waitForTimeout(250);
-    await page.keyboard.press('i');
+    // the switch lives in the panel now, in the heading of the block it gates
+    await page.click('.teacher-switch');
     await page.waitForTimeout(300);
     const on = await panel(page);
     t('with it on the notes are there', (on?.notes?.length ?? 0) > 20, `${on?.notes?.length} chars`);
     t('and the reminder is gone', on?.hint === false);
-    await page.click('.sidebar button[title*="Teacher" i]').catch(() => {});
+    t('and the switch says so', await page.getAttribute('.teacher-switch', 'aria-pressed') === 'true');
+    await page.click('.teacher-switch');
+    await page.waitForTimeout(250);
+    t('switching it off takes them away again', (await panel(page))?.notes === null);
 
     /* ---------- an experiment with no description still says something --- */
     await h.go('#/' + PLAIN);

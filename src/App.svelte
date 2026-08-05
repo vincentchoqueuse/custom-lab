@@ -9,6 +9,7 @@
     setDrawer,
     toggleSidebar,
     toggleAxisLock,
+    toggleCrosshair,
     showAllSeries,
   } from './core/store.svelte.js';
   import { schedule, onResult } from './core/worker-host.js';
@@ -98,6 +99,7 @@
     app.ui.sidebar = sidebarPref !== null ? sidebarPref !== '0' : window.innerWidth > 900;
     app.ui.teacher = readPref('teacher') === '1';
     app.ui.bold = readPref('bold') === '1';
+    app.ui.crosshair = readPref('crosshair') === '1';
   }
 
   async function togglePresentation() {
@@ -138,6 +140,10 @@
     // single-letter shortcuts are inert while a text field has focus
     if (editing || mod || e.altKey) return;
     switch (e.key) {
+      case 'c':
+      case 'C':
+        toggleCrosshair();
+        break;
       case 'i':
       case 'I':
         app.ui.info = !app.ui.info;

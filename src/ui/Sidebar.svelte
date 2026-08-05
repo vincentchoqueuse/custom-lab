@@ -42,10 +42,6 @@
     writePref('theme', app.ui.theme);
   }
 
-  function toggleTeacher() {
-    app.ui.teacher = !app.ui.teacher;
-    writePref('teacher', app.ui.teacher ? '1' : '0');
-  }
 </script>
 
 <!-- the three utility buttons, shared between the expanded footer and the
@@ -54,9 +50,14 @@
   <button class={cls} onclick={toggleTheme} title={STR.THEME}>
     <Icon name={app.ui.theme === 'light' ? 'moon' : 'sun'} size={15} />
   </button>
-  <button class={cls} class:on={app.ui.teacher} onclick={toggleTeacher} title={STR.TEACHER_MODE}>
-    <Icon name="note" size={15} />
-  </button>
+  <!-- The source, where a reader looks for it: with the application's own
+       switches rather than among the header's sharing buttons, which are about
+       THIS scene. It took the Teacher Mode slot, and Teacher Mode moved into
+       the info panel — next to the notes it gates, which is the only place its
+       state means anything. -->
+  <a class={cls} href={STR.REPO_URL} target="_blank" rel="noopener" title={STR.GITHUB}>
+    <Icon name="github" size={15} />
+  </a>
   <button
     class={cls}
     class:on={app.ui.settings}

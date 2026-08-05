@@ -23,7 +23,7 @@
   // A dialog and not a drawer, deliberately, and it does not contradict "never
   // a modal for parameters": that rule protects the look→adjust→look loop, and
   // nothing here adjusts anything. This is read, then dismissed.
-  import { app, manifest, activeScene, applyPreset } from '../core/store.svelte.js';
+  import { app, manifest, activeScene, applyPreset, toggleTeacher } from '../core/store.svelte.js';
   import { STR } from '../core/strings.js';
   import { CATALOGUE } from '../core/catalogue.js';
   import Icon from './Icon.svelte';
@@ -116,14 +116,31 @@
       </ol>
     {/if}
 
-    {#if app.ui.teacher && scene?.notes}
+    <!-- TEACHER MODE LIVES HERE NOW, next to what it gates. In the sidebar it
+         was a switch with no visible effect until you happened to be on a scene
+         that had notes; here the panel says whether this scene carries any, and
+         the switch that reveals them is the next thing your eye lands on. The
+         rule itself has not moved an inch: off, the notes are ABSENT from the
+         DOM, because a dialog opened in class is projected like everything
+         else. -->
+    {#if scene?.notes}
       <h3 class="teacher-head">
         <Icon name="note" size={14} />
         {STR.TEACHER_NOTES} — {scene.title}
+        <button
+          class="teacher-switch"
+          class:on={app.ui.teacher}
+          onclick={toggleTeacher}
+          aria-pressed={app.ui.teacher}
+        >
+          {app.ui.teacher ? STR.ON : STR.OFF}
+        </button>
       </h3>
-      <p class="notes">{scene.notes}</p>
-    {:else if scene?.notes}
-      <p class="notes-hidden">{STR.NOTES_BEHIND_TEACHER_MODE}</p>
+      {#if app.ui.teacher}
+        <p class="notes">{scene.notes}</p>
+      {:else}
+        <p class="notes-hidden">{STR.NOTES_BEHIND_TEACHER_MODE}</p>
+      {/if}
     {/if}
 
     {#if m?.tags?.length}

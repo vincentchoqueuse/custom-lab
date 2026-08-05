@@ -117,9 +117,7 @@
         </div>
       {/if}
     </div>
-    <a class="icon-btn" href={STR.REPO_URL} target="_blank" rel="noopener" title={STR.GITHUB}>
-      <Icon name="github" size={15} />
-    </a>
+
     <button class="icon-btn" onclick={onpresent} title="{STR.PRESENTATION} (L)">
       <Icon name="maximize" size={15} />
     </button>

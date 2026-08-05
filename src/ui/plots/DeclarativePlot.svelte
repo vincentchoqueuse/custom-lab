@@ -19,8 +19,11 @@
   let cursorX = $state(null);
   // a view change reuses this component with a new spec; a rule left over from
   // the previous figure would point at nothing
+  // a view change reuses this component with a new spec, and switching the
+  // readout off must take the rule with it
   $effect(() => {
     spec;
+    app.ui.crosshair;
     cursorX = null;
   });
 </script>
@@ -42,6 +45,6 @@
     uid="single"
     {cursorX}
     dataX={cursorX}
-    onhover={(v) => (cursorX = v)}
+    onhover={app.ui.crosshair ? (v) => (cursorX = v) : null}
   />
 </svg>

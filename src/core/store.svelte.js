@@ -42,6 +42,15 @@ export const app = $state({
     palette: false,
     inspector: false,
     info: false, // the panel describing the experiment (I)
+    // The crosshair readout, OFF until asked for. It was pointer-only and
+    // therefore invisible: nothing on screen said it existed, it does nothing
+    // on the equal-aspect planes or in a custom view, and it ignored touch
+    // entirely — three different ways to look broken. A switch says the
+    // feature is there, says whether it is on, and is the user asking for it,
+    // which is also what makes it safe to track a FINGER: capturing touch
+    // stops the page scrolling under the plot, and that is a trade only
+    // somebody who wants the readout should make.
+    crosshair: false,
     settings: false,
     bold: false, // permanent thick-strokes preference (projection without fullscreen)
     // Viewport below the mobile breakpoint, which picks the plot canvas
@@ -315,6 +324,16 @@ function snapshotReadings() {
   for (const [k, o] of Object.entries(app.result.observables ?? {}))
     if ((o.type === 'scalar' || o.type === 'text') && o.meta?.label) out[k] = o.value;
   return out;
+}
+
+export function toggleTeacher() {
+  app.ui.teacher = !app.ui.teacher;
+  writePref('teacher', app.ui.teacher ? '1' : '0');
+}
+
+export function toggleCrosshair() {
+  app.ui.crosshair = !app.ui.crosshair;
+  writePref('crosshair', app.ui.crosshair ? '1' : '0');
 }
 
 export function runAction(id) {

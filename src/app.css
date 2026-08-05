@@ -739,6 +739,31 @@ kbd {
   font-weight: 600;
 }
 
+/* the Teacher Mode switch, in the heading of the block it governs */
+.teacher-switch {
+  margin-left: auto;
+  padding: 2px 9px;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted-fg);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.teacher-switch:hover {
+  color: var(--foreground);
+}
+
+.teacher-switch.on {
+  color: var(--primary-fg);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
 .info-body .notes {
   margin: 0;
   padding: 12px 14px;
