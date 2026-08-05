@@ -232,8 +232,6 @@ export function compute({ family, n, fc, Amax, method, source, f0 }) {
       zeros: { x: Float64Array.from(zZeros, (z) => z[0]), y: Float64Array.from(zZeros, (z) => z[1]) },
       bCoefs: b, // Inspector download (difference-equation b/a)
       aCoefs: a,
-      structB: b, // the structure tab, drawn from the very same coefficients
-      structA: a,
       hImp, // checks: impulse-invariance sampling identity
       hAna,
       maxPole, // checks: stability

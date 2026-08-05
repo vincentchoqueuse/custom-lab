@@ -1,7 +1,6 @@
 import { coeffs, float, select } from '../../../core/fields.js';
 import { vline } from '../../../core/views.js';
 import { timeView, impulseView, spectrumView } from '../../../core/response-views.js';
-import { structureView } from '../_lib/structure.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -40,7 +39,6 @@ export default {
   views: [
     timeView(),
     impulseView({ source: 'taps', x: 'k', y: 'b[k] = h[k]' }),
-    structureView(),
     spectrumView({
       overlays: [
         vline((p) => 8000 / p.b.length, {

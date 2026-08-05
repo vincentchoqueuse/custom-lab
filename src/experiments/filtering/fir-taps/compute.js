@@ -76,9 +76,6 @@ export function compute({ b, source, f0 }) {
       specOut: steadySpectrumDb(y, DB_FLOOR),
       resp: responseGrid((f) => firGain(b, f), DB_FLOOR),
       hTaps: taps, // Inspector download + checks
-      // the structure tab: an FIR IS its coefficients, wired in a row
-      structB: taps,
-      structA: Float64Array.of(1),
       yFull: y, // checks (pure-delay identity)
       dcGain: { value: dc, meta: { label: 'H(0) = Σb', precision: 4 } },
       nyqGain: {
