@@ -52,11 +52,21 @@ one about an inequality.`,
   {
     id: 'selective',
     title: 'The channel digs holes',
-    params: { Nc: 64, L: 6, cp: 8, snr: 15, M: 50 },
-    visible: ['L'],
+    // Declared, and it has to be: the two time views now come first, so a scene
+    // that says "look at the channel" would otherwise open on the waveform.
+    view: 'channel',
+    params: { Nc: 64, L: 6, cp: 8, snr: 15, M: 150, k: 23 },
+    visible: ['k', 'L'],
     notes: `Six paths, and the channel spectrum becomes a landscape of ridges and
 FADES at −20 or −30 dB. Pressing R gives another channel every time, always with
 holes.
+
+The orange vertical is the carrier being read, and it is the thread through the
+whole experiment: drag k along the landscape and the statline follows with
+|H_k|² and that carrier's own error rate. Park it on a ridge, then let it fall
+into a fade and watch the two numbers change by twenty decibels and two orders
+of magnitude. The constellation tab shows what that carrier looks like, the
+error tab shows what it costs.
 
 The question to ask: what can a carrier at the bottom of a hole transmit?
 Nothing, and no equalizer will get it out. Dropping L to 1 flattens the channel
@@ -93,7 +103,7 @@ what the IFFT does, and why the first two tabs have no carrier marker.`,
     title: 'Sabotaging the prefix',
     view: 'constellation',
     params: { Nc: 64, L: 6, cp: 8, snr: 25, M: 50, seed: 5 },
-    visible: ['cp', 'snr'],
+    visible: ['cp', 'k'],
     notes: `The consequence of the previous scene, measured. At 25 dB everything
 is clean; freeze, then take L_cp from 8 down to 0 and let points escape WHILE the
 noise has not moved. The ISI of the previous symbol leaks into the FFT window,
