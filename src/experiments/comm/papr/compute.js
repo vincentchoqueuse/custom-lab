@@ -39,16 +39,6 @@ import { mulberry32 } from '../../../core/rng.js';
 import { ifft } from '../../../core/dsp.js';
 import { constellation } from '../_lib/modulation.js';
 
-/** The oversampling factors the sweep walks. Powers of two: L·N must stay a
- *  power of two for the radix-2 transform, and the whole point is visible by
- *  16 anyway — the curve is flat well before it. */
-const L_SWEEP = [1, 2, 4, 8, 16];
-/** The subcarrier counts the sweep walks: 802.11a is 64, LTE goes to 1024. */
-const N_SWEEP = [16, 32, 64, 128, 256, 512, 1024];
-/** Symbols per point of a swept curve. A mean over 120 draws is steady to
- *  about 0.1 dB, which is finer than the effects being compared. */
-const M_SWEEP = 120;
-const M_SWEEP_L = 80; // the L sweep pays 16× per symbol; it buys fewer
 /** The stand-in for continuous time on the envelope view. */
 const L_FINE = 32;
 /** Critical-sample periods shown around the peak. */
@@ -140,22 +130,11 @@ export function paprAt(re, im, stride, pmean) {
 
 const toDb = (v) => 10 * Math.log10(v);
 
-/** Mean PAPR in dB over `m` symbols at N, read at oversampling `L`. */
-function meanPaprDb(N, mod, L, m, rng) {
-  let acc = 0;
-  for (let s = 0; s < m; s++) {
-    const X = drawSymbol(N, mod, rng);
-    const x = oversample(X.re, X.im, L);
-    acc += paprAt(x.re, x.im, 1, meanPower(X.re, X.im));
-  }
-  return toDb(acc / m);
-}
-
 /**
  * @param {{N: number, L: number, mod: string, M: number, seed: number}} params
  * @returns {{observables: Object}}
  */
-export function compute({ N, L, mod, M, seed }) {
+export function compute({ N, L, mod, M, gamma, seed }) {
   const rng = mulberry32(seed);
 
   /* ---------- the main run: M symbols at the chosen (N, L) ---------------- */
@@ -179,59 +158,36 @@ export function compute({ N, L, mod, M, seed }) {
   const pct = (q) => sorted[Math.min(M - 1, Math.floor(q * M))];
 
   /* ---------- the CCDF, against the two models --------------------------- */
-  // The abscissa runs to a little past the largest PAPR seen, so the curve
-  // ends where the data ends rather than trailing along the floor.
-  const gMax = Math.max(toDb(sorted[M - 1]) + 0.5, 8);
+  // LINEAR IN γ, and linear in probability, because the thing this experiment
+  // is about is a RATIO — the peak is six times the average power — and a
+  // decibel hides exactly that. "7 dB" is a number; "six times" is a problem,
+  // and an amplifier is specified against the second.
+  //
+  // The ORDINATE stays logarithmic: a clipping probability is bought at one
+  // symbol in a thousand, and a linear axis puts that on the floor. Only the
+  // abscissa changes units, which is the one the pill sets.
+  const gMax = Math.max(sorted[M - 1] * 1.05, 8);
   const G = 96;
-  const gDb = new Float64Array(G);
+  const gAx = new Float64Array(G);
   const ccdfEmp = new Float64Array(G);
   const ccdfN = new Float64Array(G);
   const ccdfAlpha = new Float64Array(G);
-  // 1/M is the smallest frequency M symbols can express; below it the curve
-  // would be reporting the absence of evidence as evidence.
-  const floor = 1 / M;
   for (let i = 0; i < G; i++) {
-    const db = (gMax * i) / (G - 1);
-    const g = 10 ** (db / 10);
+    const g = (gMax * i) / (G - 1);
     let above = 0;
     for (let s = 0; s < M; s++) if (papr[s] > g) above++;
-    gDb[i] = db;
-    ccdfEmp[i] = Math.max(above / M, floor);
+    gAx[i] = g;
+    // 1/M is the smallest frequency M symbols can express; below it the curve
+    // would be reporting the absence of evidence as evidence
+    ccdfEmp[i] = Math.max(above / M, 1 / M);
     ccdfN[i] = Math.max(ccdfTheory(g, N), 1e-12);
     ccdfAlpha[i] = Math.max(ccdfTheory(g, ALPHA * N), 1e-12);
   }
 
-  /* ---------- PAPR against the oversampling factor ------------------------ */
-  // ONE transform per symbol, at the largest L, and every smaller L read off
-  // it by stride. That is the subsequence identity used as an economy: five
-  // curves for the price of one, and five numbers that cannot disagree about
-  // which symbols they measured.
-  const Lmax = L_SWEEP[L_SWEEP.length - 1];
-  const accL = new Float64Array(L_SWEEP.length);
-  for (let s = 0; s < M_SWEEP_L; s++) {
-    const X = drawSymbol(N, mod, rng);
-    const pm = meanPower(X.re, X.im);
-    const x = oversample(X.re, X.im, Lmax);
-    for (let i = 0; i < L_SWEEP.length; i++)
-      accL[i] += paprAt(x.re, x.im, Lmax / L_SWEEP[i], pm);
-  }
-  const vsL = {
-    x: Float64Array.from(L_SWEEP),
-    y: Float64Array.from(accL, (a) => toDb(a / M_SWEEP_L)),
-  };
-
-  /* ---------- PAPR against the number of subcarriers ---------------------- */
-  const vsN = {
-    x: Float64Array.from(N_SWEEP),
-    y: Float64Array.from(N_SWEEP, (n) => meanPaprDb(n, mod, L, M_SWEEP, rng)),
-  };
-  // the two models and the worst case, on the same abscissa
-  const thN = { x: vsN.x, y: Float64Array.from(N_SWEEP, (n) => toDb(harmonic(n))) };
-  const thAlpha = {
-    x: vsN.x,
-    y: Float64Array.from(N_SWEEP, (n) => toDb(harmonic(Math.round(ALPHA * n)))),
-  };
-  const worst = { x: vsN.x, y: Float64Array.from(N_SWEEP, (n) => toDb(n)) };
+  // how often the pill's own threshold is crossed — the reading a designer
+  // actually buys, at the level they actually chose
+  let overGamma = 0;
+  for (let s = 0; s < M; s++) if (papr[s] > gamma) overGamma++;
 
   /* ---------- one symbol, around its peak --------------------------------- */
   // The envelope at ×32 stands in for continuous time. The window is CENTRED
@@ -252,7 +208,9 @@ export function compute({ N, L, mod, M, seed }) {
   }
   const centre = Math.round(peakIdx / L_FINE); // in critical-sample periods
   const lo = Math.max(0, Math.min(N - WIN, centre - WIN / 2));
-  const at = (i) => toDb((fine.re[i] ** 2 + fine.im[i] ** 2) / pm0);
+  // LINEAR power, in units of the symbol's own average: the peak is then six
+  // times the mean and looks it, which "7.8 dB" never did.
+  const at = (i) => (fine.re[i] ** 2 + fine.im[i] ** 2) / pm0;
 
   const envT = [];
   const envY = [];
@@ -275,8 +233,8 @@ export function compute({ N, L, mod, M, seed }) {
 
   // The two horizontals ARE the two PAPRs, in dB, over the whole symbol — the
   // gap between them is what the critical rate fails to see.
-  const paprFine = toDb(paprAt(fine.re, fine.im, 1, pm0));
-  const paprCrit0 = toDb(paprAt(fine.re, fine.im, L_FINE, pm0));
+  const paprFine = paprAt(fine.re, fine.im, 1, pm0);
+  const paprCrit0 = paprAt(fine.re, fine.im, L_FINE, pm0);
 
   return {
     observables: {
@@ -287,35 +245,27 @@ export function compute({ N, L, mod, M, seed }) {
       truePeak: paprFine,
       critPeak: paprCrit0,
 
-      /* --- against the oversampling factor --- */
-      vsL,
-
-      /* --- against the number of subcarriers --- */
-      vsN,
-      thN,
-      thAlpha,
-      worst,
-
       /* --- the distribution --- */
-      ccdf: { x: gDb, y: ccdfEmp },
-      ccdfModelN: { x: gDb, y: ccdfN },
-      ccdfModelAlpha: { x: gDb, y: ccdfAlpha },
+      ccdf: { x: gAx, y: ccdfEmp },
+      ccdfModelN: { x: gAx, y: ccdfN },
+      ccdfModelAlpha: { x: gAx, y: ccdfAlpha },
+      // the pill's threshold, drawn as a horizontal on the envelope and a
+      // vertical on the tail — one number, two figures, the same statement
+      gammaLine: gamma,
 
       /* --- the readings --- */
-      meanPapr: { value: toDb(mean), meta: { label: 'mean PAPR', unit: 'dB', precision: 2 } },
-      p99: { value: toDb(pct(0.99)), meta: { label: 'PAPR at 99 %', unit: 'dB', precision: 2 } },
+      meanPapr: { value: mean, meta: { label: 'mean PAPR', unit: '×', precision: 2 } },
+      p99: { value: pct(0.99), meta: { label: 'PAPR at 99 %', unit: '×', precision: 2 } },
+      overGamma: {
+        value: overGamma / M,
+        meta: { label: 'P(PAPR > γ)', precision: 4 },
+      },
       hidden: {
         value: toDb(mean) - toDb(meanCrit),
         meta: { label: 'missed at L = 1', unit: 'dB', precision: 2 },
       },
-      theoryMean: {
-        value: toDb(harmonic(N)),
-        meta: { label: 'H_N model', unit: 'dB', precision: 2 },
-      },
-      worstCase: {
-        value: toDb(N),
-        meta: { label: 'worst case', unit: 'dB', precision: 1 },
-      },
+      theoryMean: { value: harmonic(N), meta: { label: 'H_N model', unit: '×', precision: 2 } },
+      worstCase: { value: N, meta: { label: 'worst case', unit: '×', precision: 0 } },
     },
   };
 }

@@ -1,4 +1,4 @@
-import { int, select } from '../../../core/fields.js';
+import { float, int, select } from '../../../core/fields.js';
 import { view, line, stem, scatter, vline, hline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
@@ -70,6 +70,19 @@ nobody can afford.`,
       ],
       default: 'qpsk',
     }),
+    gamma: float('γ', {
+      // A LINEAR ratio and not a decibel, for the same reason the two figures
+      // are: the number an amplifier is specified against is "six times the
+      // average power", and a designer who reads 7.8 dB has to convert before
+      // the sentence means anything.
+      description: 'the threshold: how many times the average power the amplifier can pass',
+      min: 1.5,
+      max: 16,
+      step: 0.25,
+      default: 5,
+      unit: '×',
+      precision: 2,
+    }),
     M: int('M', {
       description: 'OFDM symbols drawn',
       min: 100,
@@ -93,6 +106,7 @@ nobody can afford.`,
   groups: [
     { title: 'Signal', params: ['N', 'mod'] },
     { title: 'Measurement', params: ['L', 'M'] },
+    { title: 'Specification', params: ['gamma'] },
   ],
 
   derived: {
@@ -101,7 +115,8 @@ nobody can afford.`,
     spread: {
       label: 'typical vs worst',
       calc: (p) =>
-        `${(10 * Math.log10(Math.log(p.N) + 0.5772)).toFixed(1)} dB against ${(10 * Math.log10(p.N)).toFixed(1)} dB`,
+        `about ${(Math.log(p.N) + 0.5772).toFixed(1)}× the average power, against ${p.N}× if every ` +
+        `carrier lined up — which is why PAPR is a tail problem and not a worst-case one`,
     },
   },
 
@@ -126,7 +141,7 @@ nobody can afford.`,
             // the stems stand on the floor of the frame, not on an arbitrary
             // level part-way up it — a dB plot of a power has deep nulls, and a
             // stem hanging DOWNWARD from mid-frame reads as a negative sample
-            baseline: -30,
+            baseline: 0,
             label: 'IFFT samples (L = 1)',
           }),
           scatter('overSamples', { color: '#D95319', size: 3, label: 'samples at L' }),
@@ -142,70 +157,18 @@ nobody can afford.`,
             width: 1.8,
             label: 'peak the IFFT sees',
           }),
+          // the pill's threshold, on the figure it is a threshold FOR: the
+          // envelope crosses it or it does not, and that is the whole question
+          hline('gammaLine', { color: '#77AC30', width: 2.2, label: 'γ — what the amplifier passes' }),
         ],
         axes: {
           x: { label: 'time', unit: 'sample periods' },
-          // floored: the nulls of an envelope go arbitrarily deep and carry no
-          // information — the peak is the subject
-          y: {
-            label: 'instantaneous power, above the symbol average',
-            unit: 'dB',
-            domain: [-30, null],
-          },
+          // LINEAR, in units of the symbol's own average power. In decibels a
+          // peak six times the mean reads "7.8", which is a number nobody
+          // flinches at; linear it is a spike six times the height of
+          // everything around it, which is the problem the amplifier has.
+          y: { label: 'instantaneous power / average', unit: '×', domain: [0, null] },
         },
-      })
-    ),
-
-    // HOW MUCH OVERSAMPLING IS ENOUGH — the question the experiment is named
-    // for, answered as a curve that flattens. Logarithmic abscissa because the
-    // factors are octaves.
-    view(
-      'oversampling',
-      'PAPR vs the oversampling factor',
-      line('vsL', {
-        color: '#0072BD',
-        width: 2.4,
-        label: 'mean PAPR, measured',
-        overlays: [
-          // the five places it was actually measured: the claim that the curve
-          // has stopped rising rests on the last two points existing
-          scatter('vsL', { color: '#0072BD', size: 5 }),
-          vline('L', { color: '#EDB120', dashed: true, width: 1.8, label: 'the L in the pill' }),
-        ],
-        axes: {
-          x: { label: 'L', scale: 'log' },
-          y: { label: 'mean PAPR', unit: 'dB' },
-        },
-      })
-    ),
-
-    // HOW IT GROWS. Three references on one frame, and the distance between the
-    // top one and the rest is the lesson: the worst case is 10·log10(N) and
-    // nothing ever goes near it.
-    view(
-      'growth',
-      'PAPR vs the number of subcarriers',
-      line('vsN', {
-        color: '#0072BD',
-        width: 2.4,
-        label: 'mean PAPR, measured',
-        overlays: [
-          line('thN', { color: '#7E2F8E', width: 2, dashed: true, label: 'H_N (L = 1 model)' }),
-          line('thAlpha', {
-            color: '#D95319',
-            width: 2,
-            dashed: true,
-            label: 'H_{2.8N} (oversampled fit)',
-          }),
-          line('worst', { color: '#a1a1aa', width: 1.8, label: 'worst case, 10·log₁₀ N' }),
-          scatter('vsN', { color: '#0072BD', size: 4.5 }),
-          vline('N', { color: '#EDB120', dashed: true, width: 1.8, label: 'the N in the pill' }),
-        ],
-        axes: {
-          x: { label: 'N', scale: 'log' },
-          y: { label: 'mean PAPR', unit: 'dB' },
-        },
-        legend: 'left',
       })
     ),
 
@@ -232,12 +195,16 @@ nobody can afford.`,
             dashed: true,
             label: 'the same at 2.8 N — the fit',
           }),
+          vline('gammaLine', { color: '#77AC30', width: 2.2, label: 'γ' }),
         ],
         axes: {
-          x: { label: 'γ', unit: 'dB' },
+          x: { label: 'γ', unit: '×' },
+          // The ABSCISSA is linear, because γ is a ratio and the pill sets it
+          // as one; the ORDINATE stays logarithmic, because a clipping
+          // probability is bought at one symbol in a thousand and a linear
+          // axis puts that on the floor. Different axes, different jobs.
           y: { label: 'P(PAPR > γ)', scale: 'log', domain: [1e-4, 1] },
         },
-        legend: 'left',
       })
     ),
   ],

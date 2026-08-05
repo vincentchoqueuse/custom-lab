@@ -10,7 +10,7 @@ import {
 import { standardChecks, maxAbsDiff, range } from '../../../core/checks.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 
-const BASE = { N: 64, L: 4, mod: 'qpsk', M: 400, seed: 34 };
+const BASE = { N: 64, L: 4, mod: 'qpsk', M: 400, gamma: 5, seed: 34 };
 
 export const checks = [
   {
@@ -258,29 +258,55 @@ export const checks = [
   {
     // The curves the views draw must EXIST and be finite. A NaN reproduces
     // perfectly at a fixed seed, so the determinism check below is blind to it
-    // — this is the lesson the MIMO experiment paid for once already.
-    name: 'every drawn curve is finite, and ordered as the physics says',
+    // — the lesson the MIMO experiment paid for once already.
+    name: 'every drawn curve is finite, and the models bracket the measurement',
     category: 'numeric',
     run() {
-      const { observables: o } = compute({ ...BASE, N: 256 });
+      const { observables: o } = compute({ ...BASE, N: 256, gamma: 5 });
       const bad = [];
-      for (const k of ['vsL', 'vsN', 'thN', 'thAlpha', 'worst', 'ccdf', 'envelope']) {
+      for (const k of ['ccdf', 'ccdfModelN', 'ccdfModelAlpha', 'envelope', 'critSamples']) {
         const c = o[k];
         if (!c?.y?.length) bad.push(`${k} is empty`);
         else if (![...c.y].every(Number.isFinite)) bad.push(`${k} holds a non-finite value`);
       }
-      // the worst case is above both models, everywhere, by construction
-      for (let i = 0; i < o.worst.y.length; i++) {
-        if (!(o.worst.y[i] > o.thAlpha.y[i] && o.thAlpha.y[i] > o.thN.y[i]))
-          bad.push(`at N=${o.vsN.x[i]}: worst/fit/model out of order`);
+      // the oversampled fit lies ABOVE the critically sampled model everywhere,
+      // because 2.8 N samples cannot have a smaller maximum than N of them
+      for (let i = 1; i < o.ccdf.x.length - 1; i++) {
+        if (o.ccdfModelAlpha.y[i] < o.ccdfModelN.y[i] - 1e-12)
+          bad.push(`at γ=${o.ccdf.x[i].toFixed(2)}: the fit dips under the model`);
       }
-      // and the measured PAPR is never below what the IFFT alone reported
-      if (o.hidden.value < -1e-9) bad.push(`oversampling reported ${o.hidden.value} dB less`);
+      // the abscissa is a RATIO now, so it starts at zero and the curve starts
+      // at one: every symbol exceeds a threshold of nothing
+      if (Math.abs(o.ccdf.y[0] - 1) > 1e-12) bad.push(`P(>0) = ${o.ccdf.y[0]}, not 1`);
       return {
         ok: bad.length === 0,
-        detail: bad.slice(0, 2).join(' · ') || `7 curves finite, ${o.vsN.x.length} N points ordered`,
+        detail: bad.slice(0, 2).join(' · ') || `5 curves finite, γ from 0 to ${o.ccdf.x[95].toFixed(1)}×`,
       };
     },
   },
-  standardChecks.determinism(compute, { ...BASE, N: 128, M: 200 }, 'vsN'),
+  {
+    // The reading the pill produces IS the curve, read at the pill's own γ.
+    // Two ways of counting the same thing, and they have to agree — a statline
+    // computed from a different sweep than the one drawn would be the kind of
+    // disagreement nobody sees.
+    name: 'the statline P(PAPR > γ) is the drawn curve, at γ',
+    category: 'numeric',
+    run() {
+      const bad = [];
+      for (const gamma of [3, 5, 8]) {
+        const { observables: o } = compute({ ...BASE, gamma, M: 2000 });
+        // nearest sample of the drawn curve to the pill's γ
+        let j = 0;
+        for (let i = 0; i < o.ccdf.x.length; i++)
+          if (Math.abs(o.ccdf.x[i] - gamma) < Math.abs(o.ccdf.x[j] - gamma)) j = i;
+        // the curve is sampled on a grid, so they agree to within one step
+        const step = o.ccdf.x[1] - o.ccdf.x[0];
+        const slope = Math.abs(o.ccdf.y[Math.max(0, j - 1)] - o.ccdf.y[Math.min(95, j + 1)]);
+        if (Math.abs(o.overGamma.value - o.ccdf.y[j]) > slope + 1e-9)
+          bad.push(`γ=${gamma}: statline ${o.overGamma.value} vs curve ${o.ccdf.y[j]}`);
+      }
+      return { ok: bad.length === 0, detail: bad.join(' · ') || 'agree at γ = 3, 5 and 8' };
+    },
+  },
+  standardChecks.determinism(compute, { ...BASE, N: 128, M: 200 }, 'ccdf'),
 ];

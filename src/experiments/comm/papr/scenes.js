@@ -1,5 +1,5 @@
 // Lecture script. Auto-discovered by the registry.
-const BASE = { N: 64, L: 4, mod: 'qpsk', M: 600, seed: 34 };
+const BASE = { N: 64, L: 4, mod: 'qpsk', M: 600, gamma: 5, seed: 34 };
 
 export default [
   {
@@ -27,63 +27,31 @@ The sentence to leave here: an amplifier is sized for what the antenna
 transmits, and the IFFT is not what the antenna transmits.`,
   },
   {
-    id: 'how-much',
-    title: 'How much oversampling is enough',
-    view: 'oversampling',
-    params: { ...BASE },
-    visible: ['N', 'mod'],
-    notes: `The same measurement at L = 1, 2, 4, 8, 16, averaged over eighty
-symbols so the curve is steady.
+    id: 'how-often',
+    title: 'How often does it cross?',
+    view: 'envelope',
+    params: { ...BASE, gamma: 4 },
+    visible: ['gamma', 'N'],
+    notes: `Same figure, one more line: the green horizontal is γ, the peak power
+an amplifier can pass before it clips. Everything under it is transmitted as
+sent; everything over it is not.
 
-Ask for the shape before showing it. The usual guess is a straight climb; what
-happens is a jump from 1 to 2, a smaller step to 4, and then nothing worth
-plotting. The received wisdom — L = 4 is enough — is that flattening, and it is
-worth having the room read the last two points and say the number themselves:
-about a tenth of a decibel.
+Take γ down from 8 and watch the green line come to meet the envelope. There is
+a value where it grazes the highest lobe — read it, and read the statline: at
+that γ, P(PAPR > γ) is the fraction of symbols that would clip. Press R a few
+times at a fixed γ and the fraction stays put while WHICH symbols clip changes.
 
-Why it flattens: the envelope is a band-limited signal, so between two samples
-it cannot do anything sudden. Once the sampling is fine compared with its
-fastest variation, more samples find nothing new. That is the sampling theorem
-answering a question about maxima.
-
-Change N and note that the curve shifts up but keeps its shape: the sampling
-question and the how-many-carriers question are independent, which is why they
-get a view each.`,
-  },
-  {
-    id: 'grows-like-log',
-    title: 'It grows like log N, not like N',
-    view: 'growth',
-    params: { ...BASE, N: 256 },
-    visible: ['N', 'L'],
-    notes: `Four curves, and the distance between them is the whole point.
-
-The grey line is the WORST case: all N carriers in phase at one instant, giving
-exactly N, or 10·log10(N) dB. It is the number an engineer reaches for when
-asked to be safe. At N = 1024 it is 30.1 dB, which is a factor of a thousand in
-power and an amplifier nobody would pay for.
-
-The purple dashes are the model: the maximum of N independent exponentials has
-mean H_N = 1 + 1/2 + … + 1/N, the harmonic number, exactly rather than
-asymptotically. It grows like ln N. At N = 1024 it is 8.9 dB — three and a half
-times smaller in decibels, a hundred and thirty times smaller in power.
-
-The blue measurement sits between the purple and the orange, and where it sits
-is decided by L. At L = 1 it lands on the purple, which is the model's own
-regime. At L = 4 it lands on the orange, the 2.8 N fit. Move L in front of the
-room and watch it change allegiance.
-
-Then the question worth asking: why is the model so far below the worst case?
-Because all N carriers aligning is one arrangement out of unimaginably many.
-PAPR is a tail problem. Every serious answer to it — clipping, tone reservation,
-selective mapping — is an answer about tails, and this curve is why.`,
+Then take N from 64 to 1024. The envelope looks the same — noise-like, the same
+average — and the crossings become more frequent, because more carriers means
+more chances for some of them to line up. That is the whole of the N dependence,
+and it is why the next tab exists.`,
   },
   {
     id: 'the-tail',
     title: 'What a designer actually buys',
     view: 'ccdf',
     params: { ...BASE, M: 2000 },
-    visible: ['L', 'M'],
+    visible: ['gamma', 'N', 'L'],
     notes: `Nobody sizes an amplifier on a mean. The question is "how often will
 the signal exceed what I built for", and this curve answers it: for each level
 γ, the fraction of symbols whose peak goes past it.
