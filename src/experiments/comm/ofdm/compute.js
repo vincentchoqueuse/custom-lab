@@ -90,8 +90,13 @@ export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
   // consequence and never an object. These arrays make it one.
   const SPAN = 2; // symbols drawn
   const S = Nc + cp; // one symbol, prefix included
+  // The OFDM frame is COMPLEX — an IFFT of complex symbols — and a figure
+  // showing only its real part quietly teaches that it is not. Both parts are
+  // captured and both are drawn.
   const txT = new Float64Array(SPAN * S);
+  const txTi = new Float64Array(SPAN * S);
   const rxT = new Float64Array(SPAN * S);
+  const rxTi = new Float64Array(SPAN * S);
 
   const kRead = Math.min(Math.max(kSel | 0, 0), Nc - 1);
   const errsPerCarrier = new Float64Array(Nc);
@@ -125,7 +130,10 @@ export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
     // the transmitted samples of this symbol, prefix first — the same formula
     // the channel loop below uses, so the two cannot drift apart
     if (m < SPAN)
-      for (let n = 0; n < S; n++) txT[m * S + n] = xr[(n - cp + Nc) % Nc];
+      for (let n = 0; n < S; n++) {
+        txT[m * S + n] = xr[(n - cp + Nc) % Nc];
+        txTi[m * S + n] = xi[(n - cp + Nc) % Nc];
+      }
 
     // cyclic prefix + linear convolution with the channel + noise, with the
     // previous symbol's channel tail added at the head (streaming reality)
@@ -154,7 +162,11 @@ export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
       yi[n] += ns * gauss();
     }
 
-    if (m < SPAN) for (let n = 0; n < S; n++) rxT[m * S + n] = yr[n];
+    if (m < SPAN)
+      for (let n = 0; n < S; n++) {
+        rxT[m * S + n] = yr[n];
+        rxTi[m * S + n] = yi[n];
+      }
 
     // receiver: drop the prefix, FFT the window, one-tap ZF per carrier
     const zr = new Float64Array(Nc);
@@ -218,8 +230,8 @@ export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
     for (let i = 0; i < a.length; i++) m = Math.max(m, Math.abs(a[i]));
     return 1.12 * (m || 1);
   };
-  const HI_TX = amp(txT);
-  const HI_RX = amp(rxT);
+  const HI_TX = Math.max(amp(txT), amp(txTi));
+  const HI_RX = Math.max(amp(rxT), amp(rxTi));
   const band = (from, width, HI) => {
     const x = [];
     const lo = [];
@@ -241,8 +253,10 @@ export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
   return {
     observables: {
       /* --- time domain: what the prefix IS, and what it buys --- */
-      txTime: { x: nT, y: txT },
-      rxTime: { x: nT, y: rxT },
+      txI: { x: nT, y: txT },
+      txQ: { x: nT, y: txTi },
+      rxI: { x: nT, y: rxT },
+      rxQ: { x: nT, y: rxTi },
       // The prefix, at the head of each symbol, and NOTHING else shaded: the
       // frame boundaries are drawn as verticals instead. A first version also
       // shaded the tail the prefix is a copy of, which was true and unreadable

@@ -1,5 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
 import { view, plane, line, scatter } from '../../../core/views.js';
+import { basebandFigure } from '../_lib/baseband.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -73,6 +74,17 @@ export default {
   },
 
   views: [
+    // THE ONE LINE THAT SEPARATES THIS FROM THE AWGN LINK. Blue: the symbols
+    // stream 1 was asked to carry. Orange: what antenna 1 measured — which is
+    // h₁₁x₁ + h₁₂x₂ + n, a sum holding a WHOLE SECOND SYMBOL and not merely a
+    // noisy copy of the first. Every receiver on the tabs that follow is an
+    // answer to this picture, and the room should meet the question first.
+    basebandFigure({
+      txLabel: 'stream 1 sent x₁[n]',
+      rxLabel: 'antenna 1 measured y₁[n]',
+      symbol: 'y₁',
+    }),
+
     // WHAT ARRIVES. Two antennas, two clouds, and neither is a constellation
     // any more: each is a mixture of both streams. The grey points are the M²
     // noiseless vectors H·x — the LATTICE, which is what ML matches against and

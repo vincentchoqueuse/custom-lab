@@ -49,6 +49,8 @@ const N_RUNS = 24; // realizations averaged for the cost curve
 const SMOOTH = 51; // moving-average window on the learning curve (see below)
 const KEEP = 20; // one weight snapshot every KEEP iterations
 const N_CLOUD = 1200; // symbols drawn in the constellation view
+const N_TRACE = 24; // symbols drawn in the time figure — a stem plot is read
+//                     one stalk at a time, and past ~30 they touch
 
 /**
  * R₂ = E|s|⁴/E|s|², BY ENUMERATION over the constellation rather than by a
@@ -164,6 +166,8 @@ export function compute({ mod, h, phi, L, mu, snr, n, seed }) {
   const cost = new Float64Array(N);
   let x0re = null;
   let x0im = null;
+  let s0re = null;
+  let s0im = null;
 
   for (let run = 0; run < N_RUNS; run++) {
     const rand = mulberry32(seed + run * 7919);
@@ -190,6 +194,14 @@ export function compute({ mod, h, phi, L, mu, snr, n, seed }) {
       }
       xre[i] = ar + sigma * gauss();
       xim[i] = ai + sigma * gauss();
+    }
+    // The SYMBOL x[i] is centred on: the k = 0 term of the sum above. Kept
+    // for run 0 only, and kept ALIGNED, because the time figure exists to put
+    // the two side by side — a transmitted stem drawn one index off would
+    // look exactly like a channel delay and there would be no way to tell.
+    if (run === 0) {
+      s0re = sre.slice(taps.length - 1);
+      s0im = sim.slice(taps.length - 1);
     }
 
     // CENTER SPIKE initialisation, the standard blind start: no prior on the
@@ -268,6 +280,31 @@ export function compute({ mod, h, phi, L, mu, snr, n, seed }) {
     iy[i] = x0im[i + nTaps - 1];
   }
 
+  /* ---------- the same thing in time, which is where ISI is legible -------- */
+  // The cloud says the constellation is a blob; it does not say WHY. In time
+  // it is plain: the blue stems take four levels, the orange ones take every
+  // value in between, because each received sample is a MIXTURE of the symbol
+  // and its neighbours. That is intersymbol interference, drawn.
+  const nT = Math.min(N_TRACE, N_CLOUD);
+  const tIdx = Float64Array.from({ length: nT }, (_, i) => i);
+  // ALIGNMENT, and it is the whole difficulty of this figure. x[j] is centred
+  // on the symbol s0[j] — that is what the k = 0 term of the channel sum is.
+  // The cloud reads x at j = i + nTaps − 1 (the equalizer's own window), so the
+  // transmitted stem must be taken at the SAME j and not at i. Off by those
+  // nTaps − 1 samples the two stem trains still look like a signal and a
+  // smeared version of it, and the picture is simply of two different symbols.
+  const txI = new Float64Array(nT);
+  const txQ = new Float64Array(nT);
+  const rxI = new Float64Array(nT);
+  const rxQ = new Float64Array(nT);
+  for (let i = 0; i < nT; i++) {
+    const j = i + nTaps - 1;
+    txI[i] = s0re[j];
+    txQ[i] = s0im[j];
+    rxI[i] = x0re[j];
+    rxQ[i] = x0im[j];
+  }
+
   /* ---------- the combined response, where the truth is read --------------- */
   const c = combined(ch.re, ch.im, wr, wi);
   const isi = isiOf(c.re, c.im);
@@ -323,6 +360,10 @@ export function compute({ mod, h, phi, L, mu, snr, n, seed }) {
 
   return {
     observables: {
+      txI: { x: tIdx, y: txI },
+      txQ: { x: tIdx, y: txQ },
+      rxI: { x: tIdx, y: rxI },
+      rxQ: { x: tIdx, y: rxQ },
       cloud: { x: cx, y: cy },
       received: { x: ix, y: iy },
       ideal,

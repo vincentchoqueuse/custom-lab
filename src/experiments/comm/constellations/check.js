@@ -5,6 +5,36 @@ const BASE = { mod: 'qpsk', snrDb: 8, N: 20000, seed: 29 };
 
 export const checks = [
   {
+    // WHAT THE TWO FIRST TABS CLAIM ABOUT EACH OTHER. The scene says the plane
+    // is the time figure with the time thrown away, and that is a statement
+    // about the DATA and not a turn of phrase: every symbol drawn as a pair of
+    // stems must be findable, to the last bit of the mantissa, among the points
+    // of the cloud. A trace taken from a second draw, or offset by one index,
+    // would look perfectly plausible on both tabs and be a different signal.
+    name: 'the time trace and the I/Q cloud are the SAME symbols',
+    category: 'numeric',
+    run() {
+      const { observables: o } = compute({ ...BASE, mod: '16qam', N: 3000 });
+      const seen = new Set();
+      for (const c of [o.rxOk, o.rxErr])
+        for (let i = 0; i < c.x.length; i++) seen.add(`${c.x[i]},${c.y[i]}`);
+      let missing = 0;
+      for (let i = 0; i < o.rxI.y.length; i++)
+        if (!seen.has(`${o.rxI.y[i]},${o.rxQ.y[i]}`)) missing++;
+      // and what was SENT is an exact constellation point, never a rounded one
+      const ideal = new Set();
+      for (let i = 0; i < o.idealPoints.x.length; i++)
+        ideal.add(`${o.idealPoints.x[i]},${o.idealPoints.y[i]}`);
+      let offGrid = 0;
+      for (let i = 0; i < o.txI.y.length; i++)
+        if (!ideal.has(`${o.txI.y[i]},${o.txQ.y[i]}`)) offGrid++;
+      return {
+        ok: missing === 0 && offGrid === 0 && o.rxI.y.length === 24,
+        detail: `${o.rxI.y.length} symbols, ${missing} absent from the cloud, ${offGrid} off the constellation`,
+      };
+    },
+  },
+  {
     name: 'every constellation has unit average energy exactly',
     category: 'numeric',
     run() {

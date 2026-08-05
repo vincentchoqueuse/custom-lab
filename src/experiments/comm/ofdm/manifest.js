@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, figure, plane, line, scatter, band, vline } from '../../../core/views.js';
+import { view, figure, plane, line, scatter, band, vline, figureStack, stack } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -81,19 +81,25 @@ export default {
     // signal, with the prefix at the head of each and the samples it is a COPY
     // of marked in the same yellow at the tail: the eye matches the two
     // segments before anyone says the word "cyclic".
-    figure(
+    figureStack(
       'time',
-      line('txTime', {
-        color: '#0072BD',
-        width: 1.6,
-        label: 'transmitted x[n]',
+      [
+        line('txI', { color: '#0072BD', width: 1.6, label: 'transmitted x[n]',
+                      axes: { y: { label: 'Re x[n]' } } }),
+        line('txQ', { color: '#0072BD', width: 1.6, axes: { y: { label: 'Im x[n]' } } }),
+      ],
+      {
+        axes: { x: { label: 'sample n' } },
+        // The prefix and the frame boundaries mark a place in TIME, so they
+        // belong to the shared abscissa and are drawn on both parts. The
+        // prefix is a copy of the tail in Re AND in Im — one panel could not
+        // have shown that.
         overlays: [
           band('cpBand', { color: '#D95319', opacity: 0.22, label: 'cyclic prefix' }),
           vline('frame0', { color: '#18181b', width: 1.8, label: 'start of a frame' }),
           vline('frame1', { color: '#18181b', width: 1.8 }),
         ],
-        axes: { x: { label: 'sample n' }, y: { label: 'Re x[n]' } },
-      })
+      }
     ),
 
     // AND WHAT IT BUYS. The received signal, with the two regions that decide
@@ -102,13 +108,16 @@ export default {
     // works exactly when the orange fits inside it and the green stays clean —
     // which is a thing to SEE, and the constellation two tabs away is its
     // consequence.
-    view(
+    stack(
       'window',
       'What the FFT window sees',
-      line('rxTime', {
-        color: '#7E2F8E',
-        width: 1.5,
-        label: 'received y[n]',
+      [
+        line('rxI', { color: '#7E2F8E', width: 1.5, label: 'received y[n]',
+                      axes: { y: { label: 'Re y[n]' } } }),
+        line('rxQ', { color: '#7E2F8E', width: 1.5, axes: { y: { label: 'Im y[n]' } } }),
+      ],
+      {
+        axes: { x: { label: 'sample n' } },
         overlays: [
           band('cpBandRx', { color: '#D95319', opacity: 0.22, label: 'cyclic prefix' }),
           vline('frame0', { color: '#18181b', width: 1.8, label: 'start of a frame' }),
@@ -121,8 +130,7 @@ export default {
           }),
           vline('trans1', { color: '#77AC30', width: 2, dashed: true }),
         ],
-        axes: { x: { label: 'sample n' }, y: { label: 'Re y[n]' } },
-      })
+      }
     ),
 
     view(

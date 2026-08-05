@@ -17,7 +17,7 @@ import { normalizeViews } from '../src/core/figures.js';
 import * as dsp from '../src/core/dsp.js';
 import * as la from '../src/core/linalg.js';
 import { fft, median, medianInPlace } from '../src/core/numeric.js';
-import { validateScene } from '../src/core/scenes.js';
+import { validateScene, validateSceneIds } from '../src/core/scenes.js';
 import { castParam, parseHash, decodeQuery, encodeHash } from '../src/core/router.js';
 
 const ROOT = resolve(process.cwd(), 'src/experiments');
@@ -153,11 +153,22 @@ function checkRandomness() {
 function checkAxisLabels(manifest, key, bad) {
   const text = (a) => (typeof a === 'string' ? a : (a?.label ?? ''));
   for (const v of manifest.views ?? []) {
+    const name = v.title ?? v.figure ?? v.id;
+    // A stack declares the abscissa once and an ordinate per panel — and the
+    // per-panel ordinate is the ONE name the reader needs, since "Re" above
+    // "Im" is the whole reason the panels are apart.
+    if (v.kind === 'stack') {
+      if (!text(v.spec.axes?.x).trim()) bad.push(`${key}, view '${name}': axis x has no name`);
+      v.spec.panels.forEach((p, i) => {
+        if (!text(p.axes?.y).trim()) bad.push(`${key}, view '${name}': panel ${i + 1} axis y has no name`);
+      });
+      continue;
+    }
     const ax = v.spec?.axes ?? v.plot?.axes;
     if (!ax) continue;
     for (const k of ['x', 'y']) {
       if (!text(ax[k]).trim())
-        bad.push(`${key}, view '${v.title ?? v.figure ?? v.id}': axis ${k} has no name`);
+        bad.push(`${key}, view '${name}': axis ${k} has no name`);
     }
   }
 }
@@ -709,6 +720,12 @@ async function checkCatalogue() {
       const sf = join(dir, exp.name, 'scenes.js');
       if (!existsSync(sf)) continue;
       const scenes = (await import(pathToFileURL(sf).href)).default ?? [];
+      try {
+        validateSceneIds(scenes, key);
+      } catch (err) {
+        scenesOk = false;
+        console.log(`    ${red('✗')} ${err.message}`);
+      }
       for (const [i, sc] of scenes.entries()) {
         nScenes++;
         visible.push([`${key}#${sc.id}`, sc.title ?? ''], [`${key}#${sc.id}`, sc.notes ?? '']);

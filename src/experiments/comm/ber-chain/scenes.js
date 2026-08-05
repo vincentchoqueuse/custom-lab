@@ -1,6 +1,25 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
+    id: 'baseband',
+    title: 'The chain, from the top: two real signals',
+    params: { mod: 'qpsk', mapping: 'gray', ebn0Db: 8, Nbits: 20000 },
+    view: 'time',
+    visible: ['ebn0Db'],
+    notes: `Start where a bench starts, not where a textbook does. Twenty-four
+symbols in time: blue what the modulator produced, orange what the demodulator
+was handed. Two panels, because a QPSK symbol is a complex number and there is
+no honest way to draw one on a single ordinate.
+
+Ask the room to count the levels on the top panel. Two, at ±0.707. Same
+underneath. Four combinations, two bits — the whole of QPSK, before the word
+constellation is used.
+
+Take Eb/N₀ down to 4 dB and hammer R. The orange drifts further from the blue
+and, now and then, past the midline: that is a bit error, and the next tab
+counts them.`,
+  },
+  {
     id: 'honest-eb',
     title: 'Eb/N₀: the honest comparison',
     params: { mod: 'qpsk', mapping: 'gray', ebn0Db: 6, Nbits: 20000 },
@@ -18,6 +37,7 @@ close in faster than k grows.`,
   {
     id: 'gray',
     title: 'Gray against natural binary',
+    view: 'mapping',
     params: { mod: '16qam', mapping: 'gray', ebn0Db: 8, Nbits: 40000 },
     visible: ['mapping'],
     notes: `On the constellation view with Gray mapping, every neighbour differs

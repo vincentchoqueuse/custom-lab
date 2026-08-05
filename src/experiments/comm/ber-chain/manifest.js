@@ -1,5 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
 import { view, plane, line, scatter } from '../../../core/views.js';
+import { basebandFigure } from '../_lib/baseband.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -66,6 +67,13 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
+    // The chain STARTS in time, as it does on a bench: bits become a pair of
+    // real signals, those signals cross a channel, and only then does anyone
+    // draw a cloud. Same 24 symbols sent and received, Re above Im, so that
+    // the plane on the next tab is recognisable as this picture with the time
+    // removed.
+    basebandFigure({ txLabel: 'transmitted s[n]', rxLabel: 'received y[n]', symbol: 'y' }),
+
     // equal-aspect plane: per-symbol bit labels, error clouds split by bit cost
     plane('mapping', 'Constellation & bits', {
       clouds: [

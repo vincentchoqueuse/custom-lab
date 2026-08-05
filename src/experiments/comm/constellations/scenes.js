@@ -1,9 +1,31 @@
 // Lecture script. Auto-discovered by the registry.
 export default [
   {
+    id: 'baseband',
+    title: 'What actually travels: two signals',
+    params: { mod: 'qpsk', snrDb: 15, N: 2000 },
+    view: 'time',
+    visible: ['snrDb'],
+    notes: `Before the plane, the signal. Twenty-four QPSK symbols in time, in
+blue what was sent and in orange what came back — and TWO panels, because a
+symbol is a complex number and a complex number does not fit on one ordinate.
+Re on top, Im underneath, the same instant read straight down.
+
+The question that makes the whole subject click, asked here and not later:
+"how many real signals leave the transmitter?" Two. They travel on two
+carriers in quadrature, and everything after this is about the pair.
+
+On QPSK at 15 dB the stalks take four values, ±0.707 on each panel, and the
+orange lands next to the blue without ever reaching the neighbouring level.
+Take the SNR down: the orange starts to wander, and somewhere around 7 dB it
+crosses. THAT crossing is the error, and the next tab is the same picture with
+the time thrown away — every pair (Re, Im) plotted as one point.`,
+  },
+  {
     id: 'qpsk',
     title: 'QPSK, comfortable',
     params: { mod: 'qpsk', snrDb: 15, N: 2000 },
+    view: 'iq',
     visible: ['snrDb'],
     notes: `Four well-separated clouds around the four yellow symbols: at 15 dB
 the nearest-neighbour decision, whose boundaries are the dashed axes, is almost
@@ -18,6 +40,7 @@ NUMBER stays stable: this is a probability, not an accident.`,
     id: 'qam',
     title: '16-QAM: the price of four bits',
     params: { mod: '16qam', snrDb: 15, N: 4000 },
+    view: 'iq',
     visible: ['mod', 'snrDb'],
     notes: `Same average energy, same noise, but sixteen symbols instead of four:
 the decision regions shrink and orange errors already appear at 15 dB, where

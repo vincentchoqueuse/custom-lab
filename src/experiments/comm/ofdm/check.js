@@ -79,12 +79,19 @@ export const checks = [
       for (const cp of [2, 8, 16]) {
         const o = compute({ Nc: 64, L: 6, cp, snr: 30, M: 4, seed: 11 }).observables;
         const S = 64 + cp;
-        for (let m = 0; m < 2; m++)
-          for (let n = 0; n < cp; n++) {
-            const head = o.txTime.y[m * S + n];
-            const tail = o.txTime.y[m * S + cp + 64 - cp + n];
-            if (head !== tail) bad.push(`cp=${cp}, symbol ${m}, sample ${n}: ${head} ≠ ${tail}`);
-          }
+        // BOTH PARTS. The frame is complex and the figure now says so, so the
+        // copy is asserted on Re and on Im: an index right in one and wrong in
+        // the other would draw a prefix that matches its tail in the top panel
+        // and not in the bottom one, which is precisely the defect a room
+        // would spot before the check did.
+        for (const part of ['txI', 'txQ'])
+          for (let m = 0; m < 2; m++)
+            for (let n = 0; n < cp; n++) {
+              const head = o[part].y[m * S + n];
+              const tail = o[part].y[m * S + cp + 64 - cp + n];
+              if (head !== tail)
+                bad.push(`${part}, cp=${cp}, symbol ${m}, sample ${n}: ${head} ≠ ${tail}`);
+            }
         // and the bands drawn over them cover exactly those samples
         if (o.cpBand.x[0] !== 0 || o.cpBand.x[1] !== cp) bad.push(`cp=${cp}: prefix band misplaced`);
         if (o.cpBand.x[1] - o.cpBand.x[0] !== cp) bad.push(`cp=${cp}: prefix band wrong width`);
@@ -93,7 +100,9 @@ export const checks = [
       }
       return {
         ok: bad.length === 0,
-        detail: bad.length ? bad.slice(0, 3).join(' · ') : 'identical at L_cp = 2, 8 and 16, both symbols',
+        detail: bad.length
+          ? bad.slice(0, 3).join(' · ')
+          : 'identical at L_cp = 2, 8 and 16, both symbols, Re and Im',
       };
     },
   },

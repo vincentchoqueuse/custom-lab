@@ -8,6 +8,31 @@ const BASE = { mod: 'qpsk', rho: 0.5, snr: 12, eq: 'zf', N: 1500, seed: 34 };
 
 export const checks = [
   {
+    // The time figure and the antenna-1 cloud are filled in the SAME loop, so
+    // they must agree index for index — not merely in distribution. This is
+    // the check that would have caught a trace captured from the curve sweep
+    // instead of from the displayed run, which is a mistake with no visible
+    // symptom whatsoever.
+    name: 'the time trace IS antenna 1, sample for sample',
+    category: 'numeric',
+    run() {
+      const { observables: o } = compute({ ...BASE, N: 800 });
+      let bad = 0;
+      for (let i = 0; i < o.rxI.y.length; i++)
+        if (o.rxI.y[i] !== o.rx1.x[i] || o.rxQ.y[i] !== o.rx1.y[i]) bad++;
+      // and what stream 1 was asked to carry is an exact constellation point
+      const ideal = new Set();
+      for (let i = 0; i < o.ideal.x.length; i++) ideal.add(`${o.ideal.x[i]},${o.ideal.y[i]}`);
+      let offGrid = 0;
+      for (let i = 0; i < o.txI.y.length; i++)
+        if (!ideal.has(`${o.txI.y[i]},${o.txQ.y[i]}`)) offGrid++;
+      return {
+        ok: bad === 0 && offGrid === 0 && o.rxI.y.length === 24,
+        detail: `${o.rxI.y.length} samples, ${bad} disagreeing with the cloud, ${offGrid} off the constellation`,
+      };
+    },
+  },
+  {
     name: 'HᴴH = [[1, ρ], [ρ, 1]] exactly — whatever the draw',
     category: 'numeric',
     run() {

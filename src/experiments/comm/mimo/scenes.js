@@ -7,6 +7,27 @@ const BASE = { mod: 'qpsk', rho: 0.5, snr: 12, eq: 'zf', N: 1500, seed: 34 };
 
 export default [
   {
+    id: 'in-time',
+    title: 'What makes this not an AWGN link',
+    params: { mod: 'qpsk', rho: 0.5, snr: 14, N: 1500, eq: 'zf' },
+    view: 'time',
+    visible: ['rho'],
+    notes: `The AWGN experiment ended with a picture just like this one, and one
+difference decides everything that follows. There, orange was blue plus noise.
+Here, orange is
+
+    y₁[n] = h₁₁·x₁[n] + h₁₂·x₂[n] + noise
+
+— a sum carrying a WHOLE SECOND SYMBOL, the one antenna 2 was sending at the
+same instant. Look at the stem heights: they no longer take the two levels of
+stream 1, because a second QPSK symbol was added to each of them.
+
+Take ρ to 0 and watch the orange fall back onto the blue: the two channels
+become orthogonal and each antenna hears its own stream alone. Take ρ to 0.9
+and the two are barely distinguishable — which is exactly the case the three
+receivers on the following tabs disagree about.`,
+  },
+  {
     id: 'mixture',
     title: 'Two symbols at once, and two mixtures',
     view: 'antennas',

@@ -1,5 +1,6 @@
 import { float, int, select } from '../../../core/fields.js';
 import { view, plane, line, scatter } from '../../../core/views.js';
+import { basebandFigure } from '../_lib/baseband.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -52,6 +53,14 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
+    // THE SIGNAL, BEFORE THE PICTURE OF IT. The plane below is where this
+    // experiment is going, and it is also where a room quietly learns the
+    // wrong thing: that a symbol is a dot. It is two real signals in
+    // quadrature, and this is the figure that says so — the same 24 symbols
+    // sent and received, real part above, imaginary part below. The cloud on
+    // the next tab is these two panels with the time thrown away.
+    basebandFigure({ txLabel: 'transmitted s[n]', rxLabel: 'received y[n]', symbol: 'y' }),
+
     // CUSTOM view: the I/Q plane needs an enforced EQUAL-ASPECT scale (PSK
     // circles must be circles) plus ML decision boundaries — no generic
     // 1D-oriented plot type fits. Same justification as GaussianPlane;

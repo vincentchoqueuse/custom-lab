@@ -82,6 +82,14 @@ function makePlot(type, source, opts = {}) {
     throw new ViewError(`${where}: width must be > 0`);
   if (opts.opacity != null && (opts.opacity < 0 || opts.opacity > 1))
     throw new ViewError(`${where}: opacity must be in [0, 1]`);
+  // `offset` nudges a stem train sideways by a few PIXELS so that two signals
+  // sampled at the same instants can be read apart. Bounded, because past a
+  // few pixels it stops being a nudge and starts misplacing the sample.
+  if (opts.offset != null) {
+    if (type !== 'stem') throw new ViewError(`${where}: offset applies to stem only`);
+    if (!(Math.abs(opts.offset) <= 6))
+      throw new ViewError(`${where}: offset is a nudge of at most 6 px, got ${opts.offset}`);
+  }
   if (opts.overlays != null) {
     if (!Array.isArray(opts.overlays))
       throw new ViewError(`${where}: overlays must be an array`);
@@ -138,6 +146,69 @@ export function figure(key, spec, { variant } = {}) {
   if (spec === null || typeof spec !== 'object' || !PLOT_TYPES.includes(spec.type))
     throw new ViewError(`figure '${key}': spec must be built with a plot factory`);
   return { figure: key, ...(variant ? { variant } : {}), kind: 'plot', spec, layout: 'plot' };
+}
+
+/**
+ * PANELS STACKED OVER ONE ABSCISSA. A complex signal in time is the case that
+ * asked for it: Re x[n] above, Im x[n] below, one time axis under the pair.
+ * There is no honest way to put the two parts of a complex number on the same
+ * ordinate — they are not two curves, they are two components of one — and a
+ * modulus-and-phase pair would answer a different question.
+ *
+ *   stack('time', 'Signal in time', [
+ *     stem('txI', { label: 'transmitted', axes: { y: 'Re' } }),
+ *     stem('txQ', { axes: { y: 'Im' } }),
+ *   ], { axes: { x: 'symbol n' } })
+ *
+ * The abscissa is declared ONCE, on the stack, and so are the overlays that
+ * mark it: a frame boundary or a prefix band names a place in TIME, not a
+ * place in one of the two parts. Panel overlays stay on their panel.
+ */
+export function stack(id, title, panels, opts = {}) {
+  if (typeof id !== 'string' || !id) throw new ViewError('stack: id is required');
+  if (typeof title !== 'string' || !title) throw new ViewError(`stack '${id}': title is required`);
+  return { id, title, kind: 'stack', spec: stackSpec(panels, opts, `stack '${id}'`), layout: 'plot' };
+}
+
+/** The same, for a stack that IS one of the catalogue's standard figures. */
+export function figureStack(key, panels, opts = {}, { variant } = {}) {
+  if (typeof key !== 'string' || !key) throw new ViewError('figureStack: key is required');
+  return {
+    figure: key,
+    ...(variant ? { variant } : {}),
+    kind: 'stack',
+    spec: stackSpec(panels, opts, `figureStack '${key}'`),
+    layout: 'plot',
+  };
+}
+
+function stackSpec(panels, opts, where) {
+  if (!Array.isArray(panels) || panels.length < 2)
+    throw new ViewError(`${where}: needs at least two panels — one panel is a plain view`);
+  if (panels.length > 4)
+    throw new ViewError(
+      `${where}: ${panels.length} panels is past what a lecture hall can read — four is the ceiling`
+    );
+  for (const p of panels) {
+    if (p === null || typeof p !== 'object' || !PLOT_TYPES.includes(p.type))
+      throw new ViewError(`${where}: each panel must be built with a plot factory`);
+    // The abscissa is SHARED and therefore declared once. A panel that set its
+    // own would be silently overruled, which is exactly the class of quiet
+    // divergence the closed vocabulary exists to make impossible.
+    if (p.axes?.x != null)
+      throw new ViewError(
+        `${where}: a panel may not declare axes.x — the abscissa is shared, declare it on the stack`
+      );
+    validateAxis(p.axes?.y, `${where} panel axes.y`);
+  }
+  for (const o of opts.overlays ?? []) {
+    if (o === null || typeof o !== 'object' || !PLOT_TYPES.includes(o.type))
+      throw new ViewError(`${where}: overlays must be built with the plot factories`);
+  }
+  validateAxis(opts.axes?.x, `${where} axes.x`);
+  if (opts.axes?.y != null)
+    throw new ViewError(`${where}: each panel carries its own axes.y — the stack declares only x`);
+  return { panels, axes: { x: opts.axes?.x }, overlays: opts.overlays ?? [] };
 }
 
 /** The same, for the equal-aspect plane (the pole map). */
@@ -246,8 +317,12 @@ export function crossCheckSources(manifest, observables, params) {
       }
       continue;
     }
-    if (v.kind !== 'plot') continue;
-    for (const s of [v.spec, ...(v.spec.overlays ?? [])]) {
+    if (v.kind !== 'plot' && v.kind !== 'stack') continue;
+    const roots =
+      v.kind === 'stack'
+        ? v.spec.panels.flatMap((p) => [p, ...(p.overlays ?? [])]).concat(v.spec.overlays ?? [])
+        : [v.spec, ...(v.spec.overlays ?? [])];
+    for (const s of roots) {
       const src = s.source;
       if (typeof src !== 'string') continue;
       if (!(src in observables) && !(params && src in params)) {

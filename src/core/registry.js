@@ -21,7 +21,7 @@
 
 import { seedField } from './fields.js';
 import { normalizeViews } from './figures.js';
-import { validateScene } from './scenes.js';
+import { validateScene, validateSceneIds } from './scenes.js';
 
 export class RegistryError extends Error {
   constructor(message) {
@@ -69,6 +69,7 @@ function normalizeParams(raw, key, random) {
 
 function normalizeScenes(raw, manifest, key) {
   const firstView = manifest.views[0].id;
+  validateSceneIds(raw, key);
   return (raw ?? []).map((s, i) => {
     validateScene(s, i, manifest, key);
     return {

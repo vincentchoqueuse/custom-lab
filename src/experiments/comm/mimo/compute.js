@@ -42,6 +42,8 @@ import { constellation, serTheory } from '../_lib/modulation.js';
 const DB_GRID = Array.from({ length: 11 }, (_, i) => 2 * i); // 0…20 dB
 const N_CURVE = 1500; // symbol pairs per Monte-Carlo point of the SER curve
 const MAX_CLOUD = 1200; // points kept for display
+const N_TRACE = 24; // symbols drawn in the time figure — past ~30 stalks a
+//                     stem plot stops being a signal and becomes a comb
 
 /* ---------- 2×2 complex linear algebra, written out ---------------------- */
 // Four numbers each; a generic solver would hide the one identity that matters,
@@ -212,7 +214,8 @@ export function run(pts, H, n0, n, rng, gauss, keep) {
   const M = pts.length;
   const err = { zf: 0, mmse: 0, ml: 0 };
   const out = keep
-    ? { y1: [], y2: [], mlOk: [], zf1: [], zf2: [], mmse1: [], mmse2: [] }
+    ? { y1: [], y2: [], mlOk: [], zf1: [], zf2: [], mmse1: [], mmse2: [],
+        txI: [], txQ: [], rxI: [], rxQ: [] }
     : null;
 
   // THE LATTICE: the M² noiseless received vectors, H·x for every hypothesis.
@@ -285,6 +288,17 @@ export function run(pts, H, n0, n, rng, gauss, keep) {
       out.y2.push([yr[1], yi[1]]);
       out.mlOk.push(bi === a && bj === b);
     }
+    // STREAM 1 IN TIME: what antenna 1 was asked to carry, and what antenna 1
+    // actually measured. y₁ = h₁₁x₁ + h₁₂x₂ + n, so the orange stem is not a
+    // noisy copy of the blue one — it holds a whole second symbol as well.
+    // That is the one fact separating this experiment from the AWGN link, and
+    // it is legible here before any receiver is chosen.
+    if (keep && out.txI.length < N_TRACE) {
+      out.txI.push(xr[0]);
+      out.txQ.push(xi[0]);
+      out.rxI.push(yr[0]);
+      out.rxQ.push(yi[0]);
+    }
   }
   return { err, n: 2 * n, out, lat, K };
 }
@@ -341,8 +355,16 @@ export function compute({ mod, rho, snr, N, eq, seed }) {
   });
   const st = eq === 'zf' ? 'zf' : 'mmse';
 
+  const traceIdx = Float64Array.from({ length: r.out.txI.length }, (_, i) => i);
+
   return {
     observables: {
+      /* --- stream 1 in time: sent against measured, before any receiver --- */
+      txI: { x: traceIdx, y: Float64Array.from(r.out.txI) },
+      txQ: { x: traceIdx, y: Float64Array.from(r.out.txQ) },
+      rxI: { x: traceIdx, y: Float64Array.from(r.out.rxI) },
+      rxQ: { x: traceIdx, y: Float64Array.from(r.out.rxQ) },
+
       /* --- what the two antennas receive: two mixtures, and ML's lattice --- */
       rx1: cloud(r.out.y1),
       rx2: cloud(r.out.y2),

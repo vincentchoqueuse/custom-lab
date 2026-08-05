@@ -8,13 +8,14 @@
 // `visble: ['N']` did nothing at all, silently, and it was discovered in front
 // of the students.
 //
-// Five things are checked, all at load time (and repeated by `npm run check`,
+// Six things are checked, all at load time (and repeated by `npm run check`,
 // so before a browser is even opened):
 //   · the key exists, and carries the right type;
 //   · the view the scene opens on exists;
 //   · that view is STATED, once the experiment has more than two of them;
 //   · the parameters it sets exist;
-//   · the pills it shows or masks exist.
+//   · the pills it shows or masks exist;
+//   · no two scenes of one experiment answer to the same id.
 //
 // PURE: no DOM, no state, no glob.
 
@@ -98,4 +99,28 @@ export function validateScene(s, i, manifest, key) {
       if (!params.has(p)) throw new SceneError(`${where}: ${list} names '${p}', which is not a param`);
   for (const p of Object.keys(s.params ?? {}))
     if (!params.has(p)) throw new SceneError(`${where}: sets '${p}', which is not a param`);
+}
+
+
+/**
+ * The ids of an experiment's scenes are UNIQUE.
+ *
+ * They address a scene from the URL (`?preset=`) and they key the scene list in
+ * the header, so a repeat is two different lectures under one name: the link
+ * opens whichever the lookup finds first, and the picker — a keyed list —
+ * throws outright. It cost a duplicate 'mixture' in the MIMO script, added
+ * without noticing the one already there, and the symptom was a rendering error
+ * three tabs away from the cause.
+ *
+ * Not a per-scene rule, which is why it is not in validateScene: a scene cannot
+ * see its siblings, and this is a property of the SCRIPT.
+ */
+export function validateSceneIds(scenes, key) {
+  const seen = new Set();
+  for (const s of scenes ?? []) {
+    if (!s?.id) continue; // validateScene reports a missing id
+    if (seen.has(s.id))
+      throw new SceneError(`experiment '${key}': two scenes answer to the id '${s.id}'`);
+    seen.add(s.id);
+  }
 }

@@ -1,5 +1,6 @@
 import { float, int, log, select, coeffs } from '../../../core/fields.js';
 import { view, plane, line, stem, vline, hline } from '../../../core/views.js';
+import { basebandFigure } from '../_lib/baseband.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -80,6 +81,13 @@ export default {
   },
 
   views: [
+    // WHAT THE CHANNEL DID, before any algorithm is named. Blue: the levels
+    // that were sent. Orange: what arrived — every value in between, because
+    // each received sample is a MIXTURE of its symbol and the neighbours the
+    // channel dragged into it. Intersymbol interference is that picture, and
+    // the blob on the next tab is its consequence rather than its definition.
+    basebandFigure({ txLabel: 'transmitted s[n]', rxLabel: 'received x[n]', symbol: 'x' }),
+
     // THE view, and the subject of the experiment: a blob of received samples
     // closing onto the constellation with no reference anywhere. Equal aspect,
     // because a stretched axis would turn a rotation into a shear and this whole

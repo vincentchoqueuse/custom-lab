@@ -41,14 +41,25 @@ function boundaries(mod, ext) {
   return segs;
 }
 
+// How many symbols the time figure shows. A stem plot is read one stalk at a
+// time, so the count is set by the eye and not by the simulation: past ~30 the
+// stalks touch and the picture stops being a signal and starts being a comb.
+const N_TRACE = 24;
+
 /** Simulate n symbols at linear SNR γ; returns the error count (+ clouds). */
-function simulate(pts, n, snr, rng, gauss, keep) {
+function simulate(pts, n, snr, rng, gauss, keep, trace) {
   const sigma = Math.sqrt(1 / (2 * snr));
   let errors = 0;
   for (let i = 0; i < n; i++) {
     const s = Math.floor(rng() * pts.length);
     const rx = pts[s].x + sigma * gauss();
     const ry = pts[s].y + sigma * gauss();
+    if (trace && i < N_TRACE) {
+      trace.txI[i] = pts[s].x;
+      trace.txQ[i] = pts[s].y;
+      trace.rxI[i] = rx;
+      trace.rxQ[i] = ry;
+    }
     let best = 0;
     let dBest = Infinity;
     for (let c = 0; c < pts.length; c++) {
@@ -75,9 +86,19 @@ export function compute({ mod, snrDb, N, seed }) {
   const pts = constellation(mod);
   const snr = dbToLin(snrDb);
 
-  // main cloud at the pill's SNR
+  // main cloud at the pill's SNR, and the first N_TRACE symbols in ORDER —
+  // the cloud has no time in it, and the time figure is where the room sees
+  // that a symbol is two real signals and not a dot on a picture
   const keep = { ok: [], err: [] };
-  const errors = simulate(pts, N, snr, rng, gauss, keep);
+  const n = Math.min(N_TRACE, N);
+  const trace = {
+    txI: new Float64Array(n),
+    txQ: new Float64Array(n),
+    rxI: new Float64Array(n),
+    rxQ: new Float64Array(n),
+  };
+  const errors = simulate(pts, N, snr, rng, gauss, keep, trace);
+  const idx = Float64Array.from({ length: n }, (_, i) => i);
 
   // SER vs SNR: theory on a fine grid, Monte Carlo on the dB grid
   const ft = new Float64Array(81);
@@ -96,6 +117,10 @@ export function compute({ mod, snrDb, N, seed }) {
 
   return {
     observables: {
+      txI: { x: idx, y: trace.txI },
+      txQ: { x: idx, y: trace.txQ },
+      rxI: { x: idx, y: trace.rxI },
+      rxQ: { x: idx, y: trace.rxQ },
       rxOk: pairsToSeries(keep.ok),
       rxErr: pairsToSeries(keep.err),
       idealPoints: {

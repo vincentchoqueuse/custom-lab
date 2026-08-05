@@ -15,6 +15,41 @@ const BASE = {
 
 export const checks = [
   {
+    // THE ALIGNMENT OF THE TIME FIGURE, pinned against the one channel whose
+    // answer is known: a single unit tap and no carrier offset, where what
+    // arrives IS what was sent. Anything else — an index taken before the
+    // equalizer's window, a slice off by the channel length — still draws two
+    // plausible stem trains, one smeared, and quietly shows two different
+    // symbols side by side. Only an identity channel can tell.
+    name: 'time figure: through h = [1], what arrives is what was sent',
+    category: 'numeric',
+    run() {
+      const { observables: o } = compute({ ...BASE, h: [1], phi: 0, snr: 60 });
+      let worst = 0;
+      for (let i = 0; i < o.txI.y.length; i++) {
+        worst = Math.max(worst, Math.abs(o.rxI.y[i] - o.txI.y[i]));
+        worst = Math.max(worst, Math.abs(o.rxQ.y[i] - o.txQ.y[i]));
+      }
+      // σ per quadrature at 60 dB on a unit-gain channel is √(1/10⁶/2) ≈ 7·10⁻⁴;
+      // 6σ is the bound a correct alignment cannot cross and a wrong one
+      // clears by two orders of magnitude (the symbols differ by ~1.4)
+      return { ok: worst < 6 * Math.sqrt(0.5e-6), detail: `max|rx−tx|=${worst.toExponential(2)}` };
+    },
+  },
+  {
+    // And the received stems ARE the cloud on the constellation tab, read at
+    // the same instants — the two tabs must show one signal.
+    name: 'time figure: the received stems are the constellation, sample for sample',
+    category: 'numeric',
+    run() {
+      const { observables: o } = compute({ ...BASE });
+      let bad = 0;
+      for (let i = 0; i < o.rxI.y.length; i++)
+        if (o.rxI.y[i] !== o.received.x[i] || o.rxQ.y[i] !== o.received.y[i]) bad++;
+      return { ok: bad === 0, detail: `${o.rxI.y.length} samples, ${bad} disagreeing` };
+    },
+  },
+  {
     name: 'R₂ = 1 for every PSK, and exactly 1.32 for the 16-QAM',
     category: 'numeric',
     run() {

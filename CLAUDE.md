@@ -362,9 +362,15 @@ registry at load time):
   factories: `view(id, title, plotSpec)`, `custom(id, title, loader)`, and one
   factory per graphic type — `histogram`, `line`, `scatter`, `bars`, `stem`, `vline`,
   `hline`, `density`, `band`. The same factory works as main plot or as overlay,
-  by position, plus `plane(id, title, spec)` for the one shape a cartesian
-  plot cannot express (equal-aspect I/Q, s- and z-planes: circles must stay
-  circles). Style keys are **flat** (`color`, `dashed`, `width` — no nested
+  by position, plus the two shapes a single cartesian plot cannot express:
+  `plane(id, title, spec)` for equal aspect (I/Q, s- and z-planes: circles must
+  stay circles) and `stack(id, title, panels, {axes, overlays})` for panels over
+  one shared abscissa — a COMPLEX signal in time, Re above and Im below, which
+  is not two curves but two components of one. The stack declares the abscissa
+  once, and the overlays that mark it (a frame boundary, a prefix band) are
+  drawn on every panel, because they name a place in time and not a place in
+  one of the two parts; each panel declares its own `axes.y` and may not declare
+  an `axes.x`. Style keys are **flat** (`color`, `dashed`, `width` — no nested
   `style` object), consistent with the field factories. Factories validate at load
   time (known types, sane axes/scale/domain) and throw named errors; observable
   `source` names, unknowable at load time, are cross-checked against the first
@@ -456,7 +462,8 @@ export default {
         axes: { x: 'N', y: 'empirical coverage' },
       })),
   ],
-  // Factories: view(id, title, plotSpec) / custom(id, title, loader).
+  // Factories: view(id, title, plotSpec) / custom(id, title, loader) /
+  // plane(id, title, spec) / stack(id, title, panels, {axes, overlays}).
   // Plot & overlay factories (same factory, main or overlay by position):
   // histogram, line, scatter, bars, stem, vline, hline, density, band — first
   // arg is the observable source (or a param name / p => fn for vline/hline), flat
@@ -592,7 +599,11 @@ Shared SVG primitives: `Axes`, `Histogram`, `Line`, `Scatter`, `Bars`, `Stem`
 filter coefficients, impulse responses, line spectra; never a continuous line,
 which would claim values between the samples) + overlays
 `VLine`, `HLine`, `Density`, `Band`. All accept ready-made observables and style
-options; none computes anything scientific. `ViewHost` interprets
+options; none computes anything scientific. A `PlotPanel` composes them into one
+framed set of axes; `DeclarativePlot` is a canvas holding a single panel and
+`StackPlot` a canvas holding several over ONE abscissa, computed from every
+panel's layers before any is drawn (`ui/plots/layers.js`) — panels that each
+scaled their own x would line up by accident. `ViewHost` interprets
 `{layout, plot, overlays}` and composes these primitives.
 
 **Scales (`core/scales.js`).** A thin wrapper re-exporting the project's configured

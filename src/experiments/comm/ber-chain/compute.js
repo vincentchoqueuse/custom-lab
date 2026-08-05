@@ -23,7 +23,11 @@ const popcount = (v) => {
 };
 
 /** Simulate n symbols at γb; counts symbol/bit errors (+ clouds if kept). */
-function simulate(map, n, gb, rng, gauss, keep) {
+// How many symbols the time figure shows: past ~30 stalks the stem plot stops
+// being a signal and becomes a comb.
+const N_TRACE = 24;
+
+function simulate(map, n, gb, rng, gauss, keep, trace) {
   const { pts, pattern, k } = map;
   const sigma = Math.sqrt(1 / (2 * k * gb));
   let symErr = 0;
@@ -32,6 +36,12 @@ function simulate(map, n, gb, rng, gauss, keep) {
     const s = Math.floor(rng() * pts.length);
     const rx = pts[s].x + sigma * gauss();
     const ry = pts[s].y + sigma * gauss();
+    if (trace && i < N_TRACE) {
+      trace.txI[i] = pts[s].x;
+      trace.txQ[i] = pts[s].y;
+      trace.rxI[i] = rx;
+      trace.rxQ[i] = ry;
+    }
     let best = 0;
     let dBest = Infinity;
     for (let c = 0; c < pts.length; c++) {
@@ -61,9 +71,18 @@ export function compute({ mod, mapping, ebn0Db, Nbits, seed }) {
   const gb = dbToLin(ebn0Db);
   const nSym = Math.max(1, Math.floor(Nbits / map.k));
 
-  // main run at the pill's Eb/N0
+  // main run at the pill's Eb/N0, plus the first N_TRACE symbols in ORDER for
+  // the time figure — the cloud has no time in it
   const keep = { ok: [], e1: [], e2: [] };
-  const { symErr, bitErr } = simulate(map, nSym, gb, rng, gauss, keep);
+  const nT = Math.min(N_TRACE, nSym);
+  const trace = {
+    txI: new Float64Array(nT),
+    txQ: new Float64Array(nT),
+    rxI: new Float64Array(nT),
+    rxQ: new Float64Array(nT),
+  };
+  const { symErr, bitErr } = simulate(map, nSym, gb, rng, gauss, keep, trace);
+  const idx = Float64Array.from({ length: nT }, (_, i) => i);
 
   // BER vs Eb/N0: Gray theory on a fine grid, Monte Carlo on the dB grid
   const ft = new Float64Array(57);
@@ -84,6 +103,10 @@ export function compute({ mod, mapping, ebn0Db, Nbits, seed }) {
 
   return {
     observables: {
+      txI: { x: idx, y: trace.txI },
+      txQ: { x: idx, y: trace.txQ },
+      rxI: { x: idx, y: trace.rxI },
+      rxQ: { x: idx, y: trace.rxQ },
       rxOk: pairsToSeries(keep.ok),
       rxErr1: pairsToSeries(keep.e1),
       rxErrMulti: pairsToSeries(keep.e2),

@@ -7,6 +7,7 @@
   import { STR } from '../core/strings.js';
   import DeclarativePlot from './plots/DeclarativePlot.svelte';
   import PlanePlot from './plots/PlanePlot.svelte';
+  import StackPlot from './plots/StackPlot.svelte';
 
   const m = $derived(manifest());
   const viewDef = $derived(m?.views.find((v) => v.id === app.view) ?? m?.views[0]);
@@ -26,6 +27,14 @@
       {obs}
       params={app.params}
       pres={app.ui.presentation || app.ui.bold}
+    />
+  {:else if viewDef.kind === 'stack'}
+    <StackPlot
+      spec={viewDef.spec}
+      {obs}
+      params={app.params}
+      pres={app.ui.presentation || app.ui.bold}
+      lock={app.axisLock}
     />
   {:else if viewDef.kind === 'custom'}
     {#key attempt}
