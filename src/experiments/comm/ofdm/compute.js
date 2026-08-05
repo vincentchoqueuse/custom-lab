@@ -93,6 +93,12 @@ export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
   // The OFDM frame is COMPLEX — an IFFT of complex symbols — and a figure
   // showing only its real part quietly teaches that it is not. Both parts are
   // captured and both are drawn.
+  const xr0 = new Float64Array(Nc);
+  const xi0 = new Float64Array(Nc);
+  const symI = new Float64Array(Nc);
+  const symQ = new Float64Array(Nc);
+  const eqI0 = new Float64Array(Nc);
+  const eqQ0 = new Float64Array(Nc);
   const txT = new Float64Array(SPAN * S);
   const txTi = new Float64Array(SPAN * S);
   const rxT = new Float64Array(SPAN * S);
@@ -124,6 +130,11 @@ export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
       bitsQ[k] = rng() < 0.5 ? -1 : 1;
       xr[k] = bitsI[k] * inv2;
       xi[k] = bitsQ[k] * inv2;
+    }
+    // the IFFT works in place, so the symbols are kept before it runs
+    if (m === 0) {
+      xr0.set(xr);
+      xi0.set(xi);
     }
     ifftU(xr, xi);
 
@@ -181,6 +192,16 @@ export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
       const d = Habs2[k] + 1e-12;
       const er = (zr[k] * Hr[k] + zi[k] * Hi[k]) / d;
       const eq = (zi[k] * Hr[k] - zr[k] * Hi[k]) / d;
+      // THE FIRST FRAME, carrier by carrier: what was loaded onto each one and
+      // what came back off it after the one-tap equalizer. Indexed by k rather
+      // than by raw time, so this figure and the channel figure share an
+      // abscissa and the pill's carrier is the same place on both.
+      if (m === 0) {
+        symI[k] = xr0[k];
+        symQ[k] = xi0[k];
+        eqI0[k] = er;
+        eqQ0[k] = eq;
+      }
       // ONE subcarrier's cloud, over all M symbols — not the first MAX_CLOUD
       // points of a pool over every carrier, which mixed N different channels
       // into one picture and averaged away what the experiment is about.
@@ -246,12 +267,28 @@ export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
     return { x: Float64Array.from(x), lo: Float64Array.from(lo), hi: Float64Array.from(hi) };
   };
 
+  const kAx = Float64Array.from({ length: Nc }, (_, i) => i);
+  const selI = new Float64Array(Nc).fill(NaN);
+  const selQ = new Float64Array(Nc).fill(NaN);
+  selI[kRead] = eqI0[kRead];
+  selQ[kRead] = eqQ0[kRead];
+
   const nT = Float64Array.from({ length: SPAN * S }, (_, i) => i);
   const memory = L - 1; // the channel's memory, in samples
   const absorbed = cp >= memory;
 
   return {
     observables: {
+      /* --- carrier by carrier: what went on, what came back --- */
+      symI: { x: kAx, y: symI },
+      symQ: { x: kAx, y: symQ },
+      eqSymI: { x: kAx, y: eqI0 },
+      eqSymQ: { x: kAx, y: eqQ0 },
+      // the pill's carrier, alone: everything else is NaN, so the generic
+      // scatter draws one point and the eye goes straight to it
+      selI: { x: kAx, y: selI },
+      selQ: { x: kAx, y: selQ },
+
       /* --- time domain: what the prefix IS, and what it buys --- */
       txI: { x: nT, y: txT },
       txQ: { x: nT, y: txTi },

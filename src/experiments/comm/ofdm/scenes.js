@@ -1,31 +1,32 @@
 // Lecture script — auto-discovered by the registry.
 export default [
   {
-    id: 'prefix-object',
-    title: 'The frame, and the prefix at its head',
-    view: 'time',
-    params: { Nc: 64, L: 6, cp: 8, snr: 25, M: 50 },
-    visible: ['cp'],
-    notes: `The transmitted signal in time, before the channel. On its own it is
-one continuous stretch of noise — which is what an OFDM signal looks like, and
-why the structure has to be drawn rather than described.
+    id: 'symbols',
+    title: 'What went on each carrier, and what came back',
+    view: 'symbols',
+    params: { Nc: 64, L: 6, cp: 8, snr: 25, M: 50, k: 20 },
+    visible: ['k', 'L'],
+    notes: `Sixty-four carriers, each loaded with one QPSK symbol. Blue is what
+the transmitter put on carrier k; orange is what the one-tap equalizer handed
+back after the channel. The green point is the carrier the pill has selected,
+and it is the same carrier the vertical marks two tabs along.
 
-The black verticals cut it into FRAMES. Each frame is L_cp + N samples, and the
-orange band at its head is the cyclic prefix. The N samples after it are the
-useful block: the IFFT of the sixty-four QPSK symbols.
+At L = 1 the channel is flat and the orange sits on the blue everywhere. Raise
+L and watch the orange scatter — not uniformly, in PATCHES: some carriers come
+back clean and others are a mess, and the pattern does not move when you press
+R. That is the channel, not the noise, and the next tabs are two ways of
+looking at it.
 
-Two things to say while moving L_cp. The prefix carries no information at all —
-it is the last L_cp samples of the block copied to its front, and the harness
-checks that copy is bit for bit. And the receiver throws it away, so the rate
-paid is L_cp out of L_cp + N: at 8 and 64, eleven per cent of the link, spent on
-samples nobody reads.
+Walk the pill across the carriers and the green point moves through the good
+patches and the bad ones. Stop on a bad one, then go to the constellation tab:
+it is the cloud of that carrier alone, across all the frames.
 
-The next tab is what those eleven per cent buy.`,
+The abscissa here is the carrier index and not time. Time is the next tab.`,
   },
   {
     id: 'absorb',
     title: 'The prefix absorbs the channel',
-    view: 'window',
+    view: 'time',
     params: { Nc: 64, L: 6, cp: 8, snr: 25, M: 50, seed: 5 },
     visible: ['cp', 'L'],
     notes: `The same frames, now received — and one line has been added, the

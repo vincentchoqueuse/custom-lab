@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, figure, plane, line, scatter, band, vline, figureStack, stack } from '../../../core/views.js';
+import { view, figure, plane, line, scatter, stem, band, vline, figureStack, stack } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -75,6 +75,46 @@ export default {
   ],
 
   views: [
+    // WHAT WENT ON EACH CARRIER, AND WHAT CAME BACK OFF IT — the figure the
+    // rest of the experiment is about, and the one the pill drives. Blue is
+    // what the transmitter loaded onto carrier k; orange is what the one-tap
+    // equalizer handed back. Where the channel is strong they sit on top of
+    // each other; in a fade the orange scatters, and that is the whole story
+    // of a selective channel told once, before any spectrum is drawn.
+    //
+    // The abscissa is the CARRIER INDEX and not raw time, deliberately: it is
+    // the same abscissa as the channel figure two tabs along, so the pill's
+    // vertical there and the green point here are the same place. Time is on
+    // the next tab, where the frame lives.
+    stack(
+      'symbols',
+      'Symbols in, symbols out',
+      [
+        stem('symI', {
+          color: '#0072BD',
+          width: 1.6,
+          size: 2.6,
+          label: 'sent',
+          overlays: [
+            stem('eqSymI', { color: '#D95319', width: 1.4, size: 2.4, label: 'equalized' }),
+            scatter('selI', { color: '#77AC30', size: 7, label: 'the carrier in the pill' }),
+          ],
+          axes: { y: { label: 'Re' } },
+        }),
+        stem('symQ', {
+          color: '#0072BD',
+          width: 1.6,
+          size: 2.6,
+          overlays: [
+            stem('eqSymQ', { color: '#D95319', width: 1.4, size: 2.4 }),
+            scatter('selQ', { color: '#77AC30', size: 7 }),
+          ],
+          axes: { y: { label: 'Im' } },
+        }),
+      ],
+      { axes: { x: { label: 'subcarrier k' } } }
+    ),
+
     // THE PREFIX, AS AN OBJECT. Everything else here lives in frequency, where
     // OFDM is elegant and where the prefix cannot be seen — it was a parameter
     // with a consequence and never a thing. Two symbols of the transmitted
@@ -102,40 +142,9 @@ export default {
       }
     ),
 
-    // AND WHAT IT BUYS. The received signal, with the two regions that decide
-    // everything: in orange the L−1 samples still carrying the tail of the
-    // PREVIOUS symbol, in green the window the FFT actually reads. The prefix
-    // works exactly when the orange fits inside it and the green stays clean —
-    // which is a thing to SEE, and the constellation two tabs away is its
-    // consequence.
-    stack(
-      'window',
-      'What the FFT window sees',
-      [
-        line('rxI', { color: '#7E2F8E', width: 1.5, label: 'received y[n]',
-                      axes: { y: { label: 'Re y[n]' } } }),
-        line('rxQ', { color: '#7E2F8E', width: 1.5, axes: { y: { label: 'Im y[n]' } } }),
-      ],
-      {
-        axes: { x: { label: 'sample n' } },
-        overlays: [
-          band('cpBandRx', { color: '#D95319', opacity: 0.22, label: 'cyclic prefix' }),
-          vline('frame0', { color: '#18181b', width: 1.8, label: 'start of a frame' }),
-          vline('frame1', { color: '#18181b', width: 1.8 }),
-          vline('trans0', {
-            color: '#77AC30',
-            width: 2,
-            dashed: true,
-            label: 'end of the channel transient (L−1)',
-          }),
-          vline('trans1', { color: '#77AC30', width: 2, dashed: true }),
-        ],
-      }
-    ),
-
     view(
       'channel',
-      'The channel seen by the carriers',
+      'The channel',
       line('channel', {
         width: 2,
         label: '|H_k|²',
@@ -153,7 +162,7 @@ export default {
     // its own H_k, so each has its own rotation before equalization and its own
     // spread after it. Walking k along the pill turns the channel's landscape
     // into a sequence of constellations — tight on a ridge, exploded in a fade.
-    plane('constellation', 'Constellation of one subcarrier', {
+    plane('constellation', 'Constellation', {
       clouds: [
         { source: 'rxRaw', color: '#7E2F8E', r: 2.4, opacity: 0.45, label: 'before equalization' },
         { source: 'rxEq', color: '#0072BD', r: 2.4, opacity: 0.6, label: 'after ZF (1 tap)' },
@@ -164,7 +173,7 @@ export default {
     }),
     view(
       'ber',
-      'Errors per carrier',
+      'Errors',
       scatter('berMeasured', {
         size: 3,
         opacity: 0.85,
