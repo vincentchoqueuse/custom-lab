@@ -2,7 +2,7 @@ import { float, int, select } from '../../../core/fields.js';
 import { view, figure, line, scatter, stem, vline, hline, band } from '../../../core/views.js';
 // the pinned framing and the base of the frame, shared with the computation:
 // the noise rectangles reach exactly down to that base
-import { fWindow, MODEL_FLOOR } from './frame.js';
+import { fWindow, MODEL_FLOOR } from '../_lib/frame.js';
 
 /** The frequency axis, PINNED, and the same on the three views that carry one:
  *  the periodogram, the estimated spectrum and the pseudo-spectrum are read one

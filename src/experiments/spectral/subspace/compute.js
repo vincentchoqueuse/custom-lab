@@ -39,7 +39,7 @@ import {
   lsAmplitudes,
 } from '../_lib/subspace.js';
 // the pinned framing, shared with the manifest (frame.js)
-import { F_LO, F_HI, F_HI_FAR, MODEL_FLOOR } from './frame.js';
+import { F_LO, F_HI, F_HI_FAR, MODEL_FLOOR } from '../_lib/frame.js';
 
 const FS = 1000; // Hz
 const F1 = 200; // first line (Hz)

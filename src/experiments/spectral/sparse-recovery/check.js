@@ -8,27 +8,33 @@ import {
   synthesize,
   lassoSolve,
   lambdaMax,
-  N,
   FS,
-  DF,
   KMAX,
-  AMP,
 } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 
+// The record length is a parameter now, so the checks pin their own — 256, the
+// default, and the one spectral/subspace uses.
+const N = 256;
 const BASE = {
-  K: 3,
-  sep: 3,
+  sources: 2,
+  df: 1.5,
   offGrid: 0,
+  N,
   over: 2,
   snr: 30,
   algo: 'omp',
-  k: 3,
+  k: 2,
   lam: 0.1,
   alpha: 1,
   seed: 34,
 };
+// Two lines that fall exactly on the Fourier grid of N = 256 at Fs = 1000, plus
+// one plainly off to the side: bins 51, 55 and 84.
+const CELL = FS / N;
+const F = [51 * CELL, 55 * CELL, 84 * CELL];
+const AMP = [1, 1, 1];
 
 /** A noiseless on-grid signal, built here so the checks do not depend on the
  *  compute's own plumbing: K lines at exact grid frequencies of the ×`over`
@@ -81,7 +87,7 @@ export const checks = [
       // correlation of the residual with an already-selected atom must be zero,
       // and this is what forbids OMP from ever choosing one twice.
       const nfft = 2 * N;
-      const freqs = [20, 23, 45];
+      const freqs = [F[0], F[1], F[2]];
       const x = signal(freqs, AMP, [0.3, 1.1, 2.7]);
       const p = pursuit(x, nfft, true);
       const worst = Math.max(...p.orth);
@@ -150,7 +156,7 @@ export const checks = [
       // atoms it has selected. Compared against a direct solve on the same
       // support, so the check does not simply re-run the same code path.
       const nfft = 2 * N;
-      const x = signal([20, 23, 45], AMP, [0.9, 0.2, 1.4]);
+      const x = signal([F[0], F[1], F[2]], AMP, [0.9, 0.2, 1.4]);
       const p = pursuit(x, nfft, true);
       const bad = [];
       for (let it = 1; it <= 6; it++) {
@@ -175,7 +181,7 @@ export const checks = [
       // the amplitudes must land: recovering the right frequencies with the
       // wrong amplitudes would be a coincidence, not a solution.
       const nfft = 2 * N;
-      const freqs = [20, 23, 45];
+      const freqs = [F[0], F[1], F[2]];
       const x = signal(freqs, AMP, [0.3, 1.1, 2.7]);
       const p = pursuit(x, nfft, true);
       const got = p.support
@@ -203,7 +209,7 @@ export const checks = [
       // monotone by construction — and a violation would mean a sign or an
       // index error, which is exactly the bug this catches.
       const nfft = 4 * N;
-      const x = signal([20, 20.75, 45, 12], AMP, [0.5, 2.1, 1.7, 0.9]);
+      const x = signal([F[0], F[0] + 0.75 * CELL, F[2], 30 * CELL], [1, 1, 1, 1], [0.5, 2.1, 1.7, 0.9]);
       const bad = [];
       for (const [name, orth] of [
         ['OMP', true],
@@ -228,8 +234,8 @@ export const checks = [
       // the Dirichlet kernel, checked against its own definition by direct
       // summation.
       const bad = [];
-      if (neighbourCoherence(DF) > 1e-12) bad.push(`adjacent cells not orthogonal`);
-      const seq = [1, 2, 4, 8].map((o) => neighbourCoherence(DF / o));
+      if (neighbourCoherence(CELL, N) > 1e-12) bad.push(`adjacent cells not orthogonal`);
+      const seq = [1, 2, 4, 8].map((o) => neighbourCoherence(CELL / o, N));
       for (let i = 1; i < seq.length; i++)
         if (seq[i] <= seq[i - 1]) bad.push(`coherence not increasing: ${seq}`);
       if (seq[3] < 0.9) bad.push(`coherence at ×8 only ${seq[3].toFixed(3)}`);
@@ -239,14 +245,14 @@ export const checks = [
       // that sum, not its real part: the real part carries a phase that depends
       // on where the pair sits, and would make the "coherence" depend on the
       // absolute frequency, which it does not.
-      const delta = DF / 4;
+      const delta = CELL / 4;
       let sr = 0;
       let si = 0;
       for (let i = 0; i < N; i++) {
         sr += Math.cos((2 * Math.PI * delta * i) / FS);
         si += Math.sin((2 * Math.PI * delta * i) / FS);
       }
-      const gap = Math.abs(Math.hypot(sr, si) / N - neighbourCoherence(delta));
+      const gap = Math.abs(Math.hypot(sr, si) / N - neighbourCoherence(delta, N));
       if (gap > 1e-12) bad.push(`closed form off by ${gap.toExponential(2)}`);
       return {
         ok: bad.length === 0,
@@ -267,8 +273,8 @@ export const checks = [
       // to zero; half a cell off, the same three iterations leave a residual
       // orders of magnitude larger, because the true line is spread over the
       // whole dictionary instead of sitting in one column.
-      const on = compute({ ...BASE, snr: 60, offGrid: 0, k: 3 }).observables;
-      const off = compute({ ...BASE, snr: 60, offGrid: 0.5, k: 3 }).observables;
+      const on = compute({ ...BASE, snr: 60, offGrid: 0, k: 2 }).observables;
+      const off = compute({ ...BASE, snr: 60, offGrid: 0.5, k: 2 }).observables;
       return {
         ok: off.resDb > on.resDb + 20,
         detail: `residual after 3 steps: ${on.resDb.toFixed(1)} dB on grid, ${off.resDb.toFixed(1)} dB at δ = ½`,
@@ -283,7 +289,7 @@ export const checks = [
       // predict in scene 2. On a fine grid with a line between two atoms, MP
       // keeps coming back to repair its own earlier fits; OMP's zeros forbid it.
       const nfft = 8 * N;
-      const x = signal([20.31, 33, 45], AMP, [0.4, 1.9, 2.2]);
+      const x = signal([F[0] + 0.31 * CELL, 70 * CELL, F[2]], AMP, [0.4, 1.9, 2.2]);
       const mp = pursuit(x, nfft, false);
       const omp = pursuit(x, nfft, true);
       const dupMp = mp.support.length - new Set(mp.support).size;
@@ -312,11 +318,11 @@ export const checks = [
       // Jensen bias, not a broken law. The linear identity is exact in
       // expectation and is the one worth pinning.
       //
-      // Tolerance: ‖P(w)‖²/σ² is χ² with 2k = 6 degrees of freedom, so one run
-      // has a relative spread of √(2/6) = 0.577 and the mean of n has
-      // 0.577/√n. At n = 60 that is 0.075, and the tolerance is 4 of them.
+      // Tolerance: ‖P(w)‖²/σ² is χ² with 2k degrees of freedom, so one run has
+      // a relative spread of √(2/2k) and the mean of n has that over √n. At
+      // k = 2 and n = 60 it is 0.091, and the tolerance is 4 of them.
       const n = 60;
-      const k = 3;
+      const k = 2;
       const se = Math.sqrt(2 / (2 * k)) / Math.sqrt(n);
       let err = 0;
       let s2 = 0;
@@ -327,8 +333,9 @@ export const checks = [
         s2 += o.sigma * o.sigma;
         // the law assumes the support is right; if it were not, the error would
         // carry a bias term and the identity would not be the one being tested
+        const want = trueFreqs(2, BASE.df, 0, N, BASE.over);
         const got = [...o.spikes.x].sort((a, b) => a - b);
-        if (maxGap(range(3), (j) => got[j] - [20, 23, 45][j]) > 1e-9) wrongSupport++;
+        if (got.length !== 2 || maxGap(range(2), (j) => got[j] - want[j]) > 1e-9) wrongSupport++;
       }
       const ratio = err / n / (2 * k * (s2 / n));
       return {
@@ -368,7 +375,7 @@ export const checks = [
           a[l] = cc[l];
           b[l] = cs[l];
         }
-        const back = synthesize(a, b, nfft);
+        const back = synthesize(a, b, nfft, N);
         // the two rank-one corrections, from the atoms left out
         let s1 = 0;
         let sv = 0;
@@ -395,7 +402,7 @@ export const checks = [
           a[l] = cc[l];
           b[l] = cs[l];
         }
-        const w = synthesize(a, b, nfft);
+        const w = synthesize(a, b, nfft, N);
         lam = Math.sqrt(energy(w));
         v = Float64Array.from(w, (u) => u / lam);
       }
@@ -419,7 +426,7 @@ export const checks = [
       // sides are asserted — a solver that returned zero everywhere would pass
       // the first half on its own.
       const nfft = 2 * N;
-      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const x = signal([F[0], F[1], F[2]], AMP, [0.3, 1.1, 2.7]);
       const lmax = lambdaMax(x, nfft);
       const nnz = (lam) => {
         const { a, b } = lassoSolve(x, nfft, lam * lmax);
@@ -446,7 +453,7 @@ export const checks = [
       // land on it to machine precision. This is the check that says the solver
       // solves the problem it claims to, rather than something nearby.
       const nfft = N; // ×1: an orthogonal basis
-      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const x = signal([F[0], F[1], F[2]], AMP, [0.3, 1.1, 2.7]);
       const lmax = lambdaMax(x, nfft);
       const bad = [];
       for (const frac of [0.05, 0.3, 0.7]) {
@@ -484,11 +491,11 @@ export const checks = [
       // The three true frequencies here are integer Fourier bins, so they are
       // mutually orthogonal and the closed form applies.
       const nfft = 2 * N;
-      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const x = signal([F[0], F[1], F[2]], AMP, [0.3, 1.1, 2.7]);
       const lmax = lambdaMax(x, nfft);
       const lambda = 0.2 * lmax;
       const { a, b } = lassoSolve(x, nfft, lambda, 1, 4000);
-      const reco = synthesize(a, b, nfft);
+      const reco = synthesize(a, b, nfft, N);
       const { mag } = correlate(
         Float64Array.from(x, (v, i) => v - reco[i]),
         nfft
@@ -528,12 +535,14 @@ export const checks = [
       // which never shrinks anything, never paid it in the first place.
       const p = { ...BASE, snr: 20, over: 2 };
       const lasso = compute({ ...p, algo: 'lasso', lam: 0.2 }).observables;
-      const omp = compute({ ...p, algo: 'omp', k: 3 }).observables;
+      const omp = compute({ ...p, algo: 'omp', k: 2 }).observables;
       // same three lines found by both
       const lf = [...lasso.spikes.x].sort((u, v) => u - v);
       const of = [...omp.spikes.x].sort((u, v) => u - v);
       const sameSupport =
-        lf.length === 3 && of.length === 3 && maxGap(range(3), (j) => lf[j] - of[j]) < 1e-9;
+        lf.length === of.length &&
+        lf.length > 0 &&
+        maxGap(range(lf.length), (j) => lf[j] - of[j]) < 1e-9;
       // the shrunk stems sit BELOW the debiased ones, everywhere
       let below = true;
       for (let j = 0; j < lasso.spikes.y.length; j++)
@@ -541,7 +550,7 @@ export const checks = [
       return {
         ok: sameSupport && below && omp.snrOut.value > lasso.snrOut.value + 5,
         detail:
-          `same 3 lines · every lasso stem below its refit · ` +
+          `${lf.length} lines, the same for both${below ? ', every lasso stem below its refit' : ''} · ` +
           `SNR out: OMP ${omp.snrOut.value.toFixed(1)} dB vs lasso ${lasso.snrOut.value.toFixed(1)} dB`,
       };
     },
@@ -559,7 +568,7 @@ export const checks = [
       // Greedy owes nothing of the sort: its answer is the path it happened to
       // take, which is exactly why a coherent dictionary can ruin it.
       const nfft = 2 * N;
-      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const x = signal([F[0], F[1], F[2]], AMP, [0.3, 1.1, 2.7]);
       const lambda = 0.15 * lambdaMax(x, nfft);
       const ref = lassoSolve(x, nfft, lambda, 1, 4000);
       const bad = [];
@@ -590,7 +599,7 @@ export const checks = [
       // asserted, because a solver that converged for every α would mean the
       // step had no effect and the scene nothing to show.
       const nfft = 2 * N;
-      const x = signal([20, 23, 45], AMP, [0.3, 1.1, 2.7]);
+      const x = signal([F[0], F[1], F[2]], AMP, [0.3, 1.1, 2.7]);
       const lambda = 0.1 * lambdaMax(x, nfft);
       const at = (alpha) => lassoSolve(x, nfft, lambda, alpha, 400);
       const bad = [];
@@ -626,6 +635,43 @@ export const checks = [
       return {
         ok: bad.length === 0,
         detail: bad.length ? bad.join(' · ') : `all series finite · "${o.verdict.value}"`,
+      };
+    },
+  },
+  {
+    name: 'the greedy does NOT beat the Fourier limit — the invoice for not knowing d',
+    category: 'statistical',
+    run() {
+      // THE reason this experiment sits after the high-resolution methods.
+      //
+      // spectral/subspace separates two lines half a Fourier limit apart, at
+      // this very SNR, because it is HANDED d = 2. Take that postulate away and
+      // the resolution falls back to Fourier: measured over twelve draws, the
+      // greedy recovers both lines exactly 0 times out of 12 at Δf = 0.5, and
+      // 12 out of 12 at Δf = 1.5. The claim of scene 4 is this table.
+      //
+      // Statistical because it counts successes over draws, but the two ends
+      // are not close calls — 0/12 and 12/12 — so no tolerance is needed beyond
+      // requiring the ends themselves.
+      const trials = 12;
+      const rate = (df) => {
+        let ok = 0;
+        for (let seed = 1; seed <= trials; seed++) {
+          const o = compute({ ...BASE, df, snr: 25, k: 2, seed }).observables;
+          const want = trueFreqs(2, df, 0, N, BASE.over);
+          const got = [...o.spikes.x].sort((a, b) => a - b);
+          if (got.length === 2 && maxGap(range(2), (j) => got[j] - want[j]) < 1e-9) ok++;
+        }
+        return ok;
+      };
+      const half = rate(0.5);
+      const one = rate(1);
+      const oneAndHalf = rate(1.5);
+      return {
+        ok: half === 0 && oneAndHalf === trials && one <= oneAndHalf,
+        detail:
+          `both lines exact: ${half}/${trials} at Δf = 0.5 (where MUSIC separates), ` +
+          `${one}/${trials} at 1.0, ${oneAndHalf}/${trials} at 1.5`,
       };
     },
   },

@@ -1,5 +1,5 @@
 import { compute } from './compute.js';
-import { F_LO, F_HI, F_HI_FAR } from './frame.js';
+import { F_LO, F_HI, F_HI_FAR } from '../_lib/frame.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import {

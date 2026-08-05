@@ -36,29 +36,42 @@
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 import { fft } from '../../../core/numeric.js';
-import { ifft } from '../../../core/dsp.js';
+import { ifft, noiseSigma } from '../../../core/dsp.js';
 import { solveLinearSystem } from '../../../core/linalg.js';
 
-const FS = 128; // sampling rate (Hz)
-const N = 128; // samples — one second, so the Fourier cell is exactly 1 Hz
-const DF = FS / N; // Fourier resolution (Hz per cell)
-const KMAX = 12; // iterations run, whatever the number of true lines
-const FLOOR_DB = -60; // display floor for the spectrum views
+// THE SAME SIGNAL AS `subspace`, deliberately. That experiment postulates "d
+// exponentials in white noise" and hands d to the estimator; this one is asked
+// the question that leaves open — how many lines are there — so the two must be
+// comparable at a glance, on the same rate, the same record, the same pair of
+// lines and the same decibels. Δf, SNR and the framing carry the same meaning
+// in both, and the frequency window is literally the same module.
+const FS = 1000; // Hz, as in spectral/subspace
+const F1_TARGET = 200; // the close pair sits here
+const F3_TARGET = 330; // the third line, plainly off to the side
+const KMAX = 12; // greedy iterations run, whatever the number of true lines
+const DB_FLOOR = -80; // display floor, as in spectral/subspace
+const NFFT_REF = 4096; // the reference periodogram, independent of the search grid
 
-// The true lines, in decreasing amplitude: greedy takes them in this order, and
-// the room should be able to predict which one is picked next.
-const AMP = [1, 0.7, 0.5, 0.4, 0.3];
-const F_BASE = [20, null, 45, 12, 55]; // f2 is placed relative to f1 by `sep`
-
-/** The K true frequencies (Hz), given the separation and the grid offset. */
-export function trueFreqs(K, sep, offGrid, over) {
-  const cell = DF / over; // spacing of the SEARCH grid, not of the DFT
-  const f = [];
-  for (let k = 0; k < K; k++) {
-    const base = k === 1 ? F_BASE[0] + sep * DF : F_BASE[k];
-    f.push(base + offGrid * cell);
-  }
-  return f;
+/**
+ * The true frequencies (Hz).
+ *
+ * The first line is placed on the Fourier BIN nearest 200 Hz rather than at 200
+ * exactly, and that is not a detail: a search grid of nfft = over·N points has
+ * spacing FS/nfft, and 200 Hz is never one of them when nfft is a power of two.
+ * Anchoring on a bin makes "on the grid" mean exactly on the grid — which is
+ * what the exact-recovery claim needs — while staying within 2 Hz of the 200 Hz
+ * the neighbouring experiment uses.
+ *
+ * The second line sits Δf Fourier limits away, as in `subspace`; `offGrid`
+ * then slides it by a fraction of a SEARCH cell, which is the basis mismatch.
+ */
+export function trueFreqs(sources, df, offGrid, N, over) {
+  const cell = FS / N; // the Fourier limit
+  const grid = cell / over; // the search grid, finer by `over`
+  const f1 = Math.round(F1_TARGET / cell) * cell;
+  const f2 = f1 + df * cell + offGrid * grid;
+  const f3 = Math.round(F3_TARGET / cell) * cell;
+  return Number(sources) === 3 ? [f1, f2, f3] : [f1, f2];
 }
 
 /**
@@ -92,7 +105,7 @@ export function correlate(r, nfft) {
  * S_l e^{jθ} + conj(S_l) e^{−jθ} = a_l cos θ + b_l sin θ, which is the atom
  * pair. DC and Nyquist stay empty — they are not in the dictionary.
  */
-export function synthesize(a, b, nfft) {
+export function synthesize(a, b, nfft, n) {
   const L = nfft / 2 + 1;
   const re = new Float64Array(nfft);
   const im = new Float64Array(nfft);
@@ -103,8 +116,8 @@ export function synthesize(a, b, nfft) {
     im[nfft - l] = b[l] / 2;
   }
   ifft(re, im);
-  const y = new Float64Array(N);
-  for (let i = 0; i < N; i++) y[i] = nfft * re[i];
+  const y = new Float64Array(n);
+  for (let i = 0; i < n; i++) y[i] = nfft * re[i];
   return y;
 }
 
@@ -146,6 +159,44 @@ export function synthesize(a, b, nfft) {
  */
 export function lassoSolve(x, nfft, lambda, alpha = 1, maxIters = 200) {
   const L = nfft / 2 + 1;
+  const n = x.length;
+  // Every buffer the loop needs, allocated ONCE. Written the obvious way this
+  // function made four arrays of length L per iteration plus whatever
+  // correlate and synthesize allocated inside — several megabytes of garbage
+  // per solve, and the cost grew faster than the transform did. Nothing below
+  // allocates; the FFT work arrays are cleared and refilled instead.
+  const w = { re: new Float64Array(nfft), im: new Float64Array(nfft) };
+  const cc = new Float64Array(L);
+  const cs = new Float64Array(L);
+  const fit = new Float64Array(n);
+  const res = new Float64Array(n);
+  const na = new Float64Array(L);
+  const nb = new Float64Array(L);
+
+  /** Dᵀ·r into (cc, cs) — one forward transform. */
+  const analyse = (r) => {
+    w.re.fill(0);
+    w.im.fill(0);
+    w.re.set(r);
+    fft(w.re, w.im);
+    for (let l = 0; l < L; l++) {
+      cc[l] = w.re[l];
+      cs[l] = -w.im[l];
+    }
+  };
+  /** D·c into `out` — one inverse transform. */
+  const synth = (a, b, out) => {
+    w.re.fill(0);
+    w.im.fill(0);
+    for (let l = 1; l < L - 1; l++) {
+      w.re[l] = a[l] / 2;
+      w.im[l] = -b[l] / 2;
+      w.re[nfft - l] = a[l] / 2;
+      w.im[nfft - l] = b[l] / 2;
+    }
+    ifft(w.re, w.im);
+    for (let i = 0; i < n; i++) out[i] = nfft * w.re[i];
+  };
   // The step is α/‖DᵀD‖ = α·2/nfft. α = 1 is the CERTIFIED value — the one the
   // convergence proof needs — and it is deliberately a knob rather than a
   // constant, because it is not the fastest one and a lecture should be able to
@@ -156,8 +207,8 @@ export function lassoSolve(x, nfft, lambda, alpha = 1, maxIters = 200) {
   const tau = lambda * step;
   const a = new Float64Array(L);
   const b = new Float64Array(L);
-  let ya = new Float64Array(L);
-  let yb = new Float64Array(L);
+  const ya = new Float64Array(L);
+  const yb = new Float64Array(L);
   let t = 1;
   let used = maxIters;
   let prevObj = Infinity;
@@ -166,11 +217,9 @@ export function lassoSolve(x, nfft, lambda, alpha = 1, maxIters = 200) {
 
   for (let it = 0; it < maxIters; it++) {
     // gradient step at the momentum point: y + step·Dᵀ(x − D y)
-    const r = synthesize(ya, yb, nfft);
-    for (let i = 0; i < N; i++) r[i] = x[i] - r[i];
-    const { cc, cs } = correlate(r, nfft);
-    const na = new Float64Array(L);
-    const nb = new Float64Array(L);
+    synth(ya, yb, fit);
+    for (let i = 0; i < n; i++) res[i] = x[i] - fit[i];
+    analyse(res);
     for (let l = 1; l < L - 1; l++) {
       const ga = ya[l] + step * cc[l];
       const gb = yb[l] + step * cs[l];
@@ -184,9 +233,9 @@ export function lassoSolve(x, nfft, lambda, alpha = 1, maxIters = 200) {
     }
     // The objective, which is what tells convergence from divergence and what
     // the restart below watches.
-    const fit = synthesize(na, nb, nfft);
+    synth(na, nb, fit);
     let f = 0;
-    for (let i = 0; i < N; i++) f += (x[i] - fit[i]) ** 2;
+    for (let i = 0; i < n; i++) f += (x[i] - fit[i]) ** 2;
     f /= 2;
     for (let l = 1; l < L - 1; l++) f += lambda * Math.hypot(na[l], nb[l]);
     obj.push(f);
@@ -210,13 +259,11 @@ export function lassoSolve(x, nfft, lambda, alpha = 1, maxIters = 200) {
     prevObj = f;
 
     const tn = (1 + Math.sqrt(1 + 4 * t * t)) / 2;
-    const w = (t - 1) / tn;
-    ya = new Float64Array(L);
-    yb = new Float64Array(L);
+    const mom = (t - 1) / tn;
     let move = 0;
     for (let l = 1; l < L - 1; l++) {
-      ya[l] = na[l] + w * (na[l] - a[l]);
-      yb[l] = nb[l] + w * (nb[l] - b[l]);
+      ya[l] = na[l] + mom * (na[l] - a[l]);
+      yb[l] = nb[l] + mom * (nb[l] - b[l]);
       move = Math.max(move, Math.abs(na[l] - a[l]), Math.abs(nb[l] - b[l]));
       a[l] = na[l];
       b[l] = nb[l];
@@ -248,7 +295,7 @@ export function lambdaMax(x, nfft) {
 
 /** The two atoms of grid frequency `g`, written into ca/sa. */
 function atoms(g, ca, sa) {
-  for (let i = 0; i < N; i++) {
+  for (let i = 0; i < ca.length; i++) {
     const w = (2 * Math.PI * g * i) / FS;
     ca[i] = Math.cos(w);
     sa[i] = Math.sin(w);
@@ -262,6 +309,7 @@ function atoms(g, ca, sa) {
  * @returns {{coef: Float64Array, approx: Float64Array}} 2 coefficients per freq
  */
 export function fitSet(x, freqs) {
+  const N = x.length;
   const p = 2 * freqs.length;
   const cols = [];
   for (const g of freqs) {
@@ -306,6 +354,7 @@ const energy = (a) => {
  * @returns per-iteration support, residual energy, and the orthogonality defect
  */
 export function pursuit(x, nfft, orthogonal) {
+  const N = x.length;
   const L = nfft / 2 + 1;
   const support = []; // grid indices, in the order chosen
   const resE = [energy(x)];
@@ -362,29 +411,31 @@ export function pursuit(x, nfft, orthogonal) {
 }
 
 /**
- * @param {{K: number, sep: number, offGrid: number, over: number, snr: number,
- *          algo: string, k: number, seed: number}} params
+ * @param {{sources: number, df: number, offGrid: number, N: number,
+ *          over: number, snr: number, algo: string, k: number, lam: number,
+ *          alpha: number, seed: number}} params
  */
-export function compute({ K, sep, offGrid, over, snr, algo, k, lam, alpha, seed }) {
+export function compute({ sources, df, offGrid, N, over, snr, algo, k, lam, alpha, seed }) {
   const rng = mulberry32(seed);
   const gauss = gaussFrom(rng);
   const nfft = over * N;
   const L = nfft / 2 + 1;
 
-  /* ---------- the signal -------------------------------------------------- */
-  const freqs = trueFreqs(K, sep, offGrid, over);
+  /* ---------- the signal, built exactly as spectral/subspace builds it ----- */
+  const freqs = trueFreqs(sources, df, offGrid, N, over);
   const phases = freqs.map(() => 2 * Math.PI * rng());
   const t = new Float64Array(N);
   const clean = new Float64Array(N);
   for (let i = 0; i < N; i++) {
     t[i] = i / FS;
     let v = 0;
-    for (let j = 0; j < K; j++) v += AMP[j] * Math.cos(2 * Math.PI * freqs[j] * t[i] + phases[j]);
+    for (let j = 0; j < freqs.length; j++) v += Math.cos(2 * Math.PI * freqs[j] * t[i] + phases[j]);
     clean[i] = v;
   }
-  // SNR is defined on the signal power, so the same dB means the same thing
-  // whatever K and the amplitudes are
-  const sigma = Math.sqrt(energy(clean) / N / Math.pow(10, snr / 10));
+  // SNR PER LINE, the same convention as the neighbouring experiment: a unit
+  // real sinusoid carries a power of 1/2, so the same number of decibels means
+  // the same thing on both screens.
+  const sigma = noiseSigma(0.5, snr);
   const x = new Float64Array(N);
   for (let i = 0; i < N; i++) x[i] = clean[i] + sigma * gauss();
 
@@ -401,14 +452,14 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, lam, alpha, seed 
   const lMax = lambdaMax(x, nfft);
   const lambda = lam * lMax;
   const sol = isLasso ? lassoSolve(x, nfft, lambda, alpha) : null;
-  const lassoReco = sol ? synthesize(sol.a, sol.b, nfft) : null;
+  const lassoReco = sol ? synthesize(sol.a, sol.b, nfft, N) : null;
 
   /* ---------- the periodogram, and the grid ------------------------------- */
   const gf = new Float64Array(L);
   for (let l = 0; l < L; l++) gf[l] = (l * FS) / nfft;
   const { mag: px } = correlate(x, nfft);
   const pkMax = Math.max(...px, 1e-300);
-  const toDb = (v) => Math.max(20 * Math.log10(Math.max(v, 1e-300) / pkMax), FLOOR_DB);
+  const toDb = (v) => Math.max(20 * Math.log10(Math.max(v, 1e-300) / pkMax), DB_FLOOR);
   const pdb = Float64Array.from(px, toDb);
 
   // what the greedy sees AT iteration kk, on the same dB scale
@@ -514,10 +565,8 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, lam, alpha, seed 
       resMp: { x: its, y: Float64Array.from(mp.resE, relDb) },
 
       fTrue1: freqs[0],
-      fTrue2: K > 1 ? freqs[1] : NaN,
-      fTrue3: K > 2 ? freqs[2] : NaN,
-      fTrue4: K > 3 ? freqs[3] : NaN,
-      fTrue5: K > 4 ? freqs[4] : NaN,
+      fTrue2: freqs[1],
+      fTrue3: freqs.length > 2 ? freqs[2] : NaN,
 
       // Bare scalars: no meta.label, so they stay out of the statline, which
       // only has room for what a lecture actually reads. The size of the
@@ -529,7 +578,7 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, lam, alpha, seed 
         // |⟨d_l, d_{l+1}⟩| between neighbouring atoms of the search grid: the
         // number that says how hard the problem is. It goes UP as the grid is
         // refined, which is the point of scene 4.
-        value: neighbourCoherence(FS / nfft),
+        value: neighbourCoherence(FS / nfft, N),
         meta: { label: 'coherence', precision: 3 },
       },
       resDb: relDb(isLasso ? energy(Float64Array.from(x, (v, i) => v - lassoReco[i])) : main.resE[kk]),
@@ -565,7 +614,7 @@ export function compute({ K, sep, offGrid, over, snr, algo, k, lam, alpha, seed 
  * columns of the dictionary look alike"; at δ = the Fourier cell it is 0, and it
  * tends to 1 as the grid is refined.
  */
-export function neighbourCoherence(delta) {
+export function neighbourCoherence(delta, N) {
   const a = (Math.PI * delta * N) / FS;
   if (Math.abs(Math.sin(a / N)) < 1e-15) return 1;
   return Math.abs(Math.sin(a) / (N * Math.sin(a / N)));
@@ -584,4 +633,4 @@ function verdictOf(algo, dup, orth, offGrid, nnz, iters, diverged) {
   return algo === 'mp' ? 'MP, no re-selection' : 'OMP, residual orthogonal';
 }
 
-export { N, FS, DF, KMAX, AMP };
+export { FS, KMAX, DB_FLOOR };

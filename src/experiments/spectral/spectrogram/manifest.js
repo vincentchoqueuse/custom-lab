@@ -4,7 +4,7 @@ import { view, custom, figure, line, vline, hline } from '../../../core/views.js
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'spectrogram',
-  order: 5,
+  order: 6,
   title: 'The spectrogram',
   subtitle: 'Seeing time AND frequency — at the price of the Gabor trade-off',
   tags: ['digital', 'STFT', 'time–frequency', 'chirp', 'Gabor'],

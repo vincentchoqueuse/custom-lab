@@ -1,5 +1,12 @@
 import { float, int, log, select } from '../../../core/fields.js';
 import { view, figure, line, stem, scatter, vline, hline } from '../../../core/views.js';
+import { fWindow } from '../_lib/frame.js';
+
+/** The SAME frequency window as spectral/subspace, from the same module. The
+ *  two experiments are meant to be read one after the other on the same pair of
+ *  lines, and a frame that differed by a few hertz would make them look like
+ *  different signals. */
+const F_AXIS = { label: 'f', unit: 'Hz', domain: fWindow };
 
 /** The true frequencies, as verticals — the same on the two frequency views,
  *  declared once so that they cannot drift apart. A line beyond K comes back
@@ -8,38 +15,61 @@ const TRUTH = [
   vline('fTrue1', { color: '#EDB120', dashed: true, width: 1.6, label: 'true lines' }),
   vline('fTrue2', { color: '#EDB120', dashed: true, width: 1.6 }),
   vline('fTrue3', { color: '#EDB120', dashed: true, width: 1.6 }),
-  vline('fTrue4', { color: '#EDB120', dashed: true, width: 1.6 }),
-  vline('fTrue5', { color: '#EDB120', dashed: true, width: 1.6 }),
 ];
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'sparse-recovery',
-  order: 5, // straight after frequency-estimation, which it generalizes
+  // Straight after the high-resolution methods, and that order is the argument:
+  // MUSIC and ESPRIT are HANDED the number of lines, this one is not. The same
+  // signal, the same window, the same decibels — and the question the previous
+  // experiment left open.
+  order: 5,
   random: true, // noise and phases are drawn
   title: 'Sparse recovery',
-  subtitle: 'More unknowns than samples — and a greedy algorithm that picks the few that matter',
-  tags: ['sparsity', 'matching pursuit', 'OMP', 'dictionary', 'greedy', 'coherence', 'CLEAN'],
+  subtitle: 'The same two lines — but nobody says how many there are',
+  tags: ['sparsity', 'matching pursuit', 'OMP', 'lasso', 'dictionary', 'greedy', 'coherence', 'CLEAN'],
 
   params: {
-    K: int('K', { description: 'true lines in the signal', min: 1, max: 5, default: 3 }),
-    sep: float('Δf', {
-      description: 'separation of the first two lines',
-      min: 0.5,
-      max: 8,
-      step: 0.25,
-      default: 3,
-      unit: 'cells',
+    // The first five are spectral/subspace's own parameters, with the same
+    // names, the same units and the same defaults, so that switching between
+    // the two experiments changes the METHOD and nothing else.
+    sources: select('sources', {
+      description: 'number of lines actually present — and NOT given to the algorithm',
+      options: [
+        { value: 2, label: '2 (two close lines)' },
+        { value: 3, label: '3 (+ one line further off)' },
+      ],
+      default: 2,
+    }),
+    df: float('Δf', {
+      description: 'gap between the two lines, in units of the Fourier limit Fs/N',
+      min: 0.05,
+      max: 3,
+      step: 0.05,
+      // 1.5 and not the neighbour's 0.5: a greedy pursuit needs the lines to be
+      // resolved by the DICTIONARY, and 0.5 is exactly where it fails while
+      // MUSIC succeeds. That comparison is a scene, not the landing state.
+      default: 1.5,
       precision: 2,
     }),
-    offGrid: float('δ', {
-      description: 'offset of the lines from the grid (½ = worst case)',
-      min: 0,
-      max: 0.5,
-      step: 0.05,
-      default: 0,
-      unit: 'cell',
-      precision: 2,
+    snr: float('SNR', {
+      description: 'signal-to-noise ratio per line',
+      min: -10,
+      max: 50,
+      step: 1,
+      default: 25,
+      unit: 'dB',
+      precision: 0,
+    }),
+    N: select('N', {
+      description: 'record length (Fs = 1 kHz)',
+      options: [
+        { value: 128, label: '128' },
+        { value: 256, label: '256' },
+        { value: 512, label: '512' },
+      ],
+      default: 256,
     }),
     over: select('grid', {
       description: 'candidate frequencies per Fourier cell',
@@ -47,18 +77,17 @@ export default {
         { value: 1, label: '×1 — one atom per cell' },
         { value: 2, label: '×2' },
         { value: 4, label: '×4' },
-        { value: 8, label: '×8 — 513 atoms for 128 samples' },
       ],
       default: 2,
     }),
-    snr: float('SNR', {
-      description: 'signal-to-noise ratio',
+    offGrid: float('δ', {
+      description: 'offset of the lines from the search grid (½ = worst case)',
       min: 0,
-      max: 60,
-      step: 1,
-      default: 15, // low enough that the noise is VISIBLE on the time view
-      unit: 'dB',
-      precision: 0,
+      max: 0.5,
+      step: 0.05,
+      default: 0,
+      unit: 'cell',
+      precision: 2,
     }),
     algo: select('algorithm', {
       description: 'how the sparsity is imposed',
@@ -77,12 +106,10 @@ export default {
       description: 'iteration read — greedy only',
       min: 0,
       max: 12,
-      default: 3,
+      default: 2,
       visibleIf: { algo: ['omp', 'mp'] },
     }),
     lam: log('λ', {
-      // as a FRACTION of λmax = ‖Dᵀx‖∞, so the pill means the same thing at any
-      // amplitude or noise level, and λ = λmax is exactly where c becomes zero
       description: 'penalty, as a fraction of the λ that zeroes everything',
       min: 1e-3,
       max: 1,
@@ -91,11 +118,6 @@ export default {
       visibleIf: { algo: 'lasso' },
     }),
     alpha: float('α', {
-      // The FISTA step, as a multiple of the certified 1/‖DᵀD‖. A knob and not
-      // a constant on purpose: α = 1 is what the convergence proof requires,
-      // and it is NOT the fastest — the useful lesson is the gap between a
-      // guarantee and an optimum, and the edge where the guarantee stops being
-      // optional.
       description: 'FISTA step, in units of the certified 1/L',
       min: 0.25,
       max: 2,
@@ -107,18 +129,31 @@ export default {
     // seed injected by the core, because random: true
   },
 
+  validate: [
+    {
+      // FISTA runs two transforms of length N·over per iteration; past 1024 the
+      // solve leaves the range where a slider can be dragged.
+      when: (p) => p.N * p.over > 1024,
+      message: 'N × grid must stay ≤ 1024 to keep the solver responsive',
+    },
+  ],
+
   groups: [
-    { title: 'Signal', params: ['K', 'sep', 'snr'] },
+    { title: 'Signal', params: ['sources', 'df', 'snr', 'N'] },
     { title: 'Dictionary', params: ['over', 'offGrid'] },
     { title: 'Algorithm', params: ['algo', 'k', 'lam', 'alpha'] },
   ],
 
   derived: {
-    // What decides whether the problem is hard, computed where the room can
-    // check it: 128 samples against however many columns the grid has.
+    // The two numbers that decide whether the problem is hard, next to each
+    // other: the Fourier limit the neighbouring experiment beats, and the shape
+    // of the system this one has to solve.
+    fourierLimit: { label: 'Fourier limit Fs/N', calc: (p) => `${(1000 / p.N).toFixed(2)} Hz` },
     shape: {
-      label: 'D is 128 ×',
-      calc: (p) => `${2 * (64 * p.over + 1)} columns — ${p.over > 1 ? 'underdetermined' : 'square'}`,
+      label: 'D is N ×',
+      calc: (p) =>
+        `${2 * ((p.N * p.over) / 2 + 1)} columns for ${p.N} samples — ` +
+        `${p.over > 1 ? 'underdetermined' : 'square'}`,
     },
   },
 
@@ -131,7 +166,7 @@ export default {
     // that it cannot. The statline reads that as an SNR the room can compare
     // with the one it dialled in.
     figure(
-      'fit',
+      'time',
       line('signal', {
         color: '#a1a1aa',
         width: 1.1,
@@ -157,7 +192,7 @@ export default {
             color: '#0072BD',
             size: 5,
             width: 2,
-            baseline: -60,
+            baseline: -80,
             label: 'recovered lines',
           }),
           // lasso only: the same support refitted by plain least squares. The
@@ -167,15 +202,12 @@ export default {
             color: '#77AC30',
             size: 4,
             width: 1.6,
-            baseline: -60,
+            baseline: -80,
             label: 'debiased (LS refit)',
           }),
           ...TRUTH,
         ],
-        axes: {
-          x: { label: 'f', unit: 'Hz' },
-          y: { label: 'magnitude', unit: 'dB', domain: [-60, 5] },
-        },
+        axes: { x: F_AXIS, y: { label: '|X(f)|', unit: 'dB', domain: [-80, 5] } },
       })
     ),
 
@@ -198,10 +230,7 @@ export default {
           hline('lambdaLine', { color: '#77AC30', dashed: true, width: 1.8, label: 'λ' }),
           ...TRUTH,
         ],
-        axes: {
-          x: { label: 'f', unit: 'Hz' },
-          y: { label: 'correlation', unit: 'dB', domain: [-60, 5] },
-        },
+        axes: { x: F_AXIS, y: { label: 'correlation', unit: 'dB', domain: [-80, 5] } },
       })
     ),
 

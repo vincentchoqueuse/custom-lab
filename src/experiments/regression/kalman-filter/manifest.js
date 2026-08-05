@@ -4,7 +4,7 @@ import { view, line, scatter, band, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'kalman-filter',
-  order: 6,
+  order: 5,
   random: true,
   title: 'The Kalman filter',
   subtitle: 'Recursive estimation: predict, correct, and know by how much you are wrong',
