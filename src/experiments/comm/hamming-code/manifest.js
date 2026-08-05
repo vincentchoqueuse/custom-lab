@@ -4,7 +4,7 @@ import { view, line, scatter, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'hamming-code',
-  order: 6, // coding opens here, once the link itself is understood
+  order: 7, // coding opens here, once the link itself is understood
   random: true,
   title: 'The Hamming (7,4) code',
   subtitle: 'Correcting one error per frame — and the real price of the rate given up',

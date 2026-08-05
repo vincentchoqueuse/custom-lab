@@ -271,7 +271,8 @@ const ACCENTED_OK = new Set(['moiré', 'Cramér']);
 /** Word-shaped param names, the closed list. A symbol is not a word. */
 const NAME_WORDS = new Set([
   'activation', 'algorithm', 'basis', 'code', 'dataset', 'den', 'distribution', 'dither',
-  'family', 'function', 'grid', 'image', 'input', 'mapping', 'method', 'mode', 'modulation',
+  'equalizer', 'family', 'function', 'grid', 'image', 'input', 'mapping', 'method', 'mode',
+  'modulation',
   'num', 'outlier', 'output', 'pulse', 'signal', 'source', 'sources', 'stage', 'standardize',
   'structure', 'system', 'table', 'target', 'tracking', 'window', 'zero-padding',
 ]);

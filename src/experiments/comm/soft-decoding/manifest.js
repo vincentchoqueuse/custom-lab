@@ -4,7 +4,7 @@ import { view, line, scatter, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'soft-decoding',
-  order: 7,
+  order: 8,
   random: true,
   title: 'Soft decoding against hard decoding',
   subtitle: 'Do not throw away the confidence: ~2 dB free, same bits, same code',
