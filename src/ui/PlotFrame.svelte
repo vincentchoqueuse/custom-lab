@@ -13,10 +13,28 @@
   // the LIVE svg is a direct child of .plot-area (the ghost's clone is not)
   const liveSvg = () => frameEl?.querySelector('.plot-area > svg.plot-svg');
 
+  /**
+   * The crosshair and its capture surface are marked `data-transient` and are
+   * removed from every CLONE — the SVG export, the PNG, the freeze ghost.
+   *
+   * They read the plot; they are not part of it. And `F` is a keyboard
+   * shortcut, so it fires perfectly happily while the pointer is sitting on
+   * the curve: without this, the ghost would carry a rule and a readout from
+   * the moment it was taken, and every later comparison would be made against
+   * a picture with a stray line in it.
+   */
+  function stripTransient(node) {
+    for (const el of node.querySelectorAll('[data-transient]')) el.remove();
+    return node;
+  }
+
   onMount(() => {
     // freeze-frame: hand the store a way to snapshot the rendered SVG —
     // works for any view, declarative or custom, without touching them
-    registerGhostCapturer(() => liveSvg()?.outerHTML ?? null);
+    registerGhostCapturer(() => {
+      const svg = liveSvg();
+      return svg ? stripTransient(svg.cloneNode(true)).outerHTML : null;
+    });
   });
 
   const obs = $derived(app.result.observables);
@@ -30,11 +48,34 @@
       : []
   );
 
-  function statText([, o]) {
-    if (o.type === 'text') return `${o.meta.label} : ${o.value}`;
-    const unit = o.meta.unit ? ` ${o.meta.unit}` : '';
-    return `${o.meta.label} = ${formatValue(o.value, o.meta.precision)}${unit}`;
+  /** The value as the room reads it — no label, no unit. */
+  function shown(o, v) {
+    return o.type === 'text' ? String(v) : formatValue(v, o.meta.precision);
   }
+
+  // FROZEN, the statline reads `coverage = 0.948 → 0.812`.
+  //
+  // Freezing pins the picture and asks "has the shape changed"; the next
+  // question a room asks is always "by how much", and the old number had gone
+  // the instant the slider moved. The before-value is shown only when it
+  // DIFFERS as displayed — comparing the formatted strings, not the floats, so
+  // a change below the reading's own precision does not produce an arrow
+  // between two identical numbers.
+  const readings = $derived(
+    scalars.map(([key, o]) => {
+      const now = shown(o, o.value);
+      const raw = app.ghostStats?.[key];
+      const before = raw === undefined ? null : shown(o, raw);
+      return {
+        key,
+        label: o.meta.label,
+        sep: o.type === 'text' ? ' : ' : ' = ',
+        unit: o.type === 'text' || !o.meta.unit ? '' : ` ${o.meta.unit}`,
+        now,
+        before: before !== null && before !== now ? before : null,
+      };
+    })
+  );
 
   /* ---------- export ------------------------------------------------------ */
 
@@ -43,6 +84,7 @@
     if (!svg) return null;
     const vb = svg.viewBox.baseVal;
     const clone = svg.cloneNode(true);
+    stripTransient(clone);
     clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     clone.setAttribute('width', vb.width);
     clone.setAttribute('height', vb.height);
@@ -127,7 +169,13 @@
   </div>
   <div class="statline">
     <span class="stats mono">
-      {scalars.map(statText).join('  ·  ')}
+      {#each readings as r, i (r.key)}
+        {#if i > 0}<span class="dot">·</span>{/if}<span class="reading"
+          >{r.label}{r.sep}{#if r.before}<span class="was">{r.before}</span><span class="arrow"
+              >→</span
+            >{/if}{r.now}{r.unit}</span
+        >
+      {/each}
     </span>
     {#if app.ghost}
       <span class="frozen-chip"><Icon name="snowflake" size={12} /> {STR.FROZEN}</span>

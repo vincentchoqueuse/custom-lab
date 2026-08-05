@@ -19,6 +19,12 @@ export const app = $state({
   // freeze-frame ghost: SVG snapshot markup, or null. Display state ONLY —
   // never serialized in the URL (not link-reproducible, by design).
   ghost: null,
+  // The READINGS at the moment of the freeze — the statline's half of the
+  // ghost. A frozen picture answers "has the shape changed"; the room's next
+  // question is always "by how much", and until now the old number was gone
+  // the instant the slider moved. Same lifetime as the ghost, same rule:
+  // display state, never in the URL. `{ observableName: value }`.
+  ghostStats: null,
   // axis lock: while true, each declarative plot pins the domains it had when
   // it was switched on, so moving a parameter moves the CURVE, not the frame.
   // Display state ONLY — never in the URL, like the ghost.
@@ -160,6 +166,7 @@ function handleHash() {
   app.revealed = false;
   app.notice = '';
   app.ghost = null;
+  app.ghostStats = null;
   app.axisLock = scene?.lock ?? false;
   app.hidden = [];
   app.result = { status: 'idle', observables: null, message: '' };
@@ -251,6 +258,7 @@ export function showAllSeries() {
 export function setView(id) {
   app.view = id;
   app.ghost = null; // a ghost from another view would be a misleading overlay
+  app.ghostStats = null;
   app.axisLock = false; // another view's frame means nothing here
   app.hidden = []; // another view's labels have nothing to hide here
   syncUrl(true);
@@ -282,9 +290,26 @@ const actionApi = {
     app.revealed = true;
   },
   toggleFreeze: () => {
-    app.ghost = app.ghost ? null : (ghostCapturer?.() ?? null);
+    if (app.ghost) {
+      app.ghost = null;
+      app.ghostStats = null;
+      return;
+    }
+    app.ghost = ghostCapturer?.() ?? null;
+    // The numbers are snapshotted HERE and not by the capturer: they are
+    // already in the store, and reading them from the DOM would freeze the
+    // formatting rather than the value.
+    app.ghostStats = app.ghost ? snapshotReadings() : null;
   },
 };
+
+/** The scalar and text readings, by observable name — what the statline shows. */
+function snapshotReadings() {
+  const out = {};
+  for (const [k, o] of Object.entries(app.result.observables ?? {}))
+    if ((o.type === 'scalar' || o.type === 'text') && o.meta?.label) out[k] = o.value;
+  return out;
+}
 
 export function runAction(id) {
   // An experiment that declares no seed has no randomizeSeed button — and

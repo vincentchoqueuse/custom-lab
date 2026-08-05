@@ -25,6 +25,16 @@
   // It follows the canvas, or two panels on a phone are mostly gap.
   const gap = $derived(app.ui.narrow ? 22 : 30);
   const iw = $derived(F.iw);
+
+  // ONE rule across every panel, at one instant. This is the whole reason the
+  // abscissa is owned up here: two panels each tracking their own pointer would
+  // agree to within a pixel and disagree in the reading, on the one figure
+  // built to be read straight down.
+  let cursorX = $state(null);
+  $effect(() => {
+    spec;
+    cursorX = null;
+  });
   const panelH = $derived((F.ih - gap * (spec.panels.length - 1)) / spec.panels.length);
 
   // The stack's own axes.x and overlays belong to the ABSCISSA, so every panel
@@ -66,6 +76,9 @@
       {iw}
       ih={panelH}
       xDomainForced={xDomain}
+      {cursorX}
+      dataX={cursorX}
+      onhover={(v) => (cursorX = v)}
       showXTicks={i === panelSpecs.length - 1}
       showLegend={i === 0}
       uid={`stack-${i}`}

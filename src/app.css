@@ -796,6 +796,22 @@ kbd {
   color: #a1a1aa;
 }
 
+/* Freeze delta: the value the plot was frozen at, then the current one. The
+   old number is muted and the arrow more so — the reading the room needs is
+   the one on the right, and the one on the left is context. */
+.statline .was {
+  color: var(--muted-foreground);
+}
+.statline .arrow {
+  color: var(--muted-foreground);
+  opacity: 0.7;
+  padding: 0 0.28em;
+}
+.statline .dot {
+  color: var(--muted-foreground);
+  padding: 0 0.6em;
+}
+
 .statline {
   display: flex;
   align-items: center;

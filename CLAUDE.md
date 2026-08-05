@@ -240,7 +240,31 @@ the browser Fullscreen API (native `Esc` exit).
   the ghost; `Esc` or `F` again clears it. Universal implementation: snapshot of the
   rendered SVG (grayed DOM clone under the plot), which works for any view —
   declarative or custom — without touching views or compute. The ghost is display
-  state, NOT in the URL (not link-reproducible, by design).
+  state, NOT in the URL (not link-reproducible, by design). **The statline
+  freezes with it**: while a ghost exists every reading shows `coverage =
+  0.948 → 0.812`, the frozen value muted before the current one, and only where
+  the two DIFFER as displayed — comparing the formatted strings, so a change
+  below a reading's own precision does not put an arrow between two identical
+  numbers. A frozen picture answers "has the shape changed"; the room's next
+  question is always "by how much", and the old number used to be gone the
+  instant the slider moved.
+- **Crosshair readout**: pointing at a declarative plot draws a rule at the
+  sample under the pointer, a dot on every visible series and its value beside
+  it, with the abscissa on the axis. "And at 3 Hz, what is it?" is the question
+  a room asks most often about a curve, and reading it off pixels was the only
+  answer available. The rule SNAPS to the sample it reads — rule, dots and
+  abscissa are then one place instead of three — which on a dense curve is
+  invisible and on a stem plot of 24 symbols is the truth: a sampled signal has
+  no value between two samples. A stack draws ONE rule through all its panels
+  at one instant, which is what makes reading Re and Im straight down a
+  reading rather than two. Mouse and pen only: tracking a finger needs
+  `touch-action: none` over most of a phone screen, and the page would stop
+  scrolling under the reader's thumb. Purely transient — it lives while the
+  pointer is over the frame, so it is in neither the URL nor the `Esc` chain —
+  and marked `data-transient`, which the SVG export and the freeze ghost strip
+  from their clones, because `F` fires perfectly happily while the pointer sits
+  on the curve. Equal-aspect planes and custom views do not carry it: a
+  vertical rule answers a different question on a plane.
 - **Legend toggle**: clicking a legend chip hides or shows that series
   (keyboard: focus the chip, `Enter`). On a view that stacks three
   estimators, "look at this one alone" is the gesture a hand makes in front

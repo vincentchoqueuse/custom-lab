@@ -21,6 +21,7 @@
   import HLine from './HLine.svelte';
   import Density from './Density.svelte';
   import Band from './Band.svelte';
+  import Crosshair from './Crosshair.svelte';
 
   let {
     spec,
@@ -47,6 +48,14 @@
     uid,
     // the frame's margin, so the axis names are placed from it
     m,
+    // CROSSHAIR. The abscissa the pointer is on, in DATA units, owned by the
+    // parent: a stack's panels must draw one rule at one instant, and a panel
+    // that tracked its own would let the two drift apart by a pixel and make
+    // the reading a lie. `onhover` reports; `cursorX` is what gets drawn.
+    cursorX = null,
+    onhover = null,
+    // the raw pointer abscissa, printed under the rule
+    dataX = null,
   } = $props();
 
   // the primitives' fallback colors, resolved here so the palette remap
@@ -123,6 +132,63 @@
   // there is nothing to click.
   const shown = $derived(layers.filter((l) => !l.s.label || !app.hidden.includes(l.s.label)));
   const legend = $derived(legendOf(layers));
+
+  /* ---------- crosshair ---------------------------------------------------- */
+
+  // NEAREST SAMPLE per drawn series. Linear: the abscissa is not always sorted
+  // (a scatter is not) and a series may carry NaN separators (the eye diagram
+  // is one long broken path), so a bisection would be wrong on exactly the
+  // views where it would be fastest. 40 000 points — the worst in the
+  // catalogue — cost about a third of a millisecond per pointer move.
+  const hits = $derived.by(() => {
+    if (cursorX == null) return [];
+    const out = [];
+    for (const l of shown) {
+      if (!l.pts || l.pts.length === 0) continue;
+      let best = null;
+      let bd = Infinity;
+      for (const p of l.pts) {
+        if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) continue;
+        const d = Math.abs(p.x - cursorX);
+        if (d < bd) {
+          bd = d;
+          best = p;
+        }
+      }
+      if (!best) continue;
+      const px = xs(best.x);
+      const py = ys(best.y);
+      // a sample scaled outside the frame is clipped away for the curves, and
+      // reading it here would put a dot on the axis with no curve under it
+      if (!Number.isFinite(px) || !Number.isFinite(py) || py < 0 || py > ih) continue;
+      out.push({ px, py, x: best.x, y: best.y, color: l.s.color ?? '#0072BD' });
+    }
+    return out;
+  });
+
+  // the rule stands on the sample it reads (see Crosshair), so everything the
+  // crosshair draws shares one abscissa
+  const snapX = $derived(hits.length ? hits[0].x : cursorX);
+  const cursorPx = $derived(snapX == null ? null : xs(snapX));
+  const cursorIn = $derived(
+    cursorPx != null && Number.isFinite(cursorPx) && cursorPx >= 0 && cursorPx <= iw
+  );
+
+  /**
+   * Pointer → data abscissa. `xs.invert` is pixel arithmetic, which is the one
+   * computation a view is allowed.
+   *
+   * MOUSE AND PEN ONLY. Tracking a finger would need `touch-action: none` on
+   * the plot, and the plot is most of a phone screen: the page would stop
+   * scrolling under the reader's thumb. A phone reads the figure; a lecture
+   * hall reads the values.
+   */
+  function track(e) {
+    if (!onhover || e.pointerType === 'touch') return;
+    const r = e.currentTarget.getBoundingClientRect();
+    if (r.width === 0) return;
+    onhover(xs.invert(((e.clientX - r.left) / r.width) * iw));
+  }
 </script>
 
 <defs>
@@ -159,7 +225,38 @@
       {/if}
     {/each}
   </g>
+  {#if cursorIn && hits.length}
+    <Crosshair {hits} x={cursorPx} dataX={snapX} {ih} {iw} {kt} showAbscissa={showXTicks} />
+  {/if}
+  {#if onhover}
+    <!-- the capture surface, over everything and drawing nothing: an SVG
+         element only receives pointer events where it is painted, so a
+         transparent fill is what makes the whole frame trackable -->
+    <rect
+      data-transient="capture"
+      class="crosshair-capture"
+      x="0"
+      y="0"
+      width={iw}
+      height={ih}
+      fill="transparent"
+      onpointermove={track}
+      onpointerleave={() => onhover(null)}
+    />
+  {/if}
+  <!-- LAST, and that is not cosmetic: the capture surface above covers the
+       whole inner frame, and the legend chips live inside it. Drawn before it
+       they became unclickable — a chip that looks like a button and hides
+       nothing is worse than no button, which is what the legend suite exists
+       to say. Above the surface they keep their clicks, and the surface keeps
+       the pointer everywhere else. -->
   {#if showLegend}
     <Legend entries={legend} {iw} {kt} side={spec.legend ?? 'right'} />
   {/if}
 </g>
+
+<style>
+  .crosshair-capture {
+    cursor: crosshair;
+  }
+</style>
