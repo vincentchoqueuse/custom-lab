@@ -41,6 +41,7 @@ import {
 const N_ITER = 3000; // adaptation iterations
 const N_RUNS = 24; // realizations averaged for the learning curve
 const SWITCH_AT = 1500; // the channel jumps halfway, in tracking mode
+const N_WIN = 240; // iterations shown on the signal view, ending at n
 
 /**
  * @param {{algo: string, mu: number, lambda: number, L: number, a: number,
@@ -69,6 +70,8 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
   const exc = new Float64Array(N_ITER);
   let wPath = null;
   let wFinal = null;
+  let dSig = null;
+  let ySig = null;
   let diverged = false;
   for (let r = 0; r < N_RUNS; r++) {
     const gauss = gaussFrom(mulberry32(seed + r * 7919));
@@ -86,6 +89,7 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
       sigmaV,
       gauss,
       keepPath: r === 0,
+      keepSignals: r === 0,
       R,
     });
     for (let i = 0; i < N_ITER; i++) {
@@ -95,6 +99,8 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
     if (r === 0) {
       wPath = res.wPath;
       wFinal = res.wFinal;
+      dSig = res.dSig;
+      ySig = res.ySig;
     }
     diverged = diverged || res.diverged;
   }
@@ -181,6 +187,25 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
 
   /* ---------- the coefficients at the chosen iteration -------------------- */
   const nIdx = Math.min(Math.max(Math.round(n), 1), N_ITER) - 1;
+
+  /* ---------- WHAT THE ALGORITHM IS WORKING ON ---------------------------- */
+  // The last N_WIN iterations up to n, of the first realization: the reference
+  // d(n) the filter is chasing, the output y(n) it produces, and the error
+  // between them that drives every update. Sliding n walks the window forward
+  // and the two traces close on each other — the adaptation, seen on the
+  // signals rather than on a statistic of them.
+  const winLo = Math.max(0, nIdx - N_WIN + 1);
+  const nWin = nIdx - winLo + 1;
+  const wx0 = new Float64Array(nWin);
+  const dWin = new Float64Array(nWin);
+  const yWin = new Float64Array(nWin);
+  const eWin = new Float64Array(nWin);
+  for (let i = 0; i < nWin; i++) {
+    wx0[i] = winLo + i + 1;
+    dWin[i] = dSig[winLo + i];
+    yWin[i] = ySig[winLo + i];
+    eWin[i] = dWin[i] - yWin[i];
+  }
   const taps = new Float64Array(L);
   const tapsTrue = new Float64Array(L);
   const idx = new Float64Array(L);
@@ -254,6 +279,11 @@ export function compute({ algo, mu, lambda, L, a, snr, n, track, seed }) {
 
   return {
     observables: {
+      // what the algorithm is working on, at iteration n
+      refSig: { x: wx0, y: dWin },
+      outSig: { x: wx0, y: yWin },
+      errSig: { x: wx0, y: eWin },
+
       // the learning curve, and what it aims at
       learning: { x: iters, y: mseDb },
       floorDb,

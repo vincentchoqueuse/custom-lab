@@ -161,6 +161,7 @@ export function runAdaptive({
   sigmaV,
   gauss,
   keepPath = false,
+  keepSignals = false,
   R = null,
   p0 = 1e4,
 }) {
@@ -168,6 +169,13 @@ export function runAdaptive({
   const x = new Float64Array(L); // the regressor, most recent to oldest
   const e2 = new Float64Array(N);
   const wPath = keepPath ? new Float64Array(N * L) : null;
+  // d(n) and y(n) themselves — what the algorithm is actually looking at.
+  // Everything else this module returns is a SUMMARY of those two sequences:
+  // e² is their squared difference, wPath is what that difference did to the
+  // weights. A summary is unreadable to someone who has not seen the thing
+  // being summarized.
+  const dSig = keepSignals ? new Float64Array(N) : null;
+  const ySig = keepSignals ? new Float64Array(N) : null;
   // The EXCESS MSE, w̃ᵀRw̃: the only quantity in this setup that measures the
   // adaptation WITHOUT the measurement noise. e²(n) holds σ² plus a few per
   // cent of excess, and estimating those few per cent through the variance of
@@ -203,6 +211,10 @@ export function runAdaptive({
     for (let k = 0; k < L; k++) y += w[k] * x[k];
     const e = d - y;
     e2[n] = e * e;
+    if (dSig) {
+      dSig[n] = d;
+      ySig[n] = y;
+    }
 
     if (!Number.isFinite(e) || e2[n] > 1e12) {
       // A divergence is a RESULT (μ above the bound), not a failure: it is
@@ -254,7 +266,7 @@ export function runAdaptive({
     }
   }
 
-  return { e2, ex, wPath, wFinal: w, diverged };
+  return { e2, ex, wPath, dSig, ySig, wFinal: w, diverged };
 }
 
 /**

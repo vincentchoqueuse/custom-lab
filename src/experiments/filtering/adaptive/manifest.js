@@ -1,5 +1,5 @@
 import { float, int, log, bool, select } from '../../../core/fields.js';
-import { view, plane, line, stem, vline, hline } from '../../../core/views.js';
+import { view, plane, stack, line, stem, vline, hline } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -96,12 +96,46 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
-    // THE ADAPTATION ITSELF, and that is why it comes first: the L coefficients
-    // rising from zero towards their true values, and then dancing around them.
-    // All the rest of the experiment is a summary of this drawing — the learning
-    // curve is its quadratic version, the weight plane its geometric version at
-    // L = 2. A single trace for the L trajectories (cut by NaNs), failing which
-    // the legend would hold sixteen entries saying nothing.
+    // WHAT THE ALGORITHM IS WORKING ON, and it comes first because every other
+    // tab is a summary of it: the learning curve is these two traces squared
+    // and averaged, the weight tracks are what their difference did to ŵ, the
+    // weight plane is the same story with the iterations thrown away. Read in
+    // the other order the experiment shows coefficients converging towards
+    // values, with no visible sign of what made them move.
+    //
+    // Two panels over one iteration axis: above, the reference d(n) the filter
+    // is chasing and the output y(n) it produces; below, the error that drives
+    // every single update. Sliding n walks the window forward and the two
+    // traces close on each other while the error collapses onto zero — the
+    // adaptation, on the signals rather than on a statistic of them.
+    stack(
+      'signals',
+      'Reference and output',
+      [
+        line('refSig', {
+          color: '#D95319',
+          width: 2,
+          dashed: true,
+          label: 'reference d(n)',
+          overlays: [line('outSig', { color: '#0072BD', width: 1.6, label: 'filter output y(n)' })],
+          axes: { y: 'amplitude' },
+        }),
+        line('errSig', {
+          color: '#7E2F8E',
+          width: 1.4,
+          label: 'error e(n) = d − y',
+          overlays: [hline(() => 0, { color: '#a1a1aa', width: 1, dashed: true })],
+          axes: { y: 'error' },
+        }),
+      ],
+      { axes: { x: { label: 'iteration' } } }
+    ),
+
+    // THE ADAPTATION ITSELF: the L coefficients rising from zero towards their
+    // true values, and then dancing around them — the previous tab's error,
+    // seen from the other side. A single trace for the L trajectories (cut by
+    // NaNs), failing which the legend would hold sixteen entries saying
+    // nothing.
     view(
       'tracks',
       'Weights ŵ(n)',
@@ -115,8 +149,9 @@ export default {
       })
     ),
 
-    // THE view: the subject of the experiment IS the convergence, so it comes
-    // to the front. Two curves, and it is their gap that instructs: the total
+    // The convergence as a STATISTIC — e² averaged over 24 realizations, which
+    // is the quantity theory predicts and no single run shows.
+    // Two curves, and it is their gap that instructs: the total
     // MSE (what would really be measured, noise included) and the excess w̃ᵀRw̃
     // (what the adaptation controls, without the noise). The first never
     // descends below the floor; the second says how far from w* one is.

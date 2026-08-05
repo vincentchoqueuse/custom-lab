@@ -3,15 +3,26 @@ export default [
   {
     id: 'converge',
     title: 'A filter that learns',
-    view: 'learning',
-    params: { algo: 'lms', mu: 0.01, lambda: 1, L: 8, a: 0, snr: 20, n: 3000, track: false },
-    visible: ['mu', 'n'],
+    view: 'signals',
+    params: { algo: 'lms', mu: 0.01, lambda: 1, L: 8, a: 0, snr: 20, n: 240, track: false },
+    visible: ['n', 'mu'],
     notes: `The setup: an unknown system with eight coefficients, a white input,
 and an output measured at 20 dB of SNR. The filter starts from ZERO and never
 sees w*.
 
-Sweeping n from 1 to 3000 while watching the coefficients tab shows the filter
-filling in. Back on this tab there are three curves to read:
+Start here, on what the algorithm is actually looking at. The orange dashed
+trace is the reference d(n) — the unknown system's output, the only thing the
+filter is ever told. The blue trace is its own output y(n), and at n = 240 it
+is nowhere near. Below, their difference: the error, which is the ONLY signal
+that drives an update.
+
+Now walk n forward — 500, 1000, 3000. The blue trace climbs onto the orange one
+and the error collapses towards the noise floor it can never cross. That is the
+whole of adaptive filtering, and every other tab is a summary of this one: the
+coefficients tab is where the error went, the learning curve is this error
+squared and averaged over 24 runs.
+
+On the learning curve there are three curves to read:
 
   blue     the MSE one would actually measure — it falls and then stops
   orange   the excess w̃ᵀRw̃, the distance to w*, without the noise
