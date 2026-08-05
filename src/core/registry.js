@@ -19,6 +19,7 @@
 //     so the catalogue cannot drift into naming one plot two ways. The rule
 //     is enforced both ways — see normalizeViews.
 
+import { CATALOGUE } from './catalogue.js';
 import { seedField } from './fields.js';
 import { normalizeViews } from './figures.js';
 import { validateScene, validateSceneIds } from './scenes.js';
@@ -108,6 +109,18 @@ for (const [path, mod] of Object.entries(manifestModules)) {
   const manifest = {
     subtitle: '',
     tags: [],
+    // What the experiment IS, in prose, for the panel that describes it (I).
+    // Absent is a legitimate answer: the panel then stands on the subtitle,
+    // the tags and the lecture outline, which every experiment has by
+    // construction. An empty description is better than an invented one.
+    doc: '',
+    // Attribution. The catalogue's author is declared once (core/catalogue.js)
+    // and only an experiment written by somebody else says so.
+    author: CATALOGUE.author,
+    // Optional, and absent by default. A demo does not go stale — a confidence
+    // interval from two years ago is not out of date — so a date is written
+    // only where it says something, and shown only where it is written.
+    date: '',
     validate: [],
     derived: {},
     ...src,

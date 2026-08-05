@@ -45,5 +45,11 @@ export const STR = {
   SETTINGS: 'Settings',
   QR_CODE: 'QR code',
   DATA_PALETTE: 'Data palette',
+  ABOUT: 'About this experiment',
+  NO_DESCRIPTION: 'This experiment carries no description yet.',
+  LECTURE_OUTLINE: 'Lecture outline',
+  TEACHER_NOTES: 'Teacher notes',
+  NOTES_BEHIND_TEACHER_MODE:
+    'This scene carries teacher notes. Switch Teacher Mode on, in the sidebar, to read them here.',
   THICK_STROKES: 'Thick plot strokes',
 };

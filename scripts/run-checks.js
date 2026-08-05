@@ -142,6 +142,49 @@ function checkRandomness() {
 }
 
 /**
+ * Every `var(--x)` resolves to a token that is actually declared.
+ *
+ * A CSS custom property that does not exist is not an error anywhere: the
+ * declaration is dropped and the element quietly inherits. `--muted-foreground`
+ * — the shadcn spelling, and not this project's, which is `--muted-fg` — got
+ * three declarations into the statline and the frozen value simply failed to
+ * go grey. It looked fine. It looked exactly like a value that had not been
+ * styled yet, which is what it was.
+ *
+ * Cheap, and it covers the SVG too: `stroke="var(--foreground)"` in a component
+ * fails the same silent way.
+ */
+function checkCssTokens() {
+  const declared = new Set();
+  const used = new Map();
+  const walk = (dir) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (/\.(css|svelte)$/.test(e.name)) {
+        const src = readFileSync(p, 'utf8');
+        for (const m of src.matchAll(/(^|[;{\s])(--[a-z0-9-]+)\s*:/gi)) declared.add(m[2]);
+        for (const m of src.matchAll(/var\(\s*(--[a-z0-9-]+)/g))
+          if (!used.has(m[1])) used.set(m[1], p.slice(p.indexOf('src/')));
+      }
+    }
+  };
+  walk(resolve(process.cwd(), 'src'));
+  const bad = [...used].filter(([name]) => !declared.has(name));
+  console.log(`  ${dim('tokens')}`);
+  if (bad.length) {
+    for (const [name, where] of bad)
+      console.log(`    ${red('✗')} ${where}: var(${name}) is not declared anywhere`);
+    fail++;
+  } else {
+    console.log(
+      `    ${green('✓')} all ${used.size} CSS custom properties used are declared`
+    );
+    pass++;
+  }
+}
+
+/**
  * A custom view that draws <Axes> hands it the MARGIN it drew with.
  *
  * The axis NAMES are placed inside the margin — the y one rotated against the
@@ -753,6 +796,7 @@ async function checkCatalogue() {
   console.log(bold('catalogue'));
   checkLayering();
   checkAxesMargin();
+  checkCssTokens();
   checkRandomness();
   checkDsp();
   checkLinalg();

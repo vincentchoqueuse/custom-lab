@@ -8,6 +8,30 @@ export default {
   random: true,
   title: 'Confidence intervals',
   subtitle: 'Frequentist coverage and the width of the interval',
+  // The prose the info panel (I) shows. Written for a reader, not for a
+  // teacher: the notes in scenes.js remain the private half.
+  doc: `A confidence interval is the estimate that admits what it does not know:
+not "μ is 5.1" but "μ is somewhere in [4.4, 5.8]", with a level attached to the
+claim. This experiment draws M independent samples, builds an interval from each
+one, and colours the ones that miss.
+
+The question to hold on to is what the level is a statement ABOUT. It is not
+the probability that μ lies in the interval you are looking at — μ is fixed and
+the interval either contains it or does not. It is the frequency with which the
+PROCEDURE succeeds, over the draws you did not make. That is the whole of the
+frequentist reading, and it is visible here as a proportion of red lines.
+
+Two knobs separate two things a room routinely confuses. N changes the WIDTH
+and leaves the coverage alone: more data buys precision, not confidence. 1−α
+changes the coverage and the width together: you may demand more certainty and
+pay for it in vagueness. Nothing you can do makes an interval both narrower and
+surer, and that trade is the point.
+
+Whether σ is known decides which law the interval is built from — Gaussian if
+it is, Student with N−1 degrees of freedom if it is not. At N = 30 the two are
+nearly the same picture; take N down to 3 and the Student interval visibly
+stretches, which is what paying for an estimated σ looks like.`,
+
   tags: ['frequentist', 'interval', 'Student'],
 
   params: {

@@ -22,6 +22,20 @@
 </script>
 
 <div class="actionbar">
+  <!-- FIRST in the row, before the instrument's own actions: it answers
+       "what am I looking at", which comes before "what can I do to it". Not a
+       manifest action — every experiment has a title and an outline, so there
+       is nothing to declare and nothing that could be forgotten. -->
+  <button
+    class="action-btn"
+    class:on={app.ui.info}
+    onclick={() => (app.ui.info = !app.ui.info)}
+    title="{STR.ABOUT} (I)"
+    aria-label="{STR.ABOUT} (I)"
+  >
+    <Icon name="info" size={14} />
+    <kbd>I</kbd>
+  </button>
   {#each allActions as a (a.id)}
     <button
       class="action-btn"

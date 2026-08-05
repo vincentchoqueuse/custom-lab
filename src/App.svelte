@@ -21,6 +21,7 @@
   import Workspace from './ui/Workspace.svelte';
   import DrawerParams from './ui/DrawerParams.svelte';
   import CommandPalette from './ui/CommandPalette.svelte';
+  import InfoPanel from './ui/InfoPanel.svelte';
   import Inspector from './ui/Inspector.svelte';
 
   const crossChecked = new Set();
@@ -137,6 +138,10 @@
     // single-letter shortcuts are inert while a text field has focus
     if (editing || mod || e.altKey) return;
     switch (e.key) {
+      case 'i':
+      case 'I':
+        app.ui.info = !app.ui.info;
+        break;
       case 'p':
       case 'P':
         setDrawer(!app.drawer);
@@ -166,6 +171,7 @@
       case 'Escape':
         // popovers and the palette close themselves; fullscreen exits natively
         if (app.ui.palette) app.ui.palette = false;
+        else if (app.ui.info) app.ui.info = false;
         else if (app.ui.inspector) app.ui.inspector = false;
         else if (app.ghost) app.ghost = null; // clear the freeze ghost
         // last, and only if nothing else was waiting to be closed: Esc
@@ -192,6 +198,9 @@
   <DrawerParams />
   {#if app.ui.palette}
     <CommandPalette />
+  {/if}
+  {#if app.ui.info}
+    <InfoPanel />
   {/if}
   {#if app.ui.inspector}
     <Inspector />

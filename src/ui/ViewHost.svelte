@@ -75,8 +75,8 @@
     margin-left: 0.6rem;
     padding: 0.15rem 0.6rem;
     font: inherit;
-    color: var(--fg);
-    background: var(--bg);
+    color: var(--foreground);
+    background: var(--background);
     border: 1px solid var(--border);
     border-radius: 6px;
     cursor: pointer;

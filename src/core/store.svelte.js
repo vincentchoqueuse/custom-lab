@@ -41,6 +41,7 @@ export const app = $state({
     presentation: false,
     palette: false,
     inspector: false,
+    info: false, // the panel describing the experiment (I)
     settings: false,
     bold: false, // permanent thick-strokes preference (projection without fullscreen)
     // Viewport below the mobile breakpoint, which picks the plot canvas
@@ -167,6 +168,11 @@ function handleHash() {
   app.notice = '';
   app.ghost = null;
   app.ghostStats = null;
+  // The info panel describes THIS experiment; arriving at another one with a
+  // wall of text over its plot is not what clicking a sidebar entry asked for.
+  // In-app param changes never reach here (syncUrl short-circuits), so this
+  // closes it on navigation and on nothing else.
+  app.ui.info = false;
   app.axisLock = scene?.lock ?? false;
   app.hidden = [];
   app.result = { status: 'idle', observables: null, message: '' };

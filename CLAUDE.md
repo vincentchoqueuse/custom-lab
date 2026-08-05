@@ -215,13 +215,14 @@ Canonical table — any shortcut change happens HERE and nowhere else:
 |---|---|---|
 | `⌘K` / `Ctrl+K` | Open the Command Palette (experiment search) | *K* — standard |
 | `⌘B` / `Ctrl+B` | Show / hide the Sidebar | side**B**ar |
+| `I` | Open / hide the **I**nfo panel (what this experiment is) | **I**nfo |
 | `P` | Open / hide the parameter Drawer | **P**arameters |
 | `R` | `randomizeSeed` action (draw again) | **R**andomize |
 | `F` | `freeze` action — freeze/unfreeze the plot for before/after comparison (phase 3) | **F**reeze |
 | `A` | Lock / unlock the plot axes (the frame stays put while the curve moves) | **A**xes |
 | `L` | **L**ecture Presentation Mode: **fullscreen** (Fullscreen API) + strokes ×1.6 + type ×1.3 + minimal chrome | **L**ecture |
 | `←` / `→` | Previous / next preset (the lecture script on keys) | — |
-| `Esc` | Exit fullscreen / clear freeze ghost / close popover or palette / show hidden series | — |
+| `Esc` | Exit fullscreen / close the info panel / clear freeze ghost / close popover or palette / show hidden series | — |
 
 Rules: single-letter shortcuts are inert while a text field has focus; fullscreen uses
 the browser Fullscreen API (native `Esc` exit).
@@ -231,7 +232,18 @@ the browser Fullscreen API (native `Esc` exit).
 - **Prompt Bar**: always visible; `masked` → the pill shows "?" (black box),
   `revealHidden` action to unveil.
 - **Drawer**: closed by default, state in the URL, controllable per preset.
-- **Teacher Mode**: scene-notes banner above the plot.
+- **Info panel** (`I`): a wide dialog describing the experiment — its `doc` in
+  prose, the LECTURE OUTLINE (every scene title, the current one marked, each a
+  button that plays it), the current scene's notes when Teacher Mode is on, the
+  tags, and the attribution. It replaced a banner that sat above the plot on
+  every scene of every lecture: three lines of permanent height for text read
+  once, and no room at all for a description of the experiment itself. A dialog
+  does not contradict "never a modal for parameters" — that rule protects the
+  look→adjust→look loop, and nothing here adjusts anything.
+- **Teacher Mode**: gates the scene notes inside the info panel. Notes are
+  gestures written to oneself, and a dialog opened in class is projected like
+  everything else, so with Teacher Mode off they are ABSENT from the DOM rather
+  than hidden by CSS — the smoke suite asserts exactly that.
 - **Presentation Mode** (`L`): readable from the back of a lecture hall.
 - **Freeze frame** (`F`, `freeze` action): the current plot is pinned as a **gray
   dashed ghost in the background**; any subsequent change (slider, draw) renders on
@@ -424,6 +436,13 @@ export default {
   title: 'Confidence intervals',
   subtitle: 'Frequentist coverage and the width of the interval',
   tags: ['frequentist', 'interval', 'Student'],
+  doc: `What the experiment is, in prose, for the info panel (I). Optional:
+        absent, the panel stands on the subtitle, the tags and the lecture
+        outline, which every experiment has by construction — an empty
+        description is better than an invented one. Paragraphs are separated by
+        a blank line and reflow to the reader's width.`,
+  // author: 'A. Colleague',   // only where it is not the catalogue's own
+  // date:   '2026-02',        // only where a date says something
 
   params: {
     mu:    float('μ', { description: 'true mean',           min: 0,    max: 10,  step: 0.1,  default: 5 }),
@@ -861,6 +880,7 @@ export const checks = [
 │   ├── main.js
 │   ├── App.svelte
 │   ├── core/
+│   │   ├── catalogue.js          # who made this: author, affiliation, licence
 │   │   ├── registry.js           # glob over manifests + scenes, applies core defaults
 │   │   ├── router.js             # hash routing + strict-cast state↔URL
 │   │   ├── store.svelte.js       # global reactive state (runes)

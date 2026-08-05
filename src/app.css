@@ -591,29 +591,215 @@ kbd {
   min-height: 0;
 }
 
-.teacher-banner {
-  margin: 14px 0 0;
-  background: var(--muted);
+/* ---------- info panel (I) ------------------------------------------------
+   What the experiment IS: description, lecture outline, teacher notes,
+   attribution. It replaced a banner that sat above the plot on every scene of
+   every lecture — three lines of permanent height for text read once. */
+
+.info-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(9, 9, 11, 0.45);
+}
+
+.info-panel {
+  position: fixed;
+  z-index: 81;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* LARGE, because prose read at arm's length wants width and a lecture
+     outline wants height — and small enough that the page behind stays
+     visible, so the panel reads as something opened over the experiment
+     rather than as a page you navigated to. */
+  width: min(760px, calc(100vw - 32px));
+  max-height: min(780px, calc(100vh - 48px));
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
   color: var(--foreground);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 11px 16px;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  outline: none;
+}
+
+.info-head {
   display: flex;
-  gap: 10px;
   align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-head h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.info-head .sub {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  color: var(--muted-fg);
+}
+
+.info-close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  padding: 6px;
+  color: var(--muted-fg);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.info-close:hover {
+  color: var(--foreground);
+  background: var(--muted);
+}
+
+.info-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 22px 22px;
+}
+
+.info-body h3 {
+  margin: 22px 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-fg);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.info-body .doc {
+  font-size: 14.5px;
+  line-height: 1.62;
+}
+
+.info-body .doc p {
+  margin: 0 0 0.9em;
+}
+
+.info-body .doc p:last-child {
+  margin-bottom: 0;
+}
+
+.info-body .doc.empty {
+  color: var(--muted-fg);
+  font-style: italic;
+}
+
+/* the lecture script, whole: the header picker shows one scene at a time */
+.outline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scene-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  color: var(--foreground);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.scene-row:hover {
+  background: var(--muted);
+}
+
+.scene-row .idx {
+  flex: 0 0 1.4em;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted-fg);
+}
+
+.scene-row.current {
+  background: var(--muted);
+  font-weight: 600;
+}
+
+.info-body .notes {
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--muted);
+  border-radius: var(--radius);
+  white-space: pre-line;
+  line-height: 1.55;
   font-size: 13.5px;
 }
 
-.teacher-banner svg {
+.info-body .notes-hidden {
+  margin: 22px 0 0;
+  font-size: 13px;
   color: var(--muted-fg);
-  margin-top: 2px;
+  font-style: italic;
 }
 
-.teacher-banner .notes {
-  white-space: pre-line;
-  line-height: 1.5;
-  margin: 0;
-  font-family: inherit;
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tags li {
+  padding: 3px 9px;
+  font-size: 11.5px;
+  color: var(--muted-fg);
+  background: var(--muted);
+  border-radius: 999px;
+}
+
+.info-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 22px;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--muted-fg);
+}
+
+.info-foot .licence {
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 860px) {
+  .info-panel {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 28px);
+  }
+
+  .info-head,
+  .info-body,
+  .info-foot {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 
 /* tabs — shadcn Tabs: muted container, active tab raised on card bg */
@@ -800,15 +986,15 @@ kbd {
    old number is muted and the arrow more so — the reading the room needs is
    the one on the right, and the one on the left is context. */
 .statline .was {
-  color: var(--muted-foreground);
+  color: var(--muted-fg);
 }
 .statline .arrow {
-  color: var(--muted-foreground);
+  color: var(--muted-fg);
   opacity: 0.7;
   padding: 0 0.28em;
 }
 .statline .dot {
-  color: var(--muted-foreground);
+  color: var(--muted-fg);
   padding: 0 0.6em;
 }
 
