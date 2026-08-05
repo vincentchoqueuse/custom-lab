@@ -26,7 +26,12 @@ export default {
       visibleIf: { fn: 'quad' },
     }),
     alpha: log('α', { description: 'step size of gradient (and momentum)', min: 1e-4, max: 2, default: 0.1 }),
-    beta: float('β', { description: 'momentum inertia', min: 0, max: 0.99, step: 0.01, default: 0.9, precision: 2 }),
+    // 0.27 and not 0.9: on a quadratic of conditioning κ the heavy ball is
+    // tuned, not turned up. β = ((√κ−1)/(√κ+1))² is 0.27 at the default κ = 10,
+    // and at 0.9 the method is so underdamped that it converges FOUR orders of
+    // magnitude worse than the plain gradient it is supposed to improve on —
+    // which is what the figure showed while the notes said the opposite.
+    beta: float('β', { description: 'momentum inertia', min: 0, max: 0.99, step: 0.01, default: 0.27, precision: 2 }),
     N: int('N', { description: 'number of iterations', min: 1, max: 100, default: 30 }),
     // no seed here: injected by the core (unused: fully deterministic)
   },
@@ -39,6 +44,15 @@ export default {
     rate: {
       label: 'optimal rate ((κ−1)/(κ+1))²',
       calc: (p) => (p.fn === 'quad' ? (((p.kappa - 1) / (p.kappa + 1)) ** 2).toFixed(3) : '—'),
+    },
+    // the dial the room needs next, and the reason momentum is not "more is
+    // better": past this value the heavy ball rings instead of damping
+    betaOpt: {
+      label: 'optimal β = ((√κ−1)/(√κ+1))²',
+      calc: (p) =>
+        p.fn === 'quad'
+          ? (((Math.sqrt(p.kappa) - 1) / (Math.sqrt(p.kappa) + 1)) ** 2).toFixed(3)
+          : '—',
     },
   },
 

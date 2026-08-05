@@ -10,8 +10,12 @@ export const checks = [
     run() {
       const { observables: o } = compute({ ...BASE, kappa: 37 });
       return {
-        ok: o.gapNewton.y[1] <= 1e-16 + 1e-20,
-        detail: `gap(1)=${o.gapNewton.y[1].toExponential(2)}`,
+        // f − f* is QUADRATIC in the coordinate error, so an iterate correct
+        // to machine precision (1e-16) shows up here around 1e-32. Asserting
+        // an exact zero would be asserting the rounding of one particular
+        // division; 1e-20 is the machine floor squared, with room.
+        ok: o.rawNewton[1] < 1e-20,
+        detail: `gap(1)=${o.rawNewton[1].toExponential(2)}`,
       };
     },
   },
@@ -23,7 +27,7 @@ export const checks = [
       const alpha = 2 / (kappa + 1);
       const { observables: o } = compute({ ...BASE, kappa, alpha, N: 40 });
       // measured per-iteration ratio over the tail (asymptotic regime)
-      const g = o.gapGradient.y;
+      const g = o.rawGradient;
       const rate = (g[40] / g[20]) ** (1 / 20);
       const th = ((kappa - 1) / (kappa + 1)) ** 2;
       const rel = Math.abs(rate - th) / th;
@@ -58,8 +62,8 @@ export const checks = [
         N: 60,
       }).observables;
       return {
-        ok: mom.gapMomentum.y[60] < 0.01 * grad.gapGradient.y[60],
-        detail: `momentum=${mom.gapMomentum.y[60].toExponential(2)} vs gradient=${grad.gapGradient.y[60].toExponential(2)}`,
+        ok: mom.rawMomentum[60] < 0.01 * grad.rawGradient[60],
+        detail: `momentum=${mom.rawMomentum[60].toExponential(2)} vs gradient=${grad.rawGradient[60].toExponential(2)}`,
       };
     },
   },
@@ -68,11 +72,11 @@ export const checks = [
     category: 'numeric',
     run() {
       const { observables: o } = compute({ ...BASE, fn: 'rosenbrock', alpha: 0.0015, N: 100 });
-      const newtonDone = o.gapNewton.y[100] < 1e-10;
+      const newtonDone = o.rawNewton[100] < 1e-10;
       const gradSlow = o.gapGradient.y[100] > 1e-3;
       return {
         ok: newtonDone && gradSlow,
-        detail: `Newton=${o.gapNewton.y[100].toExponential(2)}, gradient=${o.gapGradient.y[100].toExponential(2)}`,
+        detail: `Newton=${o.rawNewton[100].toExponential(2)}, gradient=${o.rawGradient[100].toExponential(2)}`,
       };
     },
   },

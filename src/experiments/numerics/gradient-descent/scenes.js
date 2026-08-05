@@ -3,8 +3,8 @@ export default [
   {
     id: 'zigzag',
     title: 'The valley and the zigzag',
-    params: { fn: 'quad', kappa: 10, alpha: 0.18, beta: 0.9, N: 30 },
-    visible: ['alpha', 'kappa'],
+    params: { fn: 'quad', kappa: 10, alpha: 0.18, beta: 0.27, N: 30 },
+    visible: ['alpha', 'kappa', 'beta'],
     notes: `At κ = 10 the ellipses are ten times steeper along y than along x.
 The gradient, in blue, descends perpendicular to the level curves, which means
 it zigzags across the valley rather than running along it. Newton, in orange,
@@ -13,24 +13,40 @@ because the landscape is quadratic.
 
 Raising κ to 100 leaves the blue path nearly stationary while the orange one is
 unaffected. Pushing α past 2/κ, the value shown in the drawer, produces
-divergence live. Momentum, in green, smooths the zigzag by averaging successive
-back-and-forth steps.`,
+divergence live.
+
+Momentum, in green, smooths the zigzag by averaging successive back-and-forth
+steps — but only at the right β, and that is worth a demonstration of its own.
+The drawer gives the optimal value, ((√κ−1)/(√κ+1))², which is 0.27 here and
+not the 0.9 everybody reaches for. Freeze (F), then take β up to 0.9: the green
+path stops smoothing anything and swings twice as wide as the blue one. A heavy
+ball that is too heavy RINGS. Turned the other way, at β = 0, the green path
+disappears under the blue one — momentum with no memory IS the gradient.`,
   },
   {
     id: 'rate',
     title: 'The slope IS the conditioning',
-    params: { fn: 'quad', kappa: 30, alpha: 0.064, beta: 0.9, N: 60 },
+    params: { fn: 'quad', kappa: 30, alpha: 0.064, beta: 0.478, N: 60 },
     view: 'convergence',
     visible: ['kappa', 'alpha'],
     notes: `On a logarithmic axis the gradient is a straight line: linear
 convergence with ratio ((κ−1)/(κ+1))² at the optimal step α = 2/(κ+1), which
-the drawer displays. Newton takes a few points and then hits the machine floor,
-its quadratic convergence doubling the number of correct digits at each
-iteration.
+the drawer displays. Sixty iterations to gain half a decade.
+
+Newton leaves the picture on the FIRST step. Not "converges fast" — on a
+quadratic it is exact, since one Newton step solves ∇f = 0 and ∇f is affine
+here. Its line runs along the bottom of the frame because the figure cannot
+show what it reached; the harness can, and pins it at 1e-32, which is machine
+precision squared.
+
+Momentum, in green, is the interesting one: a straight line too, but a steeper
+one — the rate goes from ((κ−1)/(κ+1))² to (√κ−1)/(√κ+1), the square root, and
+four orders of magnitude at sixty iterations. That is the whole trick, and it
+costs one extra vector in memory.
 
 The question that follows is why Newton is not always used, and the answer is
 the cost of H⁻¹ — O(n³), with n in the billions inside a neural network.
-Momentum exists in that gap: nearly Newton's rate at the gradient's price.`,
+Momentum exists in that gap: much of Newton's benefit at the gradient's price.`,
   },
   {
     id: 'banana',

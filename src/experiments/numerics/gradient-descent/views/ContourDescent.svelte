@@ -30,23 +30,24 @@
     { key: 'trajNewton', color: '#D95319', label: 'Newton' },
   ];
 
-  // equal-aspect window over the contour extent (the landscape's domain)
+  // EQUAL-ASPECT WINDOW OVER THE LANDSCAPE'S OWN DOMAIN — the rectangle the
+  // contours were sampled on, which the compute states. It used to be the
+  // bounding box of the drawn SEGMENTS, and that is a different thing: when a
+  // level's ellipse ran wider than the sampled box, all that reached the view
+  // were its top and bottom caps, and the window was then fitted to those two
+  // caps. The frame was decided by the least meaningful part of the picture.
+  //
+  // Expanding to equal aspect, never shrinking: the domain must stay wholly
+  // visible, since it is where the function was evaluated.
   const window_ = $derived.by(() => {
-    const s = obs.contourSegs.value;
-    let x0 = Infinity;
-    let x1 = -Infinity;
-    let y0 = Infinity;
-    let y1 = -Infinity;
-    for (let i = 0; i < s.length; i += 2) {
-      x0 = Math.min(x0, s[i]);
-      x1 = Math.max(x1, s[i]);
-      y0 = Math.min(y0, s[i + 1]);
-      y1 = Math.max(y1, s[i + 1]);
-    }
-    const cx = (x0 + x1) / 2;
-    const cy = (y0 + y1) / 2;
-    const scale = Math.min(iw / (x1 - x0), ih / (y1 - y0)) / 1.02;
-    return { cx, cy, halfX: iw / scale / 2, halfY: ih / scale / 2 };
+    const [x0, x1, y0, y1] = obs.window.value;
+    const scale = Math.min(iw / (x1 - x0), ih / (y1 - y0));
+    return {
+      cx: (x0 + x1) / 2,
+      cy: (y0 + y1) / 2,
+      halfX: iw / scale / 2,
+      halfY: ih / scale / 2,
+    };
   });
 
   const xs = $derived(
