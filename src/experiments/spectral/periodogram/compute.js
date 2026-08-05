@@ -9,7 +9,7 @@
 // On white noise every point of the periodogram follows a σ⁴·χ²₂/2
 // distribution: its standard deviation EQUALS its mean, whatever the number of
 // samples. Multiplying N by sixteen divides the width of the lines by sixteen
-// and does not quiet the grass by one decibel — one gets sixteen times more
+// and does not lower the noise floor by one decibel — one gets sixteen times more
 // points, just as noisy. That is the counter-intuitive result of the whole
 // chapter, and it shows in a second: `stdRatio` stays glued to 1.
 //
@@ -24,7 +24,7 @@
 //
 // The signal is two sinusoids in noise: a strong one, and a WEAK one being
 // looked for. It is lost in two distinct ways, and they must be named separately
-// in class — under the grass of the noise (that is the variance, which Welch
+// in class — under the noise floor (that is the variance, which Welch
 // cures) or under the sidelobes of its neighbour (that is the leakage, which
 // only the window cures).
 //
@@ -163,7 +163,7 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
   const seg = segmentation(method, N, L);
   const est = averagedPeriodogram(x, seg.L, seg.hop, win);
   // always computed, always drawn in grey: it is the point of comparison, and
-  // "look at what Welch does to that grass" can only be said while seeing it
+  // "look at what Welch does to that floor" can only be said while seeing it
   const raw = averagedPeriodogram(x, N, N, win);
 
   const noiseLevel = (sigma * sigma) / FS; // E[P] on white noise

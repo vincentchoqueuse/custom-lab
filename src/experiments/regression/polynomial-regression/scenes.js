@@ -5,7 +5,7 @@ export default [
     title: 'The right model (d = 3)',
     view: 'fit',
     params: { d: 3, N: 30, sigma: 0.3, lambda: 0.001 },
-    visible: ['d', 'sigma'],
+    visible: ['d', 'sigma', 'N'],
     notes: `The true polynomial has degree 3 and a degree 3 is estimated, so
 everything behaves. Pressing R changes the noise and leaves the orange curve
 close to the blue one.
@@ -18,7 +18,7 @@ in numbers: the orange estimated bars bracket the blue true values.`,
     title: 'Underfitting (d = 1)',
     view: 'fit',
     params: { d: 1, N: 30, sigma: 0.3, lambda: 0.001 },
-    visible: ['d'],
+    visible: ['d', 'N', 'lambda'],
     notes: `A straight line cannot follow a cubic, and what is left over is bias
 rather than noise.
 
@@ -32,7 +32,7 @@ becomes rich enough to hold the truth.`,
     title: 'Overfitting (d = 9)',
     view: 'fit',
     params: { d: 9, N: 15, sigma: 0.4, lambda: 0.001 },
-    visible: ['d', 'N'],
+    visible: ['d', 'N', 'lambda'],
     notes: `Ten coefficients for fifteen points: the polynomial fits the noise.
 Pressing R makes the orange curve dance violently, which is variance made
 visible, and the coefficients view shows the estimated aₖ exploding while the
@@ -46,7 +46,7 @@ the better model, because the extra terms have nothing to describe.`,
     title: 'Ridge: taming degree 9',
     params: { d: 9, N: 15, sigma: 0.4, lambda: 0.001 },
     view: 'ridge',
-    visible: ['lambda'],
+    visible: ['lambda', 'N'],
     notes: `The same catastrophic setting, with one new dial. At λ = 0.001 the
 green ridge curve coincides with the orange least-squares one.
 
@@ -61,7 +61,7 @@ traded for bias, and the trade can be overpaid.`,
     title: 'The bias–variance trade-off',
     params: { d: 9, N: 15, sigma: 0.4, lambda: 1 },
     view: 'tradeoff',
-    visible: ['lambda', 'd'],
+    visible: ['lambda', 'd', 'N'],
     notes: `The curve of the chapter: MSE(λ) = bias²(λ) + variance(λ). On the
 left, at λ → 0, there is no bias and enormous variance — plain least squares.
 On the right there is no variance and enormous bias — the constant estimator.

@@ -356,7 +356,12 @@ kbd {
   gap: 6px;
 }
 
-.sidebar footer button {
+/* The footer's items are buttons EXCEPT the source link, which has to be an
+   anchor to be a link at all. Styling `button` alone left it with none of the
+   box — no flex basis, no padding, no radius — and it sat visibly out of line
+   with its neighbours. The rule is about the ROW, so it names the row. */
+.sidebar footer button,
+.sidebar footer a {
   flex: 1;
   display: flex;
   align-items: center;
@@ -367,12 +372,14 @@ kbd {
   transition: background var(--t), color var(--t);
 }
 
-.sidebar footer button:hover {
+.sidebar footer button:hover,
+.sidebar footer a:hover {
   background: var(--sidebar-hover);
   color: var(--foreground);
 }
 
-.sidebar footer button.on {
+.sidebar footer button.on,
+.sidebar footer a.on {
   background: var(--sidebar-active);
   color: var(--foreground);
 }

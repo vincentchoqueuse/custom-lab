@@ -1,19 +1,19 @@
 // Lecture script — auto-discovered by the registry.
 export default [
   {
-    id: 'grass',
-    title: 'The grass that never lies down',
-    view: 'spectrum',
+    id: 'noise-floor',
+    title: 'The noise floor that never comes down',
+    view: 'time',
     params: { method: 'raw', N: 512, L: 256, win: 'rect', snr: 10, a2: -20, df: 40 },
     visible: ['N', 'snr'],
     notes: `The raw periodogram of a noisy signal. The strong line comes out, the
-weak one too, and between them there is grass, some 15 dB of it.
+weak one too, and between them sits the noise floor, some 15 dB of it.
 
 The question belongs before any dial is touched: if the record length is
-multiplied by sixteen, does the grass lie down? The room answers yes — more
+multiplied by sixteen, does the noise floor come down? The room answers yes — more
 data, less noise. Freezing and then taking N from 512 to 8192 settles it.
 
-The grass does not move by a decibel. There are sixteen times more points, all
+The floor does not move by a decibel. There are sixteen times more points, all
 of them just as noisy, and the statline confirms it: the σ/mean fluctuation
 stays pinned at 1.
 
@@ -58,7 +58,7 @@ measures it.`,
     visible: ['method', 'L'],
     notes: `The same data, read differently. Welch cuts the record into
 overlapping segments, windows each one, and averages the periodograms. The
-grass lies down: σ/mean falls toward 1/√K, and K is in the statline.
+floor settles: σ/mean falls toward 1/√K, and K is in the statline.
 
 The price appears when L slides from 1024 down to 64. A large L gives few
 segments and a sharp but still noisy spectrum; a small L gives many segments
@@ -89,7 +89,7 @@ it is invisible. Why is the useful question, and the room should name the two
 causes separately before either is treated.
 
 It may be under the GRASS, which is variance, and the remedy is averaging:
-lowering L brings the grass down. Or it may be under the LOBES of its
+lowering L brings the floor down. Or it may be under the LOBES of its
 neighbour, which is leakage, and no amount of averaging will help — switching
 the window from rectangular to Hann and then Blackman brings it out at once.
 

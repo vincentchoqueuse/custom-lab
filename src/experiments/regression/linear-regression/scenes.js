@@ -5,7 +5,7 @@ export default [
     title: 'What "least squares" means',
     params: { a: 1.5, b: 1, sigma: 1, N: 20, spread: 3, outlier: 0 },
     view: 'fit',
-    visible: ['sigma'],
+    visible: ['sigma', 'N'],
     notes: `The vertical grey segments are the quantity being minimized — the
 sum of their squares, printed in the statline. Not the distance to the line,
 not the horizontal gap: the VERTICAL gap, because y is what is being predicted
@@ -52,7 +52,7 @@ sentence — where the points are placed matters more than how many there are.`,
     title: 'One point is enough to bend everything',
     params: { a: 1.5, b: 1, sigma: 0.6, N: 20, spread: 3, outlier: 0 },
     view: 'fit',
-    visible: ['outlier'],
+    visible: ['outlier', 'N'],
     notes: `Freezing a clean fit and then dragging the last point away shows the
 blue line following it. Squaring the errors gives the largest one a crushing
 weight, and the point sits at the edge of the range, so its leverage is maximal

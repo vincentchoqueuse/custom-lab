@@ -4,7 +4,7 @@ export default [
     id: 'fine-grid',
     title: 'A fine grid finds everything',
     params: { f: 5, sigma: 0.3, step: 0.05 },
-    view: 'cost',
+    view: 'time',
     visible: ['step', 'sigma'],
     notes: `The purple points are the evaluations of J. The grid sweeps
 everything, so no basin can hide from it, at a cost of about 380 evaluations as

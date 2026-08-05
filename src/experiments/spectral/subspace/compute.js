@@ -81,6 +81,18 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
     xi[n] += sigma * gauss();
   }
 
+  // THE SIGNAL ITSELF, which every other view of this experiment is an
+  // ESTIMATE of. Two sinusoids in noise look like nothing at all in time —
+  // that is the point, and it is the reason the whole method exists — so the
+  // room should meet the raw record before being shown four different opinions
+  // about what is in it. A window, because 512 samples of noise is texture and
+  // not information; a line rather than stems, as in the OFDM frame, because
+  // at this density a comb is black.
+  const nShow = Math.min(N, 128);
+  const tIdx = Float64Array.from({ length: nShow }, (_, i) => i);
+  const sigI = xr.slice(0, nShow);
+  const sigQ = xi.slice(0, nShow);
+
   /* ---------- the reference: the periodogram ------------------------------ */
   const pr = new Float64Array(NFFT);
   const pi = new Float64Array(NFFT);
@@ -252,6 +264,10 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
 
   return {
     observables: {
+      /* --- the record, before any opinion about what is in it --- */
+      sigI: { x: tIdx, y: sigI },
+      sigQ: { x: tIdx, y: sigQ },
+
       periodogram: { x: Float64Array.from(pf), y: Float64Array.from(py) },
       eigenvalues: { x: evIdx, y: evDb },
       eigenSelected: { x: selIdx, y: selDb },

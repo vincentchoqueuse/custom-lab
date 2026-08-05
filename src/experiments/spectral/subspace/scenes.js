@@ -3,7 +3,7 @@ export default [
   {
     id: 'wall',
     title: 'The Fourier wall',
-    view: 'spectrum',
+    view: 'time',
     params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2 },
     visible: ['df', 'N'],
     notes: `Two exponentials separated by 0.5 × Fs/N, in noise at 25 dB. The

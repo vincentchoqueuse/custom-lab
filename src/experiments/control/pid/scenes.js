@@ -5,7 +5,7 @@ export default [
     title: 'P alone: fast, but off target',
     view: 'regulated',
     params: { Kp: 3, Ki: 0, Kd: 0, sigma: 0 },
-    visible: ['Kp'],
+    visible: ['Kp', 'Ki', 'Kd'],
     notes: `With Ki = Kd = 0 the output rises and then stops BELOW the setpoint:
 a steady-state error of 1/(1+Kp), which the drawer computes exactly and the
 statline measures.
@@ -20,7 +20,7 @@ Because at zero error u = 0, so nobody is pushing any more.`,
     title: 'I erases everything',
     view: 'regulated',
     params: { Kp: 3, Ki: 1.5, Kd: 0, sigma: 0 },
-    visible: ['Ki'],
+    visible: ['Kp', 'Ki', 'Kd'],
     notes: `Freezing the P-only curve and adding Ki makes the steady-state error
 DISAPPEAR: the integrator accumulates until the error is exactly zero.
 
@@ -34,7 +34,7 @@ back: an integral is a memory, and memory has inertia.`,
     title: 'D calms — and amplifies noise',
     view: 'regulated',
     params: { Kp: 6, Ki: 1.5, Kd: 1.5, sigma: 0 },
-    visible: ['Kd', 'sigma'],
+    visible: ['Kp', 'Ki', 'Kd'],
     notes: `With Kp pushed to 6 the loop oscillates. Raising Kd makes the
 derivative brake BEFORE the impact and the overshoot melts, as the statline
 reports.

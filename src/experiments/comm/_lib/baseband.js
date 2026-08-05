@@ -56,27 +56,20 @@ export function basebandFigure({
   overlays = [],
 } = {}) {
   const draw = continuous ? line : stem;
-  // SIDE BY SIDE, not on top of each other. Both signals live at the same
-  // instants, so stems drawn in the same column overlap exactly and the pair
-  // reads as one muddy bar; a two-pixel nudge each way makes the sent level
-  // and the measured one two things the eye can compare, which is the entire
-  // job of this figure. Lines need no nudge — they already separate.
-  const nudge = continuous ? 0 : 2.4;
+  // ONE ABSCISSA, SHARED. Both signals live at the same instants and are drawn
+  // at them: a sideways nudge made the two stem trains easier to tell apart and
+  // put the transmitted symbol somewhere it was not, which on a figure whose
+  // whole subject is "at this instant, this was sent and that arrived" is the
+  // one thing it may not do. The received train is drawn thinner and on top, so
+  // the reference shows on both sides of it.
   const part = (tx, rx, label) =>
     draw(tx, {
       color: TX,
-      width: continuous ? 1.8 : 2.4,
-      size: 3.6,
-      ...(nudge ? { offset: -nudge } : {}),
+      width: continuous ? 1.8 : 3.2,
+      size: 4,
       label: txLabel,
       overlays: [
-        draw(rx, {
-          color: RX,
-          width: continuous ? 1.5 : 2.4,
-          size: 3.6,
-          ...(nudge ? { offset: nudge } : {}),
-          label: rxLabel,
-        }),
+        draw(rx, { color: RX, width: continuous ? 1.5 : 1.4, size: 2.8, label: rxLabel }),
       ],
       axes: { y: { label } },
     });

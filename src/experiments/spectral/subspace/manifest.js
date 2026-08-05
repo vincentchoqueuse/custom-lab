@@ -1,5 +1,5 @@
 import { float, int, select } from '../../../core/fields.js';
-import { view, figure, line, scatter, stem, vline, hline, band } from '../../../core/views.js';
+import { view, figure, figureStack, line, scatter, stem, vline, hline, band } from '../../../core/views.js';
 // the pinned framing and the base of the frame, shared with the computation:
 // the noise rectangles reach exactly down to that base
 import { fWindow, MODEL_FLOOR } from '../_lib/frame.js';
@@ -103,6 +103,20 @@ export default {
   ],
 
   views: [
+    // THE RECORD, before any opinion about what is in it. Two sinusoids in
+    // noise look like nothing in time — which is exactly the point, and the
+    // reason every other tab here exists. A room shown four estimates of a
+    // spectrum without first seeing what they were estimated FROM has been
+    // given four answers and no question.
+    figureStack(
+      'time',
+      [
+        line('sigI', { color: '#0072BD', width: 1.4, axes: { y: { label: 'Re x[n]' } } }),
+        line('sigQ', { color: '#0072BD', width: 1.4, axes: { y: { label: 'Im x[n]' } } }),
+      ],
+      { axes: { x: { label: 'sample n' } } }
+    ),
+
     // THE reference, and the starting point: the periodogram does not separate.
     // It is the same "Spectrum" as everywhere else in the subject, under the
     // same name, because it is exactly the same object.
@@ -137,6 +151,24 @@ export default {
       })
     ),
 
+    // The result. The pseudo-spectrum is NOT a spectral density — it is the
+    // inverse of a distance to the noise subspace, with no physical unit — and
+    // the two grid-free estimators are laid on it as points: root-MUSIC and
+    // ESPRIT give NUMBERS, not curves.
+    view(
+      'pseudo',
+      'Pseudo-spectrum',
+      line('pseudo', {
+        width: 2.2,
+        label: 'MUSIC',
+        overlays: [
+          ...TRUTH,
+          scatter('rootMusicMarks', { color: '#D95319', size: 10, label: 'root-MUSIC' }),
+          scatter('espritMarks', { color: '#7E2F8E', size: 10, label: 'ESPRIT' }),
+        ],
+        axes: { x: F_AXIS, y: { label: 'pseudo-spectrum', unit: 'dB' } },
+      })
+    ),
     // The MODEL, once complete. Subspace methods return frequencies and nothing
     // else; the amplitudes come from a least squares at the frequencies found,
     // and the noise variance from what is left. This is the view that says
@@ -178,25 +210,6 @@ export default {
           hline('nsEsprit', { color: '#7E2F8E', dashed: true, width: 1.6, label: 'ESPRIT' }),
         ],
         axes: { x: F_AXIS, y: { label: 'power', unit: 'dB', domain: [MODEL_FLOOR, 8] } },
-      })
-    ),
-
-    // The result. The pseudo-spectrum is NOT a spectral density — it is the
-    // inverse of a distance to the noise subspace, with no physical unit — and
-    // the two grid-free estimators are laid on it as points: root-MUSIC and
-    // ESPRIT give NUMBERS, not curves.
-    view(
-      'pseudo',
-      'Pseudo-spectrum',
-      line('pseudo', {
-        width: 2.2,
-        label: 'MUSIC',
-        overlays: [
-          ...TRUTH,
-          scatter('rootMusicMarks', { color: '#D95319', size: 10, label: 'root-MUSIC' }),
-          scatter('espritMarks', { color: '#7E2F8E', size: 10, label: 'ESPRIT' }),
-        ],
-        axes: { x: F_AXIS, y: { label: 'pseudo-spectrum', unit: 'dB' } },
       })
     ),
   ],

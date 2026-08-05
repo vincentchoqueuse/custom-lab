@@ -5,7 +5,7 @@ export default [
     title: 'Flip, slide, integrate',
     params: { sig: 'gate', ker: 'gate', a: 1, b: 1, t: 0.4 },
     view: 'overlap',
-    visible: ['t'],
+    visible: ['sig', 'ker', 't'],
     notes: `The formula belongs on the board before the screen is opened:
 y(t) = ∫ x(τ)·h(t − τ) dτ. Then the question that stops everyone: what is being
 integrated over? Over τ. The t is FROZEN during the integral and moves only
@@ -24,7 +24,7 @@ then leaves. The lower curve should stay hidden for now.`,
     title: 'Two gates give a TRIANGLE',
     params: { sig: 'gate', ker: 'gate', a: 1, b: 1, t: 1 },
     view: 'response',
-    visible: ['t'],
+    visible: ['sig', 'ker', 't'],
     notes: `The prediction is worth collecting first: two square gates, so surely
 a square output. That is the spontaneous answer and it is wrong.
 
@@ -43,7 +43,7 @@ rectangles. The harness checks the closed form to 1e-12.`,
     title: 'Widths add, areas multiply',
     params: { sig: 'gate', ker: 'gate', a: 2, b: 0.5, t: 1 },
     view: 'response',
-    visible: ['a', 'b'],
+    visible: ['sig', 'ker', 'a', 'b'],
     lock: true,
     notes: `Two gates of DIFFERENT widths turn the triangle into a trapezoid,
 with base a + b, plateau |a − b| and height min(a, b).
@@ -61,7 +61,7 @@ triangle of the previous scene. A special case, not a separate one.`,
     title: 'Which one gets flipped? (it makes no difference)',
     params: { sig: 'gate', ker: 'gate', a: 2, b: 0.5, t: 1 },
     view: 'overlap',
-    visible: ['a', 'b'],
+    visible: ['sig', 'ker', 'a', 'b'],
     notes: `On the drawing nothing looks symmetric: h is the one being flipped
 and slid, x never moves. One would expect the order to matter.
 
@@ -78,7 +78,7 @@ flips whichever of the two makes the drawing simpler.`,
     title: 'The same integral is the charging of an RC',
     params: { sig: 'gate', ker: 'exp', a: 1.5, b: 0.4, t: 1 },
     view: 'response',
-    visible: ['t', 'b'],
+    visible: ['sig', 'ker', 't', 'b'],
     notes: `Changing h to an exponential e^(−t/b)/b makes it the impulse response
 of an RC with time constant b, and the output is the curve everyone has already
 drawn in a lab session: charging as 1 − e^(−t/b) while the pulse lasts, then

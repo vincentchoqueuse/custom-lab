@@ -160,7 +160,7 @@ export const checks = [
     run() {
       // A correction of a statement first written the wrong way round here. The
       // "fluctuation vs K" view measures the dispersion FROM ONE BIN TO THE
-      // NEXT: that is what the eye sees as grass, but it is NOT the variance of
+      // NEXT: that is what the eye reads as the noise floor, but it is NOT the variance of
       // the estimator at a given frequency — a smoothing window correlates
       // neighbouring bins and lowers that number. The real variance is measured
       // over independent REALIZATIONS, here R = 200 seeds, at f = 300 Hz (a band

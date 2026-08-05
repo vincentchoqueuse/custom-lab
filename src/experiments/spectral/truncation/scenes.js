@@ -5,7 +5,7 @@ export default [
     title: 'What the window throws away',
     params: { sig: 'sine', T: 40, win: 'rect', f0: 300 },
     view: 'time',
-    visible: ['T'],
+    visible: ['T', 'win'],
     notes: `The basic figure: the signal in grey, which continues; in blue what
 is actually transformed; and a yellow line marking where the cut is made.
 
@@ -20,7 +20,7 @@ frequency, so will the spectrum of what was kept have a single line?`,
     title: 'A line becomes a lobe of width 1/T',
     params: { sig: 'sine', T: 40, win: 'rect', f0: 300 },
     view: 'spectrum',
-    visible: ['T'],
+    visible: ['T', 'win'],
     lock: true,
     notes: `The answer is no. Cutting in time is multiplying by a window, and
 therefore CONVOLVING the spectrum with the window's own. The line spreads over
@@ -63,7 +63,7 @@ duration, and moving it slides the point along the line.`,
     title: 'The chirp: longer is no longer better',
     params: { sig: 'chirp', T: 20, win: 'hann', f0: 300, k: 2000 },
     view: 'width',
-    visible: ['T', 'k'],
+    visible: ['T', 'k', 'win'],
     notes: `The chirp sweeps k hertz per second. Observing longer sharpens the
 resolution as 1/T but lets in a wider band as k·T, so the curve is no longer a
 line but a V, and the bottom of the V is the best possible duration.
@@ -81,7 +81,7 @@ window choice of the spectrogram. Moving k moves the bottom of the V.`,
     title: 'When the signal has already fallen silent',
     params: { sig: 'damped', T: 20, win: 'rect', f0: 300, tau: 15 },
     view: 'width',
-    visible: ['T', 'tau'],
+    visible: ['T', 'tau', 'win'],
     notes: `With a damped sinusoid, as long as T < τ the signal is being cut and
 the width follows 1/T. Beyond that the curve flattens: only silence is being
 observed, and the line keeps the natural width 1/(πτ) the signal gave itself.

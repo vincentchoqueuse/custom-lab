@@ -3,7 +3,7 @@ export default [
   {
     id: 'healthy',
     title: 'Reading a healthy eye',
-    view: 'eye',
+    view: 'time',
     params: { levels: 2, alpha: 0.35, bt: 8, sigma: 0.02, Nsym: 200 },
     visible: ['alpha'],
     notes: `Two hundred slices of 2T superimposed make the eye. Between the

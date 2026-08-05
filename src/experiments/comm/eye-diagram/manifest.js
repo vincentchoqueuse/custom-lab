@@ -53,6 +53,23 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
+    // THE SIGNAL FIRST, as everywhere in the subject — and here it is also the
+    // only order the eye makes sense in. The eye is this waveform cut into 2T
+    // slices and laid on top of itself; shown first, it is a picture with no
+    // provenance, and a room asked to accept one before the other has to take
+    // the construction on trust.
+    figure(
+      'time',
+      line('waveform', {
+        width: 1.8,
+        label: 'received signal',
+        overlays: [
+          scatter('samplePoints', { color: '#D95319', size: 4.5, label: 'samples at kT' }),
+        ],
+        axes: { x: 't/T', y: 'x(t)' },
+      })
+    ),
+
     // all 2T slices overlaid — one NaN-broken series drawn by the generic
     // Line; the ±1/3 level guides only exist in 4-PAM (NaN hides them)
     view(
@@ -67,19 +84,6 @@ export default {
           hline(() => -1, { color: '#a1a1aa', width: 1, dashed: true }),
           hline((p) => (p.levels === 4 ? 1 / 3 : NaN), { color: '#a1a1aa', width: 1, dashed: true }),
           hline((p) => (p.levels === 4 ? -1 / 3 : NaN), { color: '#a1a1aa', width: 1, dashed: true }),
-        ],
-        axes: { x: 't/T', y: 'x(t)' },
-      })
-    ),
-
-    // where the slices come from: the waveform and its decision samples
-    figure(
-      'time',
-      line('waveform', {
-        width: 1.8,
-        label: 'received signal',
-        overlays: [
-          scatter('samplePoints', { color: '#D95319', size: 4.5, label: 'samples at kT' }),
         ],
         axes: { x: 't/T', y: 'x(t)' },
       })

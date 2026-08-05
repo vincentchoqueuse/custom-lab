@@ -11,7 +11,7 @@ export default [
     title: 'What makes this not an AWGN link',
     params: { mod: 'qpsk', rho: 0.5, snr: 14, N: 1500, eq: 'zf' },
     view: 'time',
-    visible: ['rho'],
+    visible: ['rho', 'eq', 'snr'],
     notes: `The AWGN experiment ended with a picture just like this one, and one
 difference decides everything that follows. There, orange was blue plus noise.
 Here, orange is
@@ -32,7 +32,7 @@ receivers on the following tabs disagree about.`,
     title: 'Two symbols at once, and two mixtures',
     view: 'antennas',
     params: { ...BASE, rho: 0.5 },
-    visible: ['rho'],
+    visible: ['rho', 'eq', 'snr'],
     notes: `Two QPSK symbols leave at the same instant, on the same frequency,
 from two antennas. Two antennas receive. Look at what arrives: neither cloud is a
 constellation any more — each antenna sees a mixture of both streams, and no
@@ -53,7 +53,7 @@ does not pay.`,
     title: 'ρ = 0: two AWGN channels, and nothing more',
     view: 'ser',
     params: { ...BASE, rho: 0 },
-    visible: ['rho', 'snr'],
+    visible: ['rho', 'snr', 'eq'],
     notes: `Set ρ to 0. The two spatial channels are then orthogonal, and
 something exact happens: the three curves fall on top of one another, and on top
 of the grey dashed line — which is the single-antenna AWGN theory, the curve of
@@ -73,7 +73,7 @@ scene is the fine print.`,
     title: 'The price of forcing to zero',
     view: 'streams',
     params: { ...BASE, rho: 0.8, eq: 'zf' },
-    visible: ['rho'],
+    visible: ['rho', 'eq', 'snr'],
     notes: `Go to the stream view and take ρ up from 0. The two clouds stay
 CENTRED on the transmitted points — zero-forcing is unbiased, it removes the
 interference exactly — and they inflate.
@@ -115,7 +115,7 @@ bias out before deciding, as every textbook one does.`,
     title: 'ML never leaves the received space',
     view: 'antennas',
     params: { ...BASE, rho: 0.9, snr: 10 },
-    visible: ['rho', 'mod'],
+    visible: ['rho', 'mod', 'eq'],
     notes: `Back to the antennas, with ρ at 0.9 — a channel the linear receivers
 find nearly unusable, 7.2 dB of loss.
 

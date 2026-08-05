@@ -5,7 +5,7 @@ export default [
     title: 'A square wave, harmonic by harmonic',
     view: 'time',
     params: { wave: 'square', N: 1, A: 1 },
-    visible: ['N'],
+    visible: ['N', 'wave'],
     notes: `Starting at N = 1 gives a plain sinusoid of the same frequency.
 Raising N one notch at a time — 3, 5, 7 — lets each odd harmonic sharpen the
 edges a little further.
@@ -20,7 +20,7 @@ The spectrum view makes the structure explicit — odd orders only, decaying as
     title: 'The Gibbs phenomenon',
     view: 'time',
     params: { wave: 'square', N: 10, A: 1 },
-    visible: ['N'],
+    visible: ['N', 'wave'],
     lock: true,
     notes: `The axes are pinned from the start, so the frame stays put while the
 curve moves. Freezing at N = 10 and pushing to N = 60 draws the oscillations
@@ -51,7 +51,7 @@ discontinuity is paid for in harmonics.`,
     title: 'The pulse train and its sinc envelope',
     params: { wave: 'pulse', N: 40, A: 1, alpha: 0.25 },
     view: 'spectrum',
-    visible: ['alpha'],
+    visible: ['alpha', 'wave'],
     lock: true,
     notes: `This is the signal that shows WHERE the coefficients come from: the
 lines SAMPLE an envelope, drawn in orange, and that envelope is a cardinal
@@ -67,7 +67,7 @@ gives the widest spectrum is a question the dial answers.`,
     title: 'α = 1/2: the square wave returns',
     params: { wave: 'pulse', N: 40, A: 1, alpha: 0.5 },
     view: 'spectrum',
-    visible: ['alpha'],
+    visible: ['alpha', 'wave'],
     notes: `Setting α to exactly 0.50 sends every EVEN order to zero, leaving the
 odd ones decaying as 1/n — the spectrum of the square wave, up to a factor of
 two (the pulse swings by A, the square by 2A) and up to the mean value, the

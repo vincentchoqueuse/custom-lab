@@ -149,7 +149,7 @@ export default {
     ),
 
     // THE view. The raw periodogram stays in grey behind the chosen estimator:
-    // "look at the grass, and look at what Welch does to it" can only be said
+    // "look at the noise floor, and at what Welch does to it" can only be said
     // while seeing both at once.
     figure(
       'spectrum',

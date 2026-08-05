@@ -4,7 +4,7 @@ import { view, line, stem, vline, figure } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'fourier-series',
-  order: 6,
+  order: 3,
   title: 'Fourier series',
   subtitle:
     'Rebuilding a signal harmonic by harmonic — envelope, Gibbs and duty cycle',

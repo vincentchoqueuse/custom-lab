@@ -3,7 +3,7 @@ export default [
   {
     id: 'am-sidebands',
     title: 'AM: the message lives in the sidebands',
-    view: 'spectrum',
+    view: 'time',
     params: { mode: 'am', fm: 62.5, ka: 0.5 },
     visible: ['ka', 'fm'],
     notes: `Three lines: the carrier at 0 dB and the message, twice, at ±f_m.
