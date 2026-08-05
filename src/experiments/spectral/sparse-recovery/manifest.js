@@ -2,11 +2,25 @@ import { float, int, log, select } from '../../../core/fields.js';
 import { view, figure, line, stem, scatter, vline, hline } from '../../../core/views.js';
 import { fWindow } from '../_lib/frame.js';
 
-/** The SAME frequency window as spectral/subspace, from the same module. The
- *  two experiments are meant to be read one after the other on the same pair of
- *  lines, and a frame that differed by a few hertz would make them look like
- *  different signals. */
-const F_AXIS = { label: 'f', unit: 'Hz', domain: fWindow };
+/** THE WHOLE BAND, or the pair of lines.
+ *
+ *  Zoomed on the pair — the window spectral/subspace uses, so that the two
+ *  experiments read one after the other on the same lines — everything past the
+ *  second atom happens off screen: at k = 12 the pursuit puts atoms at 16, 35,
+ *  51, 154, 170, 279, 328, 383, 412 and 424 Hz, and a 60 Hz window shows one of
+ *  them. Turning k up then appeared to do nothing, which is the opposite of
+ *  what that dial does.
+ *
+ *  So the default is the whole band and the zoom is a pill, because the one
+ *  scene that needs the pair separated — Δf = 0.5, where six hertz is the whole
+ *  question — genuinely needs it. Same rule as `sources`, which already moves
+ *  this window: the frame is a stated parameter, never something that follows
+ *  the data. */
+const F_AXIS = {
+  label: 'f',
+  unit: 'Hz',
+  domain: (p) => (p.zoom === 'lines' ? fWindow(p) : [0, 500]),
+};
 
 /** The true frequencies, as verticals — the same on the two frequency views,
  *  declared once so that they cannot drift apart. A line beyond K comes back
@@ -94,6 +108,14 @@ export default {
       ],
       default: 0,
     }),
+    zoom: select('window', {
+      description: 'frequency span of the spectrum views',
+      options: [
+        { value: 'full', label: 'the whole band — where the atoms go' },
+        { value: 'lines', label: 'around the lines — where the resolution is' },
+      ],
+      default: 'full',
+    }),
     algo: select('algorithm', {
       description: 'how the sparsity is imposed',
       options: [
@@ -146,6 +168,7 @@ export default {
   groups: [
     { title: 'Signal', params: ['sources', 'df', 'snr', 'N'] },
     { title: 'Dictionary', params: ['over', 'offGrid'] },
+    { title: 'Frame', params: ['zoom'] },
     { title: 'Algorithm', params: ['algo', 'k', 'lam', 'alpha'] },
   ],
 

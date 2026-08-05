@@ -4,8 +4,10 @@ export default [
     id: 'floor',
     title: 'The problem, then the floor',
     params: { mu: 2, sigma: 1.5, N: 20, M: 3000 },
-    view: 'realization',
-    visible: ['sigma'],
+    // The BOUND and the variances that run against it — which is what the notes
+    // below were already describing while the scene opened on a single record.
+    view: 'variance',
+    visible: ['sigma', 'M'],
     notes: `The statement belongs on the board before anything is shown: N
 independent values are drawn from N(μ, σ²) with σ known, and μ is to be
 estimated. Everything on this screen answers that question and no other. Three
@@ -18,7 +20,17 @@ is a theorem, not an observation about this particular figure. The mean sits on
 the floor: it is efficient, and looking for something better is wasted effort.
 The median runs parallel to it, a factor π/2 above. The midrange comes away
 from both, its variance falling only as 1/ln N, so collecting more data barely
-helps it. Raising σ lifts the whole floor as σ².`,
+helps it. Raising σ lifts the whole floor as σ².
+
+Two straight lines and a curve that bends away: that is the whole chapter, and
+it is worth letting the room read the slopes before naming them. Then, and only
+then, the first tab — one single record, watched while N grows, with the bound
+drawn as a band around μ. What this figure says about M repetitions, that one
+shows happening once. The mean's trace stays inside the band; the midrange
+wanders out of it. Raising M here makes these three curves smoother without
+moving them: M is how well the variance is MEASURED, N is what the variance
+depends on, and confusing the two is the commonest reading error on this
+screen.`,
   },
   {
     id: 'price',

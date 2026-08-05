@@ -18,6 +18,7 @@ const BASE = {
   N: 256,
   over: 2,
   offGrid: 0,
+  zoom: 'full',
   algo: 'omp',
   k: 2,
   lam: 0.1,
@@ -67,8 +68,11 @@ astronomers for exactly this problem.
 
 Start with algo = MP and k = 1. One blue stem, standing on the periodogram at
 the peak it explains. Take k to 2, then 3, 4, then twelve, one step at a time.
-The first two land on the lines; everything after that is buying back the
-residue of the first two.
+The first two land on the lines; everything after that lands ANYWHERE — 16 Hz,
+328, 412, 35 — which is why this figure shows the whole band. Those atoms are
+not explaining signal, they are buying back the leakage and the noise of the
+first two, and scattering across 500 Hz to do it. That scatter IS the answer to
+"why not just take k large".
 
 Then switch to "What the algorithm sees". That purple curve is the correlation
 of the residual with EVERY atom at once — a single zero-padded FFT, which is to
@@ -101,7 +105,7 @@ anywhere.`,
     title: 'The convex road: a penalty instead of a count',
     view: 'spectrum',
     params: { ...BASE, algo: 'lasso', lam: 0.4 },
-    visible: ['lam', 'algo'],
+    visible: ['algo', 'lam'],
     notes: `The greedy road imposed the sparsity by COUNTING: k atoms, stop. The
 other family penalizes instead —
 
@@ -139,10 +143,16 @@ the path taken.`,
     id: 'resolution',
     title: 'Δf = 0.5 — where MUSIC wins and this does not',
     view: 'spectrum',
-    params: { ...BASE, df: 0.5, k: 2 },
-    visible: ['df', 'over'],
+    params: { ...BASE, df: 0.5, k: 2, zoom: 'lines' },
+    visible: ['zoom', 'df', 'over'],
     notes: `THE scene, and the reason this experiment sits after the
 high-resolution methods rather than before.
+
+This is the one scene zoomed onto the pair — six hertz is the whole question
+here, and the whole band cannot show it. The window pill says so, and turning it
+back to the whole band is worth doing once at the end, to see that the atoms
+this failure produces are not somewhere else: they are right there, on either
+side of the pair.
 
 Δf = 0.5 is the neighbouring experiment's own default: half a Fourier limit, the
 setting where the periodogram sees one lump and MUSIC separates the two lines
