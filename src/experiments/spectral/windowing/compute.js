@@ -220,7 +220,7 @@ export function compute({ N, pad, f1, df, a2, win }) {
       enbw: { value: enbw, meta: { label: 'ENBW', unit: 'bins', precision: 3 } },
       sidelobe: {
         value: sidelobe,
-        meta: { label: 'lobes secondaires (lu)', unit: 'dB', precision: 2 },
+        meta: { label: 'sidelobes (read)', unit: 'dB', precision: 2 },
       },
       sidelobeTheory: {
         value: th.db,

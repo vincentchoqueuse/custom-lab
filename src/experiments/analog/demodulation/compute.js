@@ -244,7 +244,7 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
       },
       clipped: {
         value: d2.clipped,
-        meta: { label: 'arccos hors domaine (Teager)' },
+        meta: { label: 'arccos out of range (Teager)' },
       },
       verdict: {
         value:
@@ -253,7 +253,7 @@ export function compute({ fc, ka, fam, fdev, ffm, snr, seed }) {
             : errFT < 4 * errFH
               ? 'both hold'
               : 'Teager has broken down, Hilbert holds',
-        meta: { label: 'comparaison' },
+        meta: { label: 'comparison' },
       },
     },
   };

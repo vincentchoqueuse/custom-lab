@@ -132,13 +132,13 @@ export function compute({ mod, snrDb, N, seed }) {
       serEmpCurve: { x: mx, y: my },
       serEmp: {
         value: errors / N,
-        meta: { label: 'SER empirique', precision: 4 },
+        meta: { label: 'measured SER', precision: 4 },
       },
       serTh: {
         value: serTheory(mod, snr),
         meta: { label: 'theoretical SER', precision: 4 },
       },
-      nErrors: { value: errors, meta: { label: 'erreurs', precision: 0 } },
+      nErrors: { value: errors, meta: { label: 'errors', precision: 0 } },
     },
   };
 }

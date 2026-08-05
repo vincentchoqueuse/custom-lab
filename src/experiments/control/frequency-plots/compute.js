@@ -223,7 +223,7 @@ export function compute(params) {
       },
       wcoOut: { value: wco, meta: { label: 'ω at 0 dB', unit: 'rad/s', precision: 2 } },
       w180Out: { value: w180, meta: { label: 'ω at −180°', unit: 'rad/s', precision: 2 } },
-      kCrit: { value: kCrit, meta: { label: 'K critique', precision: 2 } },
+      kCrit: { value: kCrit, meta: { label: 'critical K', precision: 2 } },
     },
   };
 }

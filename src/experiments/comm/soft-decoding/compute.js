@@ -127,15 +127,15 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
       berSoftMc: { x: mx, y: my },
       berHard: {
         value: main.hardErr / (nBlocks * k),
-        meta: { label: 'BER dur', precision: 5 },
+        meta: { label: 'hard-decision BER', precision: 5 },
       },
       berSoft: {
         value: main.softErr / (nBlocks * k),
-        meta: { label: 'BER souple', precision: 5 },
+        meta: { label: 'soft-decision BER', precision: 5 },
       },
       pCh: {
         value: qfunc(Math.sqrt(2 * R * gb)),
-        meta: { label: 'p canal', precision: 4 },
+        meta: { label: 'channel p', precision: 4 },
       },
     },
   };

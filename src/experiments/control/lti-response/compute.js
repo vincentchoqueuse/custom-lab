@@ -204,7 +204,7 @@ export function compute({ num, den, input, f }) {
       // on the response plot, which is where it was always visible anyway
       trackError: { x: ts, y: es },
       finalValue: { value: ys[nk - 1], meta: { label: 'y(20 s)', precision: 3 } },
-      dcGain: { value: dc, meta: { label: 'gain statique', precision: 3 } },
+      dcGain: { value: dc, meta: { label: 'DC gain', precision: 3 } },
       stability: { value: verdict, meta: { label: 'poles' } },
       // Only a bi-proper system (deg num = deg den) carries a Dirac at the
       // origin. Reporting "Dirac weight = 0.000" on every strictly proper

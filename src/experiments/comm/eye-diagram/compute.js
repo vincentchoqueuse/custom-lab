@@ -112,7 +112,7 @@ export function compute({ levels, alpha, bt, sigma, Nsym, seed }) {
       waveform: { x: wt, y: wy },
       samplePoints: { x: pt, y: py },
       sampleValues: sv,
-      opening: { value: opening, meta: { label: 'ouverture de l\'œil', precision: 2 } },
+      opening: { value: opening, meta: { label: 'eye opening', precision: 2 } },
       traces: { value: nTraces, meta: { label: 'traces', precision: 0 } },
     },
   };

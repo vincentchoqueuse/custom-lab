@@ -82,7 +82,7 @@ export function compute({ f, A, phi, sigma, step, seed }) {
       fittedSignal: { x: dt, y: dFit },
       costCurve: { x: rf, y: rj },
       gridPts: { x: gx, y: gy },
-      fHat: { value: fHat, meta: { label: 'f̂ (argmin grille)', unit: 'Hz', precision: 3 } },
+      fHat: { value: fHat, meta: { label: 'f̂ (argmin over the grid)', unit: 'Hz', precision: 3 } },
       errHat: {
         value: Math.abs(fHat - f),
         meta: { label: '|f̂ − f|', unit: 'Hz', precision: 3 },

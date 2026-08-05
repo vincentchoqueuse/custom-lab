@@ -6,7 +6,7 @@ export default {
   id: 'periodization',
   order: 1,
   title: 'What sampling does to a spectrum',
-  subtitle: 'The spectrum repeats every Fe — and aliasing is the sum of the copies',
+  subtitle: 'The spectrum repeats every Fs — and aliasing is the sum of the copies',
   tags: ['analog', 'digital', 'sampling', 'periodization', 'Poisson', 'Shannon'],
 
   params: {
@@ -20,7 +20,7 @@ export default {
       ],
       default: 'gauss',
     }),
-    fe: float('Fe', {
+    fs: float('Fs', {
       description: 'sampling rate',
       min: 60,
       max: 700,
@@ -48,7 +48,7 @@ export default {
         width: 2,
         label: 'x(t)',
         overlays: [
-          stem('samples', { color: '#0072BD', size: 2.8, opacity: 0.95, label: 'x(nTe)' }),
+          stem('samples', { color: '#0072BD', size: 2.8, opacity: 0.95, label: 'x(nTs)' }),
         ],
         axes: { x: { label: 't', unit: 'ms' }, y: 'x(t)' },
       })
@@ -61,10 +61,10 @@ export default {
         width: 2.6,
         label: 'sampled spectrum = Σ copies',
         overlays: [
-          line('copies', { color: '#a1a1aa', dashed: true, label: 'copies X(f − k·Fe)' }),
+          line('copies', { color: '#a1a1aa', dashed: true, label: 'copies X(f − k·Fs)' }),
           line('central', { color: '#D95319', dashed: true, width: 2, label: 'original X(f)' }),
           scatter('dtft', { color: '#77AC30', size: 1.8, opacity: 0.9, label: 'DTFT of the samples' }),
-          vline('feHalf', { color: '#EDB120', dashed: true, label: 'Fe/2' }),
+          vline('feHalf', { color: '#EDB120', dashed: true, label: 'Fs/2' }),
           vline('feHalfNeg', { color: '#EDB120', dashed: true }),
         ],
         axes: { x: { label: 'f', unit: 'Hz' }, y: '|X|' },
@@ -72,12 +72,12 @@ export default {
     ),
     view(
       'error',
-      'Repliement vs Fe',
-      line('errVsFe', {
+      'Aliasing vs Fs',
+      line('errVsFs', {
         width: 2.2,
-        overlays: [vline('fe', { color: '#EDB120', dashed: true, label: 'Fe' })],
+        overlays: [vline('fs', { color: '#EDB120', dashed: true, label: 'Fs' })],
         axes: {
-          x: { label: 'Fe', unit: 'Hz' },
+          x: { label: 'Fs', unit: 'Hz' },
           y: { label: 'in-band error', unit: '%' },
         },
       })

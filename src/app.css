@@ -1374,4 +1374,23 @@ kbd {
   .promptbar {
     padding: 10px 14px 14px;
   }
+
+  /* THE PLOT STARTS AT THE TOP. Centring the tabs+plot block in the leftover
+     height is right on a desktop and on a projector, where the leftover is a
+     few dozen pixels and the figure lands where the eye already is. On a
+     phone the block is 280 px inside 660, so centring put 240 px of nothing
+     above the figure — the one thing on the screen — and pushed it under the
+     fold on the shorter handsets. Top-aligned, the picture is the first thing
+     below the header, which is what a phone is for. */
+  .workspace-inner {
+    justify-content: flex-start;
+  }
+
+  /* 24 px of gutter each side costs a 390 px screen 14% of the plot's width,
+     and the figure is width-bound here (the canvas keeps its aspect ratio, so
+     every pixel of width is a pixel of height too). Same 14 px as the prompt
+     bar below it. */
+  .workspace {
+    padding: 0 14px;
+  }
 }

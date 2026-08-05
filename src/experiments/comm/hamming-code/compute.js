@@ -97,7 +97,7 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
         x: Float64Array.from({ length: n + 1 }, (_, w) => w),
         y: enumr.beta,
       },
-      pCh: { value: p, meta: { label: 'BER canal', precision: 4 } },
+      pCh: { value: p, meta: { label: 'channel BER', precision: 4 } },
       berOut: {
         value: bitErr / (nBlocks * k),
         meta: { label: 'decoded BER', precision: 5 },
@@ -108,7 +108,7 @@ export function compute({ code: codeName, ebn0Db, Nbits, seed }) {
       },
       berUncoded: {
         value: uncodedErr / Nbits,
-        meta: { label: 'BER sans codage', precision: 5 },
+        meta: { label: 'uncoded BER', precision: 5 },
       },
     },
   };

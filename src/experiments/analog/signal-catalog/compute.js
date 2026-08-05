@@ -188,7 +188,7 @@ export function compute({ signal, T: Tms, f0, t0: t0ms }) {
       },
       sidelobe: {
         value: sidelobeDbOf(signal, T, f0, fp, peak),
-        meta: { label: 'lobe secondaire', unit: 'dB', precision: 2 },
+        meta: { label: 'sidelobe', unit: 'dB', precision: 2 },
       },
     },
   };

@@ -146,7 +146,7 @@ export function compute({ family, fp, fstop, Amax, Amin }) {
       denReal,
       dcDb, // checks
       edgeDb: magDb(1), // checks: level at fp
-      nOrder: { value: n, meta: { label: 'ordre n', precision: 0 } },
+      nOrder: { value: n, meta: { label: 'order n', precision: 0 } },
       attStopDb: {
         value: attStop,
         meta: { label: 'attenuation at f_a', unit: 'dB', precision: 1 },

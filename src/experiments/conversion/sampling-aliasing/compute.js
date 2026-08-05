@@ -94,7 +94,7 @@ export function compute({ source, f, Fs }) {
       currentPoint: { x: Float64Array.from([f]), y: Float64Array.from([fApp]) },
       fApp: {
         value: fApp,
-        meta: { label: 'f apparente (fondamental)', unit: 'Hz', precision: 1 },
+        meta: { label: 'apparent f (fundamental)', unit: 'Hz', precision: 1 },
       },
       nSamples: { value: n, meta: { label: 'samples', precision: 0 } },
     },

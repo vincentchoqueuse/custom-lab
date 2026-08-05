@@ -137,7 +137,7 @@ export function compute({ basis, target, M, ell, lambda, N, sigma, seed }) {
       errTest: { x: mg, y: eTest },
       rmseTrain: {
         value: Math.sqrt(mseOf(phis, w, train.xs, train.ys)),
-        meta: { label: 'RMSE apprentissage', precision: 4 },
+        meta: { label: 'training RMSE', precision: 4 },
       },
       rmseTest: {
         value: Math.sqrt(mseOf(phis, w, test.xs, test.ys)),

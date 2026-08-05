@@ -273,12 +273,77 @@ function checkDsp() {
  * French word with no accent inside free prose, such as a view title reading
  * "Spectrogramme". Titles are open text and no closed list can hold them.
  */
+// The French this catalogue can still be caught speaking. Two families, and
+// they fail differently.
+//
+// GRAMMAR words are what a translated SENTENCE leaves behind — a note rewritten
+// in English keeping "le" or "dont". They are unmistakable and cheap.
+//
+// DOMAIN words are what a translated LABEL leaves behind, and they are the ones
+// that survived two passes of this check: "SER empirique", "gain statique",
+// "BER sans codage" contain no grammar at all. Twenty-one of them were sitting
+// under the plots, read by the room off every statline, because the check only
+// ever looked at manifests and scenes — the labels live in compute.js and were
+// never opened. Every word below is French and NOT an English word, so the
+// list can grow without ever becoming a source of false alarms; the ones that
+// are both (image, dense, final, distance, note, orange, simple) are exactly
+// the ones it must not contain.
+// The French this catalogue can still be caught speaking. Two families, and
+// they fail differently.
+//
+// GRAMMAR words are what a translated SENTENCE leaves behind — a note rewritten
+// in English keeping "le" or "dont". They are unmistakable and cheap.
+//
+// DOMAIN words are what a translated LABEL leaves behind, and they are the ones
+// that survived two passes of this check: "SER empirique", "gain statique",
+// "BER sans codage" contain no grammar at all. Twenty-one of them were sitting
+// under the plots, read by the room off every statline, because the check only
+// ever looked at manifests and scenes — the labels live in compute.js, which
+// this walk never opened.
+//
+// EVERY WORD BELOW IS FRENCH AND NOT AN ENGLISH WORD. That is what lets the
+// list grow without ever raising a false alarm, and it is also this check's
+// honest limit: `canal`, `grille`, `dents`, `lobe`, `image`, `dense` are French
+// AND English, so they cannot be caught here at any threshold. Those are what
+// TERMINOLOGY.md and a pair of eyes are for — a list that cried wolf on "Time
+// signal" would be turned off within a week, and then nothing would be checked
+// at all.
 const FRENCH_WORDS =
+  // grammar
   'le|la|les|des|du|une|dans|avec|pour|qui|que|dont|être|était|sont|cette|ces|leur|leurs|' +
   'nous|vous|ils|elles|aussi|donc|alors|encore|entre|chaque|même|ainsi|selon|chez|sous|' +
   'depuis|pendant|avant|après|jamais|toujours|rien|celui|celle|ceux|aux|très|trop|beaucoup|' +
-  'comme|mais|parce|lorsque|tandis|plusieurs|ensuite|puis|déjà|ici';
+  'comme|mais|parce|lorsque|tandis|plusieurs|ensuite|puis|déjà|ici|sans|hors|vers|' +
+  // quantities and readings
+  'moyenne|écart|écart-type|erreur|erreurs|valeur|valeurs|mesure|mesures|niveau|seuil|' +
+  'puissance|largeur|hauteur|longueur|profondeur|durée|vitesse|pente|somme|nombre|taille|' +
+  'taux|ordre|degré|' +
+  // signals, systems, communications
+  'bruit|signaux|onde|porteuse|codage|décodage|filtrage|repliement|échantillon|' +
+  'échantillonnage|fenêtre|fenêtrage|spectre|fréquence|secondaire|secondaires|principale|' +
+  'retard|entrée|sortie|réponse|impulsionnelle|indicielle|fréquentielle|temporelle|' +
+  'statique|dynamique|ouverture|fermeture|maillage|treillis|' +
+  // statistics, estimation, learning
+  'loi|tirage|tirages|réalisation|estimateur|biais|vraisemblance|empirique|empiriques|' +
+  'théorique|théoriques|apprentissage|entraînement|échec|réussite|couverture|confiance|' +
+  'ajustement|' +
+  // judgements a label makes
+  'dur|dure|souple|douce|faible|grande|petite|courte|lente|vraie|fausse|bonne|mauvaise|' +
+  'apparente|attendue|obtenue|choisie|comparaison|domaine|capteur';
 const ACCENTED_OK = new Set(['moiré', 'Cramér']);
+/**
+ * Symbols the catalogue has RETIRED, and what they became. A symbol is not a
+ * word, so the list above cannot see one: `Fe` is *fréquence d'échantillonnage*
+ * wearing an English coat, and it sat in one experiment's params, its axis
+ * labels, its view title and its scene notes long after TERMINOLOGY.md said in
+ * bold that the sampling rate is `Fs` everywhere and in that spelling. A rule
+ * written down and not checked is a rule that holds until someone is in a
+ * hurry.
+ */
+const RETIRED_SYMBOLS = new Map([
+  ['fe', 'Fs'],
+  ['Fe', 'Fs'],
+]);
 /** Word-shaped param names, the closed list. A symbol is not a word. */
 const NAME_WORDS = new Set([
   'activation', 'algorithm', 'basis', 'code', 'dataset', 'den', 'distribution', 'dither',
@@ -299,6 +364,8 @@ function checkLanguage(strings, names) {
       if (!ACCENTED_OK.has(a)) bad.push(`${where}: '${a}' is not an English word`);
   }
   for (const [where, name] of names) {
+    const became = RETIRED_SYMBOLS.get(name);
+    if (became) bad.push(`${where}: '${name}' is a retired symbol — the catalogue writes '${became}'`);
     // Symbols are exempt, and the test is the shape: a WORD here is all
     // lower-case latin letters, three or more. That leaves out the greek
     // (σ, μ, Δf), the short ones (f, N, h) and the acronyms (SNR, BER), which
@@ -315,7 +382,7 @@ function checkLanguage(strings, names) {
   } else {
     console.log(
       `    ${green('✓')} no French in ${strings.length} visible strings, ` +
-        `and every word-shaped param name is on the list`
+        `every word-shaped param name is on the list, no retired symbol`
     );
     pass++;
   }
@@ -717,6 +784,34 @@ async function checkCatalogue() {
           }
         }
       }
+      // THE STATLINE. An observable's `meta.label` and `meta.unit` are read by
+      // the room off the bottom of every plot, and until now nothing looked at
+      // them: they live in compute.js, which this walk never opened, so "SER
+      // empirique" and "ouverture de l'œil" sat under the figures through two
+      // language passes. A `text` observable — a regime name, a verdict — is
+      // the same reading and is harvested with them, by its VALUE.
+      //
+      // One compute per experiment, on the manifest's defaults. Cheap next to
+      // the checks that follow, and it is the only way to see a string that
+      // does not exist until the science has run.
+      const cf = join(dir, exp.name, 'compute.js');
+      if (existsSync(cf)) {
+        try {
+          const { compute } = await import(pathToFileURL(cf).href);
+          const obs = compute({ seed: 34, ...defaults })?.observables ?? {};
+          for (const [ok, o] of Object.entries(obs)) {
+            if (typeof o === 'string') visible.push([`${key}:${ok}`, o]);
+            if (o === null || typeof o !== 'object') continue;
+            if (typeof o.value === 'string') visible.push([`${key}:${ok}`, o.value]);
+            for (const f of ['label', 'unit'])
+              if (typeof o.meta?.[f] === 'string') visible.push([`${key}:${ok}.${f}`, o.meta[f]]);
+          }
+        } catch {
+          /* a compute that will not run on its own defaults is a different
+             failure, and the experiment's own checks are where it belongs */
+        }
+      }
+
       const sf = join(dir, exp.name, 'scenes.js');
       if (!existsSync(sf)) continue;
       const scenes = (await import(pathToFileURL(sf).href)).default ?? [];

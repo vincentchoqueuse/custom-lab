@@ -105,7 +105,7 @@ export function compute({ sigw, sigv, N, seed }) {
       },
       rmseZ: {
         value: Math.sqrt(seZ / N),
-        meta: { label: 'RMSE capteur', precision: 3 },
+        meta: { label: 'sensor RMSE', precision: 3 },
       },
     },
   };

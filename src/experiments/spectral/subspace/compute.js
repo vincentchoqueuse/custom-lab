@@ -287,11 +287,11 @@ export function compute({ N, M, d, sources, df, snr, seed }) {
       },
       strayRoot: {
         value: strayHz(rmHz),
-        meta: { label: 'root-MUSIC invention', unit: 'Hz', precision: 2 },
+        meta: { label: 'root-MUSIC spurious', unit: 'Hz', precision: 2 },
       },
       strayEsprit: {
         value: strayHz(esHz),
-        meta: { label: 'ESPRIT invention', unit: 'Hz', precision: 2 },
+        meta: { label: 'ESPRIT spurious', unit: 'Hz', precision: 2 },
       },
       // the three spectra, same shape: lines + noise level
       linesTrue,

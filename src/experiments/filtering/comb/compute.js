@@ -90,7 +90,7 @@ export function compute({ structure, D, g, source, f0 }) {
         value: FS / D,
         meta: { label: 'tooth spacing Fs/D', unit: 'Hz', precision: 1 },
       },
-      peakDb: { value: toDb(peak), meta: { label: 'dents', unit: 'dB', precision: 1 } },
+      peakDb: { value: toDb(peak), meta: { label: 'teeth', unit: 'dB', precision: 1 } },
       dipDb: { value: toDb(dip), meta: { label: 'notches', unit: 'dB', precision: 1 } },
     },
   };

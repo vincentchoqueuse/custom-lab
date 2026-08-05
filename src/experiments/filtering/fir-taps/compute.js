@@ -82,7 +82,7 @@ export function compute({ b, source, f0 }) {
         value: toDb(Math.abs(nyq), DB_FLOOR), // an exact null reads as the floor
         meta: { label: 'gain at Fs/2', unit: 'dB', precision: 1 },
       },
-      order: { value: b.length - 1, meta: { label: 'ordre', precision: 0 } },
+      order: { value: b.length - 1, meta: { label: 'order', precision: 0 } },
       delayMs: {
         value: linPhase ? (((b.length - 1) / 2) * 1000) / FS : NaN,
         meta: { label: 'delay (linear phase)', unit: 'ms', precision: 2 },

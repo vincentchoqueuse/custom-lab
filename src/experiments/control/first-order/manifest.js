@@ -37,11 +37,11 @@ export default {
       label: 'nature of the system',
       calc: (p) =>
         p.tz === 0
-          ? 'premier ordre pur'
+          ? 'pure first order'
           : p.tz < 0
             ? 'NON-minimum phase (zero in the right half-plane)'
             : p.tz > p.tau
-              ? 'avance de phase (τ_z > τ)'
+              ? 'phase lead (τ_z > τ)'
               : 'phase lag (τ_z < τ)',
     },
     t95: { label: 'rise time to 95 % ≈ 3τ', calc: (p) => `${(3 * p.tau).toFixed(2)} s` },
