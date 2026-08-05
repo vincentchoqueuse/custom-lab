@@ -19,6 +19,12 @@
 //     txI, txQ   what was sent      { x: n, y: value }
 //     rxI, rxQ   what came back     { x: n, y: value }
 //
+// An experiment that PROCESSES what came back — an equalizer, a matched filter
+// — passes a third pair through `after`, on the same abscissa. Without it, a
+// room looking at a receiver's time figure cannot tell whether the orange
+// train is the channel's output or the processing's, which is the one
+// distinction the experiment exists to draw.
+//
 // Four names, used identically across the subject, so that the figure is
 // declared once here and never retyped — and so that a listener moving from
 // the constellation experiment to OFDM finds the same picture in the same
@@ -28,6 +34,7 @@ import { figureStack, stem, line } from '../../../core/views.js';
 
 const TX = '#0072BD'; // blue: what was sent — the reference, everywhere
 const RX = '#D95319'; // orange: what came back
+const AFTER = '#77AC30'; // green: what the receiver made of it
 
 /**
  * The standard `time` figure of the subject: Re above, Im below, transmitted
@@ -46,6 +53,8 @@ const RX = '#D95319'; // orange: what came back
  * @param {Array}    [o.overlays]  marks on the shared abscissa (frame
  *                                 boundaries, a prefix band) — drawn on both
  *                                 panels, because they name a place in time
+ * @param {?object}  [o.after]     a third pair — {i, q, label} — for what the
+ *                                 receiver made of the received signal
  */
 export function basebandFigure({
   x = 'symbol n',
@@ -54,6 +63,7 @@ export function basebandFigure({
   symbol = 'x',
   continuous = false,
   overlays = [],
+  after = null,
 } = {}) {
   const draw = continuous ? line : stem;
   // ONE ABSCISSA, SHARED. Both signals live at the same instants and are drawn
@@ -62,7 +72,7 @@ export function basebandFigure({
   // whole subject is "at this instant, this was sent and that arrived" is the
   // one thing it may not do. The received train is drawn thinner and on top, so
   // the reference shows on both sides of it.
-  const part = (tx, rx, label) =>
+  const part = (tx, rx, af, label) =>
     draw(tx, {
       color: TX,
       width: continuous ? 1.8 : 3.2,
@@ -70,6 +80,9 @@ export function basebandFigure({
       label: txLabel,
       overlays: [
         draw(rx, { color: RX, width: continuous ? 1.5 : 1.4, size: 2.8, label: rxLabel }),
+        ...(af
+          ? [draw(af, { color: AFTER, width: continuous ? 1.5 : 1.4, size: 2.8, label: after.label })]
+          : []),
       ],
       axes: { y: { label } },
     });
@@ -77,8 +90,8 @@ export function basebandFigure({
   return figureStack(
     'time',
     [
-      part('txI', 'rxI', `Re ${symbol}[n]`),
-      part('txQ', 'rxQ', `Im ${symbol}[n]`),
+      part('txI', 'rxI', after?.i, `Re ${symbol}[n]`),
+      part('txQ', 'rxQ', after?.q, `Im ${symbol}[n]`),
     ],
     { axes: { x: { label: x } }, overlays }
   );

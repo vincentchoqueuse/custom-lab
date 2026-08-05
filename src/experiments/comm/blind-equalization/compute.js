@@ -297,12 +297,21 @@ export function compute({ mod, h, phi, L, mu, snr, n, seed }) {
   const txQ = new Float64Array(nT);
   const rxI = new Float64Array(nT);
   const rxQ = new Float64Array(nT);
+  // and what the EQUALIZER made of it — cx/cy are the same samples, output of
+  // the same window, indexed by the same i. Without this third train the figure
+  // shows a smeared signal and gives no way to tell whether that smear is the
+  // channel's doing or what is left after the algorithm has worked on it, which
+  // is the only question the experiment asks.
+  const eqI = new Float64Array(nT);
+  const eqQ = new Float64Array(nT);
   for (let i = 0; i < nT; i++) {
     const j = i + nTaps - 1;
     txI[i] = s0re[j];
     txQ[i] = s0im[j];
     rxI[i] = x0re[j];
     rxQ[i] = x0im[j];
+    eqI[i] = cx[i];
+    eqQ[i] = cy[i];
   }
 
   /* ---------- the combined response, where the truth is read --------------- */
@@ -364,6 +373,8 @@ export function compute({ mod, h, phi, L, mu, snr, n, seed }) {
       txQ: { x: tIdx, y: txQ },
       rxI: { x: tIdx, y: rxI },
       rxQ: { x: tIdx, y: rxQ },
+      eqI: { x: tIdx, y: eqI },
+      eqQ: { x: tIdx, y: eqQ },
       cloud: { x: cx, y: cy },
       received: { x: ix, y: iy },
       ideal,

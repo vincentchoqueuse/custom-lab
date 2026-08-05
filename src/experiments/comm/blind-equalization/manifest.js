@@ -86,7 +86,17 @@ export default {
     // each received sample is a MIXTURE of its symbol and the neighbours the
     // channel dragged into it. Intersymbol interference is that picture, and
     // the blob on the next tab is its consequence rather than its definition.
-    basebandFigure({ txLabel: 'transmitted s[n]', rxLabel: 'received x[n]', symbol: 'x' }),
+    basebandFigure({
+      txLabel: 'transmitted s[n]',
+      rxLabel: 'received x[n]',
+      symbol: 'x',
+      // THREE trains, because two left the room guessing which one the
+      // algorithm produced. Blue was sent, orange came off the channel, green
+      // is what the equalizer makes of the orange at iteration n — so the
+      // convergence is watched here, on the signal, and not only as a cloud
+      // tightening on the next tab.
+      after: { i: 'eqI', q: 'eqQ', label: 'equalized y[n]' },
+    }),
 
     // THE view, and the subject of the experiment: a blob of received samples
     // closing onto the constellation with no reference anywhere. Equal aspect,
