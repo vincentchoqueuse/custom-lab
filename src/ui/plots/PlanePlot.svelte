@@ -6,6 +6,7 @@
   // cartesian plot cannot express — no scientific computation here either.
   import IQPlane from './IQPlane.svelte';
   import { app } from '../../core/store.svelte.js';
+  import { frameFor } from './frame.js';
 
   let { spec, obs, params, pres = false } = $props();
 
@@ -113,4 +114,5 @@
   yLabel={spec.axes?.y ?? 'Q'}
   {legend}
   {pres}
+  frame={frameFor(app.ui.narrow)}
 />

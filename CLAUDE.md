@@ -606,6 +606,24 @@ panel's layers before any is drawn (`ui/plots/layers.js`) — panels that each
 scaled their own x would line up by accident. `ViewHost` interprets
 `{layout, plot, overlays}` and composes these primitives.
 
+**Two canvases (`ui/plots/frame.js`).** The plot canvas is 16:9 and 760 units
+wide on a desktop or a projector, and 4:3 and 460 units wide below the mobile
+breakpoint — the same breakpoint at which the sidebar becomes a drawer and the
+tabs become a native picker. NOT portrait, deliberately: a frame taller than it
+is wide would fill the phone and would also make a sinusoid look steep, and the
+promise of the instrument is that a figure teaches the same thing in the hand
+and on the wall. The narrow canvas is also SMALLER IN USER UNITS, which is the
+part that carries: both render at the same physical width, so the same 12 px
+label lands at 5.7 real pixels through the wide canvas and 9.4 through the
+narrow one — the type did not grow, the ruler shrank. Which one is in force is
+`app.ui.narrow`, a viewport FACT kept by one matchMedia listener in `App.svelte`
+(never in localStorage, never in the URL); it reaches every renderer through
+`frameFor()` and every custom view as a `frame` PROP, because a custom view must
+not have to know the store to draw on the same frame as everything else. A view
+that renders `<Axes>` hands it the margin it drew with (`m={M}`) — the axis
+names are placed inside that margin, and `npm run check` fails a view that
+forgets, since the symptom appears on a phone only.
+
 **Scales (`core/scales.js`).** A thin wrapper re-exporting the project's configured
 d3 primitives: `scaleLinear`, `scaleLog` (phase-2 SNR), `ticks`, `bin`, `line`/`area`
 path generators, and a `format` preset (SI units, fixed precision). All `ui/plots/`

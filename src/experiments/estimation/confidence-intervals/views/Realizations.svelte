@@ -12,9 +12,16 @@
   import { dataColor } from '../../../../core/palette.svelte.js';
   import Axes from '../../../../ui/plots/Axes.svelte';
 
-  let { observables, params, pres = false } = $props();
+  let { observables, params, pres = false, frame = FRAME } = $props();
 
-  const { W, H, M, iw, ih } = FRAME;
+  // The canvas arrives as a prop rather than as an import: it is 16:9 on a
+  // projector and 4:3 on a phone (ui/plots/frame.js), and a custom view has no
+  // business knowing the store to draw on the same frame as everything else.
+  const W = $derived(frame.W);
+  const H = $derived(frame.H);
+  const M = $derived(frame.M);
+  const iw = $derived(frame.iw);
+  const ih = $derived(frame.ih);
   const k = $derived(strokeScale(pres));
   const kt = $derived(typeScale(pres));
 
@@ -53,6 +60,7 @@
       h={ih}
       {k}
       {kt}
+      m={M}
     />
     {#each intervals as it, m (m)}
       <line

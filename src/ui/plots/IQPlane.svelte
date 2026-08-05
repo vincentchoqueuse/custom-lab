@@ -32,9 +32,18 @@
     yLabel = 'Q',
     legend = [],
     pres = false,
+    // The canvas, handed down rather than imported: on a phone it is 4:3 and
+    // on a projector 16:9 (frame.js), and an equal-aspect plane gains twice
+    // over — the squarer the frame, the more of the square data region fits.
+    frame = FRAME,
   } = $props();
 
-  const { W, H, M, iw, ih } = FRAME;
+  const F = $derived(frame);
+  const W = $derived(F.W);
+  const H = $derived(F.H);
+  const M = $derived(F.M);
+  const iw = $derived(F.iw);
+  const ih = $derived(F.ih);
   const k = $derived(strokeScale(pres));
   const kt = $derived(typeScale(pres));
 
@@ -103,7 +112,7 @@
     </clipPath>
   </defs>
   <g transform="translate({M.left},{M.top})">
-    <Axes {xs} {ys} xAxis={{ label: xLabel }} yAxis={{ label: yLabel }} w={iw} h={ih} {k} {kt} />
+    <Axes {xs} {ys} xAxis={{ label: xLabel }} yAxis={{ label: yLabel }} w={iw} h={ih} {k} {kt} m={M} />
 
     <g clip-path="url(#iq-clip)">
       <!-- The cross through the origin. On a pole map it is not decoration:

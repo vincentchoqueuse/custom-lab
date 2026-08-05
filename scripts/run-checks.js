@@ -142,6 +142,43 @@ function checkRandomness() {
 }
 
 /**
+ * A custom view that draws <Axes> hands it the MARGIN it drew with.
+ *
+ * The axis NAMES are placed inside the margin — the y one rotated against the
+ * left edge, the x one below the ticks — and until there were two canvases
+ * those offsets could be constants. There are two now (ui/plots/frame.js), and
+ * a view that lets `m` default to the wide margin puts its y name six units
+ * from the edge of the phone canvas, where it is clipped mid-letter. On the
+ * desktop it looks perfect, which is exactly why this is checked rather than
+ * noticed: five views were doing it and the only symptom was on a phone.
+ */
+function checkAxesMargin() {
+  const bad = [];
+  const walk = (dir) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.svelte')) {
+        const src = readFileSync(p, 'utf8');
+        for (const m of src.matchAll(/<Axes\b[^>]*>/g))
+          // `m={M}` or the shorthand `{m}` — both hand it down
+          if (!/\bm=\{|\{m\}/.test(m[0])) bad.push(p.slice(p.indexOf('src/')));
+      }
+    }
+  };
+  walk(resolve(process.cwd(), 'src'));
+  console.log(`  ${dim('canvas')}`);
+  if (bad.length) {
+    for (const b of [...new Set(bad)])
+      console.log(`    ${red('✗')} ${b}: <Axes> without m={…} — its axis names clip on the phone canvas`);
+    fail++;
+  } else {
+    console.log(`    ${green('✓')} every <Axes> is placed from the margin it was drawn with`);
+    pass++;
+  }
+}
+
+/**
  * Every declarative axis carries a name.
  *
  * An unlabelled axis is still TICKED: it therefore reads as if it measured
@@ -715,6 +752,7 @@ function checkOrdering(subjectRanks, expRanks) {
 async function checkCatalogue() {
   console.log(bold('catalogue'));
   checkLayering();
+  checkAxesMargin();
   checkRandomness();
   checkDsp();
   checkLinalg();

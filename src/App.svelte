@@ -73,6 +73,20 @@
     schedule(key, params);
   });
 
+  /* ---------- the viewport, watched once ---------------------------------- */
+  // ONE listener for the whole application. The plot canvas depends on it, and
+  // a component polling window.innerWidth on its own would not re-render when
+  // the phone is rotated. The breakpoint is the CSS one: the sidebar becomes a
+  // drawer and the tabs become a native picker at exactly the width where the
+  // wide canvas stops being worth its shape.
+  $effect(() => {
+    const mq = window.matchMedia('(max-width: 860px)');
+    const sync = () => (app.ui.narrow = mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  });
+
   /* ---------- cosmetic prefs (localStorage: never experiment state) ------- */
 
   function loadPrefs() {

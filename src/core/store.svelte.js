@@ -37,6 +37,12 @@ export const app = $state({
     inspector: false,
     settings: false,
     bold: false, // permanent thick-strokes preference (projection without fullscreen)
+    // Viewport below the mobile breakpoint, which picks the plot canvas
+    // (ui/plots/frame.js). A FACT about the device, not a preference: never in
+    // localStorage, never in the URL, and held here rather than read from
+    // `window` inside a plot, so that a figure stays a pure function of its
+    // inputs — the freeze ghost and the SVG export both clone it.
+    narrow: false,
   },
 });
 

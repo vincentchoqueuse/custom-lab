@@ -11,9 +11,16 @@
   import Axes from '../../../../ui/plots/Axes.svelte';
   import Legend from '../../../../ui/plots/Legend.svelte';
 
-  let { observables: obs, params: _params, pres = false } = $props();
+  let { observables: obs, params: _params, pres = false, frame = FRAME } = $props();
 
-  const { W, H, M, iw, ih } = FRAME;
+  // The canvas arrives as a prop rather than as an import: it is 16:9 on a
+  // projector and 4:3 on a phone (ui/plots/frame.js), and a custom view has no
+  // business knowing the store to draw on the same frame as everything else.
+  const W = $derived(frame.W);
+  const H = $derived(frame.H);
+  const M = $derived(frame.M);
+  const iw = $derived(frame.iw);
+  const ih = $derived(frame.ih);
   const k = $derived(strokeScale(pres));
   const kt = $derived(typeScale(pres));
 
@@ -84,7 +91,8 @@
     </clipPath>
   </defs>
   <g transform="translate({M.left},{M.top})">
-    <Axes {xs} {ys} xAxis={{ label: 'x' }} yAxis={{ label: 'y' }} w={iw} h={ih} {k} {kt} />
+    <Axes {xs} {ys} xAxis={{ label: 'x' }} yAxis={{ label: 'y' }} w={iw} h={ih} {k} {kt}
+      m={M} />
 
     <g clip-path="url(#cd-clip)">
       <path d={contourPath} stroke="var(--muted-fg)" stroke-width={0.9 * k} fill="none" opacity="0.45" />

@@ -16,9 +16,13 @@
 <script>
   import { FRAME, FONT_UI, typeScale } from '../../../../ui/plots/frame.js';
 
-  let { observables: obs, params, pres = false } = $props();
+  let { observables: obs, params, pres = false, frame = FRAME } = $props();
 
-  const { W, H } = FRAME;
+  // The canvas arrives as a prop rather than as an import: it is 16:9 on a
+  // projector and 4:3 on a phone (ui/plots/frame.js), and a custom view has no
+  // business knowing the store to draw on the same frame as everything else.
+  const W = $derived(frame.W);
+  const H = $derived(frame.H);
   const kt = $derived(typeScale(pres));
 
   const tiles = $derived([

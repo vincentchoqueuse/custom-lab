@@ -45,6 +45,8 @@
     showLegend = true,
     // unique per panel: two clip paths on one canvas may not share an id
     uid,
+    // the frame's margin, so the axis names are placed from it
+    m,
   } = $props();
 
   // the primitives' fallback colors, resolved here so the palette remap
@@ -133,7 +135,7 @@
   </clipPath>
 </defs>
 <g transform="translate({left},{top})">
-  <Axes {xs} {ys} xAxis={xAxisDrawn} {yAxis} w={iw} h={ih} {k} {kt} />
+  <Axes {xs} {ys} xAxis={xAxisDrawn} {yAxis} w={iw} h={ih} {k} {kt} {m} />
   <g clip-path="url(#dp-clip-{uid})">
     {#each shown as l, i (i)}
       {#if l.kind === 'histogram'}

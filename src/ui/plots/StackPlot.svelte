@@ -10,23 +10,22 @@
   // accident and stop lining up the day their supports differ — and two time
   // axes that silently disagree is worse than no stack at all.
   import { scaleLinear } from '../../core/scales.js';
-  import { FRAME, strokeScale, typeScale } from './frame.js';
+  import { frameFor, strokeScale, typeScale } from './frame.js';
+  import { app } from '../../core/store.svelte.js';
   import { axisSpec, resolveDomain, resolveLayers, xDomainOf } from './layers.js';
   import PlotPanel from './PlotPanel.svelte';
 
   let { spec, obs, params, pres = false, lock = false } = $props();
 
-  const { W, H, M } = FRAME;
+  const F = $derived(frameFor(app.ui.narrow));
   const k = $derived(strokeScale(pres));
   const kt = $derived(typeScale(pres));
 
   // Between two panels: room for the lower one's top tick label and no more.
-  const GAP = 30;
-
-  const iw = W - M.left - M.right;
-  const panelH = $derived(
-    (H - M.top - M.bottom - GAP * (spec.panels.length - 1)) / spec.panels.length
-  );
+  // It follows the canvas, or two panels on a phone are mostly gap.
+  const gap = $derived(app.ui.narrow ? 22 : 30);
+  const iw = $derived(F.iw);
+  const panelH = $derived((F.ih - gap * (spec.panels.length - 1)) / spec.panels.length);
 
   // The stack's own axes.x and overlays belong to the ABSCISSA, so every panel
   // gets them: a frame boundary or a prefix band marks a place in time, not a
@@ -51,7 +50,7 @@
   });
 </script>
 
-<svg class="plot-svg" viewBox="0 0 {W} {H}" role="img">
+<svg class="plot-svg" viewBox="0 0 {F.W} {F.H}" role="img">
   {#each panelSpecs as p, i (i)}
     <PlotPanel
       spec={p}
@@ -61,8 +60,9 @@
       {lock}
       {k}
       {kt}
-      left={M.left}
-      top={M.top + i * (panelH + GAP)}
+      left={F.M.left}
+      top={F.M.top + i * (panelH + gap)}
+      m={F.M}
       {iw}
       ih={panelH}
       xDomainForced={xDomain}

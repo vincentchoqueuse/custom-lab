@@ -2,9 +2,15 @@
   // Generic axes + grid. Accepts linear or log scales from core/scales.js —
   // log axes get decade ticks (minor labels blanked by d3's tickFormat).
   import { format } from '../../core/scales.js';
-  import { FONT_MONO, FONT_UI } from './frame.js';
+  import { FONT_MONO, FONT_UI, FRAME } from './frame.js';
 
-  let { xs, ys, xAxis = {}, yAxis = {}, w, h, k = 1, kt = 1 } = $props();
+  // `m` is the frame's margin. The axis NAMES used to sit at hard-coded
+  // offsets — y at −46, x at h+40 — tuned against the one canvas that existed.
+  // On the phone canvas, whose margins are narrower in user units, the y name
+  // then landed 6 units from the edge and was clipped mid-letter. An offset
+  // into a margin belongs to that margin: both names are now placed from it,
+  // which reproduces the old positions on the wide frame to within 2 units.
+  let { xs, ys, xAxis = {}, yAxis = {}, w, h, k = 1, kt = 1, m = FRAME.M } = $props();
 
   // A tick whose pixel position is not a number is not drawn. This is not
   // paranoia: for one frame during an experiment or scene swap a scale can be
@@ -64,7 +70,7 @@
   {#if axisLabel(xAxis)}
     <text
       x={w / 2}
-      y={h + 40 * kt}
+      y={h + (m.bottom - 8) * kt}
       text-anchor="middle"
       font-size={13 * kt}
       fill="#333"
@@ -75,7 +81,7 @@
     <text
       transform="rotate(-90)"
       x={-h / 2}
-      y={-46}
+      y={-(m.left - 14)}
       text-anchor="middle"
       font-size={13 * kt}
       fill="#333"

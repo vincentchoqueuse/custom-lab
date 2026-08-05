@@ -1,13 +1,15 @@
 <script>
   // ViewHost interprets the active view: declarative cartesian specs go
-  // through DeclarativePlot, declarative equal-aspect planes through
-  // PlanePlot; custom views are lazy-loaded components receiving
-  // {observables, params, pres} — and nothing else (no compute access).
+  // through DeclarativePlot, stacked panels through StackPlot, declarative
+  // equal-aspect planes through PlanePlot; custom views are lazy-loaded
+  // components receiving {observables, params, pres, frame} — and nothing else
+  // (no compute access, and no store access: the canvas travels as a prop).
   import { app, manifest } from '../core/store.svelte.js';
   import { STR } from '../core/strings.js';
   import DeclarativePlot from './plots/DeclarativePlot.svelte';
   import PlanePlot from './plots/PlanePlot.svelte';
   import StackPlot from './plots/StackPlot.svelte';
+  import { frameFor } from './plots/frame.js';
 
   const m = $derived(manifest());
   const viewDef = $derived(m?.views.find((v) => v.id === app.view) ?? m?.views[0]);
@@ -42,7 +44,14 @@
         <div class="plot-placeholder">{STR.COMPUTING}</div>
       {:then mod}
         {@const Custom = mod.default}
-        <Custom observables={obs} params={app.params} pres={app.ui.presentation || app.ui.bold} />
+        <!-- the canvas travels as a prop: a custom view must not have to know
+             the store to draw on the same frame as everything else -->
+        <Custom
+          observables={obs}
+          params={app.params}
+          pres={app.ui.presentation || app.ui.bold}
+          frame={frameFor(app.ui.narrow)}
+        />
       {:catch}
         <div class="plot-placeholder">
           {STR.VIEW_LOAD_ERROR}
