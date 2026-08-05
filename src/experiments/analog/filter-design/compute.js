@@ -93,26 +93,34 @@ export function compute({ family, fp, fstop, Amax, Amin }) {
     gy[i] = (-dphi / domega) * 1000; // ms
   }
 
-  // template forbidden zones (drawn as bands on the response view)
-  const zone1 = {
-    x: Float64Array.from([fMin, fp]),
-    lo: Float64Array.from([DB_FLOOR, DB_FLOOR]),
-    hi: Float64Array.from([-Amax, -Amax]),
-  };
-  // The passband forbids TWO things and the template only drew one. A response
-  // may not fall below −Amax, and it may not rise above 0 dB either: a
-  // normalized filter that amplifies in its passband has not met the
-  // specification, it has changed it. Drawing only the floor let a peaking
-  // Chebyshev look compliant while it sat 2 dB over the line.
-  const zone1b = {
-    x: Float64Array.from([fMin, fp]),
+  // THE TEMPLATE, the classic three forbidden zones — and the third one is the
+  // one that kept being missed.
+  //
+  //   · |H| may not rise above 0 dB ANYWHERE below the stop-band edge. Not
+  //     just in the pass band: across the TRANSITION band that is the only
+  //     constraint there is, and a design that bulges there has amplified
+  //     something it was asked to attenuate.
+  //   · above f_a, |H| may not rise above −Amin — the rejection actually
+  //     bought.
+  //   · below f_p, |H| may not fall below −Amax — the ripple budget.
+  //
+  // The response has to thread between them, and the picture is exactly the
+  // one drawn on a board: the filter's job is to get from the top-left
+  // corridor to the bottom-right one without touching any of the three.
+  const zoneTop = {
+    x: Float64Array.from([fMin, fstop]),
     lo: Float64Array.from([0, 0]),
     hi: Float64Array.from([5, 5]),
   };
-  const zone2 = {
+  const zoneStop = {
     x: Float64Array.from([fstop, fMax]),
     lo: Float64Array.from([-Amin, -Amin]),
     hi: Float64Array.from([5, 5]),
+  };
+  const zonePass = {
+    x: Float64Array.from([fMin, fp]),
+    lo: Float64Array.from([DB_FLOOR, DB_FLOOR]),
+    hi: Float64Array.from([-Amax, -Amax]),
   };
 
   // pole-zero map, normalized by ωp (checks + PZ view)
@@ -144,9 +152,9 @@ export function compute({ family, fp, fstop, Amax, Amin }) {
   return {
     observables: {
       response: { x: rf, y: ry },
-      zone1,
-      zone1b,
-      zone2,
+      zoneTop,
+      zoneStop,
+      zonePass,
       delay: { x: gf, y: gy },
       // {x, y} series: the shape a declarative plane consumes
       poles: { x: Float64Array.from(px), y: Float64Array.from(py) },

@@ -6,7 +6,14 @@ export default [
     view: 'gain',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
     visible: ['family'],
-    notes: `The specification is fixed: 1 dB of ripple, 40 dB of attenuation, one
+    notes: `Read the template before any filter is named: three yellow zones, and
+the response has to thread between them. It may not rise above 0 dB anywhere
+below f_a — not in the pass band and not in the TRANSITION either, where that is
+the only constraint there is. Above f_a it may not rise above −A_min: that is the
+rejection being bought. And below f_p it may not fall under −A_max: the ripple
+budget. Everything a specification says is in those three zones.
+
+The specification is fixed here: 1 dB of ripple, 40 dB of attenuation, one
 octave of transition. Cycling through the families while reading the order in
 the statline gives Butterworth 8, Chebyshev 5, elliptic 4.
 

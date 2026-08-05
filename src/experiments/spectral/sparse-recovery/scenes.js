@@ -1,5 +1,12 @@
 // Lecture script. Auto-discovered by the registry.
 //
+// THE SCRIPT IS THE SPECTRUM, and the three roads to it. The subject is
+// spectral analysis, so the figure a scene opens on is the SPECTRUM unless it
+// has a reason not to be — the periodogram first, because that is the picture
+// every other method in the subject is trying to improve on, then the two
+// families of answer: the greedy pursuits, MP and OMP, and the convex one, the
+// lasso. The last two scenes are the invoice.
+//
 // The spine of this script is the experiment next door. `subspace` postulates
 // "d lines in white noise" and is HANDED d; this one is given the same signal,
 // the same window and the same decibels, and is not told how many lines there
@@ -20,72 +27,113 @@ const BASE = {
 
 export default [
   {
-    id: 'count',
-    title: 'Nobody said how many lines there are',
-    view: 'time',
+    id: 'periodogram',
+    title: 'The periodogram, and what it does not say',
+    view: 'spectrum',
     params: { ...BASE, k: 0 },
-    visible: ['k'],
+    visible: ['snr', 'df'],
     notes: `Arrive here straight from "High-resolution methods", on purpose: same
 Fs, same record, same two lines around 200 Hz, same 25 dB, same window. One thing
 changed — MUSIC was handed d = 2. Here nothing is.
 
+Start on the grey curve alone, with k = 0, and read it as a periodogram: two
+peaks about 6 Hz apart, each one a lobe several hertz wide, and a floor of
+sidelobes underneath. Every question the rest of this experiment answers is
+already visible in it. HOW MANY lines are there — two peaks, or two peaks and a
+third one hiding in the floor? WHERE exactly are they — the maximum of a lobe is
+not the frequency of a line, it is the frequency of a line plus whatever the
+neighbouring lobe adds to it. And with WHAT amplitude — a lobe's height is the
+line's power convolved with the window.
+
 Say the shape of the problem out loud before touching anything: 256 samples, a
 dictionary of 514 columns. The normal equations have no unique solution; there
 are infinitely many ways to explain this record exactly. What picks one is the
-assumption that only a few columns are used.
+assumption that only a few columns are used — and the two scenes that follow are
+the two ways the field has found to impose it.
 
-Now take k up, one step at a time. Two steps, two lines, and the reconstruction
-lands on the signal.
-
-Between two steps, ask how it chooses. Switch to "What the algorithm sees": that
-curve is the correlation of the residual with EVERY atom at once, and it is a
-single zero-padded FFT — the periodogram of what is left. The rule is "take the
-tallest peak and subtract it", which is CLEAN, written by radio astronomers for
-this exact problem.`,
+Take the SNR down to 5 dB and back to see how much of the floor is noise and how
+much is the window. Take Δf down to 0.5 and watch the two peaks become one lump:
+that is the Fourier limit, and it is the subject of scene 5.`,
   },
   {
-    id: 'denoise',
-    title: 'What the sparsity buys: a denoiser',
-    view: 'time',
-    params: { ...BASE, snr: 5, k: 2 },
-    visible: ['snr', 'k'],
-    notes: `Take the SNR down to 5 dB and stay on the time view. The grey trace is
-what was measured and it is a mess; the orange dashed one is the signal that was
-actually sent.
-
-Take k from 0 to 2 and watch which of the two the blue lands on. It lands on the
-ORANGE. That is the argument for a sparse model in one gesture: with 514 columns
-available it could have gone through every grey point exactly — and fitted the
-noise doing it — but two columns cannot represent noise, so the only thing it can
-reproduce is the part of the record that is structured.
-
-The statline gives the number, and the room can check it in its head first: the
-error is the noise projected onto 2k = 4 dimensions out of 256, so 4/256 of its
-energy survives — 10·log10(256/4) ≈ 18 dB, and no free lunch anywhere.
-
-Then push k past 2 and let them watch the gain come back DOWN. Every atom past
-the second explains no signal and keeps a little more noise. Choosing k IS the
-estimation problem — and it is the same problem MUSIC solves by being told d.`,
-  },
-  {
-    id: 'orthogonal',
-    title: 'Where the O of OMP is',
-    view: 'correlations',
-    params: { ...BASE, k: 1 },
+    id: 'greedy',
+    title: 'The greedy road: MP, then OMP',
+    view: 'spectrum',
+    params: { ...BASE, algo: 'mp', k: 1 },
     visible: ['algo', 'k'],
-    notes: `Stay on "What the algorithm sees" and look at the frequency already
-taken: the curve has a NOTCH there, straight to the floor. That notch is not
-cosmetic — the residual of OMP is orthogonal to every atom it has selected, so
-the correlation is exactly zero. The statline reads it as "⟂ defect" and prints
-0.000000; the number behind it is around 1e-15.
+    notes: `The first family, and it is the older one: take the tallest peak,
+subtract it, look again. That is matching pursuit — CLEAN, written by radio
+astronomers for exactly this problem.
 
-Consequence, and have the room state it before you show it: OMP can never pick
-the same atom twice, because a zero can never be the maximum.
+Start with algo = MP and k = 1. One blue stem, standing on the periodogram at
+the peak it explains. Take k to 2, then 3, 4, then twelve, one step at a time.
+The first two land on the lines; everything after that is buying back the
+residue of the first two.
 
-Now switch the algorithm to MP. Same selection rule, one difference — MP fits
-each line once, against the residual of the moment, and never goes back. The
-notches are gone, the orthogonality defect is no longer zero, and "re-selected"
-starts counting. MP spends iterations repairing its own earlier answers.`,
+Then switch to "What the algorithm sees". That purple curve is the correlation
+of the residual with EVERY atom at once — a single zero-padded FFT, which is to
+say the periodogram of what is left. The selection rule is read straight off it:
+take the maximum.
+
+Now the difference between the two greedy methods, and it is one word. Leave the
+tab where it is and switch algo from MP to OMP. A NOTCH appears at every
+frequency already chosen, straight to the floor. That notch is not cosmetic: the
+residual of OMP is orthogonal to every atom it has selected, so the correlation
+there is exactly zero — the statline reads "⟂ defect" and prints 0.000000, the
+number behind it being about 1e-15. MP has no such notch, its defect is not
+zero, and "re-selected" starts counting: MP spends iterations repairing its own
+earlier answers, because it fits each line once against the residual of the
+moment and never goes back.
+
+Consequence, and worth having the room state it before you show it: OMP can
+never pick the same atom twice, because a zero can never be a maximum.
+
+Last, the argument for a sparse model at all — take the SNR down to 5 dB and go
+to the time tab. With 514 columns available the fit could have gone through
+every noisy sample exactly; two columns cannot represent noise, so all it can
+reproduce is the part of the record that is structured. The room can check the
+statline's number in its head first: the error is the noise projected onto
+2k = 4 dimensions out of 256, so 10·log10(256/4) ≈ 18 dB, and no free lunch
+anywhere.`,
+  },
+  {
+    id: 'lasso',
+    title: 'The convex road: a penalty instead of a count',
+    view: 'spectrum',
+    params: { ...BASE, algo: 'lasso', lam: 0.4 },
+    visible: ['lam', 'algo'],
+    notes: `The greedy road imposed the sparsity by COUNTING: k atoms, stop. The
+other family penalizes instead —
+
+    min ‖x − D c‖²  +  λ · Σ ‖c_l‖
+
+— and the dial is no longer a number of atoms but a weight λ. Same objective,
+two roads. Worth stating plainly: OMP has no λ and cannot have one; it is not a
+penalized least squares, it is a combinatorial search done greedily.
+
+Take λ from 1 downwards and narrate the path. At λ = λmax the solution is EXACTLY
+zero — not small, zero, and that threshold is known in closed form. Then lines
+appear one by one, in the order the greedy chose them, which is not a coincidence.
+
+Then look at the two stems. The blue ones are the lasso's amplitudes and they are
+SHORT; the green ones are the same frequencies refitted by ordinary least
+squares. The gap is the price of the penalty and it is exactly 2λ/N — the same λ
+that selected the lines also shrinks them. "Debiasing the lasso" is nothing more
+than the green stems: keep the support, throw the penalty away, refit.
+
+On "What the algorithm sees", the green horizontal is λ and the correlation curve
+is CAPPED by it, touching it exactly on the active lines. That is the optimality
+condition of the convex problem — the exact counterpart of OMP's notches. Both
+algorithms stop for a reason; this is what each reason looks like.
+
+One more thing the convex road has and the greedy one does not, if there is time:
+the drawer's α is the FISTA step in units of the certified 1/L, and L is known
+here in closed form (nfft/2) with no line search. Raise α above 1 and the step
+count in the statline FALLS — the certified step is not the fastest, it is what
+the proof needs. Somewhere below α = 2 it says DIVERGED. And while it converges
+the ANSWER never moves: same lines, same amplitudes, because the problem is
+convex and has one minimum. Put that beside the greedy scene, where the answer IS
+the path taken.`,
   },
   {
     id: 'resolution',
@@ -117,76 +165,19 @@ resolution goes back to Fourier. The gain of the previous experiment was never
 free — this is its invoice.`,
   },
   {
-    id: 'lasso',
-    title: 'The other road: a penalty instead of a count',
-    view: 'spectrum',
-    params: { ...BASE, algo: 'lasso', lam: 0.4 },
-    visible: ['lam', 'algo'],
-    notes: `Everything so far imposed the sparsity by COUNTING: k atoms, stop. The
-other formulation penalizes instead —
-
-    min ‖x − D c‖²  +  λ · Σ ‖c_l‖
-
-— and the dial is no longer a number of atoms but a weight λ. Same objective, two
-roads. Worth stating plainly: OMP has no λ and cannot have one; it is not a
-penalized least squares, it is a combinatorial search done greedily.
-
-Take λ from 1 downwards and narrate the path. At λ = λmax the solution is EXACTLY
-zero — not small, zero, and that threshold is known in closed form. Then lines
-appear one by one, in the order the greedy chose them, which is not a coincidence.
-
-Then look at the two stems. The blue ones are the lasso's amplitudes and they are
-SHORT; the green ones are the same frequencies refitted by ordinary least
-squares. The gap is the price of the penalty and it is exactly 2λ/N — the same λ
-that selected the lines also shrinks them. "Debiasing the lasso" is nothing more
-than the green stems: keep the support, throw the penalty away, refit.
-
-Last, switch to "What the algorithm sees". The green horizontal is λ, and the
-correlation curve is CAPPED by it, touching it exactly on the active lines. That
-is the optimality condition of the convex problem — the exact counterpart of
-OMP's notches. Both algorithms stop for a reason; this is what each reason looks
-like.`,
-  },
-  {
-    id: 'fista',
-    title: 'Calibrating the step: a guarantee is not an optimum',
-    view: 'spectrum',
-    params: { ...BASE, algo: 'lasso', lam: 0.1, alpha: 1 },
-    visible: ['alpha', 'lam'],
-    notes: `The convex road needs a step, and this one is not guessed: the data
-term is a quadratic, so its Lipschitz constant is ‖DᵀD‖, and for this dictionary
-that is exactly nfft/2 — no line search, no tuning. The certified step is 1/L,
-which is α = 1.
-
-Now the part worth an amphitheatre. Move α and read the step count in the
-statline: it falls as α rises past 1. The certified step is NOT the fastest. 1/L
-is what the proof needs in order to promise convergence — a sufficient condition
-— and the promise is bought with a margin the proof cannot know how to spend.
-
-Keep going. Somewhere below α = 2 it says DIVERGED. So the picture is: a range
-where it works, a range where it works faster, and a cliff. Ask the room which of
-the three a proof can tell you about.
-
-The other half, and the one to insist on: while it converges, the ANSWER never
-moves. Same lines, same amplitudes, same output SNR at every α. The step changes
-how long the solver takes and nothing else, because the problem is convex and has
-one minimum. Put that beside scene 3 — greedy's answer IS the path it took, which
-is exactly why the coherent grid of scene 4 ruins it. That is the real trade
-between the two roads, and it is not about speed.`,
-  },
-  {
     id: 'offgrid',
     title: 'Off the grid, nothing is sparse',
-    view: 'time',
+    view: 'spectrum',
     params: { ...BASE, k: 2, snr: 40 },
     visible: ['offGrid', 'k'],
     notes: `Freeze (F) on the grid, then flip the switch: the lines now fall
 exactly between two atoms, which is the worst they can do.
 
-Two lines still, two iterations still, and the residual barely moves. The reason
-is on the spectrum tab: a frequency that is not in the dictionary is not
-represented by one column, it LEAKS onto all of them. The signal is not sparse in
-this dictionary — sparsity was never a property of the signal, it was an
+Two lines still, two iterations still, and the spectrum tells the story: a
+frequency that is not in the dictionary is not represented by one column, it
+LEAKS onto all of them. The stems scatter around the truth instead of landing on
+it, and the time tab shows the residual barely moving. The signal is not sparse
+in this dictionary — sparsity was never a property of the signal, it was an
 assumption about the PAIR (signal, dictionary), and here the pair is wrong.
 
 Take k up to 12 and let the room watch the algorithm spend its whole budget
