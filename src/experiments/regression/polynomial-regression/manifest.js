@@ -39,29 +39,20 @@ export default {
   // actions omitted → core default [randomizeSeed, freeze]
 
   views: [
-    // Declarative only — true curve, noisy data, least-squares fit.
+    // ONE fit figure, carrying BOTH estimates. They were two tabs, and two tabs
+    // is the wrong shape for this lesson: ridge is not another subject, it is
+    // the same fit with one dial turned, and the whole of what it does is
+    // visible only when the unregularized curve is next to it in the same
+    // frame. λ is a pill, so the green curve leaves the orange one and comes
+    // back under the hand — which is the demonstration.
     figure(
       'fit',
       line('trueCurve', {
         width: 2.5,
-        overlays: [
-          scatter('noisyPoints', { color: '#7E2F8E', size: 3.5, opacity: 0.6 }),
-          line('fittedCurve', { color: '#D95319', width: 2.5, dashed: true }),
-        ],
-        axes: { x: 'x', y: 'y' },
-      })
-    ),
-
-    // Same scene with the ridge estimate on top: â = (XᵀX + λD)⁻¹Xᵀy.
-    view(
-      'ridge',
-      'Ridge',
-      line('trueCurve', {
-        width: 2.5,
         label: 'true',
         overlays: [
-          scatter('noisyPoints', { color: '#7E2F8E', size: 3.5, opacity: 0.6 }),
-          line('fittedCurve', { color: '#D95319', width: 2, dashed: true, label: 'LS (λ=0)' }),
+          scatter('noisyPoints', { color: '#7E2F8E', size: 3.5, opacity: 0.6, label: 'data' }),
+          line('fittedCurve', { color: '#D95319', width: 2, dashed: true, label: 'LS' }),
           line('ridgeCurve', { color: '#77AC30', width: 2.5, label: 'ridge (λ)' }),
         ],
         axes: { x: 'x', y: 'y' },

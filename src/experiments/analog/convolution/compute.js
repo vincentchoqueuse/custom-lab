@@ -36,7 +36,7 @@
 // discontinuity — gate * gate becomes EXACT and the RC charging falls to 4·10⁻⁸.
 // The verifications above are therefore equalities, not tolerances.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
-import { trapz } from '../../../core/numeric.js';
+import { trapz, fft } from '../../../core/numeric.js';
 
 const N = 1400; // grid over the τ / t axis
 const T0 = -2; // the window shown, in seconds
@@ -153,6 +153,50 @@ export function compute({ sig, ker, a, b, t }) {
     else regime = 'after: no overlap left, y = 0';
   }
 
+  // THE SAME STATEMENT IN FREQUENCY. Convolution in time is multiplication in
+  // frequency, and that identity is the reason the operation is worth learning
+  // at all — but it is invisible on a picture of sliding gates. Three magnitude
+  // spectra on one frame say it: |X| and |H| are two shapes, |Y| is their
+  // product, and where either factor is small the result is small however large
+  // the other one was.
+  //
+  // Sampled on the same τ grid the views already use, so the transform is of
+  // the very arrays being drawn on the other tabs rather than of a second,
+  // tidier version of them.
+  const NF = 2048; // past N, so nothing is truncated before the transform
+  const dt = (T1 - T0) / (N - 1);
+  const spec = (arr) => {
+    const re = new Float64Array(NF);
+    const im = new Float64Array(NF);
+    for (let i = 0; i < N; i++) re[i] = arr[i];
+    fft(re, im);
+    return { re, im };
+  };
+  const xw = new Float64Array(N);
+  const hw = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    xw[i] = x.f(tau[i]);
+    hw[i] = h.f(tau[i]);
+  }
+  const SX = spec(xw);
+  const SH = spec(hw);
+  const SY = spec(yOut);
+  const half = 220; // enough bins to fill the frame at every width the dials reach
+  const fAx = new Float64Array(half);
+  const mX = new Float64Array(half);
+  const mH = new Float64Array(half);
+  const mY = new Float64Array(half);
+  const mag = (S, i) => Math.hypot(S.re[i], S.im[i]) * dt;
+  for (let i = 0; i < half; i++) {
+    fAx[i] = i / (NF * dt);
+    mX[i] = mag(SX, i);
+    mH[i] = mag(SH, i);
+    // |Y| is DRAWN from the convolution's own transform, not from |X|·|H| — a
+    // figure that plotted the product of the two factors would be illustrating
+    // its own arithmetic instead of checking the theorem.
+    mY[i] = mag(SY, i);
+  }
+
   // the two areas, by the same cutting: ∫x over its support, ∫h over its own
   // (truncated to the window for the exponential, which has no end)
   const unit = { f: () => 1, edges: [T0, T1] };
@@ -172,6 +216,11 @@ export function compute({ sig, ker, a, b, t }) {
       yOut: { x: tau, y: yOut },
       marker,
       tNow: t, // vline: the current t, on both views
+      // the theorem, in frequency
+      specX: { x: fAx, y: mX },
+      specH: { x: fAx, y: mH },
+      specY: { x: fAx, y: mY },
+
       // the numbers
       yValue: { value: yNow, meta: { label: 'y(t) = area of the product', precision: 4 } },
       support: {

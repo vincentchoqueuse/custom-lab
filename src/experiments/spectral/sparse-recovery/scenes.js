@@ -180,8 +180,8 @@ between the two roads, and it is not about speed.`,
     view: 'time',
     params: { ...BASE, k: 2, snr: 40 },
     visible: ['offGrid', 'k'],
-    notes: `Freeze (F) with δ = 0, then take the offset to ½ a search cell — the
-lines now fall exactly between two atoms.
+    notes: `Freeze (F) on the grid, then flip the switch: the lines now fall
+exactly between two atoms, which is the worst they can do.
 
 Two lines still, two iterations still, and the residual barely moves. The reason
 is on the spectrum tab: a frequency that is not in the dictionary is not

@@ -80,14 +80,19 @@ export default {
       ],
       default: 2,
     }),
-    offGrid: float('δ', {
-      description: 'offset of the lines from the search grid (½ = worst case)',
-      min: 0,
-      max: 0.5,
-      step: 0.05,
+    // A SWITCH and not a dial, deliberately. Every intermediate offset is the
+    // same lesson half-told, and a slider invites the room to hunt for the
+    // value where it breaks — which is a hunt with no answer, since the leakage
+    // grows continuously. The experiment is on the grid; the last scene flips
+    // this once, at the worst case, and that is the whole of the off-grid
+    // story.
+    offGrid: select('grid fit', {
+      description: 'where the lines fall relative to the search grid',
+      options: [
+        { value: 0, label: 'on the grid — a line IS an atom' },
+        { value: 0.5, label: 'between two atoms — the worst case' },
+      ],
       default: 0,
-      unit: 'cell',
-      precision: 2,
     }),
     algo: select('algorithm', {
       description: 'how the sparsity is imposed',

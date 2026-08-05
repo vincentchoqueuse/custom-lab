@@ -29,6 +29,7 @@ import { view, figure, figurePlane, line, stem, hline, ViewError } from './views
 export const IN_COLOR = '#D95319'; // the input, dashed, in every time view
 export const RESP_COLOR = '#D95319'; // |H(f)| over the spectra
 export const SPEC_IN_COLOR = '#7E2F8E';
+export const SPEC_OUT_COLOR = '#0072BD'; // what came out — the catalogue's "measured" blue
 export const GAIN_COLOR = '#7E2F8E'; // |H| — the magnitude curve
 export const PHASE_COLOR = '#77AC30'; // arg H — the phase curve
 export const POLE_COLOR = '#D95319';
@@ -232,7 +233,13 @@ export function spectrumView(opts = {}) {
     yLabel: 'amplitude',
     domain,
     label: 'output',
-    color: undefined, // the default data colour, as for every output curve
+    // BLUE, stated. This used to pass `undefined` meaning "let gainView pick
+    // the default" — but an explicit `undefined` re-triggers a destructuring
+    // default, so the output spectrum came out in gainView's magnitude purple,
+    // the very colour of the input spectrum beside it. Two curves, one hex,
+    // and a legend with two identical chips: the figure was telling the room
+    // that what went in and what came out were the same thing.
+    color: SPEC_OUT_COLOR,
     width: 1.8,
     overlays: [
       line('specIn', { color: SPEC_IN_COLOR, opacity: 0.45, label: 'input' }),

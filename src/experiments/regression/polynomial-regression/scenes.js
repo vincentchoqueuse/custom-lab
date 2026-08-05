@@ -5,13 +5,17 @@ export default [
     title: 'The right model (d = 3)',
     view: 'fit',
     params: { d: 3, N: 30, sigma: 0.3, lambda: 0.001 },
-    visible: ['d', 'sigma', 'N'],
+    visible: ['d', 'N', 'sigma', 'lambda'],
     notes: `The true polynomial has degree 3 and a degree 3 is estimated, so
 everything behaves. Pressing R changes the noise and leaves the orange curve
 close to the blue one.
 
 Raising σ shows the degradation, and the coefficients view says the same thing
-in numbers: the orange estimated bars bracket the blue true values.`,
+in numbers: the orange estimated bars bracket the blue true values.
+
+The green curve is the ridge estimate, and at λ = 0.001 it sits exactly under
+the orange one — worth pointing out now, because that is the reference the
+later scenes move away from. Leave λ alone until then.`,
   },
   {
     id: 'underfitting',
@@ -45,8 +49,8 @@ the better model, because the extra terms have nothing to describe.`,
     id: 'ridge',
     title: 'Ridge: taming degree 9',
     params: { d: 9, N: 15, sigma: 0.4, lambda: 0.001 },
-    view: 'ridge',
-    visible: ['lambda', 'N'],
+    view: 'fit',
+    visible: ['lambda', 'd', 'N'],
     notes: `The same catastrophic setting, with one new dial. At λ = 0.001 the
 green ridge curve coincides with the orange least-squares one.
 

@@ -49,13 +49,19 @@ the higher Q is.`,
     title: 'Four filters for two multiplications',
     view: 'gain',
     params: { source: 'square', f0: 110, fc: 600, Q: 2, output: 'lp' },
-    visible: ['Q', 'fc'],
+    visible: ['output', 'Q', 'fc'],
     notes: `The Chamberlin structure costs TWO multiplications per sample and
 gives all four outputs at once — low-pass, band-pass, high-pass and notch.
 
-Raising Q arches all four responses together around the same f_c: same poles,
-different numerators. That is why the SVF has ruled synthesizers since the
-1980s.`,
+Freeze (F), then walk the "output" pill through the four. The orange response
+swings from low-pass to band-pass to high-pass to notch, the purple input
+spectrum never moves, and the blue output spectrum follows the orange curve
+every time. Nothing else changed: not f_c, not Q, not a single coefficient.
+Same poles, four numerators — the four filters are four TAPS of one loop, not
+four filters.
+
+Then raise Q and watch all four sharpen around the same f_c, one at a time.
+That is why the SVF has ruled synthesizers since the 1980s.`,
   },
   {
     id: 'notch',

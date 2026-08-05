@@ -1,6 +1,6 @@
 import { float, log, select } from '../../../core/fields.js';
-import { view, line, vline, figure } from '../../../core/views.js';
-import { timeView, impulseView } from '../../../core/response-views.js';
+import { vline } from '../../../core/views.js';
+import { timeView, impulseView, spectrumView } from '../../../core/response-views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -71,23 +71,18 @@ export default {
     timeView(),
     impulseView({ label: 'h[n] — selected output' }),
 
-    // hand-written: four transfer functions in one frame is this experiment's
-    // whole point, and no other filter experiment draws that
-    figure(
-      'gain',
-      line('respLp', {
-        label: 'low-pass',
-        overlays: [
-          line('respBp', { color: '#D95319', label: 'band-pass' }),
-          line('respHp', { color: '#7E2F8E', label: 'high-pass' }),
-          line('respNotch', { color: '#77AC30', label: 'notch' }),
-          vline('fc', { color: '#EDB120', dashed: true, label: 'f_c' }),
-        ],
-        axes: {
-          x: { label: 'f', unit: 'Hz' },
-          y: { label: '|H|', unit: 'dB', domain: [-40, 30] },
-        },
-      })
-    ),
+    // The module's figure, and only it: the SELECTED response with the input
+    // and output spectra under it. Four transfer functions in one frame was
+    // this experiment's own invention, and it read as four filters rather than
+    // as one structure with a switch — while every other filtering experiment
+    // showed the signal going through. The four are still all computed, still
+    // all available; the way to see them is the `output` pill, which is also
+    // the honest gesture: the Chamberlin loop does not draw four curves, it
+    // offers four taps of the same two multiplications.
+    spectrumView({
+      resp: 'respSel',
+      domain: [-60, 30],
+      overlays: [vline('fc', { color: '#EDB120', dashed: true, label: 'f_c' })],
+    }),
   ],
 };

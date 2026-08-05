@@ -116,5 +116,34 @@ export default {
         axes: { x: { label: 't', unit: 's' }, y: 'y(t)' },
       })
     ),
+
+    // THE OTHER HALF OF THE LESSON. Everything above is an integral of sliding
+    // shapes; this is the same operation as a MULTIPLICATION, one frequency at
+    // a time. Same three colours as the τ view — purple is x, orange is h,
+    // green is the result — so the eye carries the cast over from one tab to
+    // the next and reads the theorem rather than a new figure.
+    //
+    // Linear magnitude, on purpose: the statement is "the green one is the
+    // product of the other two", and a decibel axis turns a product into a sum
+    // and hides exactly the thing being shown. The x domain is fixed so that
+    // narrowing a gate visibly WIDENS its spectrum instead of the frame
+    // quietly following it.
+    figure(
+      'spectrum',
+      line('specX', {
+        color: '#7E2F8E',
+        width: 2.4,
+        label: '|X(f)|',
+        overlays: [
+          // dashed, and that is not decoration: at a = b the two factors are
+          // the SAME spectrum and the orange curve would sit exactly on the
+          // purple one, leaving a room looking at two curves where there are
+          // three. Dashed, both are legible even superimposed.
+          line('specH', { color: '#D95319', width: 2.4, dashed: true, label: '|H(f)|' }),
+          line('specY', { color: '#77AC30', width: 2.8, label: '|Y(f)| = |X|·|H|' }),
+        ],
+        axes: { x: { label: 'f', unit: 'Hz', domain: [0, 8] }, y: 'magnitude' },
+      })
+    ),
   ],
 };

@@ -93,5 +93,28 @@ Playing with b closes the scene: small b and the output copies the input, the
 RC keeping up; large b and it integrates and smooths, the RC being too slow.
 The low-pass filter, seen in time, before any Bode plot has been drawn.`,
   },
+  {
+    id: 'theorem',
+    title: 'The same operation is a MULTIPLICATION',
+    params: { sig: 'gate', ker: 'exp', a: 1.5, b: 0.4, t: 1 },
+    view: 'spectrum',
+    visible: ['ker', 'a', 'b'],
+    notes: `Everything so far has been an integral of sliding shapes. This tab says
+the same operation is a product — one frequency at a time.
+
+Three magnitude spectra, in the colours of the τ view: |X| in purple, |H| in
+orange, |Y| in green. The green curve is NOT drawn from the other two; it is the
+transform of the convolution computed on the previous tab. That it lands on
+their product is the theorem, and the harness checks it lands there to within
+the sampling error of a gate edge — the identity is exact in the continuous
+world, and this is a grid.
+
+Two gestures land it. Shrinking b with the RC selected raises the orange curve's
+corner: a faster filter passes more, and the green curve rises with it wherever
+the orange one did. Then switching h back to a gate puts zeros in the orange
+curve — and the green curve is zero at every one of them, however tall the
+purple curve was there. That is the sentence to leave the room with: a
+convolution can only remove what one of the two factors already lacked.`,
+  },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

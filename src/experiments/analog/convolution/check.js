@@ -176,5 +176,61 @@ export const checks = [
       return { ok: gap < 1e-8, detail: `continuity at the breakpoints to ${gap.toExponential(2)}` };
     },
   },
+  {
+    name: 'the CONVOLUTION THEOREM: |Y| = |X|·|H|, on the drawn curves',
+    category: 'numeric',
+    run() {
+      // The claim the spectrum tab makes, checked on the three arrays the tab
+      // actually plots — not on a cleaner pair computed for the occasion.
+      //
+      // The identity is exact in the continuous world; here the three
+      // transforms are of SAMPLED functions with jumps, and the error has a
+      // known size rather than a chosen one. A gate edge falls between two
+      // samples, so the sampled gate is the right one to within one step: a
+      // relative width error of dt/width, which propagates to the spectrum as
+      // the same fraction of its peak. The bound asserted is that error (with
+      // one factor of 2 of headroom), measured against the PEAK of the product
+      // — which is what the eye compares on a linear plot, and which does not
+      // blow up in the nulls where the product is near zero on both sides.
+      //
+      // The exponential kernel is included only with a time constant that dies
+      // well inside the window: with b comparable to the window the identity
+      // fails for a real reason — the tail, and the tail of y, are cut off —
+      // and no tolerance should paper over that.
+      const worst = maxGap(
+        [
+          { sig: 'gate', ker: 'gate', a: 1, b: 1 },
+          { sig: 'gate', ker: 'gate', a: 2, b: 0.5 },
+          { sig: 'gate', ker: 'gate', a: 0.3, b: 2.4 },
+          { sig: 'ramp', ker: 'gate', a: 1.3, b: 0.7 },
+          { sig: 'gate', ker: 'exp', a: 1.5, b: 0.4 },
+        ],
+        (p) => {
+          const o = obs(p);
+          const dt = o.yOut.x[1] - o.yOut.x[0];
+          let peak = 0;
+          let gap = 0;
+          for (let i = 0; i < o.specX.y.length; i++) {
+            peak = Math.max(peak, o.specX.y[i] * o.specH.y[i]);
+            gap = Math.max(gap, Math.abs(o.specY.y[i] - o.specX.y[i] * o.specH.y[i]));
+          }
+          return gap / peak / ((2 * dt) / Math.min(p.a, p.b)); // ≤ 1 to pass
+        }
+      );
+      // and the spectra are of the DRAWN signals, not of tidier copies: at
+      // f = 0 a magnitude spectrum is the area under the curve, so |X(0)| and
+      // |H(0)| must be the ∫x and ∫h of the check above — to one rectangular
+      // step, which is what the sum over the grid is.
+      const dc = maxGap(WIDTHS, ({ a, b }) => {
+        const o = obs({ a, b });
+        const dt = o.yOut.x[1] - o.yOut.x[0];
+        return Math.max(Math.abs(o.specX.y[0] - o.areaX.value), Math.abs(o.specH.y[0] - o.areaH.value)) / dt;
+      });
+      return {
+        ok: worst < 1 && dc < 1,
+        detail: `worst gap ${(100 * worst).toFixed(0)} % of the sampling bound, |·(0)| = the areas to ${(100 * dc).toFixed(0)} % of a step`,
+      };
+    },
+  },
   standardChecks.determinism(compute, BASE, 'yOut'),
 ];
