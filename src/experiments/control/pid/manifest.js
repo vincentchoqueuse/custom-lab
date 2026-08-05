@@ -23,7 +23,7 @@ export default {
     plant: { label: 'plant', calc: () => 'G(s) = 1/(s+1)² — static gain 1' },
     essTh: {
       label: 'steady-state error, P alone: 1/(1+Kp)',
-      calc: (p) => (p.Ki > 0 ? '0 (intégrateur)' : (1 / (1 + p.Kp)).toFixed(3)),
+      calc: (p) => (p.Ki > 0 ? '0 (the integrator)' : (1 / (1 + p.Kp)).toFixed(3)),
     },
   },
 

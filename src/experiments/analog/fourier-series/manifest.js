@@ -36,18 +36,18 @@ export default {
   },
 
   derived: {
-    fondamental: {
+    evenHarmonics: {
       label: 'even harmonics',
       calc: (p) =>
         p.wave === 'sawtooth'
-          ? 'présentes'
+          ? 'present'
           : p.wave !== 'pulse'
-            ? 'nulles (symétrie)'
+            ? 'none (half-wave symmetry)'
             : p.alpha === 0.5
-              ? 'nulles (α = 1/2 : c\'est un carré)'
-              : 'présentes',
+              ? 'none (α = 1/2 — this is a square wave)'
+              : 'present',
     },
-    zeroEnveloppe: {
+    zeroEnvelope: {
       label: 'zeros of the envelope',
       calc: (p) => (p.wave === 'pulse' ? `n = k/α = ${(1 / p.alpha).toFixed(1)} ; …` : '—'),
     },

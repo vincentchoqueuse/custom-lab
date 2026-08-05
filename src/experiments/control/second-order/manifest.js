@@ -34,7 +34,7 @@ export default {
     regime: {
       label: 'regime',
       calc: (p) =>
-        p.m < 1 ? 'pseudo-périodique (m < 1)' : p.m === 1 ? 'critique (m = 1)' : 'apériodique (m > 1)',
+        p.m < 1 ? 'underdamped (m < 1)' : p.m === 1 ? 'critically damped (m = 1)' : 'overdamped (m > 1)',
     },
     q: { label: 'quality factor Q = 1/2m', calc: (p) => (1 / (2 * p.m)).toFixed(2) },
   },

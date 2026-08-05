@@ -138,11 +138,11 @@ export default {
     // wrong. The grid is centred on the pulsation read off the denominator
     // coefficients, so any typed-in system arrives framed on its own decades.
     gainView('gain', {
-      overlays: MEASURED('gainPoint', 'gain mesuré'),
+      overlays: MEASURED('gainPoint', 'measured gain'),
     }),
 
     phaseView('phase', {
-      overlays: MEASURED('phasePoint', 'phase mesurée'),
+      overlays: MEASURED('phasePoint', 'measured phase'),
     }),
   ],
 };

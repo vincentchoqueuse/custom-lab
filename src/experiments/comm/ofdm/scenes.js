@@ -66,15 +66,27 @@ again — the selectivity comes from the ECHOES.`,
     id: 'one-tap',
     title: 'The miracle of the FFT',
     view: 'constellation',
-    params: { Nc: 64, L: 6, cp: 8, snr: 20, M: 50 },
-    visible: ['snr', 'L'],
-    notes: `Before equalization, in purple, the cloud is twisted: each carrier
-rotated and compressed by ITS own H_k. After, in blue, ONE division per carrier
-— a single coefficient — and the QPSK reappears.
+    params: { Nc: 64, L: 6, cp: 8, snr: 20, M: 150, k: 23 },
+    visible: ['k', 'snr'],
+    notes: `ONE subcarrier at a time — carrier 23 to begin with, which sits on a
+ridge of the channel. In purple, what arrives: a QPSK rotated and scaled by H_23
+and nothing else. In blue, after ONE division by that one coefficient, the QPSK
+is back where it belongs.
 
-That is the central theorem: with the prefix in place the convolution becomes
-circular, and the FFT DIAGONALIZES the channel. The sixty-tap equalizer of the
-single-carrier system has become 64 divisions.`,
+That is the central theorem, and it is worth naming: with the prefix in place the
+convolution becomes circular, the FFT DIAGONALIZES the channel, and the sixty-tap
+equalizer of a single-carrier receiver has become 64 divisions.
+
+Now walk k along the pill, with the "channel" tab open in your head — or switch
+to it, where a vertical marks where you are. Every carrier has its own H_k, so
+every carrier has its own picture: tight on a ridge, and at carrier 55, which
+sits 14 dB down in a fade, the purple cloud collapses onto the origin and the
+blue one is blown apart. The division that saved carrier 23 amplifies the noise
+of carrier 55 by the same factor.
+
+Worth saying out loud when someone asks: there is no place in the TIME signal
+that is carrier k. Every sample carries all sixty-four of them at once — that is
+what the IFFT does, and why the first two tabs have no carrier marker.`,
   },
   {
     id: 'prefix',
@@ -100,11 +112,17 @@ diagonalization.`,
     id: 'fades',
     title: 'The errors live in the holes',
     view: 'ber',
-    params: { Nc: 64, L: 6, cp: 8, snr: 12, M: 200 },
-    visible: ['snr', 'M'],
+    params: { Nc: 64, L: 6, cp: 8, snr: 12, M: 200, k: 55 },
+    visible: ['k', 'snr'],
     notes: `The BER carrier by carrier, as points, over the zero-forcing theory
 Q(√(|H_k|²·SNR)) in orange. Putting it side by side with the channel tab shows
 the error peaks landing EXACTLY on the fades.
+
+The vertical marks the carrier the constellation tab is showing, so the three
+views can be read as one: move k onto a peak of this curve, go and look at what
+that carrier's constellation looks like, then come back. At carrier 55 the
+statline reads its own BER — 5 % against an average of 0.16 % — and the
+constellation two tabs away is why.
 
 Which is why OFDM never lives alone: interleaving plus coding — see the Hamming
 and soft-decoding experiments — spread the information across good and bad

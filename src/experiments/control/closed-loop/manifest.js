@@ -17,7 +17,7 @@ export default {
     'abaque de Nichols',
     'contours iso-gain',
     'steady-state error',
-    'résonance',
+    'resonance',
   ],
 
   params: {
@@ -57,7 +57,7 @@ export default {
     },
     invariant: {
       label: 'mω₀ (unchanged)',
-      calc: (p) => `${(p.m * p.w0).toFixed(3)} rad/s — même enveloppe en BO et en BF`,
+      calc: (p) => `${(p.m * p.w0).toFixed(3)} rad/s — same envelope open and closed loop`,
     },
   },
 

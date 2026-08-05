@@ -45,15 +45,27 @@ export default {
     M: int('M', {
       description: 'number of OFDM symbols simulated',
       min: 10,
-      max: 200,
-      default: 50,
+      max: 400,
+      // 150 and not 50: the constellation now shows ONE subcarrier, so the
+      // cloud has M points and not M×N of them.
+      default: 150,
+    }),
+    k: int('k', {
+      description: 'subcarrier read on the constellation',
+      min: 0,
+      max: 127,
+      default: 0,
     }),
   },
+
+  validate: [
+    { when: (p) => p.k >= p.Nc, message: 'the subcarrier read must be below N' },
+  ],
 
   derived: {
     cpOk: {
       label: 'prefix long enough?',
-      calc: (p) => (p.cp >= p.L - 1 ? 'oui (L_cp ≥ L−1)' : 'NON — ISI'),
+      calc: (p) => (p.cp >= p.L - 1 ? 'yes (L_cp ≥ L−1)' : 'NO — ISI'),
     },
   },
 
@@ -118,20 +130,29 @@ export default {
       'The channel seen by the carriers',
       line('channel', {
         width: 2,
+        label: '|H_k|²',
+        overlays: [
+          vline('kLine', { color: '#D95319', width: 2, label: 'the subcarrier read' }),
+        ],
         axes: {
           x: 'subcarrier k',
           y: { label: '|H_k|²', unit: 'dB', domain: [-40, 12] },
         },
       })
     ),
-    plane('constellation', 'Constellation', {
+    // ONE SUBCARRIER AT A TIME. Pooling all N of them into a single cloud
+    // averaged away the very thing the experiment is about: each carrier has
+    // its own H_k, so each has its own rotation before equalization and its own
+    // spread after it. Walking k along the pill turns the channel's landscape
+    // into a sequence of constellations — tight on a ridge, exploded in a fade.
+    plane('constellation', 'Constellation of one subcarrier', {
       clouds: [
-        { source: 'rxRaw', color: '#7E2F8E', r: 1.5, opacity: 0.18, label: 'before equalization' },
-        { source: 'rxEq', color: '#0072BD', r: 1.7, opacity: 0.4, label: 'after ZF (1 tap per carrier)' },
+        { source: 'rxRaw', color: '#7E2F8E', r: 2.4, opacity: 0.45, label: 'before equalization' },
+        { source: 'rxEq', color: '#0072BD', r: 2.4, opacity: 0.6, label: 'after ZF (1 tap)' },
       ],
       markers: { source: 'ideal', color: '#EDB120', label: 'ideal QPSK' },
       minHalf: 1.6,
-      maxHalf: 2.5,
+      maxHalf: 4,
     }),
     view(
       'ber',
@@ -142,6 +163,7 @@ export default {
         label: 'measured BER',
         overlays: [
           line('berTheory', { color: '#D95319', width: 2, label: 'Q(√(|H_k|²·SNR))' }),
+          vline('kLine', { color: '#D95319', width: 2, label: 'the subcarrier read' }),
         ],
         axes: { x: 'subcarrier k', y: 'BER' },
       })

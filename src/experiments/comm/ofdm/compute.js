@@ -43,7 +43,7 @@ function ifftU(re, im) {
  *          seed: number}} params
  * @returns {{observables: Object}}
  */
-export function compute({ Nc, L, cp, snr, M, seed }) {
+export function compute({ Nc, L, cp, snr, M, k: kSel, seed }) {
   const rng = mulberry32(seed);
   const gauss = gaussFrom(rng);
 
@@ -93,6 +93,7 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
   const txT = new Float64Array(SPAN * S);
   const rxT = new Float64Array(SPAN * S);
 
+  const kRead = Math.min(Math.max(kSel | 0, 0), Nc - 1);
   const errsPerCarrier = new Float64Array(Nc);
   const rawI = [];
   const rawQ = [];
@@ -168,7 +169,10 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
       const d = Habs2[k] + 1e-12;
       const er = (zr[k] * Hr[k] + zi[k] * Hi[k]) / d;
       const eq = (zi[k] * Hr[k] - zr[k] * Hi[k]) / d;
-      if (rawI.length < MAX_CLOUD) {
+      // ONE subcarrier's cloud, over all M symbols — not the first MAX_CLOUD
+      // points of a pool over every carrier, which mixed N different channels
+      // into one picture and averaged away what the experiment is about.
+      if (k === kRead) {
         rawI.push(zr[k]);
         rawQ.push(zi[k]);
         eqI.push(er);
@@ -259,6 +263,8 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
       trans1: S + memory,
 
       channel: { x: ks, y: HdB },
+      // the carrier being read, as a vertical on both frequency views
+      kLine: kRead,
       berMeasured: { x: ks, y: berK },
       berTheory: { x: ks, y: berThK },
       rxRaw: { x: Float64Array.from(rawI), y: Float64Array.from(rawQ) },
@@ -274,6 +280,15 @@ export function compute({ Nc, L, cp, snr, M, seed }) {
       berThAvg: {
         value: berTh,
         meta: { label: 'BER theory (ZF)', precision: 4 },
+      },
+      // what the selected carrier is worth, next to the constellation showing it
+      hSel: {
+        value: HdB[kRead],
+        meta: { label: `|H_${kRead}|²`, unit: 'dB', precision: 1 },
+      },
+      berSel: {
+        value: berK[kRead],
+        meta: { label: 'its BER', precision: 4 },
       },
       // The reading that ties the two pictures together, and the one the room
       // should be able to predict before looking at the constellation.

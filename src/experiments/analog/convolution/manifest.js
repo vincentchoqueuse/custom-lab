@@ -66,7 +66,7 @@ export default {
       calc: (p) =>
         p.ker === 'gate'
           ? `supp(x) = ${p.a} s, supp(h) = ${p.b} s → supp(y) = ${(+p.a + +p.b).toFixed(1)} s`
-          : 'h est à support infini : y l’est aussi',
+          : 'h has infinite support, and so does y',
     },
   },
 

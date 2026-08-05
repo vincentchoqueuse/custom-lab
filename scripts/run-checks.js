@@ -685,6 +685,27 @@ async function checkCatalogue() {
         for (const o of p.options ?? []) if (o.label) visible.push([`${key}.${pk}`, String(o.label)]);
       }
       for (const v of views) if (v.title) visible.push([`${key}/${v.id}`, v.title]);
+      // `derived` readings are FUNCTIONS, so their text only exists once
+      // evaluated — which is how a drawer reading "oui (L_cp ≥ L−1)" survived
+      // the conversion and this check's first version alike. Evaluated here on
+      // the manifest's own defaults, and on their negations where the value is
+      // a boolean-ish choice, so both branches of a ternary are seen.
+      const defaults = {};
+      for (const [pk, p] of Object.entries(manifest.params ?? {})) defaults[pk] = p.default;
+      for (const [dk, d] of Object.entries(manifest.derived ?? {})) {
+        if (d.label) visible.push([`${key}.${dk}`, d.label]);
+        for (const probe of [defaults, ...Object.keys(defaults).map((pk) => ({
+          ...defaults,
+          [pk]: typeof defaults[pk] === 'number' ? defaults[pk] * 3 + 1 : defaults[pk],
+        }))]) {
+          try {
+            const out = d.calc?.(probe);
+            if (typeof out === 'string') visible.push([`${key}.${dk}`, out]);
+          } catch {
+            /* a derived that throws on a probed value is not this check's business */
+          }
+        }
+      }
       const sf = join(dir, exp.name, 'scenes.js');
       if (!existsSync(sf)) continue;
       const scenes = (await import(pathToFileURL(sf).href)).default ?? [];
