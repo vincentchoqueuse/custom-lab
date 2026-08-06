@@ -19,6 +19,34 @@ scriptable, projectable, and drivable. Not a course companion — the professor'
 Project identity: **static, reproducible, declarative, centered on pedagogical
 staging rather than parameter editing.**
 
+## Three roles, and the instrument holds exactly one
+
+**The instrument shows the PHENOMENON. The board carries the REASONING. The
+student writes the IMPLEMENTATION.** Each of the three loses its value if
+another does it in its place — and the one this project must not take is the
+third. A demonstration that displayed its own numpy would hand over the answer
+to the lab exercise that follows it; the room would watch a solution instead of
+meeting a problem.
+
+So the implementation is deliberately NOT on screen. There is no code panel, no
+notebook cell, no "show the source" button on the plot — not an omission, a
+boundary. Two rules already in this document follow from it rather than from
+taste:
+
+- **Scene notes are Teacher Mode only, and ABSENT from the DOM otherwise.**
+  They are answer keys as much as they are gestures: "the wrong answer to
+  expect is…" is exactly what the room must reach on its own.
+- **The info panel's `compute.js` link is provenance, not a handout.** It
+  answers "how is that computed" for a colleague verifying a formula, or for a
+  reader after the fact. It is also, always, the correction of whatever
+  exercise comes next — which is why it sits one click inside a dialog and
+  never on the view bar that gets projected.
+
+It is also why the science stays in JavaScript. Python belongs to the students,
+and a Pyodide compute would put their work on the wall — quite apart from
+trading 296 kB of gzip for twenty megabytes and making the lecture guard's
+worker resurrection cost seconds instead of milliseconds.
+
 ## Non-negotiable principles
 
 1. **Fully static.** Everything runs in the browser. No backend, no API. A
