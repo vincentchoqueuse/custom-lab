@@ -429,7 +429,7 @@ const NAME_WORDS = new Set([
   'activation', 'algorithm', 'basis', 'code', 'dataset', 'den', 'distribution', 'dither',
   'equalizer', 'family', 'function', 'grid', 'image', 'input', 'mapping', 'method', 'mode',
   'modulation',
-  'num', 'outlier', 'output', 'pulse', 'signal', 'source', 'sources', 'stage', 'standardize',
+  'key', 'num', 'outlier', 'output', 'pulse', 'signal', 'source', 'sources', 'stage', 'standardize',
   'structure', 'system', 'table', 'target', 'tracking', 'window', 'zero-padding',
 ]);
 
