@@ -707,7 +707,8 @@ Format: `#/{subject}/{experiment}?param1=…&view=…&drawer=0&preset=scene-2`
   their LMS, and every embed is a door back). It rides the query like `drawer`
   so it survives the hash rewrites that pill drags produce; panel shortcuts
   (I, P, L, ⌘K/⌘B) are inert inside it, plot gestures (R, F, C, A, ←/→) keep
-  working.
+  working — but no kbd hint is shown: the chips are the full app teaching its
+  own vocabulary, clutter inside someone else's page (same rule as the phone).
 - Minimal serialization: only params ≠ default appear.
 - `router.js`: single source of truth for state↔URL (bidirectional, replaceState
   while dragging, pushState on release).

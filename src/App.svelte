@@ -203,6 +203,7 @@
 <div
   class="app"
   class:presentation={app.ui.presentation}
+  class:embed={app.embed}
   data-theme={app.ui.theme}
 >
   {#if !app.embed}

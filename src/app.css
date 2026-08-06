@@ -202,6 +202,14 @@ kbd {
   text-decoration: none;
 }
 
+/* An embed shows no keyboard hints: the kbd chips are the full app teaching
+   its own vocabulary, and inside somebody else's course page they are only
+   clutter — same rule as the phone, where they already disappear. The
+   bindings themselves keep working for whoever knows them. */
+.app.embed kbd {
+  display: none;
+}
+
 /* the embed's return link, sitting with the actions on the viewbar */
 .embed-home {
   display: inline-flex;
