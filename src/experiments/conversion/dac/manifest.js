@@ -17,8 +17,8 @@ export default {
       description: 'stage reached in the chain',
       options: [
         { value: 'samples', label: '1 — the samples, at Fs' },
-        { value: 'stuffed', label: '2 — after zero stuffing' },
-        { value: 'filtered', label: '3 — after interpolation' },
+        { value: 'stuffed', label: '2 — zero stuffing' },
+        { value: 'filtered', label: '3 — interpolated' },
       ],
       default: 'samples',
     }),

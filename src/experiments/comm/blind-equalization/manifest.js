@@ -15,9 +15,9 @@ export default {
     mod: select('modulation', {
       description: 'transmitted constellation',
       options: [
-        { value: 'qpsk', label: 'QPSK (constant modulus)' },
-        { value: '8psk', label: '8-PSK (constant modulus)' },
-        { value: '16qam', label: '16-QAM (three moduli)' },
+        { value: 'qpsk', label: 'QPSK' },
+        { value: '8psk', label: '8-PSK' },
+        { value: '16qam', label: '16-QAM' },
       ],
       default: 'qpsk',
     }),

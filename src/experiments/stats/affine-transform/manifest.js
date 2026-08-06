@@ -14,9 +14,9 @@ export default {
     law: select('distribution', {
       description: 'distribution of the starting variable X',
       options: [
-        { value: 'gaussian', label: 'Gaussian N(0, 1)' },
+        { value: 'gaussian', label: 'Gaussian' },
         { value: 'uniform', label: 'Uniform U(0, 1)' },
-        { value: 'exponential', label: 'Exponential Exp(1)' },
+        { value: 'exponential', label: 'Exponential' },
         { value: 'rayleigh', label: 'Rayleigh(1)' },
       ],
       default: 'gaussian',

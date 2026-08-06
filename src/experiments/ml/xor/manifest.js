@@ -32,7 +32,7 @@ export default {
         { value: 'tanh', label: 'tanh' },
         { value: 'relu', label: 'ReLU' },
         { value: 'sigmoid', label: 'sigmoid' },
-        { value: 'identity', label: 'identity — hence linear' },
+        { value: 'identity', label: 'identity' },
       ],
       default: 'tanh',
     }),

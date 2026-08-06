@@ -119,8 +119,8 @@ export default {
     algo: select('algorithm', {
       description: 'how the sparsity is imposed',
       options: [
-        { value: 'omp', label: 'OMP — greedy, refits' },
-        { value: 'mp', label: 'MP — greedy, no refit' },
+        { value: 'omp', label: 'OMP (refits)' },
+        { value: 'mp', label: 'MP (no refit)' },
         { value: 'lasso', label: 'lasso — convex, ℓ₁' },
       ],
       default: 'omp',

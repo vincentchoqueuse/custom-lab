@@ -17,7 +17,7 @@ export default {
         { value: 'rbf', label: 'Gaussians (RBF)' },
         { value: 'poly', label: 'polynomials' },
         { value: 'fourier', label: 'Fourier' },
-        { value: 'sigmoid', label: 'sigmoids (proto-neurons)' },
+        { value: 'sigmoid', label: 'sigmoids' },
       ],
       default: 'rbf',
     }),

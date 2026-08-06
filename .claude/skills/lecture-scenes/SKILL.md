@@ -79,10 +79,13 @@ its own notes asked for "PC3 across, PC4 up" — a gesture the pills could not
 make. If a scene shows a plane, both axes are pills.
 
 **LENGTH — a pill reads `name = value unit`, and stays short.**
-Keep `select` option labels at **24 characters or fewer**. They render verbatim
-in the pill, and a pastille carrying
-`MMSE — (HᴴH + N₀I)⁻¹Hᴴ, unbiased for the decision` is not an interface, it is a
-paragraph with a border. The explanation has two proper homes:
+Two caps, because either one alone lets the other run away: a `select` option
+label is **24 characters or fewer**, and the pill as rendered — `name = label` —
+is **30 or fewer**. Thirty-five pills passed the label rule and still came out
+past thirty, `modulation = 8-PSK (constant modulus)` among them. A pastille
+carrying `MMSE — (HᴴH + N₀I)⁻¹Hᴴ, unbiased for the decision` is not an
+interface, it is a paragraph with a border. The explanation has two proper
+homes:
 
 - the param's `description` — drawer secondary text and tooltip;
 - the scene `notes` — where the formula and the reasoning belong anyway.

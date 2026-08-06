@@ -34,8 +34,8 @@ export default {
       description: 'M-PSK constellation — M sets the ambiguity',
       options: [
         { value: 'bpsk', label: 'BPSK' },
-        { value: 'qpsk', label: 'QPSK — 4 points, 90°' },
-        { value: '8psk', label: '8-PSK — 8 points, 45°' },
+        { value: 'qpsk', label: 'QPSK' },
+        { value: '8psk', label: '8-PSK' },
       ],
       default: 'qpsk',
     }),
@@ -95,8 +95,8 @@ export default {
     order: select('loop order', {
       description: 'how many integrators the loop filter has',
       options: [
-        { value: 1, label: '1 — no frequency track' },
-        { value: 2, label: '2 — no static error' },
+        { value: 1, label: '1 — first order' },
+        { value: 2, label: '2 — second order' },
       ],
       default: 2,
       visibleIf: { algo: ['costas', 'dd'] },

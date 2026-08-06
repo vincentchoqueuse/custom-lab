@@ -17,7 +17,7 @@ export default {
       options: [
         { value: 'dice', label: '6-sided die' },
         { value: 'uniform', label: 'Uniform U(0, 1)' },
-        { value: 'exponential', label: 'Exponential Exp(1)' },
+        { value: 'exponential', label: 'Exponential' },
         { value: 'bernoulli', label: 'Bernoulli(p)' },
       ],
       default: 'dice',

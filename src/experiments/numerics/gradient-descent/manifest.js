@@ -14,7 +14,7 @@ export default {
       description: 'landscape to minimize',
       options: [
         { value: 'quad', label: 'quadratic' },
-        { value: 'rosenbrock', label: 'Rosenbrock (the banana)' },
+        { value: 'rosenbrock', label: 'Rosenbrock' },
       ],
       default: 'quad',
     }),

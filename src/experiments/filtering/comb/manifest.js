@@ -14,8 +14,8 @@ export default {
     structure: select('structure', {
       description: 'simple echo (FIR) or recursive (IIR)',
       options: [
-        { value: 'ff', label: 'simple echo (FIR)' },
-        { value: 'fb', label: 'recursive echo (IIR)' },
+        { value: 'ff', label: 'simple (FIR)' },
+        { value: 'fb', label: 'recursive (IIR)' },
       ],
       default: 'fb',
     }),

@@ -49,7 +49,7 @@ export default {
       description: 'what the receiver is assumed to know',
       options: [
         { value: 'matched', label: 'matched filter' },
-        { value: 'glrt', label: 'GLRT — amplitude unknown' },
+        { value: 'glrt', label: 'GLRT' },
         { value: 'energy', label: 'energy detector' },
         { value: 'cfar', label: 'CFAR' },
       ],

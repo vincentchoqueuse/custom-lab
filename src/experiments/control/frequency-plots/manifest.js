@@ -38,7 +38,7 @@ export default {
       options: [
         { value: 'first', label: 'K/(1+jωτ)' },
         { value: 'second', label: 'Kω₀²/(ω₀²−ω²+2jmω₀ω)' },
-        { value: 'openloop', label: 'K/(jω(1+jωτ)(1+jωτ/5))' },
+        { value: 'openloop', label: 'third order, astatic' },
       ],
       default: 'first',
     }),

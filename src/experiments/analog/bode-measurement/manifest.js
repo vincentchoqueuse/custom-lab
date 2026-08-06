@@ -16,7 +16,7 @@ export default {
       description: 'circuit under test',
       options: [
         { value: 'rc', label: 'RC low-pass' },
-        { value: 'order2', label: 'resonant (second order)' },
+        { value: 'order2', label: 'resonant' },
       ],
       default: 'rc',
     }),

@@ -65,7 +65,7 @@ nobody can afford.`,
     mod: select('modulation', {
       description: 'constellation on every subcarrier',
       options: [
-        { value: 'qpsk', label: 'QPSK — constant modulus' },
+        { value: 'qpsk', label: 'QPSK' },
         { value: '16qam', label: '16-QAM' },
       ],
       default: 'qpsk',

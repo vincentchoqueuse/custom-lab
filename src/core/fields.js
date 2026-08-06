@@ -101,11 +101,14 @@ export function bool(name, opts) {
   return f;
 }
 
-/** A select option label renders verbatim in a pill. Twenty-four characters is
- *  what fits beside the param name without the Prompt Bar wrapping on a
- *  projector, and it is a hard limit rather than advice: the one time it was
- *  advice, fifty-four labels went past it. */
+/** A select option label renders verbatim in a pill, and the pill also carries
+ *  the param name: what the room reads is `name = label`. Both are capped,
+ *  because either one alone lets the other run away — thirty-five pills passed
+ *  the label rule and still rendered past thirty characters, `modulation =
+ *  8-PSK (constant modulus)` among them. THIRTY is what fits on the Prompt Bar
+ *  at projector size without wrapping. */
 const OPTION_LABEL_MAX = 24;
+const PILL_WIDTH_MAX = 30;
 
 export function select(name, opts) {
   const [n, o] = splitArgs(name, opts);
@@ -128,6 +131,17 @@ export function select(name, opts) {
           `${OPTION_LABEL_MAX} at most, because it renders as-is in a pill. ` +
           `Move the explanation to the field's description.`
       );
+    // and the pill as the room actually reads it. `name` is undefined when the
+    // factory is called without one (the registry fills it from the param key
+    // later), and there is nothing to measure in that case.
+    if (f.name != null) {
+      const pill = `${f.name} = ${opt.label}`;
+      if (pill.length > PILL_WIDTH_MAX)
+        throw new FieldError(
+          `${label('select', f)}: the pill would read '${pill}' — ${pill.length} characters, ` +
+            `${PILL_WIDTH_MAX} at most. Shorten the label, or the field's name.`
+        );
+    }
   }
   if (!('default' in f)) throw new FieldError(`${label('select', f)}: default is required`);
   if (!f.options.some((opt) => opt.value === f.default))

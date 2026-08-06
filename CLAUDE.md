@@ -452,9 +452,10 @@ registry at load time):
   **Three separate semantic keys, never concatenated in one string**:
   `name` — the displayed symbol ('f', 'φ', 'N'; first positional argument, defaults
   to the param key); `description` — what it is ('frequency', 'phase'); `unit` —
-  'Hz', 'rad', 'dB'. A `select` option's `label` renders VERBATIM in the pill and
-  is capped at **24 characters** at load time: the gloss belongs to
-  `description`, which the drawer and the tooltip show, or to the scene notes. Rendering: pills show `name = value unit`; the drawer shows
+  'Hz', 'rad', 'dB'. A `select` option's `label` renders VERBATIM in the pill, so
+  two lengths are capped at load time: the label at **24 characters** and the
+  rendered pill `name = label` at **30**. The gloss belongs to `description`,
+  which the drawer and the tooltip show, or to the scene notes. Rendering: pills show `name = value unit`; the drawer shows
   the name with the description as secondary text; the description also feeds the
   tooltip. Every param has a `default` (no nullable fields: the URL contract and
   resetDefaults require it); every other key is optional.

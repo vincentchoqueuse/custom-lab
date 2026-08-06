@@ -18,7 +18,7 @@ export default {
         { value: 'gauss', label: 'Gaussian e^(−π(t/T)²)' },
         { value: 'expo', label: 'causal exponential' },
         { value: 'expo2', label: 'two-sided exponential' },
-        { value: 'sinc', label: 'cardinal sine sinc(t/T)' },
+        { value: 'sinc', label: 'cardinal sine' },
         { value: 'rf', label: 'truncated sinusoid' },
       ],
       default: 'rect',

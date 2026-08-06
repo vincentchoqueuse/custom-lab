@@ -50,8 +50,8 @@ stretches, which is what paying for an estimated σ looks like.`,
     known: select('σ known?', {
       description: 'which interval the model justifies',
       options: [
-        { value: false, label: 'no — Student interval' },
-        { value: true, label: 'yes — Gaussian interval' },
+        { value: false, label: 'Student' },
+        { value: true, label: 'Gaussian' },
       ],
       default: false,
     }),

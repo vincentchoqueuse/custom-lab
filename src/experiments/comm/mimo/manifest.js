@@ -19,7 +19,7 @@ export default {
       description: 'constellation sent on EACH of the two streams',
       options: [
         { value: 'qpsk', label: 'QPSK' },
-        { value: '16qam', label: '16-QAM — 256 hypotheses' },
+        { value: '16qam', label: '16-QAM' },
       ],
       default: 'qpsk',
     }),

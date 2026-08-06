@@ -15,7 +15,7 @@ export default {
       description: 'adaptive rule updating the coefficients',
       options: [
         { value: 'lms', label: 'LMS' },
-        { value: 'nlms', label: 'NLMS — normalized step' },
+        { value: 'nlms', label: 'NLMS' },
         { value: 'rls', label: 'RLS' },
       ],
       default: 'lms',
