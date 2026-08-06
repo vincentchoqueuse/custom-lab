@@ -13,9 +13,22 @@ permissions:
   pages: write
   id-token: write
 
+# Only one deployment at a time, and NEVER cancel one that has started.
+#
+# This was `cancel-in-progress: true`, which is right for a CI check and wrong
+# for a deployment: a push that lands while the previous one is still
+# publishing kills it mid-flight, and Pages is left with a cancelled
+# deployment for that commit. Two pushes twenty minutes apart were enough —
+# both deploys timed out waiting on a status that was never going to come, and
+# a manual re-run then hit `Deployment cancelled` in five seconds because a
+# deployment for the same SHA was already stuck in that state.
+#
+# `false` is what GitHub's own Pages template uses, for exactly this reason:
+# queued runs collapse to the latest, but whatever is already publishing is
+# allowed to finish.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
