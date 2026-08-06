@@ -3,11 +3,16 @@ export default [
   {
     id: 'noise-floor',
     title: 'The noise floor that never comes down',
-    view: 'time',
+    // the SPECTRAL figure, which is what these notes describe and what the
+    // subject is about; the record itself is one tab to the left, for the room
+    // that wants to see what was measured before seeing what was estimated
+    view: 'spectrum',
     params: { method: 'raw', N: 512, L: 256, win: 'rect', snr: 10, a2: -20, df: 40 },
     visible: ['N', 'snr'],
     notes: `The raw periodogram of a noisy signal. The strong line comes out, the
-weak one too, and between them sits the noise floor, some 15 dB of it.
+weak one too, and between them sits the noise floor, some 15 dB of it. The time
+tab, one to the left, holds the record it came from — worth thirty seconds if
+the room has not yet accepted that nothing in that trace announces two lines.
 
 The question belongs before any dial is touched: if the record length is
 multiplied by sixteen, does the noise floor come down? The room answers yes — more

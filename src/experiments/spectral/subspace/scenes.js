@@ -3,12 +3,15 @@ export default [
   {
     id: 'wall',
     title: 'The Fourier wall',
-    view: 'time',
+    // the wall IS a spectral statement, so the scene opens on the spectrum; the
+    // record that produced it is one tab to the left
+    view: 'spectrum',
     params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2 },
     visible: ['df', 'N'],
     notes: `Two exponentials separated by 0.5 × Fs/N, in noise at 25 dB. The
-periodogram shows only ONE, and the two yellow verticals say where they really
-are.
+periodogram shows only ONE hump, and the two yellow verticals say where the
+lines really are. The time tab, one to the left, shows the record — two
+exponentials in there, and nothing in the trace says so.
 
 Raising Δf to 1 splits the hump, just barely. Coming back to 0.5 sets up the
 question that opens the chapter: what has to change to separate them? The room
