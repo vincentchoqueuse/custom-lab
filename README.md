@@ -1,11 +1,12 @@
-# expe34
+# pupitra
 
 **Live site: <https://vincentchoqueuse.github.io/custom-lab/>**
 
-The name is a nod to the **GR 34** — the sentier des douaniers that runs the
-whole Breton coast. A long trail made of a great many short, well-marked
-stages, walked one at a time and always in the same order: which is what a
-catalogue of lecture demonstrations is, and where this one is taught.
+Pupitra, from the French **pupitre** — the lectern. Not a course companion:
+the professor's bench. (The default seed stays 34, a surviving nod to the
+GR 34, the Breton coastal trail the project was first named after — a great
+many short, well-marked stages, walked one at a time and always in the same
+order, which is what a catalogue of lecture demonstrations is.)
 
 A purely static scientific demonstration engine for teaching — a catalog of
 interactive experiments (statistics, estimation, detection, digital
@@ -58,7 +59,7 @@ activity or any HTML document — add `embed=1` to its URL:
 
 The frame keeps the tabs, the plot, the draw/freeze actions and the parameter
 pills — students adjust the figure inside your page — and drops the rest of
-the chrome. A small `expe34` chip opens the same scene in the full catalogue.
+the chrome. A small `pupitra` chip opens the same scene in the full catalogue.
 
 Keep `loading="lazy"`: the browser then only instantiates the frames near the
 viewport. Measured with ten embeds on one page: the bundle is fetched once

@@ -5,7 +5,7 @@ import { subjectFilter } from './scripts/subject-filter.js';
 
 export default defineConfig({
   plugins: [
-    // EXPE34_SUBJECT=control npm run build → a single-subject deployment.
+    // PUPITRA_SUBJECT=control npm run build → a single-subject deployment.
     // Must come BEFORE svelte(): it rewrites the glob patterns, which Vite
     // then resolves.
     subjectFilter(),

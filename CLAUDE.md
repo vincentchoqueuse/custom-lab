@@ -1,8 +1,10 @@
-# expe34 — a scientific demonstration engine for teaching
+# pupitra — a scientific demonstration engine for teaching
 
-*(the name is a nod to the GR 34, the Breton coastal trail: a long route made
-of many short well-marked stages, walked one at a time and always in the same
-order. The default seed is 34 for the same reason.)*
+*(pupitra, from the French **pupitre** — the lectern: not a course companion,
+the professor's bench, which is the whole vision in one word. The default seed
+stays 34, a surviving nod to the GR 34 — the Breton coastal trail of many
+short well-marked stages, walked one at a time and always in the same order —
+that the project was first named after.)*
 
 Document organized from durable to interchangeable:
 **Vision → Concepts → UX → Architecture → Implementation.**
@@ -52,7 +54,7 @@ worker resurrection cost seconds instead of milliseconds.
 
 1. **Fully static.** Everything runs in the browser. No backend, no API. A
    deployment may carry the whole catalogue or A SINGLE SUBJECT:
-   `EXPE34_SUBJECT=control npm run build` rewrites the four glob patterns at
+   `PUPITRA_SUBJECT=control npm run build` rewrites the four glob patterns at
    build time (`scripts/subject-filter.js`) — 172 kB gzip → 118 kB, and the
    sidebar simply shows the one subject. Filtering at runtime would be pointless:
    `import.meta.glob` needs a literal pattern, so everything would already be in
@@ -77,7 +79,7 @@ worker resurrection cost seconds instead of milliseconds.
    language, the instrument speaks one. Core UI strings live in
    `src/core/strings.js`; the catalogue's own vocabulary — the word chosen, once,
    for each recurring quantity — lives in `TERMINOLOGY.md` and is a closed list.
-   (A per-language build, resolved at build time like `EXPE34_SUBJECT`, remains an
+   (A per-language build, resolved at build time like `PUPITRA_SUBJECT`, remains an
    extension point per principle 7. Nothing before a concrete need.)
 7. **Extension points over premature features.** Any future capability (stories,
    incremental execution, remote control, voting, annotations) must be addable without
@@ -702,7 +704,7 @@ Format: `#/{subject}/{experiment}?param1=…&view=…&drawer=0&preset=scene-2`
   experiment chosen arbitrarily. The sidebar brand links home.
 - **`embed=1` renders the instrument chrome-less for an iframe** in a course
   page: no sidebar, header, drawer or panel toggles — the tabs, plot, actions
-  and pills stay, plus one quiet "expe34" chip that opens the same scene in the
+  and pills stay, plus one quiet "pupitra" chip that opens the same scene in the
   full catalogue (the adoption loop: a colleague embeds ONE live figure in
   their LMS, and every embed is a door back). It rides the query like `drawer`
   so it survives the hash rewrites that pill drags produce; panel shortcuts

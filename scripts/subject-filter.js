@@ -1,7 +1,7 @@
 // Build one subject instead of the whole catalogue.
 //
 //   npm run build                           → the whole catalogue
-//   EXPE34_SUBJECT=control npm run build    → control alone
+//   PUPITRA_SUBJECT=control npm run build    → control alone
 //
 // Why a plugin and not a condition in the code: `import.meta.glob` requires a
 // LITERAL pattern, evaluated by Vite before a single line runs. One therefore
@@ -22,15 +22,15 @@ import { resolve } from 'node:path';
 const ROOT = resolve(process.cwd(), 'src/experiments');
 
 export function subjectFilter() {
-  const subject = process.env.EXPE34_SUBJECT?.trim();
-  if (!subject) return { name: 'expe34-subject-filter' };
+  const subject = process.env.PUPITRA_SUBJECT?.trim();
+  if (!subject) return { name: 'pupitra-subject-filter' };
 
   const known = readdirSync(ROOT, { withFileTypes: true })
     .filter((e) => e.isDirectory() && existsSync(resolve(ROOT, e.name, '_subject.js')))
     .map((e) => e.name);
   if (!known.includes(subject))
     throw new Error(
-      `EXPE34_SUBJECT='${subject}' is not a subject (known: ${known.join(', ')})`
+      `PUPITRA_SUBJECT='${subject}' is not a subject (known: ${known.join(', ')})`
     );
 
   // the project's four globs: manifests, scenes, subjects, and the worker's
@@ -42,7 +42,7 @@ export function subjectFilter() {
   ];
 
   return {
-    name: 'expe34-subject-filter',
+    name: 'pupitra-subject-filter',
     enforce: 'pre',
     transform(code, id) {
       if (!id.includes('/src/core/') || !code.includes('import.meta.glob')) return null;

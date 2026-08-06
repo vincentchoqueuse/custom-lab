@@ -8,52 +8,48 @@
 </script>
 
 <script>
-  // App icon: THE ENAMELLED ROUTE PLATE. A trail is numbered, and this one is
-  // numbered 34 — the GR that runs the Breton coast. Whoever knows it reads the
-  // nod; everyone else reads a sober plate. The reference is carried by the
-  // numeral and by nothing else: no illustration on top of it.
+  // App icon: THE FIGURE ON ITS AXIS. A Gaussian bell standing on its axis
+  // line — not a decorative wave: the axis is what makes it a FIGURE, and
+  // figures are what this instrument produces. The bell is the catalogue's
+  // own opening curve (the first experiment draws it).
   //
-  // Digits RESERVED out of a solid ground rather than drawn on it — the French
-  // road plate, and the reason this survives 16 px: what carries the shape is an
-  // area of colour, not a stroke that thins away.
+  // Drawing RESERVED out of a solid plate rather than stroked on it: what
+  // carries the shape is an area of colour, not a stroke that thins away —
+  // the reason the mark survives 16 px in a browser tab.
   //
-  // A MASK, so the digits and the inner keyline are genuinely transparent. They
-  // therefore show the sidebar behind them in the app and the tab strip behind
-  // them in the browser, which is what lets the favicon carry the SAME drawing
-  // (see index.html) instead of a second one — they diverged once, the favicon
-  // changed and this component forgotten, so the logo on screen stayed put while
-  // the tab moved. Any retouch happens on BOTH sides.
+  // A MASK, so the curve and the axis are genuinely transparent. They show
+  // the sidebar behind them in the app and the tab strip behind them in the
+  // browser, which is what lets the favicon carry the SAME drawing (see
+  // index.html) instead of a second one — the two diverged once, the favicon
+  // changed and this component was forgotten, so the logo on screen stayed
+  // put while the tab moved. Any retouch happens on BOTH sides.
   //
   // `currentColor` for the ground, so the plate follows the sidebar text and
   // inverts with the theme on its own.
   let { size = 24 } = $props();
-  const uid = `expe34-plate-${++plates}`;
+  const uid = `pupitra-mark-${++plates}`;
 </script>
 
 <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" style="flex-shrink: 0">
   <defs>
     <mask id={uid}>
       <rect width="32" height="32" fill="#fff" />
-      <rect
-        x="3.3"
-        y="3.3"
-        width="25.4"
-        height="25.4"
-        rx="4.4"
+      <line
+        x1="6.4"
+        y1="22.8"
+        x2="25.6"
+        y2="22.8"
+        stroke="#000"
+        stroke-width="1.7"
+        stroke-linecap="round"
+      />
+      <path
+        d="M 7.6 22.8 C 12.4 22.8 12.9 8.9 16 8.9 C 19.1 8.9 19.6 22.8 24.4 22.8"
         fill="none"
         stroke="#000"
-        stroke-width="1.1"
+        stroke-width="2.5"
+        stroke-linecap="round"
       />
-      <text
-        x="16"
-        y="21.3"
-        text-anchor="middle"
-        fill="#000"
-        font-size="13.6"
-        font-weight="600"
-        letter-spacing="0.1"
-        font-family="'IBM Plex Sans', system-ui, sans-serif">34</text
-      >
     </mask>
   </defs>
   <rect
