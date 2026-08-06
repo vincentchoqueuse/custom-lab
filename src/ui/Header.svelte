@@ -12,7 +12,6 @@
   import Icon from './Icon.svelte';
   import QrCode from './QrCode.svelte';
 
-  let { onpresent } = $props();
 
   const m = $derived(manifest());
   const scene = $derived(activeScene());
@@ -43,6 +42,22 @@
       await navigator.clipboard.writeText(location.href);
       copied = true;
       setTimeout(() => (copied = false), 1200);
+    } catch {}
+  }
+
+  // THE EMBED MINT. The scene on screen, struck as a ready-to-paste iframe:
+  // this is the gesture that turns the full app into the studio and the
+  // embeds into the distribution — compose here, paste in the course page.
+  // lazy-loading baked in, so the cheap path is the default path.
+  let copiedEmbed = $state(false);
+  async function copyEmbed() {
+    const h = currentHash();
+    const src = location.origin + location.pathname + h + (h.includes('?') ? '&' : '?') + 'embed=1';
+    const snippet = `<iframe src="${src}" loading="lazy" style="width:100%; height:620px; border:none"></iframe>`;
+    try {
+      await navigator.clipboard.writeText(snippet);
+      copiedEmbed = true;
+      setTimeout(() => (copiedEmbed = false), 1200);
     } catch {}
   }
 
@@ -122,9 +137,12 @@
       {/if}
     </div>
 
-    {#if m}
-      <button class="icon-btn" onclick={onpresent} title="{STR.PRESENTATION} (L)">
-        <Icon name="maximize" size={15} />
+    <!-- the embed mint took the fullscreen button's slot: striking an embed
+         is a minting gesture that deserves a button, while presentation mode
+         is a lecture gesture that lives on its key (L) -->
+    {#if m && !app.embed}
+      <button class="icon-btn" onclick={copyEmbed} title={STR.EMBED_CODE}>
+        <Icon name={copiedEmbed ? 'check' : 'code'} size={15} />
       </button>
     {/if}
   </div>

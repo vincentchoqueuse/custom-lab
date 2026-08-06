@@ -213,7 +213,10 @@ happened to land on a scene that had notes.
 
 **Clean header.** Breadcrumb `Subject / Experiment`. **Central preset selector**,
 LLM-model-picker style — one click applies the full scene. Right side: copyable URL
-chip, presentation mode button (`L`).
+chip, QR code, and the EMBED MINT — one click copies a ready-to-paste iframe of
+the current scene (`loading="lazy"` baked in). It took the fullscreen button's
+slot: striking an embed is a minting gesture that deserves a button, while
+presentation mode is a lecture gesture that lives on its key (`L`).
 
 **Landing page (`#/`).** The catalogue introducing itself: name, one-sentence
 identity with the experiment/module/scene counts (computed from the registry at

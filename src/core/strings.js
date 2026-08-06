@@ -37,6 +37,7 @@ export const STR = {
   COPY_LINK: 'Copy link',
   COPIED: 'Copied!',
   PRESENTATION: 'Presentation mode',
+  EMBED_CODE: 'Copy embed code — a live iframe of this scene for a course page',
   THEME: 'Theme',
   TEACHER_MODE: 'Teacher Mode',
   INSPECTOR: 'Inspector',

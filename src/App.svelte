@@ -211,7 +211,7 @@
   {/if}
   <div class="main">
     {#if !app.embed}
-      <Header onpresent={togglePresentation} />
+      <Header />
     {/if}
     {#if app.expKey}
       <Workspace />
