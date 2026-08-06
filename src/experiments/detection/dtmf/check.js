@@ -1,8 +1,8 @@
-import { compute, project, burst, analyse, rayleighPdf, ricePdf, FS, LOW, HIGH, TONES, keyIndex } from './compute.js';
+import { compute, project, burst, analyse, rayleighPdf, ricePdf, scaledI0, FS, LOW, HIGH, TONES, keyIndex } from './compute.js';
 import { standardChecks, maxGap, range } from '../../../core/checks.js';
 import { solveLinearSystem } from '../../../core/linalg.js';
 
-const BASE = { key: '5', ms: 40, snrDb: 10, M: 400, seed: 34 };
+const BASE = { key: '5', ms: 40, snrDb: 10, M: 1600, seed: 34 };
 const obs = (p) => compute({ ...BASE, ...p }).observables;
 
 export const checks = [
@@ -140,7 +140,12 @@ export const checks = [
     // integrates to one and Rice reduces to Rayleigh at A = 0 — the second is
     // an exact degeneracy and worth pinning, since a Rice written with a wrong
     // Bessel series would still look plausible.
-    name: 'Rice at A = 0 IS Rayleigh, and both integrate to one',
+    // and the scaled Bessel is continuous where it switches from the series to
+    // the asymptotic — the join the Rice density's stability at high SNR rests
+    // on. Written with a bare I₀ the density was NaN there: the series
+    // overflows while the exponential underflows, and the curve vanished from
+    // the figure exactly where the room pushes the SNR.
+    name: 'Rice at A = 0 IS Rayleigh, both integrate to one, and e^{−z}I₀ joins',
     category: 'numeric',
     run() {
       const s = 0.4;
@@ -156,9 +161,20 @@ export const checks = [
       };
       const aR = Math.abs(area((x) => rayleighPdf(x, s)) - 1);
       const aI = Math.abs(area((x) => ricePdf(x, 1, s)) - 1);
+      // the join at z = 30, and the density's finiteness where it used to be NaN
+      const join = Math.abs(scaledI0(29.999) / scaledI0(30.001) - 1);
+      let finite = true;
+      for (const sc of [0.4, 0.05, 5e-3, 5e-4]) {
+        for (let i = 1; i < 40; i++) {
+          const v = (2 * i) / 40;
+          if (!Number.isFinite(ricePdf(v, 1, sc))) finite = false;
+        }
+      }
       return {
-        ok: deg < 1e-15 && aR < 1e-6 && aI < 1e-6,
-        detail: `Rice(0) − Rayleigh: ${deg.toExponential(2)} · areas: ${aR.toExponential(2)}, ${aI.toExponential(2)}`,
+        ok: deg < 1e-15 && aR < 1e-6 && aI < 1e-6 && join < 5e-3 && finite,
+        detail:
+          `Rice(0) − Rayleigh: ${deg.toExponential(2)} · areas: ${aR.toExponential(2)}, ${aI.toExponential(2)} · ` +
+          `e^{−z}I₀ join: ${join.toExponential(2)} · finite down to s = 5e-4`,
       };
     },
   },

@@ -115,19 +115,38 @@ export function analyse(x) {
 
 /** Rayleigh and Rice, the two laws the modulus obeys. */
 export const rayleighPdf = (x, s) => (x <= 0 ? 0 : (x / (s * s)) * Math.exp(-(x * x) / (2 * s * s)));
+/**
+ * e^{−z}·I₀(z), the EXPONENTIALLY SCALED Bessel — and the whole reason it is
+ * written this way. The Rice density is (x/s²)·e^{−(x²+v²)/2s²}·I₀(xv/s²), and
+ * at s = 0.005 that argument reaches 40 000: the series overflows to infinity
+ * while the exponential underflows to zero, and the product is NaN. The curve
+ * simply vanished from the figure at high SNR.
+ *
+ * Scaled, the two divergences cancel before they happen. Series while it is
+ * summable, the standard asymptotic beyond, and the density is then written
+ * with e^{−(x−v)²/2s²} — bounded by one everywhere.
+ */
+export function scaledI0(z) {
+  if (z < 0) return scaledI0(-z);
+  if (z < 30) {
+    let i0 = 1;
+    let t = 1;
+    for (let k = 1; k < 200; k++) {
+      t *= (z * z) / (4 * k * k);
+      i0 += t;
+      if (t < 1e-17 * i0) break;
+    }
+    return i0 * Math.exp(-z);
+  }
+  const u = 1 / (8 * z);
+  return (1 / Math.sqrt(2 * Math.PI * z)) * (1 + u + (9 / 2) * u * u + (75 / 6) * u * u * u);
+}
+
 export function ricePdf(x, v, s) {
   if (x <= 0) return 0;
-  // I₀ by its series, which converges fast at the arguments this experiment
-  // reaches and needs no table
   const z = (x * v) / (s * s);
-  let i0 = 1;
-  let t = 1;
-  for (let k = 1; k < 60; k++) {
-    t *= (z * z) / (4 * k * k);
-    i0 += t;
-    if (t < 1e-16 * i0) break;
-  }
-  return (x / (s * s)) * Math.exp(-(x * x + v * v) / (2 * s * s)) * i0;
+  const d = (x - v) / s;
+  return (x / (s * s)) * Math.exp(-(d * d) / 2) * scaledI0(z);
 }
 
 /**
@@ -175,23 +194,56 @@ export function compute({ key, ms, snrDb, M, seed }) {
   // an absent tone: the low-group tone of ANOTHER row, chosen as far as the
   // grid allows so its leakage from the present one is smallest
   const rOff = (r + 2) % 4;
+  // ONE pass for both the histograms and the success rate. They used to be two
+  // loops over M fresh bursts, and the second one ran the full eight-tone
+  // analysis: at M = 4000 and a 100 ms window that is fifty million projection
+  // samples and the worker timed out mid-lecture. The same burst answers both
+  // questions.
+  let right = 0;
+  const cell = 4 * r + c;
   for (let m = 0; m < M; m++) {
     const b = burst({ key, n, amp, sigma, seed: seed + 1 + m });
-    on[m] = project(b.x, LOW[r]).amp;
-    off[m] = project(b.x, LOW[rOff]).amp;
+    const a = analyse(b.x);
+    on[m] = a.amps[r];
+    off[m] = a.amps[rOff];
+    if (a.best === cell) right++;
   }
-  const hiEdge = Math.max(1.4 * amp, 6 * s);
-  const hx = new Float64Array(NHIST);
-  const hOn = new Float64Array(NHIST);
-  const hOff = new Float64Array(NHIST);
-  const bw = hiEdge / NHIST;
-  for (let i = 0; i < NHIST; i++) hx[i] = (i + 0.5) * bw;
+  // BINS THAT FOLLOW THE LAWS' OWN SCALE, and this took two goes to get right.
+  //
+  // Both densities have width s = σ√(2/N); one sits at s and the other at A.
+  // A fixed grid over [0, 1.4] puts each of them inside ONE bin as soon as the
+  // SNR or the window grows, and the drawn histogram then reads 1/bw where the
+  // density is 0.6/s — the theory looks wrong when it is the ruler that is.
+  //
+  // Geometric bins were the first repair and they are not enough: they scale
+  // with x, so they resolve the Rayleigh at s and still miss the Rice at A,
+  // where the bin width no longer knows anything about s. What works is a
+  // UNIFORM bin of width s/3 — a third of the shared scale, wherever the peak
+  // is — with the count following from the range rather than fixed. Thirty
+  // bins when the two laws overlap, a thousand when they are three decades
+  // apart, and the histogram overlays the pdf in both regimes.
+  // The RANGE is fixed first and the resolution follows — in that order, and
+  // the order matters. Capping the bin count by the sample size and taking the
+  // range as count × s/3 cut the axis off at 0.39 and left the Rice, which
+  // sits at A = 1, outside the figure altogether. A cap on the sample size
+  // must cost resolution, never reach.
+  const range = amp + 7 * s;
+  const nBins = Math.max(
+    30,
+    Math.min(1200, Math.max(40, Math.round(M / 8)), Math.ceil(range / (s / 3)))
+  );
+  const bw = range / nBins;
+  const hx = new Float64Array(nBins);
+  const hOn = new Float64Array(nBins);
+  const hOff = new Float64Array(nBins);
+  for (let i = 0; i < nBins; i++) hx[i] = (i + 0.5) * bw;
   for (let m = 0; m < M; m++) {
     const i = Math.floor(on[m] / bw);
     const j = Math.floor(off[m] / bw);
-    if (i >= 0 && i < NHIST) hOn[i] += 1 / (M * bw);
-    if (j >= 0 && j < NHIST) hOff[j] += 1 / (M * bw);
+    if (i >= 0 && i < nBins) hOn[i] += 1 / (M * bw);
+    if (j >= 0 && j < nBins) hOff[j] += 1 / (M * bw);
   }
+  const hiEdge = range;
   const px2 = new Float64Array(NPDF);
   const pRay = new Float64Array(NPDF);
   const pRice = new Float64Array(NPDF);
@@ -200,13 +252,6 @@ export function compute({ key, ms, snrDb, M, seed }) {
     px2[i] = v;
     pRay[i] = rayleighPdf(v, s);
     pRice[i] = ricePdf(v, amp, s);
-  }
-
-  /* ---------- how often the key is right ----------------------------------- */
-  let right = 0;
-  for (let m = 0; m < M; m++) {
-    const b = burst({ key, n, amp, sigma, seed: seed + 5000 + m });
-    if (analyse(b.x).best === 4 * r + c) right++;
   }
 
   return {

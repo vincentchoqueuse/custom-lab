@@ -1,5 +1,5 @@
 // Lecture script. Auto-discovered by the registry.
-const BASE = { key: '5', ms: 40, snrDb: 10, M: 400, seed: 34 };
+const BASE = { key: '5', ms: 40, snrDb: 10, M: 1600, seed: 34 };
 
 export default [
   {
@@ -79,7 +79,7 @@ against.`,
     id: 'laws',
     title: 'Rayleigh against Rice',
     view: 'laws',
-    params: { ...BASE, snrDb: 3, M: 800 },
+    params: { ...BASE, snrDb: 3, M: 2400 },
     visible: ['snrDb', 'ms'],
     notes: `Why any of this works, and it is the same statement as the GLRT
 experiment two doors down.
@@ -90,10 +90,26 @@ that pair is therefore RAYLEIGH when the tone is absent — the grey histogram,
 with its closed form on top — and RICE when it is present, the blue one. Both
 laws are drawn from their formulas and neither is fitted.
 
+The bins follow the laws' own scale — a third of σ√(2/N), wherever the peaks
+happen to be — so the figure holds from the regime where the two densities
+overlap to the one where they are three decades apart. On a fixed grid each of
+them ends up one bin wide as soon as the SNR rises, and the theory then appears
+not to fit when it is the ruler that does not. If the histogram looks ragged,
+raise M: a density needs draws per bin, and the bin count follows the window.
+
 The decision is a threshold between two densities, and everything the receiver
 can do is move them apart. The SNR moves the Rice; the window length moves BOTH,
 because their common scale is σ√(2/N). Take T from 40 down to 10 and watch them
 slide into each other; take it to 100 and watch them separate.
+
+And the limit of the model, which is worth showing rather than hiding. Push the
+SNR to 25 dB and the blue histogram gets WIDER than the Rice that is drawn on
+it. Nothing is broken: at that point the noise is no longer what spreads the
+estimate — the leakage from the OTHER tone is, and it varies from burst to
+burst because the two phases are drawn independently. The Rice law describes
+the noise, and above about 15 dB the noise has stopped being the thing that
+matters. The same shape of honesty as the white-error model in the ΣΔ
+experiment: excellent where it is used, and it has an edge.
 
 The one thing to leave the room with: |â|² is a χ′² with two degrees of freedom
 — non-central when the tone is there, central when it is not — which is exactly

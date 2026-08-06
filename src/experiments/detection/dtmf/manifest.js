@@ -57,13 +57,24 @@ export default {
     }),
     M: int('M', {
       description: 'bursts drawn for the histograms and the success rate',
-      min: 50,
-      max: 2000,
-      step: 50,
-      default: 400,
+      min: 200,
+      max: 6000,
+      step: 200,
+      default: 1600,
     }),
     // seed injected by the core, because random: true
   },
+
+  validate: [
+    {
+      // The Monte Carlo runs M bursts of N samples through eight projections,
+      // and the lecture guard is 1.5 s. This is the first line of defence the
+      // contract asks for; without it a 100 ms window at M = 4000 aborted the
+      // computation in front of the room.
+      when: (p) => (p.M * p.ms * 8000) / 1000 > 1.5e6,
+      message: 'M × N too large to stay responsive — shorten the window or lower M',
+    },
+  ],
 
   derived: {
     N: { label: 'samples at Fs = 8 kHz', calc: (p) => Math.round((p.ms * 8000) / 1000) },
