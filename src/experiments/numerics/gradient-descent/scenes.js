@@ -16,9 +16,11 @@ gradient is orthogonal to the level set. On a circle, orthogonal to the level
 set means radial — pointing at the centre. On an ellipse it does not, and there
 is nothing more to the zigzag than that.
 
-Raise α and the descent takes bigger steps down the same straight line, until
-it overshoots and oscillates about the minimum. Note the value where that
-starts: it is 2/L, and on this bowl the room can predict it.
+Raise α and the descent takes bigger steps down the same straight line. At
+α = 1 it starts overshooting — the update factor 1 − α flips sign, so the path
+jumps across the minimum at every step while still converging — and at α = 2,
+the drawer's own bound 2/κ with κ = 1, it stops converging at all. Both
+thresholds are worth having the room predict before the slider proves them.
 
 Now turn κ up, one step at a time — 2, then 5, then 10 — and watch the straight
 line bend. That is the next scene, and the room will already know what it is

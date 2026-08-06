@@ -10,7 +10,7 @@ export default [
     visible: ['N', 'sigma'],
     notes: `Two estimators of the same variance, dividing by N and by N−1, and
 at two hundred points they land on top of each other. The difference between
-them is a factor 200/199, which is four tenths of a percent — invisible, and
+them is a factor 200/199, which is half a percent — invisible, and
 correctly so.
 
 This is the context, and it is worth a full minute because it is where most
