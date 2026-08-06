@@ -1,11 +1,19 @@
 // Lecture script — auto-discovered by the registry.
+//
+// x AND y are pills on EVERY scene, and never x alone. They name the two axes
+// of one picture: turning one without the other is half a gesture, and scene 1
+// asks in so many words for "PC3 across, PC4 up", which one dial cannot do.
+// They stay under the hand on the scree and reconstruction scenes too — those
+// open on another tab, but the cloud is one click away and the room asks for it
+// constantly ("and standardized, where do the penguins go?"). Pills that
+// survive a tab change are what make that answerable without leaving the scene.
 export default [
   {
     id: 'cloud',
     title: 'Four dimensions, one photograph',
     view: 'scores',
     params: { dataset: 'iris', standardize: false, k: 2, xComp: 1, yComp: 2 },
-    visible: ['dataset', 'xComp'],
+    visible: ['dataset', 'xComp', 'yComp'],
     notes: `A hundred and fifty irises, four measurements each: sepal length and
 width, petal length and width. A cloud in a four-dimensional space that nobody
 can draw.
@@ -33,7 +41,7 @@ means concretely.`,
     title: 'How many to keep',
     view: 'scree',
     params: { dataset: 'iris', standardize: false, k: 2, xComp: 1, yComp: 2 },
-    visible: ['k', 'standardize'],
+    visible: ['k', 'standardize', 'xComp', 'yComp'],
     notes: `The scree plot. PC1 carries 92.46 % of the variance, PC2 5.31 %, and
 the last two 2.2 % between them. The orange curve accumulates: at k = 2 the
 total is 97.77 %.
@@ -51,7 +59,7 @@ becomes a judgement again.`,
     title: 'The trap of units',
     view: 'scree',
     params: { dataset: 'penguins', standardize: false, k: 2, xComp: 1, yComp: 2 },
-    visible: ['standardize', 'dataset'],
+    visible: ['standardize', 'dataset', 'xComp', 'yComp'],
     notes: `The Palmer penguins: 342 individuals and four measurements — three
 lengths in millimetres and one MASS IN GRAMS.
 
@@ -84,7 +92,7 @@ experiment allows in one click.`,
     title: 'The theorem, watched',
     view: 'reconstruction',
     params: { dataset: 'iris', standardize: false, k: 2, xComp: 1, yComp: 2 },
-    visible: ['k', 'standardize'],
+    visible: ['k', 'standardize', 'xComp', 'yComp'],
     notes: `Two curves, and they coincide.
 
 The blue one is measured: the 150 flowers are reconstructed from the first k

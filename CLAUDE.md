@@ -168,8 +168,12 @@ and the chrome — Parameters, Draw, Presets, Search… — in English, like eve
 `#171717` dark), ~260 px, collapsible (`⌘B`), rounded items, soft gray hover,
 active item in neutral gray (never a color accent). Top button: "Search
 experiments" (`⌘K`). Tree: subjects (small muted sentence-case labels
-behind a folder glyph — shut when folded, open when not — collapsible, with a
-hover-only ± on the right) → experiments, indented under their folder.
+behind a folder glyph — shut when folded, open when not — carrying their
+experiment count in parentheses, collapsible, with a hover-only ± on the
+right) → experiments, indented under their folder. The count is the one thing
+a shut folder cannot say for itself, and it is set one weight and one shade
+below the title: the eye reads the modules first and finds the numbers only
+when it is looking for them.
 Footer: light/dark theme toggle for the central area, the source link, settings,
 inspector. **Teacher Mode is not here** — its switch lives in the info panel, in
 the heading of the notes block it gates, which is the only place its state means

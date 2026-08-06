@@ -102,6 +102,10 @@
                  room actually gets. -->
             <Icon name={collapsed[subject.id] ? 'folder' : 'folder-open'} size={14} stroke={1.8} />
             {subject.title}
+            <!-- how many experiments the module holds — the one thing a folded
+                 folder cannot say for itself, and the number a listener uses to
+                 decide whether opening it is worth the click. -->
+            <span class="count">({subject.experiments.length})</span>
           </span>
           <span class="chev">
             <Icon name={collapsed[subject.id] ? 'plus' : 'minus'} size={13} stroke={2.5} />

@@ -265,6 +265,17 @@ kbd {
   min-width: 0;
 }
 
+/* The count is a fact about the folder, not part of its name: same line, one
+   step down in weight and colour, so the eye reads the titles first and finds
+   the numbers only when it is looking for them. Tabular figures keep the
+   parentheses from dancing between one module and the next. */
+.sidebar .subject-title .count {
+  font-weight: 400;
+  color: var(--muted-fg);
+  font-variant-numeric: tabular-nums;
+  margin-left: -2px;
+}
+
 .sidebar .subject-title .chev {
   display: inline-flex;
   opacity: 0;
