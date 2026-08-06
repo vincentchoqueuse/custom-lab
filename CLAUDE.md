@@ -245,7 +245,17 @@ the browser Fullscreen API (native `Esc` exit).
 - **Info panel** (`I`): a wide dialog describing the experiment — its `doc` in
   prose, the LECTURE OUTLINE (every scene title, the current one marked, each a
   button that plays it), the current scene's notes when Teacher Mode is on, the
-  tags, and the attribution. It replaced a banner that sat above the plot on
+  tags, and the attribution. The footer's provenance line ends with a deep link
+  to **this experiment's `compute.js` on GitHub**, on the deployed branch: the
+  sidebar's repository button answers "what is this project", and in front of a
+  figure the question is "how is that computed" — which, by the layer
+  separation, has exactly one file for an answer. It is in the footer and not
+  in the view bar because reading the source is not a lecture gesture and the
+  view bar is projected. The link is built from the subject and the id rather
+  than from anything a manifest declares, so `npm run check` guards it: an
+  experiment with no `compute.js` to point at fails the catalogue checks, since
+  a button that silently 404s is the one breakage a reader cannot diagnose.
+  It replaced a banner that sat above the plot on
   every scene of every lecture: three lines of permanent height for text read
   once, and no room at all for a description of the experiment itself. A dialog
   does not contradict "never a modal for parameters" — that rule protects the

@@ -5,6 +5,16 @@ export const STR = {
   APP_NAME: 'expe34',
   REPO_URL: 'https://github.com/vincentchoqueuse/custom-lab',
   GITHUB: 'View source on GitHub',
+  // The branch the site is built from: a link to the science must point at the
+  // code that produced the figure on screen, not at whatever is being written
+  // next.
+  REPO_BRANCH: 'main',
+  // compute.js and no other file. A reader who asks "how is this computed"
+  // wants the science, not the manifest that names the sliders — and the whole
+  // point of the layer separation is that compute.js is the ONLY file where an
+  // answer to that question can be.
+  SOURCE_COMPUTE: 'compute.js',
+  SOURCE_COMPUTE_TITLE: 'The science behind this figure, on GitHub',
   SEARCH: 'Search experiments',
   SEARCH_PLACEHOLDER: 'Type to search experiments…',
   NO_RESULTS: 'No matching experiment',

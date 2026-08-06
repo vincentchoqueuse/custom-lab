@@ -842,6 +842,34 @@ kbd {
   font-family: var(--font-mono);
 }
 
+/* provenance, right-aligned: the science first, then the licence — the two
+   things a reader asks for in the same breath as the author */
+.info-foot .foot-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.info-foot .source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  margin: -3px -2px;
+  border-radius: 6px;
+  color: var(--muted-fg);
+  text-decoration: none;
+  transition:
+    background var(--t),
+    color var(--t);
+}
+
+.info-foot .source-link:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
 @media (max-width: 860px) {
   .info-panel {
     width: calc(100vw - 20px);

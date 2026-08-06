@@ -66,6 +66,20 @@
     applyPreset(id);
     close();
   }
+
+  // THE SCIENCE, one click from the description of it. The sidebar's GitHub
+  // button points at the repository, which answers "what is this project"; this
+  // one points at the compute.js of the experiment on screen, which answers the
+  // question a reader actually has in front of a figure — "how is that
+  // computed". Deep-linked to the deployed branch, because a figure and the
+  // code that produced it must be the same version.
+  //
+  // It lives in the footer rather than in the view bar on purpose: reading the
+  // source is not a lecture gesture, and the view bar is projected. Beside the
+  // author and the licence is where a reader already looks for provenance.
+  const sourceUrl = $derived(
+    m ? `${STR.REPO_URL}/blob/${STR.REPO_BRANCH}/src/experiments/${m.subject}/${m.id}/compute.js` : null
+  );
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
@@ -158,6 +172,20 @@
         ? ` · ${CATALOGUE.affiliation}`
         : ''}{m?.date ? ` · ${m.date}` : ''}</span
     >
-    <span class="licence">{CATALOGUE.licence}</span>
+    <span class="foot-right">
+      {#if sourceUrl}
+        <a
+          class="source-link"
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener"
+          title={STR.SOURCE_COMPUTE_TITLE}
+        >
+          <Icon name="file-code" size={14} />
+          <span class="mono">{STR.SOURCE_COMPUTE}</span>
+        </a>
+      {/if}
+      <span class="licence">{CATALOGUE.licence}</span>
+    </span>
   </footer>
 </div>

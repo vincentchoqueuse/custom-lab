@@ -77,6 +77,39 @@ function checkLayering() {
 }
 
 /**
+ * The info panel deep-links every experiment's compute.js on GitHub, built
+ * from the subject and the id rather than from anything the manifest declares
+ * — so the link is right exactly when the four-file contract is kept. A file
+ * renamed or a science split across two modules would leave a button that
+ * silently 404s, which is the one failure mode a reader cannot diagnose: the
+ * page loads, the figure is fine, and only the link is a lie.
+ */
+function checkSourceLinks() {
+  const EXP = resolve(process.cwd(), 'src/experiments');
+  const bad = [];
+  let n = 0;
+  for (const subject of readdirSync(EXP, { withFileTypes: true })) {
+    if (!subject.isDirectory() || subject.name.startsWith('_')) continue;
+    for (const exp of readdirSync(join(EXP, subject.name), { withFileTypes: true })) {
+      if (!exp.isDirectory() || exp.name.startsWith('_')) continue;
+      n++;
+      if (!existsSync(join(EXP, subject.name, exp.name, 'compute.js')))
+        bad.push(`${subject.name}/${exp.name}`);
+    }
+  }
+  console.log(`  ${dim('source links')}`);
+  if (bad.length) {
+    for (const b of bad) console.log(`    ${red('✗')} no compute.js to link to: ${b}`);
+    fail++;
+  } else {
+    console.log(
+      `    ${green('✓')} every experiment deep-links a compute.js  ${dim(`(${n} experiments)`)}`
+    );
+    pass++;
+  }
+}
+
+/**
  * `random: true` must say the truth, in both directions.
  *
  * The seed exists so a draw can be replayed; an experiment that draws
@@ -795,6 +828,7 @@ function checkOrdering(subjectRanks, expRanks) {
 async function checkCatalogue() {
   console.log(bold('catalogue'));
   checkLayering();
+  checkSourceLinks();
   checkAxesMargin();
   checkCssTokens();
   checkRandomness();
