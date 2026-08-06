@@ -4,7 +4,7 @@ export default [
     id: 'confidence',
     title: 'Confidence thrown away',
     params: { code: 'hamming74', ebn0Db: 3, Nbits: 40000 },
-    visible: ['ebn0Db'],
+    visible: ['code', 'ebn0Db'],
     notes: `A sample received at +0.05 votes "0" — without conviction. The hard
 decision keeps the vote and DISCARDS the conviction; the soft decoder correlates
 the seven received values against the sixteen possible codewords and keeps
@@ -20,7 +20,7 @@ dominates frame by frame, not merely on average.`,
     title: 'Two free decibels',
     params: { code: 'hamming74', ebn0Db: 5, Nbits: 40000 },
     view: 'ber',
-    visible: ['ebn0Db'],
+    visible: ['code', 'ebn0Db'],
     notes: `The HORIZONTAL gap between the orange curve (hard, exact) and the
 purple points (soft) is about 2 dB at a BER of 10⁻⁴ — same code, same
 transmitted bits, same energy, and only the receiver changed.
@@ -34,7 +34,7 @@ nothing else. Two free decibels is why no modern receiver decides hard.`,
     title: 'Repetition redeemed',
     params: { code: 'repetition3', ebn0Db: 4, Nbits: 40000 },
     view: 'ber',
-    visible: ['code'],
+    visible: ['code', 'ebn0Db'],
     notes: `The plausible bad idea returns. Decoded hard, repetition ×3 lost
 everywhere. Decoded soft, averaging the three samples adds three thirds of the
 energy back together and recovers ALL of it: the purple points land EXACTLY on

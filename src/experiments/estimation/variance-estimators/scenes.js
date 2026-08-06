@@ -4,7 +4,7 @@ export default [
     id: 'bias',
     title: 'The bias of σ̂² (÷N)',
     params: { N: 5, M: 2000 },
-    visible: ['N'],
+    visible: ['N', 'sigma'],
     notes: `Two thousand experiments, each estimating σ² from five points. The
 orange histogram, which divides by N, sits to the left of σ²: its mean is
 σ²(N−1)/N, so it underestimates every time on average rather than occasionally.
@@ -20,7 +20,7 @@ of freedom has already been spent.`,
     title: 'The bias vanishes as 1/N',
     params: { N: 5, M: 5000 },
     view: 'bias',
-    visible: ['sigma'],
+    visible: ['sigma', 'N'],
     notes: `The empirical bias of σ̂² follows the theoretical curve −σ²/N, and
 the bias of s² stays on zero at every sample size. On a logarithmic axis the
 argument settles itself: by N = 100 the difference between ÷N and ÷(N−1) is no

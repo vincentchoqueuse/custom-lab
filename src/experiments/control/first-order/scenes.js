@@ -5,7 +5,7 @@ export default [
     title: 'τ, and nothing else',
     params: { K: 1, tau: 1, tz: 0 },
     view: 'step',
-    visible: ['tau'],
+    visible: ['tau', 'K'],
     notes: `The pure first order: an exponential with a single shape parameter.
 The three graphical readings of the course are worth saying out loud. At t = τ
 the output is at 63 % of its final value. At t = 3τ it is at 95 %, which is the
@@ -21,7 +21,7 @@ which is what makes τ interesting.`,
     title: 'The impulse response is the derivative',
     params: { K: 1, tau: 1, tz: 0 },
     view: 'impulse',
-    visible: ['tau'],
+    visible: ['tau', 'K'],
     notes: `The same system with a different input: h(t) = (K/τ)·e^{−t/τ}, which
 starts at K/τ and decays with the SAME time constant.
 
@@ -35,7 +35,7 @@ integrating an impulse gives the step back.`,
     title: 'One pole, one speed',
     params: { K: 1, tau: 1, tz: 0 },
     view: 'poles',
-    visible: ['tau'],
+    visible: ['tau', 'K'],
     notes: `The pole sits at −1/τ, alone on the real axis. Moving τ slides it: the
 further from the imaginary axis, the faster the system.
 
@@ -49,7 +49,7 @@ pole position to the shape.`,
     title: 'The same system, seen in frequency',
     params: { K: 1, tau: 1, tz: 0 },
     view: 'gain',
-    visible: ['tau'],
+    visible: ['tau', 'K'],
     lock: true,
     notes: `The axes are pinned, so moving τ slides the corner without the frame
 moving. The cutoff is at ω = 1/τ, exactly the pole with its sign changed — one
@@ -64,7 +64,7 @@ control.`,
     title: 'One zero, and the output jumps',
     params: { K: 1, tau: 1, tz: 0.5 },
     view: 'step',
-    visible: ['tz'],
+    visible: ['tz', 'tau'],
     notes: `The 63 %/τ and 95 %/3τ markers have gone, deliberately: they only hold
 for the PURE first order. The tangent stays, its identity surviving the zero.
 
@@ -82,7 +82,7 @@ displayed. A system that responds instantaneously looks like that.`,
     title: 'Non-minimum phase: it starts the wrong way',
     params: { K: 1, tau: 1, tz: -0.6 },
     view: 'step',
-    visible: ['tz'],
+    visible: ['tz', 'tau'],
     notes: `A negative τ_z puts the zero in the RIGHT half-plane, and the output
 starts by going the wrong way before coming back — the inverse overshoot, in the
 statline.

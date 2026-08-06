@@ -5,7 +5,7 @@ export default [
     title: 'Where is the pulse?',
     view: 'signals',
     params: { shape: 'rect', N: 32, snr: 0.1, tau: 32, M: 800 },
-    visible: ['snr'],
+    visible: ['snr', 'N'],
     notes: `At an SNR of 0.1 per sample, which is −10 dB, the orange pulse is
 buried in r[n]. Letting the room hunt for it is worth the twenty seconds it
 takes, because nobody finds it, and pressing R changes nothing about that.

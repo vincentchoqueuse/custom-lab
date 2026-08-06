@@ -18,7 +18,7 @@ what does it buy?`,
     title: 'The step that steps over the basin',
     params: { f: 5, sigma: 0.3, step: 1.3 },
     view: 'cost',
-    visible: ['step'],
+    visible: ['step', 'sigma'],
     notes: `With Δf = 1.3 Hz, larger than the basin width 1/T = 1 Hz, the grid
 can straddle the true minimum entirely and f̂ lands somewhere else — the
 statline shows |f̂−f| jump accordingly.

@@ -20,7 +20,7 @@ It does not. The intervals get narrower and the proportion containing μ stays a
     title: 'Level α = 0.20',
     view: 'realizations',
     params: { conf: 0.8 },
-    visible: ['conf'],
+    visible: ['conf', 'N'],
     notes: `At 1−α = 0.80 the red intervals become common enough to count, and
 counting them out loud is the cheapest way to make the frequentist definition
 concrete: roughly one in five misses, by construction rather than by accident.`,

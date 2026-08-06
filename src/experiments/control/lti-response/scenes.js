@@ -36,7 +36,7 @@ at all: it opens as (1−H(0))·t. The ramp is a stopwatch.`,
     title: 'The living definition of H(jω)',
     view: 'response',
     params: { num: [1], den: [1, 2, 1], input: 'sine', f: 0.5 },
-    visible: ['f'],
+    visible: ['input', 'f'],
     notes: `After the transient, the output is a sinusoid at the SAME frequency,
 of amplitude |H(jω)| and shifted by arg H(jω). The statline compares the
 measured gain, fitted over the last two periods, with the computed |H(jω)|:
@@ -51,7 +51,7 @@ drawn.`,
     title: 'The poles decide, time obeys',
     params: { num: [1], den: [1, 2, 1], input: 'step' },
     view: 'poles',
-    visible: ['den'],
+    visible: ['den', 'input'],
     notes: `The same system, read where everything is decided. Ask before
 touching anything: if a pole is slid to the right, what becomes of the step
 response?

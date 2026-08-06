@@ -5,7 +5,7 @@ export default [
     title: 'One specification, four families',
     view: 'gain',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
-    visible: ['family'],
+    visible: ['family', 'Amin'],
     notes: `Read the template before any filter is named: three yellow zones, and
 the response has to thread between them. It may not rise above 0 dB anywhere
 below f_a — not in the pass band and not in the TRANSITION either, where that is
@@ -40,7 +40,7 @@ selectivity alongside.`,
     title: 'The geometry of the families',
     view: 'poles',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
-    visible: ['family'],
+    visible: ['family', 'fp'],
     notes: `Butterworth puts its poles on a CIRCLE. Chebyshev 1 flattens that
 circle into an ellipse. Chebyshev 2 and the elliptic add ZEROS on the jω axis,
 and those zeros are what dig the notches into the stop band.
@@ -53,7 +53,7 @@ design in one figure.`,
     title: 'What selectivity costs',
     view: 'delay',
     params: { family: 'butter', fp: 1000, fstop: 2000, Amax: 1, Amin: 40 },
-    visible: ['family'],
+    visible: ['family', 'Amin'],
     notes: `This answers the question left open in scene 1. Freezing the group
 delay of the Butterworth shows it nearly flat; switching to the elliptic sends
 it soaring near f_p, so components close to the band edge arrive LATE. That is

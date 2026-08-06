@@ -5,7 +5,7 @@ export default [
     title: 'Reading a healthy eye',
     view: 'time',
     params: { levels: 2, alpha: 0.35, bt: 8, sigma: 0.02, Nsym: 200 },
-    visible: ['alpha'],
+    visible: ['alpha', 'sigma'],
     notes: `Two hundred slices of 2T superimposed make the eye. Between the
 instants the signal wanders freely, but at t = T, on the yellow line, ALL the
 traces pass through ±1: that is the Nyquist criterion of the raised cosine, with

@@ -101,6 +101,12 @@ export function bool(name, opts) {
   return f;
 }
 
+/** A select option label renders verbatim in a pill. Twenty-four characters is
+ *  what fits beside the param name without the Prompt Bar wrapping on a
+ *  projector, and it is a hard limit rather than advice: the one time it was
+ *  advice, fifty-four labels went past it. */
+const OPTION_LABEL_MAX = 24;
+
 export function select(name, opts) {
   const [n, o] = splitArgs(name, opts);
   const f = { type: 'select', name: n, ...o };
@@ -109,6 +115,19 @@ export function select(name, opts) {
   for (const opt of f.options) {
     if (opt === null || typeof opt !== 'object' || !('value' in opt) || !('label' in opt))
       throw new FieldError(`${label('select', f)}: each option needs {value, label}`);
+    // A select's label is not drawer text: it renders VERBATIM inside a pill,
+    // which is read from the back of a lecture hall and sized for
+    // `name = value unit`. One of these once read
+    //   equalizer = MMSE — (HᴴH + N₀I)⁻¹Hᴴ, unbiased for the decision
+    // which is a paragraph with a border. The label carries the discriminating
+    // word; the gloss belongs to `description` (drawer and tooltip) or to the
+    // scene notes.
+    if (opt.label.length > OPTION_LABEL_MAX)
+      throw new FieldError(
+        `${label('select', f)}: option label '${opt.label}' is ${opt.label.length} characters — ` +
+          `${OPTION_LABEL_MAX} at most, because it renders as-is in a pill. ` +
+          `Move the explanation to the field's description.`
+      );
   }
   if (!('default' in f)) throw new FieldError(`${label('select', f)}: default is required`);
   if (!f.options.some((opt) => opt.value === f.default))

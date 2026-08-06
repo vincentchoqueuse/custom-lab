@@ -84,7 +84,7 @@ exactly the half that gets applied outside the domain.`,
     title: 'Why one is needed at all',
     view: 'time',
     params: { act: 'identity', signal: 'square', gain: 1, bias: 0 },
-    visible: ['act'],
+    visible: ['act', 'bias'],
     notes: `With the identity activation the output IS the input, and so is the
 spectrum.
 

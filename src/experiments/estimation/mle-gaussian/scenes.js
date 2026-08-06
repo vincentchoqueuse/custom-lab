@@ -4,7 +4,7 @@ export default [
     id: 'principle',
     title: 'The principle (N = 20)',
     params: { N: 20 },
-    visible: ['N'],
+    visible: ['N', 'sigma'],
     notes: `Each press of R redraws the purple sample, moves the orange estimated
 density and leaves the blue true one where it is. The two estimates μ̂ and σ̂
 are in the statline, and the gap between the curves is the estimation error made
@@ -18,7 +18,7 @@ coincides, which is itself worth noticing.`,
     id: 'variability',
     title: 'Little data (N = 5)',
     params: { N: 5 },
-    visible: ['N'],
+    visible: ['N', 'sigma'],
     notes: `Holding R at N = 5 makes the estimated density dance, and that dance
 is exactly the variance of the estimator — one number per draw, seen as a curve.
 
@@ -31,7 +31,7 @@ unbiased estimator, which the next experiment takes apart.`,
     title: 'The log-likelihood',
     params: { N: 20 },
     view: 'loglik',
-    visible: ['N'],
+    visible: ['N', 'sigma'],
     notes: `The curve ℓ(μ) peaks at μ̂, the dashed orange line, and not at μ, the
 blue one. The estimator maximizes the likelihood of the data that were observed,
 not of the truth, and the distance between the two lines is what that costs on

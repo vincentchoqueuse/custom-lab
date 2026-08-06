@@ -5,7 +5,7 @@ export default [
     title: 'Four marksmen, one vocabulary',
     view: 'targets',
     params: { mu: 2, sigma: 1.5, N: 5, lambda: 0.8, M: 400 },
-    visible: ['N'],
+    visible: ['N', 'sigma'],
     notes: `Four estimators of the same center, from the same data. The room can
 name what it sees before any of it is explained: x̄ is on target and tight, the
 median is on target and a little looser, λx̄ is off target but very tight, and

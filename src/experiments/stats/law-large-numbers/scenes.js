@@ -18,7 +18,7 @@ theorem seen edge-on.`,
     id: 'slowness',
     title: 'Convergence is slow (1/√n)',
     params: { law: 'dice', n: 10000, K: 5 },
-    visible: ['n'],
+    visible: ['n', 'law'],
     notes: `The horizontal axis is logarithmic, and that is what makes the cost
 readable: the funnel narrows by a factor of ten every two orders of magnitude,
 so one more digit of precision costs a hundred times more draws.

@@ -20,7 +20,7 @@ care.`,
     title: 'Aliasing: the wagon wheel',
     view: 'time',
     params: { source: 'sine', f: 45, Fs: 50 },
-    visible: ['f'],
+    visible: ['f', 'Fs'],
     notes: `Forty-five hertz sampled at fifty: the samples trace a 5 Hz signal,
 and the reconstruction agrees — the statline reads an apparent frequency of
 5 Hz.

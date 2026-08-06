@@ -5,7 +5,7 @@ export default [
     title: 'An image is a matrix',
     view: 'images',
     params: { image: 'phantom', k: 3 },
-    visible: ['k'],
+    visible: ['image', 'k'],
     notes: `The Shepp–Logan phantom, the standard test image of medical imaging
 since 1974. At 128 × 128 pixels it is a 128 × 128 matrix, so 16 384 numbers.
 

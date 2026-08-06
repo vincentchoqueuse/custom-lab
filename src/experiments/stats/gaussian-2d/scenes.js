@@ -19,7 +19,7 @@ room that expects the one-dimensional 68 %.`,
     id: 'regression',
     title: 'Regression ≠ principal axis',
     params: { rho: 0.6, sigmax: 1.5, sigmay: 1.5, N: 1000 },
-    visible: ['rho'],
+    visible: ['rho', 'N'],
     notes: `Two lines cross the same cloud: the major axis in purple and
 E[Y|X = x] in green. The green one is flatter, and that gap is regression to the
 mean — at an extreme X, the expected Y falls back toward μᵧ rather than staying
@@ -34,7 +34,7 @@ not move, since it answers a different question about the same ellipse.`,
     title: 'The marginals ignore ρ',
     params: { rho: 0.9, sigmax: 1.5, sigmay: 1 },
     view: 'marginals',
-    visible: ['rho'],
+    visible: ['rho', 'sigmax'],
     notes: `Moving ρ across its whole range changes nothing on this view. All the
 dependence lives in the joint distribution and none of it survives the
 projection onto either axis.

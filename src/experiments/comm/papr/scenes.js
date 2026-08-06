@@ -7,7 +7,7 @@ export default [
     title: 'The peak is between the samples',
     view: 'envelope',
     params: { ...BASE },
-    visible: ['L'],
+    visible: ['L', 'N'],
     notes: `Sixteen sample periods around the peak of one OFDM symbol. The grey
 line is the envelope drawn at ×32 — near enough to the continuous signal for
 this argument — and the blue stems are what the IFFT actually produced.

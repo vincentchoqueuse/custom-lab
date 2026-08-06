@@ -7,7 +7,7 @@ export default [
     title: 'What actually travels: two signals',
     view: 'time',
     params: { ...BASE },
-    visible: ['ebn0Db'],
+    visible: ['mod', 'ebn0Db'],
     notes: `Before the plane, the signal. Twenty-four QPSK symbols in time, in
 blue what was sent and in orange what came back — and TWO panels, because a
 symbol is a complex number and a complex number does not fit on one ordinate.
@@ -28,7 +28,7 @@ thrown away — every pair (Re, Im) plotted as one point.`,
     title: 'QPSK, comfortable',
     view: 'iq',
     params: { ...BASE, ebn0Db: 10 },
-    visible: ['ebn0Db'],
+    visible: ['mod', 'ebn0Db'],
     notes: `Four clouds around four symbols, and the dashed lines are the exact
 decision boundaries: the receiver keeps the nearest point, so the boundaries are
 the perpendicular bisectors, which for QPSK are the axes. The vocabulary belongs

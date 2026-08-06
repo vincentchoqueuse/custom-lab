@@ -23,7 +23,7 @@ Changing source or f₀ moves the output and leaves the filter alone.`,
     title: 'The moving average',
     view: 'gain',
     params: { b: [0.25, 0.25, 0.25, 0.25], source: 'square', f0: 125 },
-    visible: ['b'],
+    visible: ['b', 'source'],
     notes: `Four coefficients equal to 1/4: the most naive filter in the world,
 and it has PERFECT zeros at k·Fs/L = 2, 4 and 6 kHz, which the harness verifies
 to 1e-15. Typing 0.125 eight times tightens the zeros and lowers the cutoff.
@@ -36,7 +36,7 @@ statline, and it has to be 1.`,
     title: 'The pure delay',
     view: 'response',
     params: { b: [0, 0, 0, 1], source: 'square', f0: 125 },
-    visible: ['b'],
+    visible: ['b', 'source'],
     notes: `With b = 0,0,0,1 the filter does nothing except wait. The output is
 the input shifted by three samples, bit for bit, and the harness checks it.
 
@@ -49,7 +49,7 @@ lengthens the wait.`,
     title: 'The differentiator',
     view: 'gain',
     params: { b: [1, -1], source: 'saw', f0: 125 },
-    visible: ['b'],
+    visible: ['b', 'source'],
     notes: `With b = 1,−1 the filter is the difference of two samples. Σb = 0, so
 DC is ANNIHILATED, and |H(f)| = 2·|sin(πf/Fs)| rises with frequency: a high-pass
 that amplifies noise at 6 dB per octave.

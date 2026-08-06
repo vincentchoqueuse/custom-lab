@@ -5,7 +5,7 @@ export default [
     title: 'Three candidates for θ',
     view: 'realization',
     params: { theta: 5, N: 10, M: 3000 },
-    visible: ['N'],
+    visible: ['N', 'theta'],
     notes: `The yellow line should be ignored for a moment: θ is not known, and
 the question is what estimate these ten points support. A room reliably produces
 the same three answers — the maximum, because nothing smaller can be right;
@@ -21,7 +21,7 @@ max+min estimator, in green, lands above θ about half the time.`,
     title: 'The bias of the maximum',
     params: { theta: 5, N: 10, M: 5000 },
     view: 'sampling',
-    visible: ['N'],
+    visible: ['N', 'theta'],
     notes: `The histogram of the maximum lies entirely to the left of θ, with a
 bias of exactly −θ/(N+1). Adding the minimum corrects it exactly, because
 E[min] = θ/(N+1) makes up the same deficit. The estimator 2x̄ is centered too,

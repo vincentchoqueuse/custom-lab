@@ -39,6 +39,10 @@ export const SCENE_KEYS = Object.freeze({
   lock: 'boolean',
 });
 
+/** The Prompt Bar holds only the active scene's `visible` params. */
+const PILLS_MIN = 2;
+const PILLS_MAX = 4;
+
 const typeOf = (v) => (Array.isArray(v) ? 'array' : typeof v);
 
 /**
@@ -97,6 +101,27 @@ export function validateScene(s, i, manifest, key) {
   for (const list of ['visible', 'masked'])
     for (const p of s[list] ?? [])
       if (!params.has(p)) throw new SceneError(`${where}: ${list} names '${p}', which is not a param`);
+
+  // HOW MANY PILLS A SCENE EXPOSES, and it is a range rather than a maximum.
+  //
+  // ONE is the interesting bound. A single pill is a slider, not a scene: the
+  // room can turn it but cannot COMPARE, and comparison is what a demonstration
+  // is for — the second pill is what lets someone ask "and if N were larger
+  // while σ stays put?". A scene that honestly turns one dial still needs the
+  // quantity the room will suspect of doing the work, so that holding it still
+  // is visibly a choice. Seventy-one scenes were in that state.
+  //
+  // Past four the Prompt Bar stops being readable from the back of a room, and
+  // the drawer (P) exists for everything else.
+  const nPills = (s.visible ?? []).length;
+  if (nPills < PILLS_MIN || nPills > PILLS_MAX)
+    throw new SceneError(
+      `${where}: ${nPills} pill${nPills === 1 ? '' : 's'} in visible — ` +
+        `${PILLS_MIN} to ${PILLS_MAX}. ` +
+        (nPills < PILLS_MIN
+          ? 'One dial can be turned but not compared: add the parameter the room will want held fixed.'
+          : 'Move the rest to the drawer.')
+    );
   for (const p of Object.keys(s.params ?? {}))
     if (!params.has(p)) throw new SceneError(`${where}: sets '${p}', which is not a param`);
 }

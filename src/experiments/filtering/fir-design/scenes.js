@@ -5,7 +5,7 @@ export default [
     title: 'The signal goes in, the signal comes out',
     view: 'response',
     params: { fc: 1000, N: 21, win: 'hann' },
-    visible: ['fc'],
+    visible: ['fc', 'N'],
     notes: `The filter at work, before any theory: a signal goes in and its
 filtered version comes out — LATE, shifted by (N−1)/2 samples. That delay is not
 a misconfiguration but the price of causality, and scene 5 measures it.
@@ -19,7 +19,7 @@ coefficients, then the frequency response.`,
     title: 'Truncating the infinite',
     view: 'impulse',
     params: { fc: 1000, N: 21, win: 'rect' },
-    visible: ['N'],
+    visible: ['N', 'win'],
     notes: `The ideal response, in orange, is an INFINITE and non-causal sinc.
 Only N coefficients are kept, recentred at (N−1)/2 — the delay was born there,
 before any calculation. Raising N makes the bars follow the sinc more and more
@@ -33,7 +33,7 @@ sample, and more delay, which is scene 5.`,
     title: 'Gibbs does not give way',
     view: 'gain',
     params: { fc: 1000, N: 21, win: 'rect' },
-    visible: ['N'],
+    visible: ['N', 'win'],
     notes: `With raw truncation the first stop-band lobe sits at −21 dB.
 
 Freezing and taking N from 21 to 101 STEEPENS the transition — and leaves the
@@ -60,7 +60,7 @@ to spend one's decibels.`,
     title: 'Clean, but late',
     view: 'response',
     params: { fc: 500, N: 81, win: 'hamming' },
-    visible: ['N'],
+    visible: ['N', 'fc'],
     notes: `A square wave goes in and a smoothed version comes out, shifted by
 EXACTLY (N−1)/2 samples — 5 ms at N = 81, in the statline. The phase is linear,
 so every frequency waits the same time and the shape is preserved.

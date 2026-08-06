@@ -60,7 +60,7 @@ lingers.`,
     title: 'A delay is only visible in the phase',
     params: { signal: 'rect', T: 5, t0: 0 },
     view: 'phase',
-    visible: ['t0'],
+    visible: ['signal', 't0'],
     notes: `Moving t₀ while watching the spectrum tab changes |X(f)| by not one
 pixel, which the numerical harness verifies as an exact identity.
 

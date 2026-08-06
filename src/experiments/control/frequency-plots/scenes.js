@@ -5,7 +5,7 @@ export default [
     title: 'A first order, read four times',
     params: { sys: 'first', K: 1, tau: 1, wc: 1 },
     view: 'gain',
-    visible: ['wc'],
+    visible: ['sys', 'wc'],
     notes: `The rule of the game belongs first: all four tabs plot THE SAME
 complex number H(jω). Nothing changes between them except the way of looking at
 it.
@@ -101,7 +101,7 @@ so are the margins; only the axes have turned.`,
     title: 'Raising K until the loop diverges',
     params: { sys: 'openloop', K: 1, tau: 1, wc: 2.24 },
     view: 'nyquist',
-    visible: ['K'],
+    visible: ['sys', 'K'],
     notes: `One control: K. Freeze at K = 1, then climb.
 
 Ask first what moves when K increases. The answer to obtain: the locus GROWS,

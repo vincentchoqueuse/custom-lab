@@ -71,7 +71,7 @@ depend on f₀ when the filter has not changed?`,
     title: 'The complementary comb',
     view: 'gain',
     params: { structure: 'fb', D: 40, g: 0.9, source: 'saw', f0: 110 },
-    visible: ['g'],
+    visible: ['g', 'D'],
     notes: `Sliding g from +0.9 to −0.9 SWAPS resonances and notches: the
 resonances now sit between the k·Fs/D, and DC is eaten — |H(0)| = 1/(1+|g|),
 which is −5.6 dB.

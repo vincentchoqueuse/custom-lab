@@ -5,7 +5,7 @@ export default [
     title: 'The three regimes',
     view: 'step',
     params: { K: 1, m: 0.3, w0: 2 },
-    visible: ['m'],
+    visible: ['m', 'w0'],
     notes: `At m = 0.3 the system rings: oscillations under an exponential
 envelope, with 37 % overshoot in the statline and the formula
 e^(−mπ/√(1−m²)) beside it.
@@ -34,7 +34,7 @@ scale and m is the SHAPE. Two numbers, and the whole dynamics.`,
     title: 'Resonance — and identification',
     params: { K: 1, m: 0.2, w0: 2 },
     view: 'gain',
-    visible: ['m'],
+    visible: ['m', 'w0'],
     notes: `Below m = 0.707, |H| bulges at ωr = ω₀√(1−2m²) with
 Mr = K/(2m√(1−m²)) — at m = 0.2 that is Mr ≈ 2.55, or 8 dB above K. Raising m
 melts the bump, which vanishes exactly at 0.707.

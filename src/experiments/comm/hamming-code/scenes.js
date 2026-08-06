@@ -4,7 +4,7 @@ export default [
     id: 'syndrome',
     title: 'One error per frame: free',
     params: { code: 'hamming74', ebn0Db: 5, Nbits: 20000 },
-    visible: ['ebn0Db'],
+    visible: ['code', 'ebn0Db'],
     notes: `Each column is a seven-bit frame — four data bits and three parity
 bits, separated by the grey line — and each blue dot is a bit flipped by the
 channel.
@@ -20,7 +20,7 @@ and counting the two-dot columns makes the failure rate concrete.`,
     title: 'The crossover: coding can lose',
     params: { code: 'hamming74', ebn0Db: 2, Nbits: 40000 },
     view: 'ber',
-    visible: ['ebn0Db'],
+    visible: ['code', 'ebn0Db'],
     notes: `At equal Eb/N₀ the seven transmitted bits share the energy of four
 useful ones, so the coded channel is WORSE by a rate penalty of
 −10·log₁₀(4/7) = 2.4 dB.
@@ -36,7 +36,7 @@ of the cascade.`,
     title: 'Repetition, a plausible bad idea',
     params: { code: 'repetition3', ebn0Db: 5, Nbits: 40000 },
     view: 'ber',
-    visible: ['code'],
+    visible: ['code', 'ebn0Db'],
     notes: `The naive idea the room proposes is to repeat three times and vote.
 The curve delivers the verdict: repetition ×3 NEVER goes below the uncoded
 curve, because a rate penalty of 4.8 dB eats the whole benefit of the vote at

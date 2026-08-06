@@ -46,7 +46,7 @@ it from the two noise variances.`,
     title: 'The filter knows itself',
     view: 'consistency',
     params: { sigw: 0.1, sigv: 1, N: 500 },
-    visible: ['N'],
+    visible: ['N', 'sigv'],
     notes: `The true error x̂ − x, which is not observable in practice, lives
 inside the ±3σ tube the filter predicted on its own. Counting the points
 outside gives roughly one in 370, as a Gaussian says it should.

@@ -5,7 +5,7 @@ export default [
     title: 'The signal and its samples',
     params: { signal: 'gauss', fs: 600, tau: 5 },
     view: 'time',
-    visible: ['fs'],
+    visible: ['signal', 'fs'],
     notes: `Starting with what is literally visible: a curve, and points taken
 every Ts = 1/Fs. Lowering Fs spreads the points out and leaves the curve alone.
 At 600 Hz there are dozens per hump; at 100 Hz a handful.
@@ -18,7 +18,7 @@ about the signal? The whole experiment answers it, in frequency.`,
     title: 'The spectrum repeats itself',
     params: { signal: 'gauss', fs: 600, tau: 5 },
     view: 'periodize',
-    visible: ['fs'],
+    visible: ['signal', 'fs'],
     notes: `A Gaussian sampled at 600 Hz. The spectrum of the sampled signal, in
 blue, is not X(f): it is X(f) PLUS its copies shifted by ±Fs and ±2Fs, drawn in
 grey. At 600 Hz they are far away and the central copy is untouched.

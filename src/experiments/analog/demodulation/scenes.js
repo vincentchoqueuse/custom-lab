@@ -52,7 +52,7 @@ they move slowly compared with the carrier.`,
     title: 'What locality costs',
     view: 'freq',
     params: { fc: 1000, ka: 0.5, fam: 40, fdev: 200, ffm: 25, snr: 20 },
-    visible: ['snr'],
+    visible: ['snr', 'ka'],
     notes: `The prediction is worth collecting before lowering the SNR: which of
 the two gives way first?
 

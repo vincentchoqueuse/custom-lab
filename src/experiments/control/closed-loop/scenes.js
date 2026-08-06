@@ -5,7 +5,7 @@ export default [
     title: 'Closing the loop, and seeing what changes',
     params: { w0: 1, m: 0.5, K: 4 },
     view: 'response',
-    visible: ['K'],
+    visible: ['K', 'm'],
     notes: `One dial: K. Starting at K = 0.1, where the loop barely acts, and
 climbing slowly to 4.
 
@@ -25,7 +25,7 @@ it moves ω₀ and not the real part of the poles.`,
     title: 'Faster and less damped, in the same ratio',
     params: { w0: 1, m: 0.5, K: 4 },
     view: 'gain',
-    visible: ['K'],
+    visible: ['K', 'w0'],
     lock: true,
     notes: `The same gesture, read in frequency. The blue curve is |L| = |K·G|,
 the red one the closed loop |T|.
@@ -61,7 +61,7 @@ property of the loop.`,
     title: 'The chart: reading the CLOSED loop on the OPEN one',
     params: { w0: 1, m: 0.5, K: 4 },
     view: 'black',
-    visible: ['K'],
+    visible: ['K', 'm'],
     notes: `Only the open loop is drawn here — the blue locus, |L| in dB against
 arg L. The grey contours are the chart: every point of the plane giving the same
 CLOSED-loop gain, |L/(1+L)| = M.

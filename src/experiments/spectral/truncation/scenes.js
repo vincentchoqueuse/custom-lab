@@ -35,7 +35,7 @@ gate in the signal catalogue, seen from the other side.`,
     title: 'The shape of the cut sets the skirts',
     params: { sig: 'sine', T: 40, win: 'rect', f0: 300 },
     view: 'spectrum',
-    visible: ['win'],
+    visible: ['win', 'T'],
     lock: true,
     notes: `At CONSTANT duration, moving from rectangular to Hann to Blackman
 collapses the sidelobes — −13 dB, −31 dB, −58 dB — while the main lobe widens.

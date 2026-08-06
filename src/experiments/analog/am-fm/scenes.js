@@ -18,7 +18,7 @@ whatsoever. That is the case against amplitude modulation, in one number.`,
     title: 'Overmodulation: the envelope gives it away',
     view: 'time',
     params: { mode: 'am', fm: 62.5, ka: 0.9 },
-    visible: ['ka'],
+    visible: ['ka', 'fm'],
     notes: `Freezing at k_a = 0.9 leaves an orange envelope that reproduces the
 message faithfully. Moving to k_a = 1.4 makes the two envelopes CROSS, and an
 envelope detector — the diode of a crystal set — would see |envelope|: the
@@ -46,7 +46,7 @@ what is being paid and what is being bought?`,
     title: 'β = 2.405: the carrier vanishes',
     view: 'spectrum',
     params: { mode: 'fm', fm: 62.5, beta: 2.405 },
-    visible: ['beta'],
+    visible: ['beta', 'fm'],
     notes: `At the first zero of J₀ the carrier disappears entirely, even though
 only the phase is being modulated. Moving β by ±0.2 either side brings it back.
 

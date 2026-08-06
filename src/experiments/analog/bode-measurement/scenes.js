@@ -5,7 +5,7 @@ export default [
     title: 'What the scope shows',
     view: 'scope',
     params: { system: 'rc', fc: 500, f: 100, sigma: 0.05 },
-    visible: ['f'],
+    visible: ['f', 'sigma'],
     notes: `At f = 100 Hz, well below f_c = 500 Hz, the orange output follows the
 input.
 
@@ -32,7 +32,7 @@ asymptote. Freezing and then moving f_c makes the point follow.`,
     title: 'The measurement campaign',
     view: 'gain',
     params: { system: 'rc', fc: 500, f: 500, sigma: 0.05 },
-    visible: ['sigma'],
+    visible: ['sigma', 'system'],
     notes: `Twenty-five bench measurements, in orange, laid over the theory in
 blue. Pressing R gives a slightly different campaign each time, which is the
 difference between a measurement and a calculation.
@@ -47,7 +47,7 @@ circuit.`,
     title: 'Resonance',
     view: 'gain',
     params: { system: 'order2', f0: 500, Q: 2, f: 500, sigma: 0.05 },
-    visible: ['Q'],
+    visible: ['Q', 'f0'],
     notes: `The second-order circuit grows a peak at f₀ as Q rises, of height
 roughly 20·log₁₀Q. Freezing at Q = 2 and pushing to Q = 15 sharpens it.
 

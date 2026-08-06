@@ -5,7 +5,7 @@ export default [
     title: 'The staircase',
     view: 'time',
     params: { b: 3, A: 0.9, f: 7.3, dither: false },
-    visible: ['b'],
+    visible: ['b', 'A'],
     notes: `At b = 3 there are eight levels and the staircase is impossible to
 miss. Freezing and raising b to 8 makes it disappear into the line.
 
@@ -18,7 +18,7 @@ first.`,
     title: 'The error is (almost) uniform',
     view: 'error-hist',
     params: { b: 8, A: 0.9, f: 7.3, dither: false },
-    visible: ['b'],
+    visible: ['b', 'dither'],
     notes: `At b = 8 the histogram sits on the uniform density over ±Δ/2, which
 is the assumption behind the familiar Δ²/12.
 

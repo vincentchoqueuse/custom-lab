@@ -4,7 +4,7 @@ export default [
     id: 'samples',
     title: 'What we have: samples',
     params: { stage: 'samples', L: 4, f0: 1000, half: 8 },
-    visible: ['f0'],
+    visible: ['stage', 'f0'],
     notes: `A 1 kHz sinusoid sampled at 8 kHz, and nothing else so far: numbers,
 one every 0.125 ms.
 

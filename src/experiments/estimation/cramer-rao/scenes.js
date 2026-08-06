@@ -37,7 +37,7 @@ screen.`,
     title: 'Three widths for one N',
     params: { mu: 2, sigma: 1.5, N: 50, M: 5000 },
     view: 'sampling',
-    visible: ['N'],
+    visible: ['N', 'sigma'],
     notes: `The same data budget buys three different precisions. The yellow
 curve is the best distribution available — N(μ, σ²/N), dictated by Cramér–Rao —
 and the histogram of x̄ fills it exactly.
