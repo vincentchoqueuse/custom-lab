@@ -248,6 +248,111 @@ function betacf(a, b, x) {
   return h;
 }
 
+/**
+ * Regularized lower incomplete gamma P(a, x) — the χ² family's CDF, and the
+ * counterpart of the incomplete beta already here. Series below a+1, continued
+ * fraction above, which is where each converges.
+ */
+export function gammaP(a, x) {
+  if (x <= 0) return 0;
+  if (x < a + 1) {
+    // series: P(a,x) = x^a e^{-x} Σ x^n / (a(a+1)…(a+n))
+    let ap = a;
+    let sum = 1 / a;
+    let del = sum;
+    for (let n = 0; n < 500; n++) {
+      ap += 1;
+      del *= x / ap;
+      sum += del;
+      if (Math.abs(del) < Math.abs(sum) * 1e-15) break;
+    }
+    return sum * Math.exp(-x + a * Math.log(x) - logGamma(a));
+  }
+  // continued fraction for the UPPER tail Q(a,x), then P = 1 − Q
+  const FPMIN = 1e-300;
+  let b = x + 1 - a;
+  let c = 1 / FPMIN;
+  let d = 1 / b;
+  let h = d;
+  for (let i = 1; i <= 500; i++) {
+    const an = -i * (i - a);
+    b += 2;
+    d = an * d + b;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = b + an / c;
+    if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return 1 - Math.exp(-x + a * Math.log(x) - logGamma(a)) * h;
+}
+
+/** CDF of a χ² with k degrees of freedom. */
+export const chi2Cdf = (x, k) => gammaP(k / 2, x / 2);
+
+/** pdf of a χ² with k degrees of freedom, through logs so large k is safe. */
+export function chi2Pdf(x, k) {
+  if (x <= 0) return 0;
+  return Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.LN2 - logGamma(k / 2));
+}
+
+/**
+ * CDF of a NON-CENTRAL χ² — the law of a χ² whose Gaussians are off-centre,
+ * which is what every detection problem's H₁ produces. Written as what it is:
+ * a Poisson(λ/2) mixture of central χ² with k + 2j degrees of freedom.
+ */
+export function ncChi2Cdf(x, k, lambda) {
+  if (x <= 0) return 0;
+  if (lambda <= 0) return chi2Cdf(x, k);
+  const half = lambda / 2;
+  // start at the Poisson mode and walk outwards, so no term underflows first
+  const jMax = Math.max(60, Math.ceil(half + 12 * Math.sqrt(half + 1)));
+  let sum = 0;
+  let logw = -half; // log P(J = 0)
+  for (let j = 0; j <= jMax; j++) {
+    if (j > 0) logw += Math.log(half) - Math.log(j);
+    const w = Math.exp(logw);
+    if (w > 1e-300) sum += w * chi2Cdf(x, k + 2 * j);
+    if (j > half && w < 1e-17) break;
+  }
+  return Math.min(1, sum);
+}
+
+/** The x with chi2Cdf(x, k) = p — bisection, which needs no derivative and
+ *  cannot leave the bracket. */
+export function chi2Quantile(p, k) {
+  if (p <= 0) return 0;
+  let lo = 0;
+  let hi = Math.max(4 * k, 20);
+  while (chi2Cdf(hi, k) < p) hi *= 2;
+  for (let i = 0; i < 200; i++) {
+    const mid = (lo + hi) / 2;
+    if (chi2Cdf(mid, k) < p) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+/** CDF of Fisher's F(d1, d2), through the incomplete beta it already is. */
+export const fCdf = (x, d1, d2) =>
+  x <= 0 ? 0 : regularizedIncompleteBeta(d1 / 2, d2 / 2, (d1 * x) / (d1 * x + d2));
+
+/** The x with fCdf(x, d1, d2) = p. */
+export function fQuantile(p, d1, d2) {
+  if (p <= 0) return 0;
+  let lo = 0;
+  let hi = 10;
+  while (fCdf(hi, d1, d2) < p && hi < 1e12) hi *= 2;
+  for (let i = 0; i < 200; i++) {
+    const mid = (lo + hi) / 2;
+    if (fCdf(mid, d1, d2) < p) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
 /** Regularized incomplete beta I_x(a, b). */
 export function regularizedIncompleteBeta(a, b, x) {
   if (x <= 0) return 0;
