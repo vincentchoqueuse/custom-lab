@@ -1,4 +1,7 @@
 // Lecture script. Auto-discovered by the registry.
+// PLAN — problem 1 · method 2-3. NO CONTEXT SCENE: it opens on the confidence
+// already thrown away.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'confidence',

@@ -1,4 +1,7 @@
 // Lecture script — auto-discovered by the registry.
+// PLAN — problem 1 · method 2 · problem 3-4. NO CONTEXT SCENE, deliberately: the
+// 1969 counter-example IS the opening.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'perceptron',

@@ -1,6 +1,8 @@
 // Lecture script. Auto-discovered by the registry.
 const BASE = { mod: 'qpsk', mapping: 'gray', ebn0Db: 8, N: 3000, seed: 34 };
 
+// PLAN — context 1-2 · method 3-4
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'baseband',

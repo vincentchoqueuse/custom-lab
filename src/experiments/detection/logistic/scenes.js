@@ -19,6 +19,8 @@ const BASE = {
   seed: 34,
 };
 
+// PLAN — context 1 · problem 2 · method 3-4
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'bridge',

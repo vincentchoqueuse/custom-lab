@@ -14,6 +14,9 @@ const BASE = {
   seed: 34,
 };
 
+// PLAN — problem 1-2 · method 3 · invoice 4. NO CONTEXT SCENE: it opens on the
+// contamination.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'one-point',

@@ -1,5 +1,8 @@
 // Lecture script — the file reopened the night before class. Auto-discovered
 // by the registry. Defaults: view = first view, drawer = false.
+// PLAN — context 1 · problem 2. NO METHOD SCENE: the interval IS the method, and
+// it is already on screen in scene 1.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'all-is-well',

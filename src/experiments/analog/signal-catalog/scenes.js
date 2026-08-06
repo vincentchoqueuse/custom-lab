@@ -1,4 +1,6 @@
 // Auto-discovered by the registry. Defaults: view = first view, drawer = false.
+// PLAN — ATLAS: seven signals visited one by one. No single problem to build to.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'shapes',

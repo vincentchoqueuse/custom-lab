@@ -1,4 +1,6 @@
 // Lecture script — auto-discovered by the registry.
+// PLAN — problem 1 · method 2-3 · problem 4 · method 5
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'wall',

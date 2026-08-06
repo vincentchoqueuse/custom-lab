@@ -4,6 +4,9 @@ const BASE = {
   algo: 'costas', blt: 0.005, zeta: 0.707, order: 2, block: 64, N: 6000, seed: 34,
 };
 
+// PLAN — problem 1-2 · method 3-4. NO CONTEXT SCENE: it opens on the constellation
+// already turning.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'turning',

@@ -1,4 +1,6 @@
 // Lecture script — auto-discovered by the registry.
+// PLAN — context 1 · method 2-3 · problem 4
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'least-squares',

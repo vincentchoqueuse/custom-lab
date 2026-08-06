@@ -1,6 +1,8 @@
 // Lecture script. Auto-discovered by the registry.
 const BASE = { N: 64, L: 4, mod: 'qpsk', M: 600, gamma: 5, seed: 34 };
 
+// PLAN — problem 1 · method 2-3. NO CONTEXT SCENE.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'between-the-samples',

@@ -5,6 +5,8 @@
 // two, and the whole script is what that costs.
 const BASE = { mod: 'qpsk', rho: 0.5, snr: 12, eq: 'zf', N: 1500, seed: 34 };
 
+// PLAN — context 1-2 · problem 3-4 · method 5-6
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'in-time',

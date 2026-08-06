@@ -1,4 +1,7 @@
 // Lecture script. Auto-discovered by the registry.
+// PLAN — ATLAS, not an argument: each scene is a specimen of the catalogue. The
+// context -> problem -> method plan does not apply.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'histogram',

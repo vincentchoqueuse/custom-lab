@@ -1,6 +1,8 @@
 // Lecture script — auto-discovered by the registry.
 // Each scene IS a classic FIR, typed as coefficients: the URL carries them
 // (?b=0.25,0.25,0.25,0.25), so any variation a student invents is a link.
+// PLAN — context 1 · method 2-5 (each scene one filter, built by hand)
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'through',

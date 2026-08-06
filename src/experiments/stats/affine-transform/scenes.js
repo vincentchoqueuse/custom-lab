@@ -1,4 +1,6 @@
 // Lecture script. Auto-discovered by the registry.
+// PLAN — ATLAS: three transforms visited in turn, not one argument in three beats.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'shift',

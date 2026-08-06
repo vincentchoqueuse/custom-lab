@@ -1,6 +1,8 @@
 // Lecture script. Auto-discovered by the registry.
 const BASE = { key: '5', ms: 40, snrDb: 10, M: 1600, seed: 34 };
 
+// PLAN — context 1 · method 2-4
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'two-tones',

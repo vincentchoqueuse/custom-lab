@@ -7,6 +7,8 @@
 // open on another tab, but the cloud is one click away and the room asks for it
 // constantly ("and standardized, where do the penguins go?"). Pills that
 // survive a tab change are what make that answerable without leaving the scene.
+// PLAN — context 1 · method 2-4
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'cloud',

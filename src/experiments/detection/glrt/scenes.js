@@ -5,6 +5,10 @@
 // is what the receiver is allowed to know.
 const BASE = { snr: 0.1, N: 20, pfa: 0.01, detector: 'glrt', R: 16, M: 4000, seed: 34 };
 
+// PLAN — problem 1-3 · method 4. NO CONTEXT SCENE, deliberately: the fully known
+// case is the experiment next door, and this one opens on what it costs to
+// lose each piece of it.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'amplitude',

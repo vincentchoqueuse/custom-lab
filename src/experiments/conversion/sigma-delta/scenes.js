@@ -1,6 +1,8 @@
 // Lecture script. Auto-discovered by the registry.
 const BASE = { bits: 1, order: 1, osr: 64, amp: 0.4, fin: 0.4 };
 
+// PLAN — context 1 · method 2-3 · invoice 4
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'one-bit',

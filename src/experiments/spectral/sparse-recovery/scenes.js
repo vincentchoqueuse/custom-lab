@@ -26,6 +26,8 @@ const BASE = {
   seed: 34,
 };
 
+// PLAN — context+problem 1 · method 2-3 · invoice 4-5
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'periodogram',

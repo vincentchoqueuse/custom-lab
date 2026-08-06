@@ -1,4 +1,8 @@
 // Lecture script — auto-discovered by the registry.
+// PLAN — TWO ARCS, one per modulation: AM context 1 · problem 2, then FM context 3
+// · problem 4. Forcing them into one three-beat plan would hide that the
+// experiment covers two subjects.
+// (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
     id: 'am-sidebands',
