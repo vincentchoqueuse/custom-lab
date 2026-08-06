@@ -177,6 +177,11 @@ export default {
     // other: the Fourier limit the neighbouring experiment beats, and the shape
     // of the system this one has to solve.
     fourierLimit: { label: 'Fourier limit Fs/N', calc: (p) => `${(1000 / p.N).toFixed(2)} Hz` },
+    // in hertz too, so the gap reads the same here as in the periodogram
+    ecart: {
+      label: 'requested gap',
+      calc: (p) => `${((p.df * 1000) / p.N).toFixed(2)} Hz (${p.df}× the limit)`,
+    },
     shape: {
       label: 'D is N ×',
       calc: (p) =>

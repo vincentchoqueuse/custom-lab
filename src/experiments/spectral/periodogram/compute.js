@@ -33,11 +33,13 @@ import { fft, windowValue, dbToLin } from '../../../core/numeric.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
 
 const FS = 1000; // Hz
-const F1 = 150; // strong line (Hz)
+const F1 = 200; // strong line (Hz) — the module's line, see windowing and subspace
 const DB_FLOOR = -120;
-// The strong line is at 150 Hz and the maximum gap is 200 Hz: above 400 Hz
+// The strong line is at 200 Hz and the maximum gap is 150 Hz: above 400 Hz
 // there is never a line, whatever the scene. That is where the fluctuation of
-// the estimator is measured.
+// the estimator is measured. The line moved from 150 to 200 to join the rest
+// of the subject — windowing, subspace and sparse-recovery all put their pair
+// at 200 Hz, and a listener walking the module must recognise the same signal.
 const MEAS_LO = 400;
 
 /**
@@ -250,7 +252,13 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
     wMin = Math.min(wMin, sum[i]);
     wMax = Math.max(wMax, sum[i]);
   }
-  const flat = Number.isFinite(wMin) && wMax - wMin < 1e-9;
+  // A RAW periodogram is one segment, so no sample has a neighbour on both
+  // sides and this loop never runs — the sentinels came out untouched and the
+  // statline read "ripples from Infinity to -Infinity", on the landing scene of
+  // the experiment. There is nothing wrong to report there: with one segment
+  // there is no overlap to cover.
+  const hasInterior = Number.isFinite(wMin);
+  const flat = hasInterior && wMax - wMin < 1e-9;
 
   // the signal, restricted to the same range and rescaled to the windows: it is
   // there for context, not to be read on the ordinate
@@ -285,11 +293,13 @@ export function compute({ method, win, N, L, snr, a2, df, seed }) {
       zoomSignal: { x: zx, y: zy },
       shownSegments: shown,
       coverage: {
-        value: flat
-          ? wMin > 1.5
-            ? `flat at ${wMin.toFixed(2)} — every sample counted twice`
-            : 'flat at 1 — perfect overlap, every sample weighs 1'
-          : `ripples from ${wMin.toFixed(2)} to ${wMax.toFixed(2)} — segment edges are underweighted`,
+        value: !hasInterior
+          ? 'one segment — no overlap to cover'
+          : flat
+            ? wMin > 1.5
+              ? `flat at ${wMin.toFixed(2)} — every sample counted twice`
+              : 'flat at 1 — perfect overlap, every sample weighs 1'
+            : `ripples from ${wMin.toFixed(2)} to ${wMax.toFixed(2)} — segment edges are underweighted`,
         meta: { label: 'sum of the windows' },
       },
       segments: { value: est.segments, meta: { label: 'segments averaged K' } },

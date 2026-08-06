@@ -1,5 +1,7 @@
 // Lecture script — auto-discovered by the registry.
-// PLAN — context 1 · problem 2 · method 3-4 · problem 5 · method 6
+// PLAN — context 1 · problem 2 · method 3-4 · problem 5 · method 6 · wall 7
+// The last scene hands the record over to "High-resolution methods" unchanged:
+// same 200 Hz, same 2 Hz gap, same 25 dB, same 256 samples (RUNNING THREAD).
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {
@@ -146,6 +148,36 @@ Bartlett sits on 1/√K, Welch slightly ABOVE it. That is not a measurement
 defect — 1/√K is the law for INDEPENDENT segments, and Welch's share half their
 samples. What Welch gains is not beating the law but reaching a K twice as
 large at equal segment length, and therefore at equal resolution.`,
+  },
+  {
+    id: 'handover',
+    title: 'Two lines that will not come apart',
+    view: 'spectrum',
+    params: { method: 'raw', N: 256, L: 128, win: 'rect', snr: 25, a2: 0, df: 2 },
+    visible: ['df', 'N'],
+    notes: `THE END OF THE ROAD for this estimator, and the scene the next two
+experiments start from. Set it up out loud, because the numbers are about to be
+handed over unchanged: two equal lines around 200 Hz, 2 Hz apart, 25 dB, 256
+samples at Fs = 1 kHz.
+
+One lump. Not two peaks close together — one. And the drawer says why in one
+line: the Fourier limit Fs/N is 3.9 Hz and the gap is 2, so the requested
+separation is 0.51× the limit. Below one, the window's own lobe is wider than
+the distance between the lines, and no amount of care in computing the
+periodogram changes that.
+
+Now let the room try the two repairs that feel obvious, and watch both fail.
+Raise N — that works, and it is worth showing, but it costs record length you
+may not have: at N = 1024 the limit is 0.98 Hz and the pair separates. Then put
+N back to 256 and raise the SNR to 40. NOTHING happens. That is the important
+one: this is not a noise problem. The lines are perfectly visible and still
+merged, because the limit is set by the OBSERVATION TIME and by nothing else.
+
+That is the wall, and it is where this experiment stops. The next one takes
+exactly this record — same 200 Hz, same 2 Hz, same 25 dB, same 256 samples —
+and separates the two lines anyway. It does it by assuming something we have
+not assumed here, and the whole of "High-resolution methods" is the price of
+that assumption.`,
   },
 ];
 // notes: Teacher Mode only. Never projected by default, never in the URL.

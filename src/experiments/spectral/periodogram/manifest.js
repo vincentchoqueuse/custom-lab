@@ -23,6 +23,7 @@ export default {
     N: select('N', {
       description: 'record length (Fs = 1 kHz)',
       options: [
+        { value: 256, label: '256' },
         { value: 512, label: '512' },
         { value: 1024, label: '1024' },
         { value: 2048, label: '2048' },
@@ -72,13 +73,18 @@ export default {
       precision: 0,
     }),
     df: float('Δf', {
-      description: 'gap between the two lines (the strong one is at 150 Hz)',
-      min: 5,
-      max: 200,
-      step: 1,
+      // Down to 1 Hz, and N down to 256, so that the experiment can reach the
+      // case it exists to explain: at N = 256 the Fourier limit is 3.9 Hz, so
+      // a 2 Hz gap MERGES. Before, the floor of 5 Hz at N ≥ 512 kept the two
+      // lines resolved whatever the dial did — the periodogram could not show
+      // its own wall.
+      description: 'gap between the two lines (the strong one is at 200 Hz)',
+      min: 1,
+      max: 150,
+      step: 0.5,
       default: 40,
       unit: 'Hz',
-      precision: 0,
+      precision: 1,
     }),
     // seed injected by the core, because random: true
   },
@@ -92,6 +98,14 @@ export default {
 
   derived: {
     duration: { label: 'record duration', calc: (p) => `${(p.N / 1000).toFixed(3)} s` },
+    // The bridge to the two experiments downstream, which dial the SAME gap in
+    // units of the Fourier limit. Reading both here is what lets a scene hand
+    // over without the room re-learning a number.
+    fourierLimit: { label: 'Fourier limit Fs/N', calc: (p) => `${(1000 / p.N).toFixed(2)} Hz` },
+    gapInLimits: {
+      label: 'requested gap',
+      calc: (p) => `${p.df} Hz (${((p.df * p.N) / 1000).toFixed(2)}× the limit)`,
+    },
     resolution: {
       label: 'Δf of the raw periodogram',
       calc: (p) => `${(1000 / p.N).toFixed(2)} Hz`,

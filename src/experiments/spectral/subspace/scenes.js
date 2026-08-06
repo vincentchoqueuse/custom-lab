@@ -10,7 +10,14 @@ export default [
     view: 'spectrum',
     params: { sources: 2, df: 0.5, snr: 25, N: 256, M: 32, d: 2 },
     visible: ['df', 'N'],
-    notes: `Two exponentials separated by 0.5 × Fs/N, in noise at 25 dB. The
+    notes: `ARRIVING FROM THE PERIODOGRAM, and the record has not changed: the two lines
+are still at 200 Hz, still 2 Hz apart, still at 25 dB, still 256 samples at
+Fs = 1 kHz. Δf is dialled here in units of the Fourier limit, and 0.5 of a
+limit IS those 2 hertz — 1.95, to be exact, the periodogram dialling in whole
+half-hertz. The drawer prints both, and it is worth showing the room that the
+number they just left is the number they are looking at.
+
+Two exponentials separated by 0.5 × Fs/N, in noise at 25 dB. The
 periodogram shows only ONE hump, and the two yellow verticals say where the
 lines really are. The time tab, one to the left, shows the record — two
 exponentials in there, and nothing in the trace says so.

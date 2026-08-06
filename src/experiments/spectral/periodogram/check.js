@@ -117,7 +117,7 @@ export const checks = [
     name: 'with no noise, the line lands exactly on its bin',
     category: 'numeric',
     run() {
-      // 150 Hz and 190 Hz at Fs = 1000 over N = 2048: 307.2 and 389.12 bins, so
+      // 200 Hz and 240 Hz at Fs = 1000 over N = 2048: 409.6 and 491.52 bins, so
       // no exact bin — the maximum must be the nearest bin, not a neighbour.
       // Verifies that the frequency axis is not shifted by half a bin, the
       // classic error and one invisible to the eye.
@@ -135,7 +135,7 @@ export const checks = [
         }
         return o.psd.x[best];
       };
-      const worst = maxGap([150, 190], peakNear, (fc) => fc);
+      const worst = maxGap([200, 240], peakNear, (fc) => fc);
       return { ok: worst <= bin, detail: `max gap ${worst.toFixed(3)} Hz ≤ 1 bin = ${bin.toFixed(3)} Hz` };
     },
   },
@@ -218,8 +218,8 @@ export const checks = [
         [-5, -10, -20, -35, -50],
         (a2) => {
           const { observables: o } = compute({ ...BASE, snr: 200, a2, df: 40, N: 8192, win: 'hann' });
-          // The POWER of the lobe, not the height of the peak: neither 150 nor
-          // 190 Hz falls on an exact bin, and the scalloping loss differs
+          // The POWER of the lobe, not the height of the peak: neither 200 nor
+          // 240 Hz falls on an exact bin, and the scalloping loss differs
           // between them. Summing the density over the lobe cancels it, and the
           // identity becomes exact again instead of holding "to within
           // 0.4 dB".
@@ -229,7 +229,7 @@ export const checks = [
               if (Math.abs(o.psd.x[k] - fc) <= 2) p += 10 ** (o.psd.y[k] / 10);
             return 10 * Math.log10(p);
           };
-          return lobe(190) - lobe(150);
+          return lobe(240) - lobe(200);
         },
         (a2) => a2
       );
@@ -278,4 +278,25 @@ export const checks = [
   },
   standardChecks.determinism(compute, BASE, 'psd'),
   standardChecks.determinism(compute, BASE, 'signal'),
+  {
+    // A TEXT observable is displayed and never asserted, which is how "ripples
+    // from Infinity to -Infinity" survived on the landing scene: the numbers
+    // were all correct, and the sentence was nonsense. Every reading the
+    // statline can show must be a sentence, over the whole parameter grid.
+    name: 'the statline never prints a sentinel, whatever the segmentation',
+    category: 'numeric',
+    run() {
+      const bad = [];
+      for (const method of ['raw', 'bartlett', 'welch'])
+        for (const N of [256, 512, 2048])
+          for (const L of [64, 128, 256]) {
+            if (method !== 'raw' && L > N) continue;
+            const o = compute({ ...BASE, method, N, L }).observables;
+            for (const [name, v] of Object.entries(o))
+              if (v && typeof v.value === 'string' && /Infinity|NaN|undefined/.test(v.value))
+                bad.push(`${method} N=${N} L=${L}: ${name} = "${v.value.slice(0, 40)}"`);
+          }
+      return { ok: bad.length === 0, detail: bad[0] ?? '27 segmentations, every text reading a sentence' };
+    },
+  },
 ];
