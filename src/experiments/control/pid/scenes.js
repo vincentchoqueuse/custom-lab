@@ -1,6 +1,7 @@
 // Lecture script. Auto-discovered by the registry.
-// PLAN — problem 1 · method 2-3. NO CONTEXT SCENE: it opens on P alone missing the
-// target.
+// PLAN — context+problem 1 · method 2-3. Scene 1 carries both beats: the plant
+// closed with a single gain IS the nominal case, and its steady-state error is
+// already the problem.
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {

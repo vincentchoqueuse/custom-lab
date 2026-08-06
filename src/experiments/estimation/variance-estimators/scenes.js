@@ -1,7 +1,30 @@
 // Lecture script. Auto-discovered by the registry.
-// PLAN — problem 1 · method 2-3. NO CONTEXT SCENE: it opens on the bias itself.
+// PLAN — context 1 · problem 2 · method 3-4
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
+  {
+    id: 'agree',
+    title: 'At N = 200 the two agree',
+    view: 'sampling',
+    params: { N: 200, M: 2000 },
+    visible: ['N', 'sigma'],
+    notes: `Two estimators of the same variance, dividing by N and by N−1, and
+at two hundred points they land on top of each other. The difference between
+them is a factor 200/199, which is four tenths of a percent — invisible, and
+correctly so.
+
+This is the context, and it is worth a full minute because it is where most
+people's intuition actually lives: they have used one or the other for years
+and never seen them disagree. The statline gives both means; read them out.
+
+Raise σ and note that the two move together — the scale of the data is not
+what separates them.
+
+Then take N down. Not to five straight away — go through 50, 20, 10 and let the
+gap open in front of the room. What appears is not noise: press R and the gap
+does not change sign. The next scene puts a name and a formula on it.`,
+  },
+
   {
     id: 'bias',
     title: 'The bias of σ̂² (÷N)',

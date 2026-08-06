@@ -1,6 +1,6 @@
 // Lecture script. Auto-discovered by the registry.
-// PLAN — problem 1 · method 2-3. NO CONTEXT SCENE: it opens on the confidence
-// already thrown away.
+// PLAN — context 1 · method 2-3. Scene 1 is the context despite its title:
+// hard decoding is the status quo every receiver already does.
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
   {

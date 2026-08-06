@@ -1,9 +1,32 @@
 // Lecture script. Auto-discovered by the registry.
 const BASE = { N: 64, L: 4, mod: 'qpsk', M: 600, gamma: 5, seed: 34 };
 
-// PLAN — problem 1 · method 2-3. NO CONTEXT SCENE.
+// PLAN — context 1 · problem 2 · method 3-4
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
+  {
+    id: 'waveform',
+    title: 'What an OFDM symbol looks like',
+    view: 'envelope',
+    params: { ...BASE, L: 1 },
+    visible: ['N', 'mod'],
+    notes: `The context, and it is one sentence: add N carriers with independent
+phases and the sum is a signal whose amplitude wanders far above its average.
+
+Read the envelope. The average power is flat and boring; the peaks are not. The
+statline gives the ratio of the two — the peak-to-average power ratio, in dB —
+and that number is what decides how much of a power amplifier you have to buy
+and leave unused.
+
+Take N from 64 to 1024. More carriers, higher peaks, and the room should expect
+that: a sum of N independent terms is Gaussian by the central limit theorem, so
+the envelope is Rayleigh and its maximum grows like the log of N.
+
+Everything here is measured ON THE SAMPLES, at L = 1. That is the honest,
+obvious, universal way to compute a PAPR — and the next scene shows it is
+wrong.`,
+  },
+
   {
     id: 'between-the-samples',
     title: 'The peak is between the samples',

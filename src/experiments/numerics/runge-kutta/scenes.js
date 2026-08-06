@@ -1,7 +1,30 @@
 // Lecture script. Auto-discovered by the registry.
-// PLAN — problem 1 · method 2-3. NO CONTEXT SCENE: it opens on Euler inventing energy.
+// PLAN — context 1 · problem 2 · method 3-4
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
+  {
+    id: 'swings',
+    title: 'A pendulum that simply swings',
+    view: 'trajectory',
+    params: { system: 'pendulum', h: 0.01, theta0: 2.5 },
+    visible: ['h', 'theta0'],
+    notes: `h = 0.01, and the three methods are indistinguishable. That is the
+point of the scene: with a small enough step, the choice of integrator does not
+matter, and every one of them draws the pendulum a physicist would draw.
+
+Establish what "correct" looks like before anything breaks it. The pendulum
+swings, the amplitude does not change, and it never will — this system conserves
+energy exactly, and the energy tab is a flat line. Show it now, flat, so that
+the next scene has something to be measured against.
+
+Push θ₀ towards π and the swing gets slower and less sinusoidal. That is real
+physics, not numerical error, and it is worth separating the two out loud
+before the errors arrive.
+
+Then take h from 0.01 to 0.1 and go to the energy tab. One of the three curves
+stops being flat.`,
+  },
+
   {
     id: 'euler-inflates',
     title: 'Euler invents energy',

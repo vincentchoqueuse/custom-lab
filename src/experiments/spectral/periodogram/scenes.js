@@ -1,8 +1,31 @@
 // Lecture script — auto-discovered by the registry.
-// PLAN — problem 1 · method 2-3 · problem 4 · method 5. NO CONTEXT SCENE: it opens
-// on the floor that never comes down.
+// PLAN — context 1 · problem 2 · method 3-4 · problem 5 · method 6
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
+  {
+    id: 'one-line',
+    title: 'One line, and no argument about where it is',
+    view: 'spectrum',
+    params: { method: 'raw', N: 512, L: 256, win: 'rect', snr: 40, a2: -20, df: 40 },
+    visible: ['snr', 'N'],
+    notes: `At 40 dB the periodogram does exactly what the textbook promises:
+two clean peaks, at the right frequencies, well above everything else. There is
+no estimation problem visible, and that is the point of opening here.
+
+Establish the two rulers while they are easy to read. The width of a peak is
+Fs/N — take N from 512 to 128 and watch it get four times wider. And the height
+of a peak is the power of the line; the second one is 20 dB down, and it looks
+20 dB down.
+
+Now take the SNR from 40 to 10. The floor rises to meet the lines, and the
+question the whole experiment answers appears: that floor is not smooth. It is
+grass, and it does not calm down.
+
+Ask the room what to do about it before moving on. The instinctive answer —
+"take a longer record" — is the wrong one, and it is worth having on the table
+before scene 2 shows why.`,
+  },
+
   {
     id: 'noise-floor',
     title: 'The noise floor that never comes down',

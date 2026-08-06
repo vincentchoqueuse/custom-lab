@@ -1,7 +1,30 @@
 // Lecture script. Auto-discovered by the registry.
-// PLAN — problem 1 · method 2 · problem 3. NO CONTEXT SCENE.
+// PLAN — context 1 · problem 2 · method 3 · problem 4
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
+  {
+    id: 'bowl',
+    title: 'A round bowl, and the descent goes straight in',
+    view: 'landscape',
+    params: { fn: 'quad', kappa: 1, alpha: 0.18, beta: 0.27, N: 30 },
+    visible: ['kappa', 'alpha'],
+    notes: `κ = 1: the contours are circles, and the gradient at every point
+aims exactly at the minimum. The path is a straight line.
+
+Say why, because it is the whole reason the next scene is surprising. The
+gradient is orthogonal to the level set. On a circle, orthogonal to the level
+set means radial — pointing at the centre. On an ellipse it does not, and there
+is nothing more to the zigzag than that.
+
+Raise α and the descent takes bigger steps down the same straight line, until
+it overshoots and oscillates about the minimum. Note the value where that
+starts: it is 2/L, and on this bowl the room can predict it.
+
+Now turn κ up, one step at a time — 2, then 5, then 10 — and watch the straight
+line bend. That is the next scene, and the room will already know what it is
+looking at.`,
+  },
+
   {
     id: 'zigzag',
     title: 'The valley and the zigzag',

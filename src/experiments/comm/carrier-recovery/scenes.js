@@ -4,10 +4,33 @@ const BASE = {
   algo: 'costas', blt: 0.005, zeta: 0.707, order: 2, block: 64, N: 6000, seed: 34,
 };
 
-// PLAN — problem 1-2 · method 3-4. NO CONTEXT SCENE: it opens on the constellation
-// already turning.
+// PLAN — context 1 · problem 2-3 · method 4-5
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
+  {
+    id: 'locked',
+    title: 'A constellation that stands still',
+    view: 'constellation',
+    params: { ...BASE },
+    visible: ['mod', 'ebn0Db'],
+    notes: `Before anything turns, look at what right looks like. Four clean
+clouds, one per symbol, sitting where the transmitter put them. Every other
+scene in this experiment is this picture going wrong.
+
+Say what is being assumed out loud, because it is the assumption the whole
+subject rests on and no other experiment in the module ever states it: the
+receiver knows the carrier phase. It has been handed θ, so it can rotate the
+received samples back and read them.
+
+Move Eb/N₀ down and the clouds fatten — that is noise, and it is the only
+impairment here. Note the shape: they fatten SYMMETRICALLY and stay put. Fix
+that in mind, because the next scene changes exactly one thing, and what moves
+is not the size of the clouds.
+
+Take the modulation to 8-PSK and back. Same picture, more points, same
+promise.`,
+  },
+
   {
     id: 'turning',
     title: 'The constellation is turning',

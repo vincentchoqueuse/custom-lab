@@ -14,10 +14,32 @@ const BASE = {
   seed: 34,
 };
 
-// PLAN — problem 1-2 · method 3 · invoice 4. NO CONTEXT SCENE: it opens on the
-// contamination.
+// PLAN — context 1 · problem 2-3 · method 4 · invoice 5
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
+  {
+    id: 'clean',
+    title: 'Clean data: least squares is the right answer',
+    view: 'fit',
+    params: { ...BASE, contam: 0, shift: 0 },
+    visible: ['sigma', 'N'],
+    notes: `No outliers at all, and the four methods sit on top of one another.
+Ordinary least squares is not merely acceptable here — under Gaussian noise it
+is the maximum-likelihood estimator and no other method beats it. Say that
+plainly, because the rest of the experiment is going to attack it and the room
+should know it is attacking a champion rather than a straw man.
+
+Raise σ and press R a few times. The line wobbles, all four wobble together,
+and the wobble is symmetric: errors above and below are equally likely and
+cancel. Raise N and the wobble shrinks like 1/√N.
+
+Everything in this scene depends on one assumption, and it is worth writing on
+the board: the errors are Gaussian, so a large residual is very rare. Squaring a
+residual is only reasonable if large residuals cannot happen.
+
+The next scene makes two of them happen.`,
+  },
+
   {
     id: 'one-point',
     title: 'Two points out of forty',

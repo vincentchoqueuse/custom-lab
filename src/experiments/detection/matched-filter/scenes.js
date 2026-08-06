@@ -1,7 +1,29 @@
 // Lecture script. Auto-discovered by the registry.
-// PLAN — problem 1 · method 2-3. NO CONTEXT SCENE: it opens on the pulse already lost.
+// PLAN — context 1 · problem 2 · method 3-4
 // (the three beats, and the shapes that escape them: lecture-scenes skill)
 export default [
+  {
+    id: 'plain',
+    title: 'A pulse you can simply see',
+    view: 'signals',
+    params: { shape: 'rect', N: 32, snr: 3, tau: 32, M: 800 },
+    visible: ['snr', 'shape'],
+    notes: `Start where there is no problem at all. One pulse, thirty-two
+samples wide, sitting at τ = 32 in mild noise. Anyone in the room can point at
+it, and the correlator tab is a formality.
+
+Two things to establish while it is easy, because they are what the rest of the
+experiment is about. First, the pulse SHAPE — switch between rectangle, triangle
+and the raised cosine and watch the peak of the correlation change shape with
+it: the matched filter is matched to something, and this is that something.
+Second, the pulse is known EXACTLY — its shape, its width, its amplitude. Only
+its position is not.
+
+Now take the SNR down one notch at a time and stop the moment the room stops
+being able to point at it. That is where the next scene begins, and it is worth
+letting them find it themselves rather than being shown it.`,
+  },
+
   {
     id: 'invisible',
     title: 'Where is the pulse?',
