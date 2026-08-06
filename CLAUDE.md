@@ -700,6 +700,14 @@ Format: `#/{subject}/{experiment}?param1=…&view=…&drawer=0&preset=scene-2`
   verification promise. An UNKNOWN path lands there too: the honest fallback
   for a broken shared link is the catalogue choosing nothing, not the first
   experiment chosen arbitrarily. The sidebar brand links home.
+- **`embed=1` renders the instrument chrome-less for an iframe** in a course
+  page: no sidebar, header, drawer or panel toggles — the tabs, plot, actions
+  and pills stay, plus one quiet "expe34" chip that opens the same scene in the
+  full catalogue (the adoption loop: a colleague embeds ONE live figure in
+  their LMS, and every embed is a door back). It rides the query like `drawer`
+  so it survives the hash rewrites that pill drags produce; panel shortcuts
+  (I, P, L, ⌘K/⌘B) are inert inside it, plot gestures (R, F, C, A, ←/→) keep
+  working.
 - Minimal serialization: only params ≠ default appear.
 - `router.js`: single source of truth for state↔URL (bidirectional, replaceState
   while dragging, pushState on release).

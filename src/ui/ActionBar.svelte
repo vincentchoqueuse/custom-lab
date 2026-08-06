@@ -25,17 +25,21 @@
   <!-- FIRST in the row, before the instrument's own actions: it answers
        "what am I looking at", which comes before "what can I do to it". Not a
        manifest action — every experiment has a title and an outline, so there
-       is nothing to declare and nothing that could be forgotten. -->
-  <button
-    class="action-btn"
-    class:on={app.ui.info}
-    onclick={() => (app.ui.info = !app.ui.info)}
-    title="{STR.ABOUT} (I)"
-    aria-label="{STR.ABOUT} (I)"
-  >
-    <Icon name="info" size={14} />
-    <kbd>I</kbd>
-  </button>
+       is nothing to declare and nothing that could be forgotten. Hidden in an
+       embed, like the drawer toggle below: the panels they open belong to the
+       full app, and a button that opens nothing is worse than no button. -->
+  {#if !app.embed}
+    <button
+      class="action-btn"
+      class:on={app.ui.info}
+      onclick={() => (app.ui.info = !app.ui.info)}
+      title="{STR.ABOUT} (I)"
+      aria-label="{STR.ABOUT} (I)"
+    >
+      <Icon name="info" size={14} />
+      <kbd>I</kbd>
+    </button>
+  {/if}
   {#each allActions as a (a.id)}
     <button
       class="action-btn"
@@ -48,14 +52,16 @@
       {#if a.shortcut}<kbd>{a.shortcut}</kbd>{/if}
     </button>
   {/each}
-  <button
-    class="action-btn"
-    class:on={app.drawer}
-    onclick={() => setDrawer(!app.drawer)}
-    title="{STR.PARAMETERS} (P)"
-    aria-label="{STR.PARAMETERS} (P)"
-  >
-    <Icon name="settings" size={14} />
-    <kbd>P</kbd>
-  </button>
+  {#if !app.embed}
+    <button
+      class="action-btn"
+      class:on={app.drawer}
+      onclick={() => setDrawer(!app.drawer)}
+      title="{STR.PARAMETERS} (P)"
+      aria-label="{STR.PARAMETERS} (P)"
+    >
+      <Icon name="settings" size={14} />
+      <kbd>P</kbd>
+    </button>
+  {/if}
 </div>

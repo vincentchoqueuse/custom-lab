@@ -128,6 +128,11 @@
         t.tagName === 'SELECT' ||
         t.isContentEditable);
     const mod = e.metaKey || e.ctrlKey;
+    // Inside an iframe the instrument keeps its plot gestures (R, F, C, A,
+    // the arrows) and gives up the app panels: no palette, no sidebar, no
+    // drawer, no info dialog, no fullscreen — the host page owns the screen.
+    if (app.embed && ['i', 'I', 'p', 'P', 'l', 'L'].includes(e.key)) return;
+    if (app.embed && mod) return;
     if (mod && (e.key === 'k' || e.key === 'K')) {
       e.preventDefault();
       app.ui.palette = !app.ui.palette;
@@ -200,16 +205,22 @@
   class:presentation={app.ui.presentation}
   data-theme={app.ui.theme}
 >
-  <Sidebar />
+  {#if !app.embed}
+    <Sidebar />
+  {/if}
   <div class="main">
-    <Header onpresent={togglePresentation} />
+    {#if !app.embed}
+      <Header onpresent={togglePresentation} />
+    {/if}
     {#if app.expKey}
       <Workspace />
     {:else}
       <Landing />
     {/if}
   </div>
-  <DrawerParams />
+  {#if !app.embed}
+    <DrawerParams />
+  {/if}
   {#if app.ui.palette}
     <CommandPalette />
   {/if}

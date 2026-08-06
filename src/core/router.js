@@ -113,6 +113,11 @@ export function decodeQuery(query, manifest) {
     out.preset = query.preset;
   if (query.view && manifest.views.some((v) => v.id === query.view)) out.view = query.view;
   if (query.drawer === '1' || query.drawer === '0') out.drawer = query.drawer === '1';
+  // EMBED: display state, not experiment state — but it must survive the
+  // hash rewrites that pill drags produce, or the chrome would pop back the
+  // moment a student touches a slider inside the iframe. So it rides the
+  // query exactly like `drawer`.
+  if (query.embed === '1') out.embed = true;
   for (const [k, spec] of Object.entries(manifest.params)) {
     if (!(k in query)) continue;
     const v = castParam(spec, query[k]);
@@ -153,5 +158,6 @@ export function encodeHash(expKey, o) {
   if (o.view && o.view !== o.defaultView) parts.push(`view=${o.view}`);
   if ((o.drawer ?? false) !== (o.defaultDrawer ?? false))
     parts.push(`drawer=${o.drawer ? 1 : 0}`);
+  if (o.embed) parts.push('embed=1');
   return `#/${expKey}${parts.length ? '?' + parts.join('&') : ''}`;
 }

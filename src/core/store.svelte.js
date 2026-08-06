@@ -9,6 +9,9 @@ import { writePref } from './prefs.js';
 
 export const app = $state({
   expKey: null,
+  // embed=1 in the query: chrome-less rendering for an iframe in a course
+  // page. Set on navigation, preserved by syncUrl, never toggled from the UI.
+  embed: false,
   params: {},
   view: null,
   preset: null,
@@ -137,6 +140,7 @@ export function currentHash() {
   if (!m) return '#/';
   const scene = activeScene();
   return encodeHash(app.expKey, {
+    embed: app.embed,
     params: app.params,
     base: sceneBase(m, scene),
     paramSpecs: m.params,
@@ -169,6 +173,7 @@ function handleHash() {
   const expKey = getExperiment(path) ? path : null;
   if (!expKey) {
     app.expKey = null;
+    app.embed = false;
     app.preset = null;
     app.ui.info = false;
     app.ghost = null;
@@ -184,6 +189,7 @@ function handleHash() {
   const presetId = dec.preset ?? m.presets[0]?.id ?? null;
   const scene = m.presets.find((p) => p.id === presetId) ?? null;
   app.expKey = expKey;
+  app.embed = dec.embed ?? false;
   app.preset = presetId;
   app.params = { ...sceneBase(m, scene), ...dec.params };
   app.view = dec.view ?? scene?.view ?? m.views[0].id;
