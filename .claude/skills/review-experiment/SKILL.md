@@ -1,6 +1,6 @@
 ---
 name: review-experiment
-description: Review an existing or contributed Custom Lab experiment against the project contract — science, checks, declarative discipline, French pedagogical content, performance. Use when asked to review, audit, or validate an experiment or an experiment PR.
+description: Review an existing or contributed Custom Lab experiment against the project contract — science, checks, declarative discipline, English pedagogical content, scene plan and pills, performance. Use when asked to review, audit, or validate an experiment or an experiment PR.
 ---
 
 # Reviewing a Custom Lab experiment
@@ -38,7 +38,10 @@ reading AND by running (`npm run check`, then the browser).
 
 ## 4. Pedagogy
 
-- French pedagogical content, English code — both ways round is a defect.
+- Everything in English, code and pedagogical content alike (principle 6).
+- The scene plan (context -> problem -> method) and the pill rules — 2-3 per
+  scene, subject of the scene first, select labels <= 24 chars. See the
+  `lecture-scenes` skill.
 - Scenes: do they script GESTURES (freeze, move, compare, ask the room)
   or just list parameter values? Each scene sets every param its story
   depends on. Notes never travel in the URL.
