@@ -33,11 +33,15 @@ Node-safe, usable from compute.js AND check.js):
   `polyval`, `solveLinearSystem` (pivoted, ≤ ~30 unknowns), `sinc`,
   `dbToLin`, `rk4Step(f, x, t, h)` (array state), `pairsToSeries`.
 - `core/rng.js` — `mulberry32(seed)`, `gaussFrom(rng)`. NEVER `Math.random()`.
-- `core/laws.js` — canonical sampling laws with exact moments.
-- `core/codes.js` — Hamming(7,4), repetition×3, `codewordTable`,
-  `enumerateHard`, `berHardExact` (exact hard-decision BER by enumeration).
-- `core/modulation.js` — unit-energy constellations, `constellationMap`
-  (Gray/natural), `serTheory`, `berTheoryGray`.
+- `core/dsp.js` — `tone`, `magSpectrum`, `spectrumComplex`, `dbAmpAll`,
+  `peakNear`, `linspace`, `timeAxis`, `freqAxis`, `noiseSigma`.
+- `core/linalg.js` — `matvec`, `jacobiSym`, `solveLinearSystem`,
+  `normalEquations`, `ridgeSolve`, `svd`, `lowRank`.
+- SUBJECT-OWNED science lives in that subject's `_lib`, not in core:
+  `stats/_lib/laws.js` (canonical sampling laws with exact moments),
+  `comm/_lib/codes.js` (Hamming(7,4), repetition×3, `berHardExact`),
+  `comm/_lib/modulation.js` (unit-energy constellations, `serTheory`,
+  `berTheoryGray`), `control/_lib/{bode,lti}.js`, `spectral/_lib/subspace.js`.
 - `core/fields.js` — `float, int, log, bool, select, coeffs, readonly`.
   `log` is MANDATORY for anything spanning orders of magnitude.
   `coeffs` = numeric list param (URL `?den=1,2,1`). `visibleIf: {p: v}`

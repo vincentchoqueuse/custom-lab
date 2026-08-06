@@ -953,7 +953,10 @@ export const checks = [
 │   │   ├── numeric.js            # shared pure math (normalPdf, erf, quantiles,
 │   │   │                         #   Student t, trapz, small linear solver) —
 │   │   │                         #   importable from compute.js and check.js
-│   │   ├── laws.js               # canonical sampling laws (draw + exact moments)
+│   │   ├── dsp.js                # shared DSP idiom (tone, spectra, dB, peakNear)
+│   │   ├── linalg.js             # matvec, eigen (jacobiSym), solve, ridge, svd
+│   │   ├── filters.js            # shared digital-filter primitives
+│   │   ├── palette.svelte.js     # data-mark palette preference (remaps the 5 hexes)
 │   │   ├── prefs.js              # cosmetic localStorage prefs (single owner)
 │   │   ├── actions.js            # core action registry
 │   │   ├── observables.js        # type inference + meta
