@@ -126,6 +126,28 @@ export function decodeQuery(query, manifest) {
   return out;
 }
 
+/**
+ * Rewrite a hash's query: keys set to a value are added or replaced, keys set
+ * to null are dropped; the path and every other parameter survive untouched.
+ *
+ * The embed chip (leave the frame) and the embed mint (strike one) both
+ * reshape the CURRENT hash this way. Each first did it with a regex that
+ * silently depended on where the encoder happened to put the parameter —
+ * correct by construction today, wrong the day the encoder is reordered. The
+ * rewrite belongs to the module that owns the state↔URL contract.
+ */
+export function patchHashQuery(hash, patch) {
+  const { path, query } = parseHash(hash);
+  for (const [k, v] of Object.entries(patch)) {
+    if (v === null) delete query[k];
+    else query[k] = String(v);
+  }
+  const q = Object.entries(query)
+    .map(([k, v]) => (v === '' ? k : `${k}=${v}`))
+    .join('&');
+  return `#/${path}${q ? '?' + q : ''}`;
+}
+
 /** Trim float noise (0.30000000000000004 → 0.3) while staying exact enough. */
 function formatParam(v) {
   if (Array.isArray(v)) return v.map(formatParam).join(',');

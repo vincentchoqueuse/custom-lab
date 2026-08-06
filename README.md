@@ -54,7 +54,8 @@ activity or any HTML document — add `embed=1` to its URL:
 
 ```html
 <iframe src="https://vincentchoqueuse.github.io/custom-lab/#/spectral/subspace?df=0.5&embed=1"
-        loading="lazy" style="width:100%; height:620px; border:none"></iframe>
+        title="pupitra — High-resolution methods" loading="lazy"
+        style="width:100%; height:620px; border:none"></iframe>
 ```
 
 The frame keeps the tabs, the plot, the draw/freeze actions and the parameter

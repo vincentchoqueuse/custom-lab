@@ -18,7 +18,7 @@ import * as dsp from '../src/core/dsp.js';
 import * as la from '../src/core/linalg.js';
 import { fft, median, medianInPlace } from '../src/core/numeric.js';
 import { validateScene, validateSceneIds } from '../src/core/scenes.js';
-import { castParam, parseHash, decodeQuery, encodeHash } from '../src/core/router.js';
+import { castParam, parseHash, decodeQuery, encodeHash, patchHashQuery } from '../src/core/router.js';
 
 const ROOT = resolve(process.cwd(), 'src/experiments');
 
@@ -674,6 +674,34 @@ function checkRouter() {
     if (got !== undefined) bad.push(`'${str}' → ${JSON.stringify(got)}, expected fallback`);
   }
 
+  // EMBED rides the query like drawer, in both directions
+  {
+    const m2 = { params: {}, presets: [], views: [{ id: 'v' }] };
+    const dec = decodeQuery({ embed: '1' }, m2);
+    if (dec.embed !== true) bad.push(`decodeQuery embed=1 → ${JSON.stringify(dec.embed)}, expected true`);
+    const rej = decodeQuery({ embed: '2' }, m2);
+    if ('embed' in rej) bad.push(`decodeQuery embed=2 accepted — only '1' is the flag`);
+    const eh = encodeHash('a/b', {
+      params: {}, base: {}, paramSpecs: {}, view: 'v', defaultView: 'v', embed: true,
+    });
+    if (eh !== '#/a/b?embed=1') bad.push(`encodeHash embed → '${eh}'`);
+  }
+
+  // PATCH: add, replace, drop — path and neighbours untouched, position-blind.
+  // The embed chip and the embed mint both lean on this; a regex there once
+  // depended on where the encoder put the parameter.
+  for (const [hash, patch, want] of [
+    ['#/a/b?N=30', { embed: '1' }, '#/a/b?N=30&embed=1'],
+    ['#/a/b?embed=1&N=30', { embed: null }, '#/a/b?N=30'],
+    ['#/a/b?N=30&embed=1', { embed: null }, '#/a/b?N=30'],
+    ['#/a/b?embed=1', { embed: null }, '#/a/b'],
+    ['#/a/b', { embed: null }, '#/a/b'],
+    ['#/a/b?drawer=1&N=2', { embed: '1', drawer: null }, '#/a/b?N=2&embed=1'],
+  ]) {
+    const got = patchHashQuery(hash, patch);
+    if (got !== want) bad.push(`patch ${hash} ${JSON.stringify(patch)} → '${got}', expected '${want}'`);
+  }
+
   // NEVER THROWS: a truncated or mangled hash is a state, not a crash
   for (const h of ['', '#', '#/', '#/a/b?', '#/a/b?=&&x', '#/a/b?N=%E0%A4%A', '#///']) {
     try {
@@ -719,7 +747,7 @@ function checkRouter() {
   const stale = decodeQuery({ view: 'gone', preset: 'gone' }, manifest);
   if ('view' in stale || 'preset' in stale) bad.push('stale view/preset survived decode');
 
-  report('url', bad, 'strict casts, fallback on anything unparsable, parseHash never throws, encode∘decode = id');
+  report('url', bad, 'strict casts, fallback on anything unparsable, parseHash never throws, encode∘decode = id, embed and patch round-trip');
 }
 
 /**

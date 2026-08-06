@@ -12,9 +12,6 @@ export { format } from 'd3-format';
 
 import { format as d3format } from 'd3-format';
 
-/** SI-prefix preset (1200 → 1.2k, 0.000001 → 1µ). */
-export const formatSI = d3format('~s');
-
 /**
  * Human-readable value formatting for pills, statline and inspector.
  * @param {*} v

@@ -1,5 +1,6 @@
 <script>
   import { app, manifest, currentHash } from '../core/store.svelte.js';
+  import { patchHashQuery } from '../core/router.js';
   import { STR } from '../core/strings.js';
   import Tabs from './Tabs.svelte';
   import ActionBar from './ActionBar.svelte';
@@ -11,7 +12,7 @@
   // The embed's only way out: the SAME scene, in the full catalogue, in a new
   // tab. currentHash carries embed=1, so it is stripped here — the link's
   // whole point is to leave the frame.
-  const fullUrl = $derived(currentHash().replace(/[?&]embed=1/, ''));
+  const fullUrl = $derived(patchHashQuery(currentHash(), { embed: null }));
 </script>
 
 <div class="workspace">

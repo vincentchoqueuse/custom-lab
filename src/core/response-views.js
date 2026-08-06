@@ -45,9 +45,6 @@ export const GUIDE = Object.freeze({ color: GUIDE_COLOR, width: 1, dashed: true 
  *  the catalogue's hlines have this shape. */
 export const at = (value, label) => hline(() => value, { ...GUIDE, label });
 
-/** The same, but existing only for some parameters: the value is NaN
- *  elsewhere, and a non-finite guide is not drawn. */
-export const atIf = (fn, label) => hline(fn, { ...GUIDE, label });
 
 /* ------------------------------------------------------- frequency abscissa
    The three abscissae the catalogue actually uses. Passing one of these,

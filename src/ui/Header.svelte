@@ -9,6 +9,7 @@
   } from '../core/store.svelte.js';
   import { subjects } from '../core/registry.js';
   import { STR } from '../core/strings.js';
+  import { patchHashQuery } from '../core/router.js';
   import Icon from './Icon.svelte';
   import QrCode from './QrCode.svelte';
 
@@ -51,9 +52,14 @@
   // lazy-loading baked in, so the cheap path is the default path.
   let copiedEmbed = $state(false);
   async function copyEmbed() {
-    const h = currentHash();
-    const src = location.origin + location.pathname + h + (h.includes('?') ? '&' : '?') + 'embed=1';
-    const snippet = `<iframe src="${src}" loading="lazy" style="width:100%; height:620px; border:none"></iframe>`;
+    // drawer dropped from the mint: the frame renders no drawer, so the flag
+    // would be dead weight in every course page the snippet lands in
+    const h = patchHashQuery(currentHash(), { embed: '1', drawer: null });
+    const src = location.origin + location.pathname + h;
+    // title attribute: what a screen reader announces for the frame — we
+    // write the snippet colleagues will paste, so the accessible path is the
+    // default path, like the lazy attribute
+    const snippet = `<iframe src="${src}" title="pupitra — ${m?.title ?? 'interactive figure'}" loading="lazy" style="width:100%; height:620px; border:none"></iframe>`;
     try {
       await navigator.clipboard.writeText(snippet);
       copiedEmbed = true;
