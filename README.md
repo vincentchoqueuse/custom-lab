@@ -46,6 +46,26 @@ Pushes to `main` run the checks, build, and deploy to
 | `←` / `→` | Previous / next lecture scene |
 | `Esc` | Clear ghost, close popover / palette, exit fullscreen |
 
+## Embedding a figure in your own course page
+
+Any scene becomes a live, drivable figure inside a Moodle page, an LMS
+activity or any HTML document — add `embed=1` to its URL:
+
+```html
+<iframe src="https://vincentchoqueuse.github.io/custom-lab/#/spectral/subspace?df=0.5&embed=1"
+        loading="lazy" style="width:100%; height:620px; border:none"></iframe>
+```
+
+The frame keeps the tabs, the plot, the draw/freeze actions and the parameter
+pills — students adjust the figure inside your page — and drops the rest of
+the chrome. A small `expe34` chip opens the same scene in the full catalogue.
+
+Keep `loading="lazy"`: the browser then only instantiates the frames near the
+viewport. Measured with ten embeds on one page: the bundle is fetched once
+(~320 kB gzip, shared by every frame) and the ten live instruments settle in
+about 24 MB of JS heap — lighter than plotly.js loads before drawing its
+first figure.
+
 ## Writing an experiment
 
 One self-contained directory under `src/experiments/<subject>/<id>/`,
