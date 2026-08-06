@@ -4,7 +4,7 @@ import { view, line, scatter, vline, figure } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'frequency-estimation',
-  order: 4,
+  order: 5,
   random: true,
   title: 'Frequency estimation (least squares)',
   subtitle: 'A nonconvex criterion searched on a grid — the step sets cost against precision',

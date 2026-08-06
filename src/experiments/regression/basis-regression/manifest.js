@@ -4,7 +4,7 @@ import { view, line, scatter, vline, hline, figure } from '../../../core/views.j
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'basis-regression',
-  order: 3,
+  order: 4,
   random: true,
   title: 'Basis-function regression',
   subtitle: 'Linear does not mean straight — same least squares, new shapes',

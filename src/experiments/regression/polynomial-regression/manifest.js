@@ -4,7 +4,7 @@ import { view, line, scatter, stem, vline, hline, figure } from '../../../core/v
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'polynomial-regression',
-  order: 2,
+  order: 3,
   random: true,
   title: 'Polynomial regression',
   subtitle: 'Least squares and ridge: fitting, overfitting, regularization',
