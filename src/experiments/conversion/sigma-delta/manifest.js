@@ -31,8 +31,8 @@ export default {
     order: select('L', {
       description: 'order of the noise transfer function (1 − z⁻¹)^L',
       options: [
-        { value: 1, label: '1 — first order, 9 dB per octave' },
-        { value: 2, label: '2 — second order, 15 dB per octave' },
+        { value: 1, label: '1 — first order' },
+        { value: 2, label: '2 — second order' },
       ],
       default: 1,
     }),
@@ -64,7 +64,7 @@ export default {
   derived: {
     band: { label: 'band kept', calc: (p) => `Fs/${2 * p.osr}` },
     law: {
-      label: 'theory (20L + 10)·log10(OSR)',
+      label: 'theory',
       calc: (p) => `${((20 * p.order + 10) * Math.log10(p.osr)).toFixed(1)} dB above the quantizer`,
     },
   },

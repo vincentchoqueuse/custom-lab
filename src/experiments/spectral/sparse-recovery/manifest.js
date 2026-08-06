@@ -52,7 +52,7 @@ export default {
       description: 'number of lines actually present — and NOT given to the algorithm',
       options: [
         { value: 2, label: '2 (two close lines)' },
-        { value: 3, label: '3 (+ one line further off)' },
+        { value: 3, label: '3 — one further off' },
       ],
       default: 2,
     }),
@@ -103,25 +103,25 @@ export default {
     offGrid: select('grid fit', {
       description: 'where the lines fall relative to the search grid',
       options: [
-        { value: 0, label: 'on the grid — a line IS an atom' },
-        { value: 0.5, label: 'between two atoms — the worst case' },
+        { value: 0, label: 'on the grid' },
+        { value: 0.5, label: 'between two atoms' },
       ],
       default: 0,
     }),
     zoom: select('window', {
       description: 'frequency span of the spectrum views',
       options: [
-        { value: 'full', label: 'the whole band — where the atoms go' },
-        { value: 'lines', label: 'around the lines — where the resolution is' },
+        { value: 'full', label: 'the whole band' },
+        { value: 'lines', label: 'around the lines' },
       ],
       default: 'full',
     }),
     algo: select('algorithm', {
       description: 'how the sparsity is imposed',
       options: [
-        { value: 'omp', label: 'OMP — greedy, k atoms, refits each time' },
-        { value: 'mp', label: 'MP — greedy, k atoms, fits each once' },
-        { value: 'lasso', label: 'lasso — convex, penalty λ‖c‖₁' },
+        { value: 'omp', label: 'OMP — greedy, refits' },
+        { value: 'mp', label: 'MP — greedy, no refit' },
+        { value: 'lasso', label: 'lasso — convex, ℓ₁' },
       ],
       default: 'omp',
     }),

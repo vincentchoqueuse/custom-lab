@@ -18,7 +18,7 @@ export default {
     mod: select('modulation', {
       description: 'constellation sent on EACH of the two streams',
       options: [
-        { value: 'qpsk', label: 'QPSK — 16 hypotheses for ML' },
+        { value: 'qpsk', label: 'QPSK' },
         { value: '16qam', label: '16-QAM — 256 hypotheses' },
       ],
       default: 'qpsk',
@@ -43,10 +43,13 @@ export default {
       precision: 0,
     }),
     eq: select('equalizer', {
-      description: 'linear receiver drawn on the stream view — ML makes no cloud',
+      // the two formulas used to live in the option labels, where they made
+      // the pill a paragraph; the drawer is where a formula belongs
+      description:
+        'linear receiver drawn on the stream view — ZF is H⁻¹, MMSE is (HᴴH + N₀I)⁻¹Hᴴ. ML makes no cloud',
       options: [
-        { value: 'zf', label: 'ZF — H⁻¹, interference to exactly zero' },
-        { value: 'mmse', label: 'MMSE — (HᴴH + N₀I)⁻¹Hᴴ, unbiased for the decision' },
+        { value: 'zf', label: 'ZF' },
+        { value: 'mmse', label: 'MMSE' },
       ],
       default: 'zf',
     }),

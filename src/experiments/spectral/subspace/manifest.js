@@ -59,7 +59,7 @@ export default {
       description: 'number of lines actually present',
       options: [
         { value: 2, label: '2 (two close lines)' },
-        { value: 3, label: '3 (+ one line further off)' },
+        { value: 3, label: '3 — one further off' },
       ],
       default: 2,
     }),

@@ -48,10 +48,10 @@ export default {
     detector: select('method', {
       description: 'what the receiver is assumed to know',
       options: [
-        { value: 'matched', label: 'matched filter — signal, amplitude and σ known' },
+        { value: 'matched', label: 'matched filter' },
         { value: 'glrt', label: 'GLRT — amplitude unknown' },
-        { value: 'energy', label: 'energy detector — the signal itself unknown' },
-        { value: 'cfar', label: 'CFAR — σ unknown too, estimated as it goes' },
+        { value: 'energy', label: 'energy detector' },
+        { value: 'cfar', label: 'CFAR' },
       ],
       default: 'glrt',
     }),

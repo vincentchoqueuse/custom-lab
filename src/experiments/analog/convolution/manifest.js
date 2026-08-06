@@ -40,7 +40,7 @@ export default {
       description: 'the impulse response',
       options: [
         { value: 'gate', label: 'gate of width b' },
-        { value: 'exp', label: 'exponential e^(−t/b)/b — an RC' },
+        { value: 'exp', label: 'exponential e^(−t/b)/b' },
       ],
       default: 'gate',
     }),

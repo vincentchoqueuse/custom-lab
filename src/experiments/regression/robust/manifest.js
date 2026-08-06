@@ -64,17 +64,17 @@ export default {
     pattern: select('structure', {
       description: 'whether the contaminated points agree with each other',
       options: [
-        { value: 'scatter', label: 'scattered — each one its own size' },
-        { value: 'block', label: 'all pushed together — a second line' },
+        { value: 'scatter', label: 'scattered' },
+        { value: 'block', label: 'pushed together' },
       ],
       default: 'scatter',
     }),
     method: select('method', {
       description: 'what replaces the square',
       options: [
-        { value: 'huber', label: 'Huber — quadratic near zero, linear far out' },
-        { value: 'l1', label: 'L1 — every residual at its absolute value' },
-        { value: 'ransac', label: 'RANSAC — outside the band, it stops counting' },
+        { value: 'huber', label: 'Huber' },
+        { value: 'l1', label: 'L1' },
+        { value: 'ransac', label: 'RANSAC' },
       ],
       default: 'huber',
     }),

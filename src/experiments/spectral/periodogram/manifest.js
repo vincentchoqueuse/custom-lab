@@ -15,7 +15,7 @@ export default {
       description: 'power spectral density estimator',
       options: [
         { value: 'raw', label: 'raw periodogram' },
-        { value: 'bartlett', label: 'Bartlett — disjoint segments' },
+        { value: 'bartlett', label: 'Bartlett' },
         { value: 'welch', label: 'Welch — 50 % overlap' },
       ],
       default: 'raw',

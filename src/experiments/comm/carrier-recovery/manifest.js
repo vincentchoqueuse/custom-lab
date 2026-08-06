@@ -33,7 +33,7 @@ export default {
     mod: select('modulation', {
       description: 'M-PSK constellation — M sets the ambiguity',
       options: [
-        { value: 'bpsk', label: 'BPSK — 2 points, 180° ambiguity' },
+        { value: 'bpsk', label: 'BPSK' },
         { value: 'qpsk', label: 'QPSK — 4 points, 90°' },
         { value: '8psk', label: '8-PSK — 8 points, 45°' },
       ],
@@ -69,9 +69,9 @@ export default {
     algo: select('method', {
       description: 'how the phase is recovered',
       options: [
-        { value: 'costas', label: 'Costas — feedback, blind to the data' },
-        { value: 'vv', label: 'Viterbi & Viterbi — feedforward, per block' },
-        { value: 'dd', label: 'decision-directed — feedback, uses the decisions' },
+        { value: 'costas', label: 'Costas' },
+        { value: 'vv', label: 'Viterbi & Viterbi' },
+        { value: 'dd', label: 'decision-directed' },
       ],
       default: 'costas',
     }),
@@ -95,8 +95,8 @@ export default {
     order: select('loop order', {
       description: 'how many integrators the loop filter has',
       options: [
-        { value: 1, label: '1 — cannot track a frequency offset' },
-        { value: 2, label: '2 — tracks it with no static error' },
+        { value: 1, label: '1 — no frequency track' },
+        { value: 2, label: '2 — no static error' },
       ],
       default: 2,
       visibleIf: { algo: ['costas', 'dd'] },

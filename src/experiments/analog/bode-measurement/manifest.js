@@ -15,7 +15,7 @@ export default {
     system: select('system', {
       description: 'circuit under test',
       options: [
-        { value: 'rc', label: 'RC low-pass (first order)' },
+        { value: 'rc', label: 'RC low-pass' },
         { value: 'order2', label: 'resonant (second order)' },
       ],
       default: 'rc',

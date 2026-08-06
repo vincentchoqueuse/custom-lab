@@ -13,7 +13,7 @@ export default {
     fn: select('function', {
       description: 'landscape to minimize',
       options: [
-        { value: 'quad', label: 'quadratic with conditioning κ' },
+        { value: 'quad', label: 'quadratic' },
         { value: 'rosenbrock', label: 'Rosenbrock (the banana)' },
       ],
       default: 'quad',

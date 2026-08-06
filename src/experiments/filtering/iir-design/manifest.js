@@ -14,8 +14,8 @@ export default {
     method: select('method', {
       description: 'discretization of the analog prototype (Fs = 8 kHz)',
       options: [
-        { value: 'bilinear', label: 'bilinear with pre-warping' },
-        { value: 'naive', label: 'bilinear without pre-warping' },
+        { value: 'bilinear', label: 'bilinear, pre-warped' },
+        { value: 'naive', label: 'bilinear, raw' },
         { value: 'impulse', label: 'impulse invariance' },
       ],
       default: 'bilinear',

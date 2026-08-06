@@ -14,7 +14,7 @@ export default {
       description: 'continuous signal being sampled',
       options: [
         { value: 'sine', label: 'sinusoid' },
-        { value: 'square', label: 'square wave (rich in harmonics)' },
+        { value: 'square', label: 'square wave' },
       ],
       default: 'sine',
     }),

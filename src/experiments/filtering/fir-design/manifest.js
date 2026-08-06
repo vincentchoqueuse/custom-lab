@@ -30,7 +30,7 @@ export default {
     win: select('window', {
       description: 'window applied to the truncation',
       options: [
-        { value: 'rect', label: 'rectangular (raw truncation)' },
+        { value: 'rect', label: 'rectangular' },
         { value: 'hann', label: 'Hann' },
         { value: 'hamming', label: 'Hamming' },
         { value: 'blackman', label: 'Blackman' },

@@ -13,8 +13,8 @@ export default {
     system: select('system', {
       description: 'differential equation integrated',
       options: [
-        { value: 'pendulum', label: 'nonlinear pendulum (θ″ = −sin θ)' },
-        { value: 'linear', label: 'damped second order (m=0.2, ω₀=2)' },
+        { value: 'pendulum', label: 'nonlinear pendulum' },
+        { value: 'linear', label: 'damped second order' },
       ],
       default: 'pendulum',
     }),

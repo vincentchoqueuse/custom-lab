@@ -53,7 +53,7 @@ famously coincide.`,
     mapping: select('mapping', {
       description: 'how the bits are numbered onto the symbols',
       options: [
-        { value: 'gray', label: 'Gray — neighbours differ by 1 bit' },
+        { value: 'gray', label: 'Gray' },
         { value: 'natural', label: 'natural binary' },
       ],
       default: 'gray',

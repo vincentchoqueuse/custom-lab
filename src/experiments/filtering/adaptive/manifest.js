@@ -14,9 +14,9 @@ export default {
     algo: select('algorithm', {
       description: 'adaptive rule updating the coefficients',
       options: [
-        { value: 'lms', label: 'LMS — stochastic gradient' },
+        { value: 'lms', label: 'LMS' },
         { value: 'nlms', label: 'NLMS — normalized step' },
-        { value: 'rls', label: 'RLS — recursive least squares' },
+        { value: 'rls', label: 'RLS' },
       ],
       default: 'lms',
     }),
@@ -40,7 +40,7 @@ export default {
     L: select('L', {
       description: 'filter length (and length of the system to identify)',
       options: [
-        { value: 2, label: '2 (the weight plane is then exact)' },
+        { value: 2, label: '2 — exact weight plane' },
         { value: 4, label: '4' },
         { value: 8, label: '8' },
         { value: 16, label: '16' },

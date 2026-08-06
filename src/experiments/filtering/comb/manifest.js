@@ -14,8 +14,8 @@ export default {
     structure: select('structure', {
       description: 'simple echo (FIR) or recursive (IIR)',
       options: [
-        { value: 'ff', label: 'simple echo: y = x + g·x[n−D]' },
-        { value: 'fb', label: 'recursive echo: y = x + g·y[n−D]' },
+        { value: 'ff', label: 'simple echo (FIR)' },
+        { value: 'fb', label: 'recursive echo (IIR)' },
       ],
       default: 'fb',
     }),

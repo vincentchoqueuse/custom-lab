@@ -15,8 +15,8 @@ export default {
     dataset: select('dataset', {
       description: 'dataset analysed',
       options: [
-        { value: 'iris', label: 'Fisher iris (150 flowers, cm)' },
-        { value: 'penguins', label: 'Palmer penguins (342, mm and g)' },
+        { value: 'iris', label: 'Fisher iris' },
+        { value: 'penguins', label: 'Palmer penguins' },
       ],
       default: 'iris',
     }),

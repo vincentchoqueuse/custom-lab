@@ -16,7 +16,7 @@ export default {
         { value: 'chirp', label: 'linear chirp' },
         { value: 'tones', label: 'two close tones' },
         { value: 'am', label: 'AM (beat)' },
-        { value: 'fm', label: 'chirp + frequency-modulated sinusoid' },
+        { value: 'fm', label: 'chirp + FM sinusoid' },
       ],
       default: 'chirp',
     }),
