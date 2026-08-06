@@ -5,7 +5,7 @@
 // science without reading indices. Writing
 //
 //     const x = tone(N, f0, { fs: FS });
-//     const y = addNoise(x, noiseSigma(0.5, snrDb), gauss);
+//     const y = Float64Array.from(x, (v) => v + noiseSigma(0.5, snrDb) * gauss());
 //     const S = dbAmp(magSpectrum(y, { nfft: NFFT, window: 'hann' }));
 //
 // says exactly what the line does; the three equivalent loops say it too, but
@@ -80,28 +80,11 @@ export function noiseSigma(signalPower, snrDb) {
   return Math.sqrt(signalPower / 10 ** (snrDb / 10));
 }
 
-/** x + σ·g, in a new array. `gauss` comes from core/rng.js. */
-export function addNoise(x, sigma, gauss) {
-  const y = new Float64Array(x.length);
-  for (let i = 0; i < x.length; i++) y[i] = x[i] + sigma * gauss();
-  return y;
-}
-
 /** Mean power (1/N)·Σx². */
 export function power(x) {
   let s = 0;
   for (let i = 0; i < x.length; i++) s += x[i] * x[i];
   return s / x.length;
-}
-
-/** a divided by its absolute maximum — the relative plot of a spectrum. */
-export function normalizeMax(a) {
-  let m = 0;
-  for (let i = 0; i < a.length; i++) m = Math.max(m, Math.abs(a[i]));
-  const out = new Float64Array(a.length);
-  const s = m > 0 ? 1 / m : 1;
-  for (let i = 0; i < a.length; i++) out[i] = a[i] * s;
-  return out;
 }
 
 /* ------------------------------------------------------------ transform -- */

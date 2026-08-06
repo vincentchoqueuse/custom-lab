@@ -40,6 +40,25 @@ const red = (s) => `\x1b[31m${s}\x1b[0m`;
 let pass = 0;
 let fail = 0;
 
+/**
+ * One catalogue check, reported. Every catalogue check ends the same way — a
+ * section label, then either the list of offences or the one-line summary of
+ * what was proved — and that ending was pasted twelve times, drifting a little
+ * each time. Callers push COMPLETE sentences into `bad`; `cap` bounds how many
+ * are shown when a broken sweep would otherwise print hundreds.
+ */
+function report(section, bad, ok, { cap = Infinity } = {}) {
+  console.log(`  ${dim(section)}`);
+  if (bad.length) {
+    for (const b of bad.slice(0, cap)) console.log(`    ${red('✗')} ${b}`);
+    if (bad.length > cap) console.log(`    ${dim(`… and ${bad.length - cap} more`)}`);
+    fail++;
+  } else {
+    console.log(`    ${green('✓')} ${ok}`);
+    pass++;
+  }
+}
+
 /* ------------------------------------------------------------- catalogue --
    The vocabulary and the scene references, replayed exactly as the registry
    does it — but outside Vite, so `npm run check` catches them too. */
@@ -61,19 +80,12 @@ function checkLayering() {
       else if (e.name.endsWith('.js') || e.name.endsWith('.svelte')) {
         const src = readFileSync(p, 'utf8');
         for (const m of src.matchAll(/from\s+'([^']+)'/g))
-          if (/experiments\//.test(m[1])) bad.push(`${p} → ${m[1]}`);
+          if (/experiments\//.test(m[1])) bad.push(`core imports an experiment: ${p} → ${m[1]}`);
       }
     }
   };
   walk(resolve(process.cwd(), 'src/core'));
-  console.log(`  ${dim('layering')}`);
-  if (bad.length) {
-    for (const b of bad) console.log(`    ${red('✗')} core imports an experiment: ${b}`);
-    fail++;
-  } else {
-    console.log(`    ${green('✓')} no file of core/ imports experiments/  ${dim('(principle 4)')}`);
-    pass++;
-  }
+  report('layering', bad, `no file of core/ imports experiments/  ${dim('(principle 4)')}`);
 }
 
 /**
@@ -94,19 +106,10 @@ function checkSourceLinks() {
       if (!exp.isDirectory() || exp.name.startsWith('_')) continue;
       n++;
       if (!existsSync(join(EXP, subject.name, exp.name, 'compute.js')))
-        bad.push(`${subject.name}/${exp.name}`);
+        bad.push(`no compute.js to link to: ${subject.name}/${exp.name}`);
     }
   }
-  console.log(`  ${dim('source links')}`);
-  if (bad.length) {
-    for (const b of bad) console.log(`    ${red('✗')} no compute.js to link to: ${b}`);
-    fail++;
-  } else {
-    console.log(
-      `    ${green('✓')} every experiment deep-links a compute.js  ${dim(`(${n} experiments)`)}`
-    );
-    pass++;
-  }
+  report('source links', bad, `every experiment deep-links a compute.js  ${dim(`(${n} experiments)`)}`);
 }
 
 /**
@@ -164,14 +167,7 @@ function checkRandomness() {
         bad.push(`${sub.name}/${exp.name}: uses core/rng.js but does not declare random: true`);
     }
   }
-  console.log(`  ${dim('randomness')}`);
-  if (bad.length) {
-    for (const b of bad) console.log(`    ${red('✗')} ${b}`);
-    fail++;
-  } else {
-    console.log(`    ${green('✓')} random: true matches the generator in all ${n} experiments`);
-    pass++;
-  }
+  report('randomness', bad, `random: true matches the generator in all ${n} experiments`);
 }
 
 /**
@@ -203,18 +199,10 @@ function checkCssTokens() {
     }
   };
   walk(resolve(process.cwd(), 'src'));
-  const bad = [...used].filter(([name]) => !declared.has(name));
-  console.log(`  ${dim('tokens')}`);
-  if (bad.length) {
-    for (const [name, where] of bad)
-      console.log(`    ${red('✗')} ${where}: var(${name}) is not declared anywhere`);
-    fail++;
-  } else {
-    console.log(
-      `    ${green('✓')} all ${used.size} CSS custom properties used are declared`
-    );
-    pass++;
-  }
+  const bad = [...used]
+    .filter(([name]) => !declared.has(name))
+    .map(([name, where]) => `${where}: var(${name}) is not declared anywhere`);
+  report('tokens', bad, `all ${used.size} CSS custom properties used are declared`);
 }
 
 /**
@@ -243,15 +231,11 @@ function checkAxesMargin() {
     }
   };
   walk(resolve(process.cwd(), 'src'));
-  console.log(`  ${dim('canvas')}`);
-  if (bad.length) {
-    for (const b of [...new Set(bad)])
-      console.log(`    ${red('✗')} ${b}: <Axes> without m={…} — its axis names clip on the phone canvas`);
-    fail++;
-  } else {
-    console.log(`    ${green('✓')} every <Axes> is placed from the margin it was drawn with`);
-    pass++;
-  }
+  report(
+    'canvas',
+    [...new Set(bad)].map((b) => `${b}: <Axes> without m={…} — its axis names clip on the phone canvas`),
+    'every <Axes> is placed from the margin it was drawn with'
+  );
 }
 
 /**
@@ -345,16 +329,7 @@ function checkDsp() {
   const g = dsp.linspace(-3, 7, 101);
   if (g[0] !== -3 || g[100] !== 7) bad.push(`linspace : [${g[0]}, ${g[100]}]`);
 
-  console.log(`  ${dim('dsp')}`);
-  if (bad.length) {
-    for (const b of bad) console.log(`    ${red('✗')} ${b}`);
-    fail++;
-  } else {
-    console.log(
-      `    ${green('✓')} ifft∘fft, dbAmp = dbPower∘square, line on bin, Nyquist included, σ(SNR), linspace`
-    );
-    pass++;
-  }
+  report('dsp', bad, 'ifft∘fft, dbAmp = dbPower∘square, line on bin, Nyquist included, σ(SNR), linspace');
 }
 
 /**
@@ -487,18 +462,12 @@ function checkLanguage(strings, names) {
     if (!NAME_WORDS.has(name.toLowerCase()))
       bad.push(`${where}: param name '${name}' is a word but not one the catalogue uses`);
   }
-  console.log(`  ${dim('language')}`);
-  if (bad.length) {
-    for (const b of bad.slice(0, 10)) console.log(`    ${red('✗')} ${b}`);
-    if (bad.length > 10) console.log(`    ${dim(`… and ${bad.length - 10} more`)}`);
-    fail++;
-  } else {
-    console.log(
-      `    ${green('✓')} no French in ${strings.length} visible strings, ` +
-        `every word-shaped param name is on the list, no retired symbol`
-    );
-    pass++;
-  }
+  report(
+    'language',
+    bad,
+    `no French in ${strings.length} visible strings, every word-shaped param name is on the list, no retired symbol`,
+    { cap: 10 }
+  );
 }
 
 /**
@@ -538,16 +507,7 @@ function checkMedian() {
   median(src);
   if (String(src) !== '5,1,4,2,3') bad.push(`median mutated its input: ${src}`);
 
-  console.log(`  ${dim('median')}`);
-  if (bad.length) {
-    for (const b of bad.slice(0, 6)) console.log(`    ${red('✗')} ${b}`);
-    fail++;
-  } else {
-    console.log(
-      `    ${green('✓')} select = sort, bit for bit, on 6 shapes × n = 1…65  ${dim('(390 cases)')}`
-    );
-    pass++;
-  }
+  report('median', bad, `select = sort, bit for bit, on 6 shapes × n = 1…65  ${dim('(390 cases)')}`, { cap: 6 });
 }
 
 /**
@@ -641,16 +601,7 @@ function checkLinalg() {
   const again = la.ridgeSolve(AtA, Aty, 0);
   if (worst(3, (i) => again[i] - w0[i]) > 0) bad.push('ridgeSolve modifies its inputs');
 
-  console.log(`  ${dim('linalg')}`);
-  if (bad.length) {
-    for (const b2 of bad) console.log(`    ${red('✗')} ${b2}`);
-    fail++;
-  } else {
-    console.log(
-      `    ${green('✓')} matvec, xᵀRx = Σλ⟨v,x⟩², VᵀV = I, Rv = λv, solve(A,Ax) = x, ridge exact and continuous at 0`
-    );
-    pass++;
-  }
+  report('linalg', bad, 'matvec, xᵀRx = Σλ⟨v,x⟩², VᵀV = I, Rv = λv, solve(A,Ax) = x, ridge exact and continuous at 0');
 }
 
 /**
@@ -765,16 +716,7 @@ function checkRouter() {
   const stale = decodeQuery({ view: 'gone', preset: 'gone' }, manifest);
   if ('view' in stale || 'preset' in stale) bad.push('stale view/preset survived decode');
 
-  console.log(`  ${dim('url')}`);
-  if (bad.length) {
-    for (const b of bad) console.log(`    ${red('✗')} ${b}`);
-    fail++;
-  } else {
-    console.log(
-      `    ${green('✓')} strict casts, fallback on anything unparsable, parseHash never throws, encode∘decode = id`
-    );
-    pass++;
-  }
+  report('url', bad, 'strict casts, fallback on anything unparsable, parseHash never throws, encode∘decode = id');
 }
 
 /**
@@ -811,18 +753,12 @@ function checkOrdering(subjectRanks, expRanks) {
   scan('', subjectRanks);
   for (const [sub, entries] of expRanks) scan(`${sub}/`, entries);
 
-  console.log(`  ${dim('order')}`);
-  if (bad.length) {
-    for (const b of bad) console.log(`    ${red('✗')} ${b}`);
-    fail++;
-  } else {
-    const n = [...expRanks.values()].reduce((s, e) => s + e.length, 0);
-    console.log(
-      `    ${green('✓')} every declared rank is unique inside its subject  ` +
-        `${dim(`(${subjectRanks.length} subjects, ${n} experiments)`)}`
-    );
-    pass++;
-  }
+  const n = [...expRanks.values()].reduce((s, e) => s + e.length, 0);
+  report(
+    'order',
+    bad,
+    `every declared rank is unique inside its subject  ${dim(`(${subjectRanks.length} subjects, ${n} experiments)`)}`
+  );
 }
 
 async function checkCatalogue() {
@@ -953,14 +889,7 @@ async function checkCatalogue() {
     console.log(`    ${green('✓')} standard figures: id, title and order  ${dim(`(${nViews} views)`)}`);
   checkOrdering(subjectRanks, expRanks);
   checkLanguage(visible.filter(([, s]) => s), paramNames);
-  console.log(`  ${dim('axes')}`);
-  if (axisBad.length) {
-    for (const b of axisBad) console.log(`    ${red('✗')} ${b}`);
-    fail++;
-  } else {
-    console.log(`    ${green('✓')} every declarative axis carries a name`);
-    pass++;
-  }
+  report('axes', axisBad, 'every declarative axis carries a name');
   console.log(`  ${dim('scenes')}`);
   if (scenesOk)
     console.log(
