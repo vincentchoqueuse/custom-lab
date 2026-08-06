@@ -89,15 +89,17 @@ function checkLayering() {
 }
 
 /**
- * The info panel deep-links every experiment's compute.js on GitHub, built
- * from the subject and the id rather than from anything the manifest declares
- * — so the link is right exactly when the four-file contract is kept. A file
- * renamed or a science split across two modules would leave a button that
- * silently 404s, which is the one failure mode a reader cannot diagnose: the
- * page loads, the figure is fine, and only the link is a lie.
+ * The info panel deep-links every experiment's DIRECTORY on GitHub, built from
+ * the subject and the id rather than from anything the manifest declares — and
+ * its tooltip promises the four-file contract by name: compute, scenes,
+ * manifest, checks. So all four are required here, not just the science: a
+ * link that under-delivers on its own tooltip is the one breakage a reader
+ * cannot diagnose — the page loads, the figure is fine, and only the promise
+ * is a lie.
  */
 function checkSourceLinks() {
   const EXP = resolve(process.cwd(), 'src/experiments');
+  const FILES = ['compute.js', 'scenes.js', 'manifest.js', 'check.js'];
   const bad = [];
   let n = 0;
   for (const subject of readdirSync(EXP, { withFileTypes: true })) {
@@ -105,11 +107,12 @@ function checkSourceLinks() {
     for (const exp of readdirSync(join(EXP, subject.name), { withFileTypes: true })) {
       if (!exp.isDirectory() || exp.name.startsWith('_')) continue;
       n++;
-      if (!existsSync(join(EXP, subject.name, exp.name, 'compute.js')))
-        bad.push(`no compute.js to link to: ${subject.name}/${exp.name}`);
+      for (const f of FILES)
+        if (!existsSync(join(EXP, subject.name, exp.name, f)))
+          bad.push(`${subject.name}/${exp.name}: the source link promises ${f} and it is missing`);
     }
   }
-  report('source links', bad, `every experiment deep-links a compute.js  ${dim(`(${n} experiments)`)}`);
+  report('source links', bad, `every experiment carries its four files  ${dim(`(${n} experiments)`)}`);
 }
 
 /**

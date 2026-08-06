@@ -67,18 +67,20 @@
     close();
   }
 
-  // THE SCIENCE, one click from the description of it. The sidebar's GitHub
-  // button points at the repository, which answers "what is this project"; this
-  // one points at the compute.js of the experiment on screen, which answers the
-  // question a reader actually has in front of a figure — "how is that
-  // computed". Deep-linked to the deployed branch, because a figure and the
-  // code that produced it must be the same version.
+  // THIS EXPERIMENT ON GITHUB, one click from the description of it. The
+  // sidebar's GitHub button answers "what is this project"; this one opens the
+  // experiment's DIRECTORY — compute.js for the colleague verifying a formula,
+  // scenes.js for the one adapting the lecture script to their own course, and
+  // the four-file listing itself for anyone wondering what contributing costs:
+  // that listing IS the architecture's sales pitch, and GitHub renders it
+  // better than any panel here could. Deep-linked to the deployed branch,
+  // because a figure and the code that produced it must be the same version.
   //
   // It lives in the footer rather than in the view bar on purpose: reading the
   // source is not a lecture gesture, and the view bar is projected. Beside the
   // author and the licence is where a reader already looks for provenance.
   const sourceUrl = $derived(
-    m ? `${STR.REPO_URL}/blob/${STR.REPO_BRANCH}/src/experiments/${m.subject}/${m.id}/compute.js` : null
+    m ? `${STR.REPO_URL}/tree/${STR.REPO_BRANCH}/src/experiments/${m.subject}/${m.id}` : null
   );
 </script>
 
@@ -179,10 +181,10 @@
           href={sourceUrl}
           target="_blank"
           rel="noopener"
-          title={STR.SOURCE_COMPUTE_TITLE}
+          title={STR.SOURCE_DIR_TITLE}
         >
-          <Icon name="file-code" size={14} />
-          <span class="mono">{STR.SOURCE_COMPUTE}</span>
+          <Icon name="folder-open" size={14} />
+          <span class="mono">{STR.SOURCE_DIR}</span>
         </a>
       {/if}
       <span class="licence">{CATALOGUE.licence}</span>

@@ -9,12 +9,14 @@ export const STR = {
   // code that produced the figure on screen, not at whatever is being written
   // next.
   REPO_BRANCH: 'main',
-  // compute.js and no other file. A reader who asks "how is this computed"
-  // wants the science, not the manifest that names the sliders — and the whole
-  // point of the layer separation is that compute.js is the ONLY file where an
-  // answer to that question can be.
-  SOURCE_COMPUTE: 'compute.js',
-  SOURCE_COMPUTE_TITLE: 'The science behind this figure, on GitHub',
+  // The experiment's DIRECTORY, not one file. Two readers arrive here with two
+  // questions: "how is that computed" (the colleague verifying a formula) and
+  // "how would I build one of these" (the colleague tempted to contribute).
+  // The directory answers both at once, because it IS the pitch: compute,
+  // scenes, manifest, checks — four small files, and the core untouched.
+  SOURCE_DIR: 'compute · scenes',
+  SOURCE_DIR_TITLE:
+    'This experiment on GitHub — compute.js, scenes.js, manifest.js, check.js: four files, no core changes',
   SEARCH: 'Search experiments',
   SEARCH_PLACEHOLDER: 'Type to search experiments…',
   NO_RESULTS: 'No matching experiment',

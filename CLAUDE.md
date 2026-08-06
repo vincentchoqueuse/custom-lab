@@ -36,11 +36,12 @@ taste:
 - **Scene notes are Teacher Mode only, and ABSENT from the DOM otherwise.**
   They are answer keys as much as they are gestures: "the wrong answer to
   expect is…" is exactly what the room must reach on its own.
-- **The info panel's `compute.js` link is provenance, not a handout.** It
-  answers "how is that computed" for a colleague verifying a formula, or for a
-  reader after the fact. It is also, always, the correction of whatever
-  exercise comes next — which is why it sits one click inside a dialog and
-  never on the view bar that gets projected.
+- **The info panel's source link is provenance, not a handout.** It opens the
+  experiment's directory on GitHub — compute.js for a colleague verifying a
+  formula, scenes.js for one adapting the script to their own lecture. It is
+  also, always, the correction of whatever exercise comes next — which is why
+  it sits one click inside a dialog and never on the view bar that gets
+  projected.
 
 It is also why the science stays in JavaScript. Python belongs to the students,
 and a Pyodide compute would put their work on the wall — quite apart from
@@ -274,16 +275,17 @@ the browser Fullscreen API (native `Esc` exit).
   prose, the LECTURE OUTLINE (every scene title, the current one marked, each a
   button that plays it), the current scene's notes when Teacher Mode is on, the
   tags, and the attribution. The footer's provenance line ends with a deep link
-  to **this experiment's `compute.js` on GitHub**, on the deployed branch: the
-  sidebar's repository button answers "what is this project", and in front of a
-  figure the question is "how is that computed" — which, by the layer
-  separation, has exactly one file for an answer. It is in the footer and not
-  in the view bar because reading the source is not a lecture gesture and the
-  view bar is projected. The link is built from the subject and the id rather
-  than from anything a manifest declares, so `npm run check` guards it: an
-  experiment with no `compute.js` to point at fails the catalogue checks, since
-  a button that silently 404s is the one breakage a reader cannot diagnose.
-  It replaced a banner that sat above the plot on
+  to **this experiment's directory on GitHub**, on the deployed branch: the
+  sidebar's repository button answers "what is this project"; this one answers
+  both "how is that computed" (compute.js) and "how would I build one" — the
+  four-file listing is the architecture's own sales pitch, and GitHub renders
+  it better than any panel could. It is in the footer and not in the view bar
+  because reading the source is not a lecture gesture and the view bar is
+  projected. The link is built from the subject and the id rather than from
+  anything a manifest declares, so `npm run check` guards it: an experiment
+  missing any of its four files fails the catalogue checks, since a link that
+  under-delivers on its own tooltip is the one breakage a reader cannot
+  diagnose. It replaced a banner that sat above the plot on
   every scene of every lecture: three lines of permanent height for text read
   once, and no room at all for a description of the experiment itself. A dialog
   does not contradict "never a modal for parameters" — that rule protects the
