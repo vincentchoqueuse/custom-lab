@@ -431,7 +431,13 @@ registry at load time):
   `_subject.js` carries the same key for the subjects themselves.
 - **`scenes.js` is auto-discovered** by the registry (same glob as manifests) and
   merged as `presets`. In a scene: `view` defaults to the first view, `drawer` to
-  `false`, `masked` to `[]`, `lock` to `false`. **Past two views the default
+  `false`, `masked` to `[]`, `lock` to `false`. **`visible` holds 2 to 4 pills,
+  and one is a load-time error**: a single pill is a slider, not a scene — the
+  room can turn it but cannot COMPARE, and comparison is what a demonstration
+  is for. A scene that honestly moves one dial still exposes the quantity the
+  room will suspect of doing the work, so that holding it still reads as a
+  choice. Past four the bar stops being legible from the back of a hall; the
+  drawer is for the rest. **Past two views the default
   stops applying**: a scene of an experiment with three or more views must SAY
   which one it opens on, and the registry refuses one that does not. The default
   is a convention for a main figure and its companion; on four tabs it means the
@@ -446,7 +452,9 @@ registry at load time):
   **Three separate semantic keys, never concatenated in one string**:
   `name` — the displayed symbol ('f', 'φ', 'N'; first positional argument, defaults
   to the param key); `description` — what it is ('frequency', 'phase'); `unit` —
-  'Hz', 'rad', 'dB'. Rendering: pills show `name = value unit`; the drawer shows
+  'Hz', 'rad', 'dB'. A `select` option's `label` renders VERBATIM in the pill and
+  is capped at **24 characters** at load time: the gloss belongs to
+  `description`, which the drawer and the tooltip show, or to the scene notes. Rendering: pills show `name = value unit`; the drawer shows
   the name with the description as secondary text; the description also feeds the
   tooltip. Every param has a `default` (no nullable fields: the URL contract and
   resetDefaults require it); every other key is optional.
