@@ -33,7 +33,12 @@ const F1 = 16; // Hz — bin 16, its harmonics at bins 32, 48, 64…
 const F2 = 21; // Hz — the second tone, for the intermodulation
 const N_PLOT = 256; // samples plotted (a quarter of a second)
 const DB_FLOOR = -90;
-const X_MAX = 4; // half-width of the transfer curve
+// Two, and not four. A nonlinearity does everything it has to say between −2
+// and 2 — the knee, the slope at the origin, the beginning of the saturation —
+// and past that a sigmoid is a flat line and a ReLU is a straight one, so the
+// wide frame spent half its width on nothing and squeezed the part that
+// teaches into the middle third.
+const X_MAX = 2; // half-width of the transfer curve
 
 /**
  * @param {{act: string, signal: string, gain: number, bias: number,

@@ -43,8 +43,10 @@ export default {
     }),
     bias: float('b', {
       description: 'bias before the activation',
-      min: -3,
-      max: 3,
+      // matched to the ±2 the transfer curve now spans: a bias that can push
+      // the knee out of the frame is a dial with an invisible half
+      min: -2,
+      max: 2,
       step: 0.1,
       default: 0,
       precision: 1,
