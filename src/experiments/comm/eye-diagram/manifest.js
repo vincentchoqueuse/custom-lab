@@ -4,7 +4,7 @@ import { view, line, histogram, scatter, vline, hline, figure } from '../../../c
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'eye-diagram',
-  order: 2,
+  order: 3,
   random: true,
   title: 'The eye diagram',
   subtitle: 'ISI, noise and sampling instant — the health of a link at a glance',
