@@ -167,8 +167,9 @@ and the chrome — Parameters, Draw, Presets, Search… — in English, like eve
 **Left sidebar (Open WebUI style).** Theme-aware neutral (`#f9f9f9` light /
 `#171717` dark), ~260 px, collapsible (`⌘B`), rounded items, soft gray hover,
 active item in neutral gray (never a color accent). Top button: "Search
-experiments" (`⌘K`). Tree: subjects (small muted sentence-case labels,
-ChatGPT-style, collapsible with a hover-only chevron) → experiments.
+experiments" (`⌘K`). Tree: subjects (small muted sentence-case labels
+behind a folder glyph — shut when folded, open when not — collapsible, with a
+hover-only ± on the right) → experiments, indented under their folder.
 Footer: light/dark theme toggle for the central area, the source link, settings,
 inspector. **Teacher Mode is not here** — its switch lives in the info panel, in
 the heading of the notes block it gates, which is the only place its state means

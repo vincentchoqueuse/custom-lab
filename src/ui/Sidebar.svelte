@@ -94,7 +94,15 @@
     <nav>
       {#each subjects as subject (subject.id)}
         <button class="subject-title" onclick={() => toggleSubject(subject.id)}>
-          <span>{subject.title}</span>
+          <span class="label">
+            <!-- the classic tree glyph: a shut folder when the subject is
+                 folded, an open one when it is not. It says the same thing as
+                 the +/− on the right, but it says it without a hover — which
+                 is what a listener scanning the sidebar from the back of the
+                 room actually gets. -->
+            <Icon name={collapsed[subject.id] ? 'folder' : 'folder-open'} size={14} stroke={1.8} />
+            {subject.title}
+          </span>
           <span class="chev">
             <Icon name={collapsed[subject.id] ? 'plus' : 'minus'} size={13} stroke={2.5} />
           </span>
