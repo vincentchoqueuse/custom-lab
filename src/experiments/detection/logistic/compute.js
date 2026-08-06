@@ -375,9 +375,11 @@ export function compute(params) {
   /* ---------- the path ---------------------------------------------------- */
   const it = Float64Array.from(path, (_, i) => i);
   const nllPath = Float64Array.from(path, (s) => s.nll);
-  // floored for a log axis: a converged NLL is positive here, but ‖w‖ starts at
-  // exactly 0 and a log scale has no room for it
-  const wPath = Float64Array.from(path, (s) => Math.max(s.wNorm, 1e-3));
+  // floored for a log axis: ‖w‖ starts at exactly 0 (β = 0) and a log scale has
+  // no room for it. The floor sits just under the smallest ‖w‖ a heavy penalty
+  // produces, so the artificial segment is one sliver at the bottom instead of
+  // three decades of empty panel.
+  const wPath = Float64Array.from(path, (s) => Math.max(s.wNorm, 0.05));
 
   /* ---------- is the training set separated by what was fitted? ----------- */
   let sep = true;
