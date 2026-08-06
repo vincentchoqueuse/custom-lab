@@ -70,7 +70,11 @@
       </button>
     {/if}
     <span class="crumb">
-      {subjectTitle} / <strong>{m?.title ?? ''}</strong>
+      {#if m}
+        {subjectTitle} / <strong>{m.title}</strong>
+      {:else}
+        <strong>{STR.CATALOGUE}</strong>
+      {/if}
     </span>
   </div>
 
@@ -118,8 +122,10 @@
       {/if}
     </div>
 
-    <button class="icon-btn" onclick={onpresent} title="{STR.PRESENTATION} (L)">
-      <Icon name="maximize" size={15} />
-    </button>
+    {#if m}
+      <button class="icon-btn" onclick={onpresent} title="{STR.PRESENTATION} (L)">
+        <Icon name="maximize" size={15} />
+      </button>
+    {/if}
   </div>
 </header>

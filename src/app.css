@@ -198,6 +198,126 @@ kbd {
   font-weight: 600;
   font-size: 14.5px;
   letter-spacing: 0.2px;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------- landing (#/ — the catalogue introducing itself) --------------- */
+
+.landing {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--background);
+}
+
+.landing-inner {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 44px 28px 56px;
+}
+
+.landing .brandline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing h1 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: 0.2px;
+}
+
+.landing .lede {
+  margin: 14px 0 0;
+  max-width: 62ch;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--foreground);
+}
+
+/* prose, not flex: flex would split the sentence into items and orphan the
+   half after the mono span onto its own line */
+.landing .verified {
+  margin: 12px 0 0;
+  max-width: 68ch;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted-fg);
+}
+
+.landing .verified :global(svg),
+.landing .verified svg {
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+
+.landing .verified a {
+  color: var(--foreground);
+}
+
+.landing .modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px 26px;
+  margin-top: 34px;
+}
+
+.landing .module {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.landing .module h2 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted-fg);
+}
+
+.landing .module h2 .count {
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing .module ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing .module a {
+  display: block;
+  padding: 5px 8px;
+  margin: 0 -8px;
+  border-radius: 7px;
+  color: var(--foreground);
+  font-size: 13.5px;
+  text-decoration: none;
+  transition: background var(--t);
+}
+
+.landing .module a:hover {
+  background: var(--accent);
+}
+
+.landing-foot {
+  margin-top: 34px;
+  font-size: 12.5px;
+  color: var(--muted-fg);
+  max-width: 70ch;
+}
+
+@media (max-width: 860px) {
+  .landing-inner {
+    padding: 26px 16px 40px;
+  }
 }
 
 .sidebar .side-toggle {

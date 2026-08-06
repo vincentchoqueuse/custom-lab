@@ -166,9 +166,6 @@ export function getExperiment(key) {
   return experimentMap.get(key) ?? null;
 }
 
-export function firstExperimentKey() {
-  return subjects[0]?.experiments[0]?.key ?? null;
-}
 
 /** All experiments, flat, in sidebar order (command palette). */
 export function allExperiments() {

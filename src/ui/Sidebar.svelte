@@ -82,7 +82,8 @@
 <aside class="sidebar" class:collapsed={!app.ui.sidebar}>
   {#if app.ui.sidebar}
     <div class="side-top">
-      <div class="brand"><AppIcon size={24} /> {STR.APP_NAME}</div>
+      <!-- the brand is the way home: it opens the catalogue page (#/) -->
+      <a class="brand" href="#/"><AppIcon size={24} /> {STR.APP_NAME}</a>
       <button class="side-toggle" onclick={toggleSidebar} title="{STR.COLLAPSE_SIDEBAR} (⌘B)">
         <Icon name="panel-left" size={16} />
       </button>

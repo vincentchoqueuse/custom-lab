@@ -2,7 +2,7 @@
 // The URL is the API: every state mutation goes through syncUrl (replaceState
 // while dragging, pushState on release / discrete changes).
 
-import { getExperiment, firstExperimentKey, defaultsFor } from './registry.js';
+import { getExperiment, defaultsFor } from './registry.js';
 import { parseHash, decodeQuery, encodeHash } from './router.js';
 import { coreActions } from './actions.js';
 import { writePref } from './prefs.js';
@@ -161,8 +161,23 @@ export function syncUrl(push = true) {
 function handleHash() {
   if (location.hash === lastWritten) return;
   const { path, query } = parseHash(location.hash);
-  const expKey = getExperiment(path) ? path : firstExperimentKey();
-  if (!expKey) return;
+  // THE LANDING PAGE. An empty path used to redirect to the first experiment,
+  // which hid the catalogue behind one statistics demo; an unknown path used
+  // to do the same, which sent a broken shared link somewhere arbitrary. Both
+  // now land on the catalogue itself — the honest fallback, since it lets the
+  // reader choose instead of choosing for them.
+  const expKey = getExperiment(path) ? path : null;
+  if (!expKey) {
+    app.expKey = null;
+    app.preset = null;
+    app.ui.info = false;
+    app.ghost = null;
+    app.ghostStats = null;
+    app.hidden = [];
+    app.notice = '';
+    app.result = { status: 'idle', observables: null, message: '' };
+    return;
+  }
   const m = getExperiment(expKey);
   const dec = decodeQuery(query, m);
   // Scene defaults to the first preset — the nominal lecture opening.

@@ -213,6 +213,14 @@ happened to land on a scene that had notes.
 LLM-model-picker style — one click applies the full scene. Right side: copyable URL
 chip, presentation mode button (`L`).
 
+**Landing page (`#/`).** The catalogue introducing itself: name, one-sentence
+identity with the experiment/module/scene counts (computed from the registry at
+runtime — nothing on the page can go stale), the check.js promise with a repo
+link, and the modules as cards in lecture order, every experiment a link. The
+single-letter shortcuts are inert here — there is no experiment for them to
+drive — and the header shows no presentation button; ⌘K and the sidebar work as
+everywhere.
+
 **Central area.** Teacher Mode banner (scene notes; never projected by default, never
 in the URL). Light-background PlotFrame (projector legibility), pure SVG rendering,
 statline of key observables, export. Minimal tabs when the experiment has several
@@ -687,6 +695,11 @@ unacceptable.
 ## State & URL
 
 Format: `#/{subject}/{experiment}?param1=…&view=…&drawer=0&preset=scene-2`
+- **`#/` is the catalogue's landing page** — the modules in lecture order, the
+  live counts (read from the registry, never written by hand), and the
+  verification promise. An UNKNOWN path lands there too: the honest fallback
+  for a broken shared link is the catalogue choosing nothing, not the first
+  experiment chosen arbitrarily. The sidebar brand links home.
 - Minimal serialization: only params ≠ default appear.
 - `router.js`: single source of truth for state↔URL (bidirectional, replaceState
   while dragging, pushState on release).

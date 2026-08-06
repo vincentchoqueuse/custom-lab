@@ -23,6 +23,7 @@
   import DrawerParams from './ui/DrawerParams.svelte';
   import CommandPalette from './ui/CommandPalette.svelte';
   import InfoPanel from './ui/InfoPanel.svelte';
+  import Landing from './ui/Landing.svelte';
   import Inspector from './ui/Inspector.svelte';
 
   const crossChecked = new Set();
@@ -137,8 +138,11 @@
       toggleSidebar();
       return;
     }
-    // single-letter shortcuts are inert while a text field has focus
+    // single-letter shortcuts are inert while a text field has focus — and on
+    // the landing page, where there is no experiment for them to drive
+    // (Escape still closes the palette).
     if (editing || mod || e.altKey) return;
+    if (!app.expKey && e.key !== 'Escape') return;
     switch (e.key) {
       case 'c':
       case 'C':
@@ -199,7 +203,11 @@
   <Sidebar />
   <div class="main">
     <Header onpresent={togglePresentation} />
-    <Workspace />
+    {#if app.expKey}
+      <Workspace />
+    {:else}
+      <Landing />
+    {/if}
   </div>
   <DrawerParams />
   {#if app.ui.palette}
