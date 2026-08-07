@@ -35,7 +35,8 @@ The abscissa is Eb/N₀ and not Es/N₀, which is the other thing worth insistin
 on. Comparing modulations at equal energy per SYMBOL flatters the dense ones —
 16-QAM carries four bits in the energy QPSK spends on two. Per BIT is the
 comparison an engineer can act on, and it is the axis on which BPSK and QPSK
-famously coincide.`,
+famously coincide — exactly, because QPSK is two orthogonal BPSKs sharing the
+energy of one.`,
 
   tags: ['constellation', 'AWGN', 'BER', 'SER', 'Gray', 'Eb/N0', 'mapping', 'decision'],
 

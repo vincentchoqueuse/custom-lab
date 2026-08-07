@@ -27,7 +27,15 @@ export default {
         All three share one property, and it is a theorem rather than a defect:
         the detector cannot tell one constellation point from another, so its
         characteristic has period 2π/M and the loop locks to any of M phases.
-        The answer to that is differential encoding, not a better loop.`,
+        The answer to that is differential encoding, not a better loop.
+
+        The loop itself is a servo, and the control chapter applies verbatim. A
+        frequency offset is a phase ramp, which a first-order loop tracks with
+        a constant bias proportional to the offset and a second-order loop
+        tracks exactly — the type-2 statement, one subject away. And the
+        bandwidth is a bet: the phase jitter follows σ²_φ = 1/(2ρ_L) with
+        ρ_L = (Es/N₀)/(2·B_L·T), so narrow is quieter — and acquires slowly,
+        and cannot follow a drifting offset. No setting wins both.`,
 
   params: {
     mod: select('modulation', {

@@ -10,6 +10,27 @@ export default {
   subtitle: 'ISI, noise and sampling instant — the health of a link at a glance',
   tags: ['eye diagram', 'ISI', 'raised cosine', 'Nyquist', 'PAM'],
 
+  doc: `Hundreds of slices of the waveform, two symbol periods long, superimposed:
+the eye. Between the sampling instants the signal wanders freely, but at
+t = T every trace passes through ±1 — the Nyquist criterion of the raised
+cosine, the intersymbol interference cancelling exactly where the decision
+is made. The roll-off α is bandwidth paid for timing tolerance: lowering it
+keeps the eye open AT the exact instant while closing it horizontally, so an
+imprecise clock stops being forgiven.
+
+The channel is what closes the eye. A bandwidth too narrow spreads each
+pulse over its neighbours: the ISI closes the eye vertically and SHIFTS the
+optimal instant through the group delay, until around B·T ≈ 0.4 no
+threshold separates the levels at any instant — the statline measures the
+opening falling from about 1.9 to negative. Noise does the same thing
+without the shift.
+
+4-PAM stacks three eyes, each a third the size of the 2-PAM one: two bits
+per symbol, four levels, and the packets at the sampling instant touch at a
+noise level 2-PAM shrugs off. It breaks first, exactly as 16-QAM broke
+before QPSK — the same currency, rate paid for in noise margin.`,
+
+
   params: {
     levels: select('M', {
       description: 'number of PAM levels',

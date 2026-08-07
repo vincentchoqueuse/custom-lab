@@ -10,6 +10,26 @@ export default {
   subtitle: 'Correcting one error per frame — and the real price of the rate given up',
   tags: ['coding', 'Hamming', 'BER', 'syndrome', 'coding gain'],
 
+  doc: `Hamming(7,4) at work, frame by frame: four data bits, three parity bits,
+and each error the channel injects marked on the frame it hit. A frame with
+a single flipped bit costs nothing — the syndrome points at the culprit and
+the decoder corrects it. With two or more, the decoder corrects
+confidently, and wrongly, sometimes touching a bit the channel never did.
+
+The BER view prices the whole trade. At equal Eb/N₀ the seven transmitted
+bits share the energy of four useful ones — a rate penalty of
+10·log₁₀(7/4) = 2.4 dB — so below about 3 dB the code LOSES: too many
+errors, corrected in the wrong places. Above it the code wins and the gap
+grows, about 0.6 dB at a BER of 10⁻⁵ with hard decoding, and the slope
+steepens from p to p².
+
+Repetition ×3 is the plausible bad idea the comparison needs: it never goes
+below the uncoded curve, its 4.8 dB rate penalty eating the vote's whole
+benefit at every Eb/N₀. Same price per frame as Hamming — three parity
+bits — but one protected bit instead of four. A code is not redundancy, it
+is STRUCTURED redundancy, and the structure is what decides.`,
+
+
   params: {
     code: select('code', {
       description: 'error-correcting code compared with no coding',

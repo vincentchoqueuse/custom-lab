@@ -11,6 +11,29 @@ export default {
   subtitle: 'Undoing a channel without a training sequence — and what it costs',
   tags: ['CMA', 'Godard', 'blind', 'equalization', 'ISI', 'PSK', 'phase ambiguity'],
 
+  doc: `An equalizer that undoes a channel it was never shown, trained on symbols
+it never sees. All the constant-modulus algorithm is given is that a QPSK
+has ONE modulus: minimising the spread of |y| around it is enough to make
+the composed channel-equalizer response collapse to a single spike — the
+definition of a channel undone.
+
+The cost depends on |y| alone, so J(w·e^{jφ}) = J(w): every rotated
+equalizer is an equally good minimum, and the constellation converges up
+to a rotation the algorithm has no way to prefer. The receiver's real
+answers are a pilot, or differential encoding, so that only phase
+differences carry information.
+
+16-QAM shows what the constant modulus was really buying. With three
+distinct moduli even a perfect equalizer leaves J = E[(|s|²−R₂)²] — exactly
+0.4224 for the unit-energy 16-QAM, an orange floor no step size gets
+under. The algorithm is not broken; its criterion has stopped being the
+right one, and practice switches to decision-directed once the eye is
+open. The last scene removes the safety net: with no reference, nothing
+measures the error, and a receiver cannot tell a poor minimum from a good
+one — the CMA cost is not convex, and the centre-spike initialisation is a
+bet on where the useful delay sits.`,
+
+
   params: {
     mod: select('modulation', {
       description: 'transmitted constellation',

@@ -10,6 +10,29 @@ export default {
   subtitle: 'The channel digs holes; the FFT flattens it, carrier by carrier',
   tags: ['OFDM', 'multipath', 'cyclic prefix', 'equalization'],
 
+  doc: `Sixty-four carriers, one QPSK symbol each, and a channel with echoes. The
+multipath digs a landscape of ridges and fades — some carriers come back
+clean, others 20 dB down, and the pattern is the channel, not the noise.
+The cyclic prefix is the timing contract: the channel's memory smears the
+first samples of each frame with the previous one, and as long as that
+mixture ends inside the prefix the FFT window sees only its own frame.
+
+Then the central theorem: with the prefix in place the convolution becomes
+circular, the FFT DIAGONALIZES the channel, and the sixty-tap equalizer of
+a single-carrier receiver becomes one division per carrier. Each carrier
+has its own H_k and its own picture — tight on a ridge, blown apart in a
+fade, where the division that saved one carrier amplifies the noise of
+another. And no place in the time signal IS carrier k: every sample
+carries all sixty-four at once.
+
+Sabotaging the prefix shows what it was worth: the leaked ISI puts an
+error floor under the constellation that no SNR removes — noise is beaten
+with power, interference is only avoided. The per-carrier BER lands its
+peaks exactly on the fades, with one carrier at 5 % against an average of
+0.16 % — which is why OFDM never lives alone: interleaving and coding
+spread the information across good and bad carriers alike.`,
+
+
   params: {
     Nc: select('N', {
       description: 'number of subcarriers',

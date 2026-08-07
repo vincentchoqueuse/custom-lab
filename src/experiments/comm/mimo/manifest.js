@@ -14,6 +14,31 @@ export default {
   subtitle: 'Two symbols at once — and what it costs to pull them apart',
   tags: ['MIMO', 'spatial multiplexing', 'ZF', 'MMSE', 'ML', 'conditioning'],
 
+  doc: `Two antennas transmit two QPSK symbols at the same instant on the same
+frequency, and each receive antenna hears a mixture of both. Nothing is
+lost — two equations, two unknowns, H invertible — and the whole experiment
+is the gap between "solvable" and "solvable without paying for it".
+
+At ρ = 0 the promise is exact: the three receivers coincide with the
+single-antenna AWGN curve, because a unitary channel leaves white noise
+white, and the rate has doubled for free. Correlation writes the fine
+print. Zero-forcing inverts the channel and pays in noise, by exactly
+[(HᴴH)⁻¹]ᵢᵢ = 1/(1−ρ²): 1.25 dB at ρ = 0.5, 4.4 at 0.8, 7.2 at 0.9 — a
+linear MIMO receiver hands back an AWGN channel at a worse SNR, by a
+factor you can write down. MMSE tolerates a little crosstalk to avoid
+amplifying the noise, converging to ZF as the noise vanishes — and its
+estimate is biased, which the receiver divides out before deciding.
+
+Maximum likelihood never inverts anything: it measures distances to the
+sixteen lattice points H·x and keeps the nearest, paying only where the
+geometry genuinely became ambiguous — two lattice points drawn together by
+nearly parallel columns of H. Its curve stays near the AWGN line where ZF
+has fallen seven decibels away. The price is the search: M² hypotheses per
+symbol, 4^n for n streams — which is why linear receivers exist at all,
+and why half the field is about getting close to ML without paying for
+it.`,
+
+
   params: {
     mod: select('modulation', {
       description: 'constellation sent on EACH of the two streams',
