@@ -9,6 +9,29 @@ export default {
   subtitle: 'Integrating a differential equation — the slope of the error is the order',
   tags: ['Runge–Kutta', 'Euler', 'ODE', 'order', 'pendulum', 'simulation'],
 
+  doc: `At a small enough step the choice of integrator does not matter: all three
+draw the pendulum a physicist would draw, and the energy — which this
+system conserves exactly — stays flat. The interesting part starts when h
+grows. Euler adds energy at every step, exponentially, until the pendulum
+goes over the top and swings become rotation: the simulation changed the
+NATURE of the motion, not merely its accuracy, and the fault is
+structural — every Euler step leaves along the tangent, on the outside of
+a convex orbit.
+
+The order view measures what an integrator is: dividing h by ten buys a
+factor of ten for Euler, a hundred for RK2, ten thousand for RK4 — slopes
+1, 2 and 4. The honest comparison is at equal cost, RK4 paying four
+evaluations per step, and even so RK4 at h = 0.16 beats Euler at h = 0.005
+with eight times less arithmetic. One intelligent step is worth a thousand
+naive ones, which is why RK4/5 runs inside scipy and LTspice.
+
+The damped second order ties the subject to the control chapter: at large
+h Euler distorts the pseudo-period, then turns a stable system unstable —
+the worst failure available, a simulation lying about stability itself.
+When no closed form exists, the integrator is all there is, and its order
+decides whether the answer means anything.`,
+
+
   params: {
     system: select('system', {
       description: 'differential equation integrated',

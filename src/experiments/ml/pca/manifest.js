@@ -11,6 +11,33 @@ export default {
   subtitle: 'Irises and penguins: four measurements, two directions, and the theorem behind them',
   tags: ['PCA', 'iris', 'penguins', 'covariance', 'eigenvalues', 'dimension reduction'],
 
+  doc: `A cloud in four dimensions that nobody can draw — 150 irises or 342
+penguins, four measurements each — and its best flat photograph in the
+least-squares sense. The three species separate almost perfectly, and
+nobody gave them to the algorithm: PCA looked for variance, and the
+biological structure was in there. The scree plot says what the photograph
+keeps: PC1 carries 92.46 % on the irises, two components 97.77 %, and
+putting PC3 and PC4 on the axes instead shows the 2.2 % they share as a
+round blur.
+
+The trap of units is the scene the experiment exists for. On the penguins
+— three lengths in millimetres, one mass in GRAMS — the raw covariance
+puts 99.99 % on a first component that measures mass and nothing else:
+643 000 g² against 30 mm², a choice of unit, not a biological result.
+Standardizing diagonalizes the correlation instead, PC1 falls to 68.84 %
+and becomes flipper length, which genuinely separates the species. The
+rule: same nature and unit, covariance; heterogeneous variables,
+correlation — and when in doubt, both, one click apart.
+
+The reconstruction view watches a theorem. The measured loss from keeping
+k components coincides with the sum of the discarded eigenvalues — the
+Eckart–Young theorem of 1936, pinned to 1e-12 — so PCA's quality is
+computable before reconstructing anything. And it is the same
+eigendecomposition of a covariance as in the high-resolution methods:
+there the small eigenvalues were noise, here they are what is thrown
+away. One algebra, two readings.`,
+
+
   params: {
     dataset: select('dataset', {
       description: 'dataset analysed',

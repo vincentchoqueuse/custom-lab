@@ -10,6 +10,29 @@ export default {
   subtitle: 'A memoryless nonlinearity: what it does to a curve, and to a spectrum',
   tags: ['networks', 'activation', 'ReLU', 'tanh', 'nonlinearity', 'harmonics'],
 
+  doc: `Six activations, each read twice: the curve and its derivative. The
+derivative is where deep learning lives — sigmoid's is 0.25 at BEST, so
+ten stacked layers multiply the gradient by 10⁻⁶: the vanishing gradient
+is nothing mysterious, it is repeated multiplication, and ReLU replaces
+the factor by 1. A bias only slides the curve, which is already a great
+deal: it chooses where in the curve the signal works.
+
+The spectral views read a nonlinearity the way an electronics course
+would. A sinusoid through a ReLU is half-wave rectification, its Fourier
+series known since 1822 and verified here to 1e-12; through tanh the even
+harmonics vanish, because an odd function of a sinusoid can only contain
+odd harmonics — the parity of the function is legible in the spectrum. Two
+tones produce intermodulation, and the awkward line 2f₁−f₂ lands INSIDE
+the useful band where no filter removes it: the plague of amplifiers and
+converters, and also what a network does deliberately at every layer. Its
+small-signal three-for-one law in dB is measured exactly — and measured
+leaving its domain, the slope dropping once tanh compresses.
+
+The identity closes the argument: a linear layer invents no frequency, and
+ten linear layers are the product of ten matrices, which is one matrix.
+Depth buys nothing without a nonlinearity — the reason this file exists.`,
+
+
   params: {
     act: select('activation', {
       description: 'activation function',

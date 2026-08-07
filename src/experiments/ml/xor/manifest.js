@@ -10,6 +10,28 @@ export default {
   subtitle: 'The 1969 counter-example, and the two neurons that settle it',
   tags: ['networks', 'XOR', 'perceptron', 'separability', 'hidden layer', 'gradient'],
 
+  doc: `Four points, two classes, and no line separates them: the 1969
+counter-example of Minsky and Papert, after which perceptron funding
+stopped for fifteen years. The linear neuron's best answer is the constant
+1/2 — an optimum, not a failure of the descent, and the harness proves it.
+OR and AND, one pill away, are separable; XOR is the one that is not.
+
+Two hidden tanh neurons settle it: each draws a line that separates
+nothing alone, and their combination is a band that does — h₁ = OR,
+h₂ = AND, output = h₁ − h₂, "or, but not both" in one subtraction. The
+learning curve carries its own lesson: hundreds of epochs on a plateau at
+the linear model's floor, gradient near zero, before the symmetry breaks
+and the error falls by decades. Anyone stopping at epoch 200 concludes it
+does not work — the most common mistake in the field.
+
+The last scene measures what the initial randomness decides, over forty
+draws: tanh at H = 2 succeeds 34 times, at H = 4 all forty; ReLU at H = 2
+succeeds FOUR times. Width offers not more expressiveness but more PATHS —
+two neurons are enough, four escape more valleys — and the default
+activation of the whole field dies here nine times out of ten, a ReLU
+whose input is negative at all four points having zero gradient forever.`,
+
+
   params: {
     problem: select('table', {
       description: 'function to learn',

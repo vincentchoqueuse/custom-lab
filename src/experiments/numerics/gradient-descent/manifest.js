@@ -9,6 +9,29 @@ export default {
   subtitle: 'Three algorithms, one landscape — the conditioning decides everything',
   tags: ['optimization', 'gradient', 'Newton', 'momentum', 'conditioning', 'Rosenbrock'],
 
+  doc: `On a round bowl the gradient points at the minimum and the descent is a
+straight line — orthogonal to a circular level set means radial, and there
+is nothing more to what follows than that sentence failing on an ellipse.
+At κ = 10 the path zigzags across the valley instead of running along it;
+Newton bends the direction by H⁻¹ and lands in one step, exactly, because
+the landscape is quadratic. Momentum smooths the zigzag — at the right β,
+((√κ−1)/(√κ+1))², not the 0.9 everybody reaches for: too heavy a ball
+rings, swinging wider than the plain gradient.
+
+The convergence view names the rates. The gradient is linear at
+((κ−1)/(κ+1))², momentum reaches the square root of that — four orders of
+magnitude at sixty iterations for one extra vector in memory — and Newton
+is not "fast" but exact, one step to machine precision squared. The step
+size has hard edges the experiment lets you find: overshooting past α = 1,
+divergence at exactly 2/κ. Newton is not always used because H⁻¹ costs
+O(n³) with n in the billions; momentum exists in that gap.
+
+Rosenbrock closes with the everyday reality: a curved valley with a nearly
+flat floor, where the gradient crawls with a minute step while Newton
+follows the curvature in a handful of iterations. The whole zoo between
+the two extremes — BFGS, Adam and the rest — exists for that landscape.`,
+
+
   params: {
     fn: select('function', {
       description: 'landscape to minimize',

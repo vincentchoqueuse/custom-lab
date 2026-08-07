@@ -16,6 +16,31 @@ export default {
   subtitle: 'An image is a matrix — and Eckart–Young says exactly what is lost',
   tags: ['SVD', 'compression', 'rank', 'Eckart–Young', 'Shepp–Logan', 'singular values'],
 
+  doc: `The Shepp–Logan phantom — a formula, not a photograph: ten ellipses with
+published parameters — rebuilt from its rank-1 layers. At k = 3 the oval
+is recognizable; the details come back in order of importance, which is
+not a figure of speech, the SVD ranked them. At k = 12 the statline reads
+3084 numbers stored instead of 16 384, for a difference nobody sees from
+four metres.
+
+What decides is the spectrum of singular values, and the four images make
+the argument. The phantom's collapse is what makes it compressible; the
+rank-4 image's spectrum falls off a cliff after four values and four
+layers are EXACT to 1e-14; white noise barely decays over forty layers,
+so nothing is negligible and nothing is compressible — noise will never
+be compressed by anyone, by any method. The checkerboard is the bet the
+eye loses: edges everywhere, detail everywhere, and rank 2 — a separable
+formula two layers reconstruct exactly. The eye judges apparent
+complexity, not rank, and the two are unrelated.
+
+The energy view states the theorem: the measured error ‖A − Aₖ‖² EQUALS
+the sum of the discarded squared singular values — Eckart–Young again,
+the same theorem as in the PCA experiment — so k can be chosen for a
+target quality by reading the spectrum, before reconstructing anything.
+An eigenvalue of a covariance is a squared singular value: two courses,
+one theorem.`,
+
+
   params: {
     image: select('image', {
       description: 'image analysed (computed, never copied)',
