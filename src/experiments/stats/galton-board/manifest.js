@@ -1,5 +1,5 @@
 import { float, int } from '../../../core/fields.js';
-import { view, line, scatter, bars, density } from '../../../core/views.js';
+import { view, line, scatter, bars, band, density } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -14,9 +14,11 @@ export default {
 through D rows of pegs and bounces right with probability p at each one; the
 bin it lands in counts its rights. Nothing else is going on — and that
 nothing else is the whole point: D independent yes/no decisions in, a bell
-silhouette out. The board view shows the machine — the pegs, a handful of
-real trajectories — and the histogram view shows what M of those
-trajectories add up to.
+silhouette out. The board view is the whole object: the pegs, a handful of
+real trajectories, and the bins filling live underneath as M feeds them —
+the bar heights share one fixed scale, so the silhouette converges upward
+into the bell instead of being renormalized out of sight. The histogram view
+then reads the same bins against the law.
 
 The bins fill as an exact Binomial(D, p), drawn from its closed form over
 the measured bars: the pegs write Pascal's triangle without being told to.
@@ -65,7 +67,12 @@ same convergence with draws that are not coin flips at all.`,
         color: 'var(--muted-fg)',
         size: 3,
         label: 'pegs',
-        overlays: [line('paths', { width: 1.6, opacity: 0.85, label: 'trajectories' })],
+        overlays: [
+          line('paths', { width: 1.6, opacity: 0.85, label: 'trajectories' }),
+          // the bins, stacking under the pegs — the classic object keeps its
+          // histogram inside the machine, and M feeds it live
+          band('bins', { color: '#0072BD', opacity: 0.55, label: 'the bins, filling' }),
+        ],
         axes: { x: 'lateral position', y: 'row' },
       })
     ),

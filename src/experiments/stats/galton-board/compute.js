@@ -91,6 +91,30 @@ export function compute({ D, M, p, seed }) {
   let gap = 0;
   for (let k = 0; k <= D; k++) gap = Math.max(gap, Math.abs(pmf[k] - normalPdf(k, mu, sd)));
 
+  /* ---------- the bins, filling under the board --------------------------- */
+  // the classic object has the histogram INSIDE it: the balls stack under the
+  // pegs. A step band grows from a floor below the last row, each bin under
+  // the lateral position its k lands at, height normalized on the PEAK OF THE
+  // LAW (not of the draw) so the frame never jumps while M feeds it — the
+  // silhouette converges upward into the binomial as the balls accumulate.
+  const FLOOR = -D - 4.4;
+  const pmfMax = Math.max(...pmf);
+  const bx = new Float64Array(4 * (D + 1));
+  const blo = new Float64Array(4 * (D + 1));
+  const bhi = new Float64Array(4 * (D + 1));
+  for (let k = 0; k <= D; k++) {
+    const xk = k - D / 2;
+    const h = FLOOR + (3.6 * freq[k]) / pmfMax;
+    const o = 4 * k;
+    bx[o] = xk - 0.44;
+    bx[o + 1] = xk - 0.38;
+    bx[o + 2] = xk + 0.38;
+    bx[o + 3] = xk + 0.44;
+    blo[o] = blo[o + 1] = blo[o + 2] = blo[o + 3] = FLOOR;
+    bhi[o] = bhi[o + 3] = FLOOR;
+    bhi[o + 1] = bhi[o + 2] = h;
+  }
+
   let meanMeas = 0;
   for (let k = 0; k <= D; k++) meanMeas += k * counts[k];
   meanMeas /= M;
@@ -101,6 +125,7 @@ export function compute({ D, M, p, seed }) {
   return {
     observables: {
       pegs: { x: Float64Array.from(pegX), y: Float64Array.from(pegY) },
+      bins: { x: bx, lo: blo, hi: bhi },
       paths: { x: Float64Array.from(px), y: Float64Array.from(py) },
       // the measured histogram, the exact law, the CLT silhouette
       landing: { x: kAxis, y: freq },
