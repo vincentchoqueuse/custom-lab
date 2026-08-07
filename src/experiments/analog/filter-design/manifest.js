@@ -6,7 +6,7 @@ import { requiredOrder } from './compute.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'filter-design',
-  order: 7,
+  order: 8,
   title: 'Analog filter design',
   subtitle: 'One specification, four families — the order is a result, not a choice',
   tags: ['analog', 'filter', 'Butterworth', 'Chebyshev', 'elliptic', 'specification'],

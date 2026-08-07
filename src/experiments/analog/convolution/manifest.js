@@ -5,7 +5,7 @@ import { at, GUIDE_COLOR } from '../../../core/response-views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'convolution',
-  order: 4,
+  order: 5,
   title: 'Convolution, taken apart',
   subtitle: 'Flip, slide, integrate — and the t dial does the rest',
   tags: [

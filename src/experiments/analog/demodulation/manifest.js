@@ -4,7 +4,7 @@ import { view, figure, line, vline, hline } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'demodulation',
-  order: 6,
+  order: 7,
   random: true, // additive Gaussian noise
   // plural, like the mirror experiment "AM and FM modulation": both really carry
   // two, and the catalogue is read in pairs

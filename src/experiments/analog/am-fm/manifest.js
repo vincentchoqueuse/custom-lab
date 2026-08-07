@@ -4,7 +4,7 @@ import { view, line, scatter, figure } from '../../../core/views.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'am-fm',
-  order: 5,
+  order: 6,
   title: 'AM and FM modulation',
   subtitle: 'Sidebands, Bessel lines and the Carson rule',
   tags: ['analog', 'AM', 'FM', 'Bessel', 'Carson', 'modulation'],
