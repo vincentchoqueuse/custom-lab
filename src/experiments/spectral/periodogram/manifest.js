@@ -10,6 +10,34 @@ export default {
   subtitle: 'Estimating a spectrum in noise — and why a longer record is not enough',
   tags: ['PSD', 'periodogram', 'Welch', 'Bartlett', 'consistency', 'noise'],
 
+  doc: `At high SNR the periodogram does what the textbook promises: peaks at the
+right frequencies, width Fs/N, height the power of the line. The trouble is
+the floor. It is grass, and it does not calm down: multiplying the record
+length by sixteen moves it by not one decibel, because each point follows a
+χ² law with two degrees of freedom whose standard deviation equals its
+mean. The periodogram is not consistent — a longer record buys RESOLUTION,
+never variance.
+
+Averaging is the repair, and the segment view shows where the samples go.
+Bartlett with a rectangular window weighs every sample once; Bartlett with
+Hann discards the segment edges; Welch's 50 % overlap puts back exactly the
+weight the window removed — the COLA condition — while Welch WITHOUT a
+fading window counts every sample twice in correlated segments and loses
+20 % of the promised reduction. The fluctuation follows 1/√K over two
+decades, the raw periodogram sitting at K = 1 as the degenerate case. The
+price is resolution: smaller segments, broader lines — the same trade as
+windowing, seen from the variance side. And a lost line has two distinct
+causes demanding opposite remedies: under the grass, average more; under a
+neighbour's lobes, change the window. The diagnosis is the skill.
+
+The last scene is the end of the road: two equal lines 2 Hz apart on 256
+samples, 0.51× the Fourier limit Fs/N, and the periodogram shows one lump.
+Raising the SNR changes NOTHING — this is not a noise problem; the limit is
+set by the observation time alone. The high-resolution experiment takes
+this exact record and separates the pair anyway, by paying with an
+assumption.`,
+
+
   params: {
     method: select('method', {
       description: 'power spectral density estimator',

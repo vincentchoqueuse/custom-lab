@@ -9,6 +9,29 @@ export default {
   subtitle: 'Observing for T is multiplying by a window — and convolving the spectrum',
   tags: ['analog', 'digital', 'truncation', 'window', 'resolution', 'Gabor'],
 
+  doc: `A signal that continues, and the finite piece of it that is actually
+transformed. Cutting in time is multiplying by a window, and therefore
+convolving the spectrum with the window's own: a single frequency becomes a
+lobe of width roughly 1/T, and the displayed product T·B₃ stays at 0.886 —
+the same constant as the gate in the signal catalogue, seen from the other
+side. At constant duration the shape of the cut sets the skirts: rectangular
+−13 dB, Hann −31, Blackman −58, the sidelobes collapsing while the main lobe
+widens. Dynamic range is only ever bought by paying in resolution.
+
+The width view measures the law rather than reciting it: thirty durations on
+log–log axes, a straight line of slope exactly −1, which a change of window
+translates without tilting — the shape sets the constant, never the law.
+
+Two signals then break the "longer is better" rule from opposite sides. A
+chirp sweeps k Hz per second, so observing longer sharpens as 1/T but lets
+in a band k·T: the curve becomes a V whose bottom is the best possible
+duration — the Gabor trade-off measured, and exactly the window choice of
+the spectrogram. And a damped sinusoid stops cooperating at T ≈ τ: beyond
+it only silence is observed, and the line keeps the natural width 1/(πτ)
+the signal gave itself. Lengthening the window improves resolution only
+while the signal is still there.`,
+
+
   params: {
     sig: select('signal', {
       description: 'signal observed (defined independently of the duration)',

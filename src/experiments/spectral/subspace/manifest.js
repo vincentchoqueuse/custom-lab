@@ -28,6 +28,34 @@ export default {
   subtitle: 'MUSIC, root-MUSIC, ESPRIT — what a model buys, and what it costs',
   tags: ['high resolution', 'MUSIC', 'ESPRIT', 'subspace', 'eigenvalues'],
 
+  doc: `The record the periodogram gave up on: two lines 2 Hz apart — half a
+Fourier limit — at 25 dB on 256 samples, one hump. Subspace methods
+separate them by assuming what Fourier does not: that the signal IS d
+exponentials in white noise.
+
+The eigenvalues of the covariance are where the model meets the data: a few
+large ones, then a plateau at σ², and the number above the plateau is the
+number of sources — the only information available for choosing d. Lowering
+the SNR raises the plateau until counting becomes impossible: high-
+resolution methods do not degrade gently, they break. With d in hand, MUSIC
+sweeps a pseudo-spectrum while root-MUSIC and ESPRIT sweep nothing — they
+solve an equation and return numbers, gridless, with errors of the order of
+a hundredth of a hertz. How far it holds is measured: Δf = 0.3 Fourier
+limits needs 30 dB, 0.2 needs 40, and at M = 12 snapshots even 0.5 stops
+working. The periodogram never collapses; it stays mediocre whatever is
+done to it. That is the bargain in both directions.
+
+Getting d wrong is the failure worth rehearsing. Underestimated, a source
+disappears bluntly. Overestimated, swept MUSIC forgives — but root-MUSIC
+and ESPRIT return exactly d numbers, and the invented ones can land outside
+the frame where nothing shows them. An invented NUMBER looks like a result,
+which is why d is read off the eigenvalues and never by eye. The model view
+closes the loop without needing the truth: refitting amplitudes by least
+squares, the residual estimates the noise floor, and a floor that rises
+above its expected level says the model is wrong — which is exactly the
+situation with a real signal, where the true curve does not exist.`,
+
+
   params: {
     df: float('Δf', {
       description: 'gap between the two lines, in units of the Fourier limit Fs/N',

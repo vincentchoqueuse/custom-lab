@@ -9,6 +9,25 @@ export default {
   subtitle: 'Resolution, leakage and dynamic range — what the window does to the spectrum',
   tags: ['digital', 'DFT', 'window', 'resolution', 'leakage'],
 
+  doc: `A pure frequency does not give a pure spectrum, because only N samples are
+observed: the line is a peak of width Fs/N, and that width belongs to the
+observation, not to the signal. Two questions follow, and they are the two
+halves of windowing.
+
+Can two close lines be told apart? Below Fs/N a pair merges into one hump,
+and zero-padding — the show-of-hands trap — smooths the curve without
+splitting it: padding interpolates, it does not invent information. What
+resolves is N.
+
+Can a weak line be seen at all? A tone at −45 dB is invisible under the
+−13 dB sidelobes of the rectangular window; Hann at −31 dB barely lets it
+emerge, Blackman at −58 dB reveals it. The window chooses what one is
+ALLOWED to see — and it charges for it: the Hann main lobe is twice as
+wide, so at Δf = 6 Hz the rectangular window separates two equal lines that
+Hann merges. A wide main lobe with low sidelobes, or the converse, never
+both: all of windowing is that one trade-off.`,
+
+
   params: {
     win: select('window', {
       description: 'observation window',

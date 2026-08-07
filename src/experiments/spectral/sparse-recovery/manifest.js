@@ -44,6 +44,38 @@ export default {
   subtitle: 'The same two lines — but nobody says how many there are',
   tags: ['sparsity', 'matching pursuit', 'OMP', 'lasso', 'dictionary', 'greedy', 'coherence', 'CLEAN'],
 
+  doc: `The same record as the high-resolution methods — same lines, same window,
+same decibels — with one thing withheld: nobody says how many lines there
+are. In its place, a dictionary of 514 sinusoids for 256 samples. The
+normal equations have no unique solution; what picks one is the assumption
+that only a few columns are used, and the experiment plays the two ways the
+field has found to impose it.
+
+The greedy road counts: matching pursuit takes the tallest peak of the
+residual's correlation — which is nothing but the periodogram of what is
+left — subtracts, and looks again; OMP re-projects at each step, so its
+residual is orthogonal to everything already chosen and a notch to the
+floor appears at every selected frequency. Past the true lines, extra atoms
+land anywhere in the band, buying back leakage and noise: that scatter is
+the answer to "why not take k large". The convex road penalizes instead:
+min ‖x − Dc‖² + λΣ‖c‖, where λ = λmax gives exactly zero, lines then appear
+one by one, and the correlation is CAPPED at λ, touching it on the active
+atoms — the optimality condition, counterpart of OMP's notches. The same λ
+that selects also shrinks, by exactly 2λ/N; debiasing is refitting the
+support by least squares.
+
+The last two scenes are the invoice. At half a Fourier limit — where MUSIC
+separates cleanly — the pursuit fails, an atom on each side of the pair: 0
+out of 12 draws at Δf = 0.5, 12 out of 12 at 1.5, and refining the grid
+only raises the coherence between look-alike columns. MUSIC wins there
+because it was TOLD there are two lines; take the postulate away and
+resolution returns to Fourier. And off the grid nothing is sparse: a
+frequency between two atoms leaks onto all of them, because sparsity was
+never a property of the signal but of the PAIR (signal, dictionary) — the
+basis-mismatch problem, whose answers are a research direction, not a
+tuning knob.`,
+
+
   params: {
     // The first five are spectral/subspace's own parameters, with the same
     // names, the same units and the same defaults, so that switching between

@@ -9,6 +9,26 @@ export default {
   subtitle: 'Seeing time AND frequency — at the price of the Gabor trade-off',
   tags: ['digital', 'STFT', 'time–frequency', 'chirp', 'Gabor'],
 
+  doc: `A window slid along the signal, a spectrum per position, and one map with
+time across and frequency up. The window length divides one invariant
+between two axes: Δf·Δt = 1, always. A chirp drawn with N = 64 has a sharp
+time axis and a blurred frequency axis; N = 1024, the opposite. One does
+not choose to be good everywhere, only WHERE to be good — the uncertainty
+principle in its signal-processing form.
+
+The scenes make the trade concrete. Two tones 15 Hz apart need about 1/Δf
+of listening before they separate — the calculation the ear performs. A
+chirp that climbs past Fs/2 BOUNCES, aliasing signing its name in the
+time–frequency plane. An AM signal is pulsing columns through a short
+window and three steady lines — carrier and sidebands — through a long one:
+neither picture is wrong, the same physics projected onto two resolutions.
+
+The last scene is why the spectrogram exists at all: a rising chirp and a
+slowly wobbling tone CROSS, which no spectrum can show. And the two ridges
+ask for opposite windows in the same image — Gabor again, with no setting
+that serves both.`,
+
+
   params: {
     source: select('source', {
       description: 'signal analysed',
