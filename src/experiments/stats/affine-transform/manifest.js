@@ -10,6 +10,20 @@ export default {
   subtitle: 'How a and b shift, stretch and flip a density',
   tags: ['transform', 'random variable', 'mean', 'variance'],
 
+  doc: `What Y = aX + b does to a density, one dial at a time. With a = 1, b slides
+the curve as a whole: E[Y] follows, and the variance does not move — it
+measures spread about the mean, and the mean shifted along with everything
+else. With b = 0, raising a widens the curve and flattens it at once, since
+the area under a density is always 1; taking a from 1 to 2 quadruples the
+variance, because Var(Y) = a²·Var(X).
+
+A negative a mirrors the density about the origin, and this is where the
+absolute value in f_Y(y) = f_X((y−b)/a)/|a| stops being a typographic
+convention: without it the density would come out negative.
+
+The histogram view is the confirmation: the transformed draws land on the
+transformed density, having never been told about it.`,
+
   params: {
     law: select('distribution', {
       description: 'distribution of the starting variable X',

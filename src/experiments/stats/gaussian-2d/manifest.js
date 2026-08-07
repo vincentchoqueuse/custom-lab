@@ -10,6 +10,23 @@ export default {
   subtitle: 'Correlation, iso-density ellipses, principal axes and regression',
   tags: ['Gaussian', '2D', 'correlation', 'covariance', 'ellipse', 'regression'],
 
+  doc: `Two Gaussian variables and the one number that couples them. Sliding ρ
+flattens the cloud along a line, and the ellipses follow exactly — they are
+level curves of the density, not a summary of the points. Drawing again
+changes the cloud and leaves the ellipses in place: the distinction between a
+model and the data drawn from it. The three ellipses hold about 39 %, 86 %
+and 99 % of the points, and the first number surprises anyone expecting the
+one-dimensional 68 %.
+
+Two lines cross the same cloud: the principal axis, and the flatter
+E[Y|X = x]. Their gap is regression to the mean — at an extreme X the
+expected Y falls back toward μᵧ — and they coincide only as |ρ| approaches 1.
+
+The marginals ignore ρ entirely: all the dependence lives in the joint
+distribution, and none of it survives the projection. Two Gaussian marginals
+do not determine a joint distribution, and this pair of views is the shortest
+proof of it.`,
+
   params: {
     mux: float('μₓ', { description: 'mean of X', min: -3, max: 3, step: 0.1, default: 0 }),
     muy: float('μᵧ', { description: 'mean of Y', min: -3, max: 3, step: 0.1, default: 0 }),

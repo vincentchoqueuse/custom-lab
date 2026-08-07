@@ -10,6 +10,22 @@ export default {
   subtitle: 'pdf/pmf and CDF: theory against draws',
   tags: ['probability', 'distributions', 'histogram', 'CDF', 'Poisson', 'Gaussian'],
 
+  doc: `A distribution met three ways: as draws, as a density, and as a cumulative
+curve. The blue histogram shivers around the orange density at N = 100 — every
+draw is a different histogram of the same distribution — and settles onto it at
+ten thousand, which is the law of large numbers seen directly. The statline
+carries the same story in numbers: x̄ against E[X], s² against Var(X).
+
+On a discrete distribution the blue bars are observed frequencies and the
+orange ones probabilities, and the two never match exactly: one is measured,
+the other is a model, and only an infinite sample would close the gap. A
+binomial with n large and p small wears the same silhouette as the Poisson —
+the classic limit, easier to believe as a superposition than as algebra.
+
+The sampled CDF is a staircase whose every step is exactly 1/N: countable at
+N = 10, invisible at ten thousand. None of it depends on which distribution
+the pill selects, and that is the point.`,
+
   params: {
     law: select('distribution', {
       description: 'probability distribution',

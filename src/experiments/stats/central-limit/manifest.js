@@ -11,6 +11,23 @@ export default {
   subtitle: 'The mean of n draws turns Gaussian — whatever the distribution',
   tags: ['CLT', 'convergence', 'Gaussian', 'mean'],
 
+  doc: `The mean of n draws turns Gaussian, whatever the distribution supplies. At
+n = 1 the die's histogram is a flat comb with six teeth; a triangle at 2, a
+bell at 5, and by 30 a curve the eye cannot tell from the overlay. The
+orange N(μ, σ²/n) always carries the right mean and variance — only the SHAPE
+of the histogram comes to meet it, and that shape is the whole content of the
+theorem.
+
+The exponential is brutally skewed and converges anyway: recentred by n = 5,
+symmetric by 30, Gaussian by 100. The theorem asks nothing beyond a finite
+variance. Worth separating out loud: the bell narrows (σ/√n) at the same
+time as it becomes a bell, and these are two different statements.
+
+A coin at p = 0.1 draws almost nothing but zeros, yet the mean of a hundred
+tosses is already Gaussian — de Moivre–Laplace, a century before the general
+case. At n = 10 the discrete comb returns: the np(1−p) ≳ 10 rule of thumb,
+visible rather than asserted.`,
+
   params: {
     law: select('distribution', {
       description: 'distribution of the individual draws',

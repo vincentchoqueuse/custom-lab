@@ -11,6 +11,22 @@ export default {
   subtitle: 'Every path of x̄ₙ converges to μ — at speed 1/√n',
   tags: ['LLN', 'convergence', 'sample mean', 'paths'],
 
+  doc: `Running means of n draws, watched on their way to μ. The paths wander early,
+then settle inside the funnel μ ± 2σ/√n, which holds about 95 % of each of
+them: the law of large numbers leaves nothing to chance about the
+destination, only about the road. At fixed n the vertical spread of the paths
+is Gaussian — this figure is the central limit theorem seen edge-on.
+
+The logarithmic axis makes the cost readable: the funnel narrows by a factor
+of ten every two orders of magnitude, so one more digit of precision costs a
+hundred times more draws. Three decimals on the mean of a die would take
+roughly three million tosses — beyond the slider, which is the message.
+
+The coin scene replays history: Buffon tossed 4040 times, Pearson 24 000.
+Ten paths of five thousand tosses now cost one keystroke. At p = 0.05 the
+relative convergence is far slower — estimating a rare event takes a great
+deal of data, made concrete.`,
+
   params: {
     law: select('distribution', {
       description: 'distribution of the individual draws',
