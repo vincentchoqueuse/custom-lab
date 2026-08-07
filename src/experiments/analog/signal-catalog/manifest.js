@@ -9,6 +9,27 @@ export default {
   subtitle: 'Seven signals, seven Fourier transforms — magnitude, dB and phase',
   tags: ['analog', 'Fourier', 'transform', 'spectrum', 'catalogue'],
 
+  doc: `Seven canonical signals and their transforms, visited one by one — an atlas
+rather than an argument. Sorted by eye they make three families: those that
+stop (gate, triangle), those that decay without ever reaching zero (Gaussian,
+exponentials), and the one that lingers (sinc); the question the atlas keeps
+asking is which of them buys the narrowest spectrum for a given duration.
+
+The gate and the cardinal sine are the basic pair, first zero at 1/T — and
+doubling the duration halves the lobe, not the reverse. With the axes locked
+the product T·B₃ does not change by a digit as T moves: the scaling theorem,
+demonstrated rather than stated. The Gaussian is the fixed point — the same
+shape on both sides, no sidelobes and no zeros, the only signal here for
+which that is true — and the dB view separates it sharply from the gate,
+which lingers at −13.3 dB where the triangle, a sinc squared, sits at
+−26.5 dB: already the whole idea of windowing.
+
+Two more theorems close the tour. A delay changes the magnitude spectrum by
+not one pixel — it lives entirely in the phase, as a slope of −2πt₀ — so a
+magnitude spectrum alone cannot say WHEN. And the gate times a cosine moves
+its lobe to ±f₀ without deforming it: modulating is shifting the spectrum.`,
+
+
   params: {
     signal: select('signal', {
       description: 'signal from the catalogue',

@@ -12,6 +12,32 @@ export default {
   subtitle: 'Recovering A(t) and f(t) — one global method, one local method',
   tags: ['demodulation', 'Hilbert', 'Teager–Kaiser', 'DESA', 'envelope', 'instantaneous frequency'],
 
+  doc: `One signal modulated in amplitude and frequency at once, and two estimators
+of its envelope and instantaneous frequency with nothing in common. Hilbert
+is GLOBAL: an FFT over the whole record, negative frequencies removed,
+A = |x + j·H{x}| — the value at time t depends on every sample, including
+those after it. Teager is LOCAL: Ψ(x)[n] = x[n]² − x[n+1]·x[n−1], three
+samples and two multiplications, no transform and no latency. On a clean
+signal both land on the truth.
+
+Noise prices the difference. Teager degrades two to three times faster —
+measured, 84 Hz against 266 Hz of RMS error at 20 dB — because Ψ is a
+product of neighbouring samples, so noise enters squared and nothing
+averages it away, while an FFT IS an average over the record. The locality
+that made Teager free is exactly what makes it fragile. It has one rare
+virtue: it announces its own failure, counting the arccos calls that leave
+[−1, 1] when the local sinusoidal model stops holding.
+
+Both estimators have a DOMAIN, derivable in two lines from their formulas
+and invisible in their output. Teager's arccos caps the frequency at Fs/4,
+above which the estimate folds exactly as undersampling folds — the harness
+pins the error at 2(f − Fs/4). Hilbert's is subtler and therefore more
+treacherous: the DFT treats the record as periodic, and a carrier that does
+not close on the N samples leaks globally — exact to 1e-10 on a DFT bin,
+8.5 Hz of error off it. Nothing in the curve says so; only the calculation
+does.`,
+
+
   params: {
     fc: float('f_c', {
       description: 'carrier — this is what to raise to reach Fs/4',

@@ -18,6 +18,28 @@ export default {
     'RC',
   ],
 
+  doc: `y(t) = ∫ x(τ)·h(t−τ) dτ, taken apart. The integration runs over τ with t
+frozen — which is why the computation view has τ on its axis — and the three
+curves say the rest: x(τ) motionless, h flipped (the minus sign) and slid by
+t, and their product, whose area IS y(t).
+
+Two gates give a triangle, not a square: no overlap, growing overlap, full
+overlap, shrinking overlap, and the linear growth of an overlap of
+rectangles makes the rise a straight line. Different widths turn the
+triangle into a trapezoid of base a + b and plateau |a − b|, carrying two
+rules worth discovering — supports ADD, areas MULTIPLY. Swapping the two
+gates changes the computation picture completely and the output not at all:
+x∗h = h∗x, so the flip is an artefact of the calculation, not a property of
+the system.
+
+An exponential kernel makes the same integral the charging of an RC —
+1 − e^(−t/b) while the pulse lasts, then discharge — the low-pass filter
+seen in time before any Bode plot. And the spectrum view says the same
+operation is a product, one frequency at a time: the transform of the
+computed convolution lands on |X|·|H|, and a convolution can only remove
+what one of the two factors already lacked.`,
+
+
   params: {
     t: float('t', {
       description: 'the instant being computed — THE dial: sliding it IS the animation',

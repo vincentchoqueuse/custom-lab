@@ -11,6 +11,25 @@ export default {
   subtitle: 'Bode point by point: two traces, one ratio, one phase shift',
   tags: ['analog', 'Bode', 'oscilloscope', 'measurement', 'RC', 'resonance'],
 
+  doc: `A frequency response, measured the way a lab session measures it: one
+sinusoid at a time, reading the amplitude ratio and the time shift off the
+scope, with Δφ = 360°·f·Δt. At f = f_c the statline reads −3.01 dB, an
+output at 70.7 % and −45° of phase — the operational DEFINITION of the
+cutoff frequency, which in the lab is a point one finds, not an asymptote.
+
+The campaign view lays twenty-five bench measurements over the theory, and
+redrawing gives a slightly different campaign each time — the difference
+between a measurement and a calculation. Raising the noise asks the useful
+question: the measurement breaks down first far into the stop band, where
+the output sinks below the scope's noise floor. What limits the measurable
+dynamic range is the instrument, not the circuit.
+
+The second-order system adds the resonance: a peak at f₀ of height roughly
+20·log₁₀Q, and a phase swing from 0 to −180° that steepens as Q rises —
+the signature that later makes phase margin comprehensible in the control
+chapter.`,
+
+
   params: {
     system: select('system', {
       description: 'circuit under test',

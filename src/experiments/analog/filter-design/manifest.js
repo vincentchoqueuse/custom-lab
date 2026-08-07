@@ -11,6 +11,27 @@ export default {
   subtitle: 'One specification, four families — the order is a result, not a choice',
   tags: ['analog', 'filter', 'Butterworth', 'Chebyshev', 'elliptic', 'specification'],
 
+  doc: `One specification — a ripple budget below f_p, a rejection floor above f_a,
+and a transition band where the only rule is not to rise above 0 dB — and
+four families that meet it at different prices. At 1 dB of ripple, 40 dB of
+attenuation and one octave of transition: Butterworth order 8, Chebyshev 5,
+elliptic 4. Order is not an abstraction — it is op-amps, capacitors and
+cost — and every tightening of the template is paid in order: the same
+elliptic goes from 6 to 8 when the transition narrows from 1.4× to 1.2×.
+
+The pole view shows where the orders come from. Butterworth puts its poles
+on a circle; Chebyshev flattens it into an ellipse; Chebyshev 2 and the
+elliptic add zeros on the jω axis, and those zeros dig the stop-band
+notches. Fewer poles, better placed, plus zeros: the history of filter
+design in one figure.
+
+The group-delay view answers the question the first scene leaves open — if
+the elliptic is half the order, why is Butterworth everywhere? The
+Butterworth delay is nearly flat; the elliptic's soars near f_p, so
+components close to the band edge arrive late. Selectivity is paid for in
+phase, and phase distortion wrecks transients.`,
+
+
   params: {
     family: select('family', {
       description: 'approximation family',

@@ -10,6 +10,27 @@ export default {
     'Rebuilding a signal harmonic by harmonic — envelope, Gibbs and duty cycle',
   tags: ['analog', 'Fourier', 'harmonics', 'spectrum', 'Gibbs', 'pulse train'],
 
+  doc: `A square wave built harmonic by harmonic: N = 1 is a plain sinusoid, and
+each odd order — 3, 5, 7 — sharpens the edges a little further, with
+coefficients decaying as 1/n. A perfect square needs infinitely many, and
+even then not quite: pushing N from 10 to 60 draws the oscillations tighter
+against the discontinuity, but the overshoot never shrinks below about 9 %
+(8.95 % in theory). That is the Gibbs phenomenon — convergence in mean
+square, not uniform — and the reason for the ringing near edges in every
+band-limited system.
+
+Smoothness sets the rate. The triangle, continuous, converges with
+coefficients in 1/n² and is nearly perfect at N = 3; on log–log axes the
+error falls with slope −3/2 against −1/2 for the square and sawtooth. A
+discontinuity is paid for in harmonics.
+
+The pulse train shows where the coefficients come from: the lines SAMPLE a
+sinc envelope, 2Aα·sinc(nα), with zeros at n = k/α locating the duty cycle —
+a short pulse costs bandwidth. And at α = 1/2 every even order vanishes,
+leaving the odd ones in 1/n: the square wave is not a separate object but
+the pulse train at duty cycle one half.`,
+
+
   params: {
     wave: select('signal', {
       description: 'periodic waveform',
