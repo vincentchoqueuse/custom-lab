@@ -81,6 +81,11 @@ scaffolded by `npm run new:experiment`:
 The core discovers experiments automatically; adding one never modifies the
 core. Reference example: `src/experiments/estimation/confidence-intervals/`.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) — the experiment contract, the check
+requirement, and the licensing terms contributions are accepted under.
+
 ## License
 
 AGPL-3.0 — see [LICENSE](LICENSE).
