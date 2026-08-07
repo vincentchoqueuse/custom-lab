@@ -1,9 +1,9 @@
 ---
 name: review-experiment
-description: Review an existing or contributed Custom Lab experiment against the project contract — science, checks, declarative discipline, English pedagogical content, scene plan and pills, performance. Use when asked to review, audit, or validate an experiment or an experiment PR.
+description: Review an existing or contributed pupitra experiment against the project contract — science, checks, declarative discipline, English pedagogical content, scene plan and pills, performance. Use when asked to review, audit, or validate an experiment or an experiment PR.
 ---
 
-# Reviewing a Custom Lab experiment
+# Reviewing a pupitra experiment
 
 Review in this order — a failure early makes the rest moot. Verify by
 reading AND by running (`npm run check`, then the browser).

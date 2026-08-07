@@ -1,6 +1,6 @@
 ---
 name: lecture-scenes
-description: Write and review the lecture script of a Custom Lab experiment — the context/problem/method scene plan, and the Prompt Bar pill rules (2-3 per scene, ordered, short labels). Use whenever adding or editing scenes.js, choosing which params a scene exposes, wording select option labels, or auditing an experiment's pedagogical staging.
+description: Write and review the lecture script of a pupitra experiment — the context/problem/method scene plan, and the Prompt Bar pill rules (2-3 per scene, ordered, short labels). Use whenever adding or editing scenes.js, choosing which params a scene exposes, wording select option labels, or auditing an experiment's pedagogical staging.
 ---
 
 # The lecture script: scenes and pills

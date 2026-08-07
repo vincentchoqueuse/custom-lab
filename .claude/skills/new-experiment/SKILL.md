@@ -1,9 +1,9 @@
 ---
 name: new-experiment
-description: Design and build a complete, numerically verified Custom Lab experiment (manifest, compute, scenes, checks). Use whenever asked to add, create, or extend an experiment, a subject, or a lecture demo in this repository. Encodes the contract, the shared-code inventory, the check-writing craft and the pitfalls learned while building the first 30 experiments.
+description: Design and build a complete, numerically verified pupitra experiment (manifest, compute, scenes, checks). Use whenever asked to add, create, or extend an experiment, a subject, or a lecture demo in this repository. Encodes the contract, the shared-code inventory, the check-writing craft and the pitfalls learned while building the first 30 experiments.
 ---
 
-# Building a Custom Lab experiment
+# Building a pupitra experiment
 
 An experiment is a self-contained pedagogical object: 4 files in
 `src/experiments/{subject}/{id}/`, zero core changes, auto-discovered.

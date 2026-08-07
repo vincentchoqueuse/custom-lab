@@ -7,6 +7,12 @@ import { parseHash, decodeQuery, encodeHash } from './router.js';
 import { coreActions } from './actions.js';
 import { writePref } from './prefs.js';
 
+// The mobile breakpoint, in ONE place: App.svelte keeps the live listener on
+// it, and the store starts from its current truth — a component whose first
+// effect runs before App's (the landing's autofocus did) must not see the
+// desktop default on a phone.
+export const NARROW_MQ = '(max-width: 860px)';
+
 export const app = $state({
   expKey: null,
   // embed=1 in the query: chrome-less rendering for an iframe in a course
@@ -59,8 +65,10 @@ export const app = $state({
     // (ui/plots/frame.js). A FACT about the device, not a preference: never in
     // localStorage, never in the URL, and held here rather than read from
     // `window` inside a plot, so that a figure stays a pure function of its
-    // inputs — the freeze ghost and the SVG export both clone it.
-    narrow: false,
+    // inputs — the freeze ghost and the SVG export both clone it. Read once
+    // at store creation so it is true from the very first render on a phone;
+    // App.svelte's listener keeps it live afterwards.
+    narrow: typeof window !== 'undefined' && window.matchMedia(NARROW_MQ).matches,
   },
 });
 

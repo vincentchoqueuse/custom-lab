@@ -184,8 +184,8 @@ export const checks = [
     run() {
       const want = [
         { den: [1, 2, 1], expect: 'stable' },
-        { den: [1, -1, 1], expect: 'instable' },
-        { den: [1, 0, 1], expect: 'marginalement stable' },
+        { den: [1, -1, 1], expect: 'unstable' },
+        { den: [1, 0, 1], expect: 'marginally stable' },
       ];
       const got = want.map((c) => compute({ ...BASE, den: c.den }).observables.stability.value);
       const ok = want.every((c, i) => got[i] === c.expect);

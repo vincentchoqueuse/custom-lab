@@ -1,4 +1,4 @@
-/* expe34 — global styles. Open WebUI / shadcn-ui design language: neutral
+/* pupitra — global styles. Open WebUI / shadcn-ui design language: neutral
    white/black/zinc palette, theme-aware sidebar, outline buttons with subtle
    shadows. The MATLAB palette is reserved for data marks inside plots. */
 
@@ -293,7 +293,9 @@ kbd {
   background: none;
   outline: none;
   font: inherit;
-  font-size: 15px;
+  /* 16px, not 15: mobile Safari zooms the page when focusing any input
+     below 16px, and the landing leads with this one */
+  font-size: 16px;
   color: var(--foreground);
 }
 

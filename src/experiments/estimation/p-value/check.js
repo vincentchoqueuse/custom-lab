@@ -4,7 +4,7 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 import { mulberry32, gaussFrom } from '../../../core/rng.js';
-import { normalQuantile, qfunc } from '../../../core/numeric.js';
+import { normalQuantile, qfunc, trapz } from '../../../core/numeric.js';
 
 const P = (over = {}) => ({ delta: 0.5, sigma: 1, N: 20, alpha: 0.05, M: 4000, seed: 34, ...over });
 
@@ -15,12 +15,7 @@ export const checks = [
     run() {
       // the density view claims p is an area; integrate what is actually drawn
       const { observables: o } = compute(P({ seed: 7 }));
-      const trapz = ({ x, hi }) => {
-        let s = 0;
-        for (let i = 1; i < x.length; i++) s += ((hi[i] + hi[i - 1]) / 2) * (x[i] - x[i - 1]);
-        return s;
-      };
-      const area = trapz(o.tailLeft) + trapz(o.tailRight);
+      const area = trapz(o.tailLeft.x, o.tailLeft.hi) + trapz(o.tailRight.x, o.tailRight.hi);
       // the grid stops at ±4.5, whose remaining tail is 2Q(4.5) ≈ 6.8e-6; the
       // trapezoid on 80 points adds ~1e-5 of its own — hence 1e-4, not 1e-12
       const err = Math.abs(area - o.pObs.value);

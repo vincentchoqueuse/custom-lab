@@ -24,7 +24,8 @@ the same deficit. The estimator 2x̄ is centered too, but far more spread out.
 On log–log axes the slopes are convergence rates, and they carry the headline
 of the chapter. The maximum and max+min fall with slope −1, an error in 1/N;
 2x̄ falls with slope −1/2, the usual 1/√N of the central limit theorem. At
-N = 100 the maximum is about seven times more precise: exploiting the
+N = 100 the maximum is about four times more precise — seventeen times in
+mean squared error, the ratio (N+1)(N+2)/6N the drawer displays: exploiting the
 regularity of the support beats averaging. One surprise is worth keeping —
 the maximum and max+min have the SAME mean squared error, 2θ²/((N+1)(N+2)).
 Correcting the bias cost nothing here, and gained nothing either.`,

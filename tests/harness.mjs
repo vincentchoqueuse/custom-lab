@@ -10,7 +10,7 @@ import { readdirSync, existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 
-export const BASE = process.env.EXPE34_TEST_URL ?? 'http://localhost:4179';
+export const BASE = process.env.PUPITRA_TEST_URL ?? 'http://localhost:4179';
 const CHROMIUM = process.env.PLAYWRIGHT_CHROMIUM ?? '/opt/pw-browsers/chromium';
 
 const green = (s) => `\x1b[32m${s}\x1b[0m`;

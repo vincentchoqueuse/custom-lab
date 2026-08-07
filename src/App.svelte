@@ -11,6 +11,7 @@
     toggleAxisLock,
     toggleCrosshair,
     showAllSeries,
+    NARROW_MQ,
   } from './core/store.svelte.js';
   import { schedule, onResult } from './core/worker-host.js';
   import { normalizeAll } from './core/observables.js';
@@ -83,7 +84,7 @@
   // drawer and the tabs become a native picker at exactly the width where the
   // wide canvas stops being worth its shape.
   $effect(() => {
-    const mq = window.matchMedia('(max-width: 860px)');
+    const mq = window.matchMedia(NARROW_MQ);
     const sync = () => (app.ui.narrow = mq.matches);
     sync();
     mq.addEventListener('change', sync);

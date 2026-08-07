@@ -135,7 +135,7 @@ export function compute({ num, den, input, f }) {
     y: Float64Array.from(roots, (r) => r[1]),
   });
   const maxRe = poles.length ? Math.max(...poles.map((r) => r[0])) : -Infinity;
-  const verdict = maxRe > 1e-9 ? 'instable' : maxRe < -1e-9 ? 'stable' : 'marginalement stable';
+  const verdict = maxRe > 1e-9 ? 'unstable' : maxRe < -1e-9 ? 'stable' : 'marginally stable';
 
   // theory H(jω) for the sine (complex polynomial evaluation)
   let gainTh = NaN;

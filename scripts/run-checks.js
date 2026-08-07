@@ -408,7 +408,7 @@ const FRENCH_WORDS =
   // quantities and readings
   'moyenne|écart|écart-type|erreur|erreurs|valeur|valeurs|mesure|mesures|niveau|seuil|' +
   'puissance|largeur|hauteur|longueur|profondeur|durée|vitesse|pente|somme|nombre|taille|' +
-  'taux|ordre|degré|' +
+  'taux|ordre|degré|instable|marginalement|' +
   // signals, systems, communications
   'bruit|signaux|onde|porteuse|codage|décodage|filtrage|repliement|échantillon|' +
   'échantillonnage|fenêtre|fenêtrage|spectre|fréquence|secondaire|secondaires|principale|' +
