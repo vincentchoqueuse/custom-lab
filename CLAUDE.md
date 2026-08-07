@@ -35,9 +35,10 @@ notebook cell, no "show the source" button on the plot — not an omission, a
 boundary. Two rules already in this document follow from it rather than from
 taste:
 
-- **Scene notes are Teacher Mode only, and ABSENT from the DOM otherwise.**
-  They are answer keys as much as they are gestures: "the wrong answer to
-  expect is…" is exactly what the room must reach on its own.
+- **The doc tells the story; the scenes stage it.** The manifest's `doc` is
+  public prose distilling what the scenes demonstrate, measured numbers
+  included. It absorbed the per-scene teacher notes, and the private channel
+  (Teacher Mode) was removed with nothing left to carry.
 - **The info panel's source link is provenance, not a handout.** It opens the
   experiment's directory on GitHub — compute.js for a colleague verifying a
   formula, scenes.js for one adapting the script to their own lecture. It is
@@ -74,7 +75,7 @@ worker resurrection cost seconds instead of milliseconds.
 6. **AGPL-3.0. Everything in English — code, UI, commits, and pedagogical content
    alike.** One language, no i18n framework: labels become `{fr, en}` pairs the day
    a second language is added, which would break the manifest contract and double
-   the maintenance of every teacher note forever. The catalogue is a demonstration
+   the maintenance of every doc paragraph forever. The catalogue is a demonstration
    instrument for an international audience; the lecture may be given in any
    language, the instrument speaks one. Core UI strings live in
    `src/core/strings.js`; the catalogue's own vocabulary — the word chosen, once,
@@ -121,8 +122,9 @@ other — a regime name, a verdict — and shows in the statline beside the numb
 ## Scenes (presets)
 
 A preset is a complete lecture scene: params, active view, visible pills, masked
-params (black box), panel states, teacher notes. Presets chain via keyboard (←/→):
-the preset list IS the lecture script.
+params (black box), panel states. Presets chain via keyboard (←/→): the preset
+list IS the lecture script; the argument it stages is written up in the
+manifest's `doc`.
 
 ## Actions
 
@@ -137,7 +139,7 @@ action never requires touching the UI.
 An experiment can:
 - ✓ produce typed observables
 - ✓ have multiple views (declarative, or custom with justification)
-- ✓ have multiple presets/scenes with teacher notes
+- ✓ have multiple presets/scenes, and a doc that tells their story
 - ✓ be replayed identically (seed in the URL)
 - ✓ be driven by URL (full state in the hash)
 - ✓ be driven by keyboard (lecture-ready shortcuts)
@@ -178,8 +180,6 @@ Claude.ai):
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ ☰  Statistics / Confidence intervals      [ Preset: All is well ▾ ] [🔗] [L] │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ 🗒 [Teacher Mode banner — current scene notes, when enabled]             │
-├──────────────────────────────────────────────────────────────────────────┤
 │  [Realizations | Distribution of x̄ | Coverage vs N]     [🎲 R][❄ F][⚙ P] │
 │                                                                          │
 │                       [ MAIN PLOT CARD ]                                 │
@@ -206,10 +206,7 @@ a shut folder cannot say for itself, and it is set one weight and one shade
 below the title: the eye reads the modules first and finds the numbers only
 when it is looking for them.
 Footer: light/dark theme toggle for the central area, the source link, settings,
-inspector. **Teacher Mode is not here** — its switch lives in the info panel, in
-the heading of the notes block it gates, which is the only place its state means
-anything; in the sidebar it was a toggle with no visible effect until you
-happened to land on a scene that had notes.
+inspector.
 
 **Clean header.** Breadcrumb `Subject / Experiment`. **Central preset selector**,
 LLM-model-picker style — one click applies the full scene. Right side: copyable URL
@@ -226,9 +223,8 @@ single-letter shortcuts are inert here — there is no experiment for them to
 drive — and the header shows no presentation button; ⌘K and the sidebar work as
 everywhere.
 
-**Central area.** Teacher Mode banner (scene notes; never projected by default, never
-in the URL). Light-background PlotFrame (projector legibility), pure SVG rendering,
-statline of key observables, export. Minimal tabs when the experiment has several
+**Central area.** Light-background PlotFrame (projector legibility), pure SVG
+rendering, statline of key observables, export. Minimal tabs when the experiment has several
 views.
 
 **View bar (tabs line).** The representations on the left when the experiment has
@@ -286,8 +282,7 @@ the browser Fullscreen API (native `Esc` exit).
 - **Drawer**: closed by default, state in the URL, controllable per preset.
 - **Info panel** (`I`): a wide dialog describing the experiment — its `doc` in
   prose, the LECTURE OUTLINE (every scene title, the current one marked, each a
-  button that plays it), the current scene's notes when Teacher Mode is on, the
-  tags, and the attribution. The footer's provenance line ends with a deep link
+  button that plays it), the tags, and the attribution. The footer's provenance line ends with a deep link
   to **this experiment's directory on GitHub**, on the deployed branch: the
   sidebar's repository button answers "what is this project"; this one answers
   both "how is that computed" (compute.js) and "how would I build one" — the
@@ -303,10 +298,6 @@ the browser Fullscreen API (native `Esc` exit).
   once, and no room at all for a description of the experiment itself. A dialog
   does not contradict "never a modal for parameters" — that rule protects the
   look→adjust→look loop, and nothing here adjusts anything.
-- **Teacher Mode**: gates the scene notes inside the info panel. Notes are
-  gestures written to oneself, and a dialog opened in class is projected like
-  everything else, so with Teacher Mode off they are ABSENT from the DOM rather
-  than hidden by CSS — the smoke suite asserts exactly that.
 - **Presentation Mode** (`L`): readable from the back of a lecture hall.
 - **Freeze frame** (`F`, `freeze` action): the current plot is pinned as a **gray
   dashed ghost in the background**; any subsequent change (slider, draw) renders on
@@ -456,7 +447,7 @@ registry at load time):
   stops applying**: a scene of an experiment with three or more views must SAY
   which one it opens on, and the registry refuses one that does not. The default
   is a convention for a main figure and its companion; on four tabs it means the
-  scene silently follows any reordering and opens on a figure its notes do not
+  scene silently follows any reordering and opens on a figure its title does not
   describe.
 - **`story`** absent → reserved extension point (state-machine lead noted in phase 5).
 - **Params are declared with field factories** from `core/fields.js` (Django-style):
@@ -470,7 +461,7 @@ registry at load time):
   'Hz', 'rad', 'dB'. A `select` option's `label` renders VERBATIM in the pill, so
   two lengths are capped at load time: the label at **24 characters** and the
   rendered pill `name = label` at **30**. The gloss belongs to `description`,
-  which the drawer and the tooltip show, or to the scene notes. Rendering: pills show `name = value unit`; the drawer shows
+  which the drawer and the tooltip show, or to the manifest `doc`. Rendering: pills show `name = value unit`; the drawer shows
   the name with the description as secondary text; the description also feeds the
   tooltip. Every param has a `default` (no nullable fields: the URL contract and
   resetDefaults require it); every other key is optional.
@@ -644,24 +635,21 @@ while keeping manifest and compute untouched.
 ```js
 // experiments/estimation/confidence-intervals/scenes.js
 // Auto-discovered by the registry. Defaults: view = first view, drawer = false.
+// A scene carries no prose: the argument the scenes stage is written up once,
+// publicly, in the manifest's `doc`.
 export default [
   {
     id: 'scene-1', title: 'All is well (N=30)',
     params: { N: 30, conf: 0.95 },
     visible: ['N', 'conf'],    // Prompt Bar pills
     masked: [],                 // black box: pill shows "?", revealHidden action
-    notes: `Question to ask BEFORE moving N:
-"If I take N from 30 to 200, does the coverage change?"
-The wrong answer to expect: "it goes up". Show that only the width shrinks.`,
   },
   {
     id: 'scene-2', title: 'Level α = 0.20',
     params: { conf: 0.80 },
     visible: ['conf'],
-    notes: `Have the room count the red intervals out loud (~1 in 5).`,
   },
 ];
-// notes: Teacher Mode only. Never projected by default, never in the URL.
 ```
 
 ## Contract: check.js — numerical correctness harness
@@ -719,7 +707,6 @@ Format: `#/{subject}/{experiment}?param1=…&view=…&drawer=0&preset=scene-2`
   while dragging, pushState on release).
 - The seed is part of the state: `randomizeSeed` increments it, so the URL stays
   reproducible after every draw.
-- Teacher `notes` never travel through the URL.
 - **Strict casting on decode**: everything in a URL is a string; `router.js` converts
   according to the manifest type (`float` → parseFloat, `int` → parseInt, `bool` →
   `=== 'true'`, `select` → validated against `options`). An out-of-bounds or
@@ -807,6 +794,13 @@ export default {
   subtitle: 'Amplitude, frequency, phase — and a little noise',
   tags: ['signal', 'sinusoid', 'fundamentals'],
 
+  doc: `Three numbers and a curve: A scales it, f packs it, φ slides it — at
+φ = π/2 the sine is a cosine, which the freeze ghost demonstrates in one
+gesture. Adding noise hides the curve without touching it: redraw and the
+noise changes while the red sinusoid stays put, and around σ = A the eye
+loses a signal that is still exactly there — recoverable, which is the whole
+point of the semester.`,
+
   params: {
     A:     float('A', { description: 'amplitude', min: 0,     max: 2,    step: 0.05, default: 1 }),
     f:     float('f', { description: 'frequency', min: 0.5,   max: 20,   step: 0.1,  default: 3,
@@ -833,18 +827,11 @@ export default [
     id: 'phase', title: 'Scene 1 · Phase shifts the curve',
     params: { A: 1, f: 3, phi: 0, sigma: 0 },
     visible: ['phi'],
-    notes: `One dial only: φ. Freeze (F) at φ=0, then turn it.
-Question: "at φ = π/2, which familiar curve do I get?"
-The grey ghost holds the original sine; the cosine lands on top of it.`,
   },
   {
     id: 'noise', title: 'Scene 2 · The signal inside the noise',
     params: { A: 1, f: 3, phi: 0, sigma: 0.5 },
     visible: ['sigma', 'A'],
-    notes: `Hammer R: the noise changes, the red sinusoid stays put.
-Raise σ until the eye loses the signal (~σ = A).
-Teaser: "and yet A, f and φ can be recovered exactly —
-that is the whole point of the semester."`,
   },
 ];
 ```
@@ -924,7 +911,7 @@ export const checks = [
 2. Templates: `monte-carlo` (M/N/seed params, wired histogram view) and
    `parametric-curve` (parameter sweep, line view).
 3. Writes the four files: a pre-filled `manifest.js` (params, declarative view),
-   a `scenes.js` with one example scene (pills + notes), a `compute.js` returning
+   a `scenes.js` with one example scene (pills only — the prose goes in `doc`), a `compute.js` returning
    functional dummy observables, and a `check.js` that includes the mandatory
    `standardChecks.determinism` plus one trivial passing test.
 4. **Criterion: the experiment appears in the sidebar and runs immediately**, before
@@ -1012,8 +999,8 @@ export const checks = [
 │   │   ├── Sidebar.svelte
 │   │   ├── CommandPalette.svelte
 │   │   ├── Header.svelte         # breadcrumb + preset selector + actions
-│   │   ├── Workspace.svelte      # composes: TeacherBanner, Tabs, ViewHost,
-│   │   │                         #   PlotFrame, PromptBar
+│   │   ├── Workspace.svelte      # composes: Tabs, ViewHost, PlotFrame,
+│   │   │                         #   PromptBar
 │   │   ├── DrawerParams.svelte
 │   │   ├── Inspector.svelte      # developer panel (raw observables)
 │   │   └── plots/
@@ -1055,7 +1042,7 @@ project refuses everywhere else.
 ## Conventions
 
 - **Everything in English**: code, UI chrome, comments, commit messages, and the
-  pedagogical content (labels, titles, notes, validation messages) that lives in
+  pedagogical content (labels, titles, docs, validation messages) that lives in
   the manifests. A recurring term is chosen once in `TERMINOLOGY.md` and used
   identically across the catalogue — a listener moving from one experiment to the
   next must never re-learn a name.
@@ -1070,7 +1057,7 @@ project refuses everywhere else.
   'd3-scale'`), never the full `d3` bundle, and always consumed through
   `core/scales.js`. `d3-selection` and any DOM-manipulating d3 module remain
   excluded: Svelte owns the DOM (freeze-frame and SVG export depend on it).
-- localStorage: cosmetic preferences only (theme, sidebar, teacher mode) — never
+- localStorage: cosmetic preferences only (theme, sidebar, palette) — never
   experiment state, which lives in the URL.
 - Responsive (sidebar as mobile drawer, adapted Prompt Bar); baseline accessibility
   (visible focus, `prefers-reduced-motion`, AA contrast).
@@ -1081,14 +1068,14 @@ project refuses everywhere else.
    rng, actions, observables, scales, worker-host with **lecture guard**: status,
    1.5 s timeout + resurrection, try/catch), Sidebar, Header with preset selector,
    Workspace (Tabs, ViewHost, PlotFrame, PromptBar with non-modal popovers and
-   actions, TeacherBanner), generated DrawerParams (visibleIf, validate, derived,
+   actions), generated DrawerParams (visibleIf, validate, derived,
    display), generic plots + overlays. Full validation on
    `estimation/confidence-intervals`.
 2. **Trial by fire**: `detection/neyman-pearson` (`log` param for SNR,
    densities+threshold / ROC / Pd vs SNR) to stress-test and **lock the manifest
    schema**. No other experiment before this lock.
-3. **Lecture polish**: CommandPalette, full shortcuts, Presentation Mode, Teacher
-   Mode, **freeze frame (F)**, Inspector, exports (SVG, PNG, clipboard), scaffold.
+3. **Lecture polish**: CommandPalette, full shortcuts, Presentation Mode,
+   **freeze frame (F)**, Inspector, exports (SVG, PNG, clipboard), scaffold.
 4. **Catalog**: histogram/density, LLN-CLT, bias/variance, MLE, CRB vs MLE, then
    digital communications.
 5. **Extension points** (nothing implemented before a concrete need — principle 7):

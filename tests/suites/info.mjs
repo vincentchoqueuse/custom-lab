@@ -1,19 +1,17 @@
 // THE INFO PANEL (I) — what the experiment is, and who wrote it.
 //
-// One assertion here matters more than the rest and is the reason the suite
-// exists at all: TEACHER NOTES ARE PRIVATE. They are gestures written to
-// oneself — "the wrong answer to expect is…", "have the room count the red
-// intervals" — and a room reading them over the professor's shoulder has been
-// handed the answer before the question. The rule predates this panel; the
-// panel is simply where it could most easily have been lost, since a dialog
-// opened in class is projected like everything else.
+// The panel carries the description, the lecture outline and the attribution,
+// and nothing else. It used to also gate per-scene teacher notes behind a
+// Teacher Mode switch; the notes were rewritten into the public docs and the
+// mechanism removed, and this suite asserts the removal stuck: no switch, no
+// notes block, in any state.
 //
 // The rest pins the promises a panel makes by existing: it opens and closes,
 // the outline is the whole script and playing a line plays that scene.
 import { run } from '../harness.mjs';
 
-const DOC = 'estimation/confidence-intervals'; // carries a `doc`
-const PLAIN = 'comm/mimo'; // carries none: the outline must stand alone
+const DOC = 'estimation/confidence-intervals';
+const DOC2 = 'comm/mimo'; // a second data point: the whole catalogue carries docs
 
 const panel = (page) =>
   page.evaluate(() => {
@@ -24,8 +22,7 @@ const panel = (page) =>
       doc: !!p.querySelector('.doc p'),
       scenes: [...p.querySelectorAll('.scene-row .title')].map((e) => e.textContent.trim()),
       current: p.querySelector('.scene-row.current .title')?.textContent.trim(),
-      notes: p.querySelector('.notes')?.textContent.trim() ?? null,
-      hint: !!p.querySelector('.notes-hidden'),
+      paragraphs: p.querySelectorAll('.doc p').length,
       foot: p.querySelector('.info-foot')?.textContent.replace(/\s+/g, ' ').trim(),
     };
   });
@@ -65,34 +62,23 @@ export default () =>
       t('and plays that scene', picked.includes(p.scenes[1]), picked.trim());
     }
 
-    /* ---------- teacher notes are private ------------------------------- */
-    // THE assertion. Teacher Mode off: the notes must not be in the DOM at
-    // all — not hidden by CSS, absent — because a projector shows the DOM.
+    /* ---------- teacher notes are gone, mechanism and all ---------------- */
+    // The notes became the docs; the private channel was retired. Nothing of
+    // it may survive in the DOM — no switch, no notes block, no reminder.
     await h.go('#/' + DOC);
     await page.keyboard.press('i');
     await page.waitForTimeout(300);
-    const off = await panel(page);
-    t('with Teacher Mode off there are no notes', off?.notes === null);
-    t('only a note that there are some', off?.hint === true);
-    t('and a switch to reveal them', !!(await page.$('.teacher-switch')));
+    t('no Teacher Mode switch anywhere', !(await page.$('.teacher-switch')));
+    t('no notes block anywhere', !(await page.$('.info-body .notes, .info-body .notes-hidden')));
 
-    // the switch lives in the panel now, in the heading of the block it gates
-    await page.click('.teacher-switch');
-    await page.waitForTimeout(300);
-    const on = await panel(page);
-    t('with it on the notes are there', (on?.notes?.length ?? 0) > 20, `${on?.notes?.length} chars`);
-    t('and the reminder is gone', on?.hint === false);
-    t('and the switch says so', await page.getAttribute('.teacher-switch', 'aria-pressed') === 'true');
-    await page.click('.teacher-switch');
-    await page.waitForTimeout(250);
-    t('switching it off takes them away again', (await panel(page))?.notes === null);
-
-    /* ---------- an experiment with no description still says something --- */
-    await h.go('#/' + PLAIN);
+    /* ---------- the doc is real prose, not a token --------------------- */
+    const rich = await panel(page);
+    t('the description flows as paragraphs', (rich?.paragraphs ?? 0) >= 2, `${rich?.paragraphs} paragraphs`);
+    await h.go('#/' + DOC2);
     await page.keyboard.press('i');
     await page.waitForTimeout(300);
-    const plain = await panel(page);
-    t('no description is not an empty panel', plain?.scenes.length > 1, `${plain?.scenes.length} scenes`);
+    const second = await panel(page);
+    t('a second experiment carries one too', (second?.paragraphs ?? 0) >= 2, `${second?.paragraphs} paragraphs`);
 
     /* ---------- it closes ------------------------------------------------ */
     await page.keyboard.press('Escape');

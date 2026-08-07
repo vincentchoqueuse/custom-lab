@@ -52,9 +52,7 @@
   </button>
   <!-- The source, where a reader looks for it: with the application's own
        switches rather than among the header's sharing buttons, which are about
-       THIS scene. It took the Teacher Mode slot, and Teacher Mode moved into
-       the info panel — next to the notes it gates, which is the only place its
-       state means anything. -->
+       THIS scene. -->
   <a class={cls} href={STR.REPO_URL} target="_blank" rel="noopener" title={STR.GITHUB}>
     <Icon name="github" size={15} />
   </a>

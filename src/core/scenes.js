@@ -33,7 +33,6 @@ export const SCENE_KEYS = Object.freeze({
   params: 'object',
   visible: 'array',
   masked: 'array',
-  notes: 'string',
   view: 'string',
   drawer: 'boolean',
   lock: 'boolean',

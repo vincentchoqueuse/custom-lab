@@ -350,8 +350,8 @@ function checkDsp() {
  *   1. FRENCH FUNCTION WORDS anywhere in a user-visible string. Fifty-seven
  *      words that are unambiguously not English — the list is checked to give
  *      zero hits on the 1300 strings the catalogue has today, so any hit is a
- *      regression and not a judgement call. This is the guard for scene notes,
- *      which are the most-edited pedagogical content in the repository.
+ *      regression and not a judgement call. This is the guard for the docs,
+ *      which are the most-edited pedagogical prose in the repository.
  *   2. ACCENTED WORDS outside a whitelist. `moiré` and `Cramér` are English
  *      (a loanword and a proper noun); `fréquence` and `méthode` are not.
  *   3. WORD-SHAPED PARAM NAMES against a CLOSED LIST. A param `name` is meant to
@@ -426,8 +426,8 @@ const ACCENTED_OK = new Set(['moiré', 'Cramér']);
  * Symbols the catalogue has RETIRED, and what they became. A symbol is not a
  * word, so the list above cannot see one: `Fe` is *fréquence d'échantillonnage*
  * wearing an English coat, and it sat in one experiment's params, its axis
- * labels, its view title and its scene notes long after TERMINOLOGY.md said in
- * bold that the sampling rate is `Fs` everywhere and in that spelling. A rule
+ * labels and its view title long after TERMINOLOGY.md said in bold that the
+ * sampling rate is `Fs` everywhere and in that spelling. A rule
  * written down and not checked is a rule that holds until someone is in a
  * hurry.
  */
@@ -839,7 +839,7 @@ async function checkCatalogue() {
       }
       checkAxisLabels(manifest, key, axisBad);
       expRanks.get(sub.name).push([exp.name, manifest.order]);
-      visible.push([key, manifest.title ?? ''], [key, manifest.subtitle ?? '']);
+      visible.push([key, manifest.title ?? ''], [key, manifest.subtitle ?? ''], [key, manifest.doc ?? '']);
       for (const [pk, p] of Object.entries(manifest.params ?? {})) {
         if (p.name) paramNames.push([`${key}.${pk}`, String(p.name)]);
         if (p.description) visible.push([`${key}.${pk}`, p.description]);
@@ -906,7 +906,7 @@ async function checkCatalogue() {
       }
       for (const [i, sc] of scenes.entries()) {
         nScenes++;
-        visible.push([`${key}#${sc.id}`, sc.title ?? ''], [`${key}#${sc.id}`, sc.notes ?? '']);
+        visible.push([`${key}#${sc.id}`, sc.title ?? '']);
         try {
           validateScene(sc, i, { views, params: manifest.params, random: manifest.random }, key);
         } catch (err) {

@@ -99,7 +99,7 @@ Node-safe, usable from compute.js AND check.js):
 ## Manifest / scenes conventions
 
 - EVERYTHING in English — code, comments, and the pedagogical content alike
-  (title, subtitle, descriptions, labels, notes, validate messages). One
+  (title, subtitle, doc, labels, validate messages). One
   language, no i18n (CLAUDE.md principle 6). A recurring term is chosen once
   in TERMINOLOGY.md and reused identically.
 - Data-mark colors: ONLY the canonical MATLAB hexes `#0072BD #D95319
@@ -112,8 +112,8 @@ Node-safe, usable from compute.js AND check.js):
 - Fixed axis domains are fine (data layers are clipped to the frame).
 - Scenes: set EVERY param that matters to the story (a later-added param's
   default will otherwise leak into old scenes); `view` defaults to the
-  first view; notes are teacher-only gestures ("freeze (F), raise X,
-  compare") and love a provocative question for the room.
+  first view. Scenes carry no notes: the argument they stage is written
+  up once, publicly, in the manifest `doc` (see `lecture-scenes`).
 - Scene 1 auto-applies on load — the default landing IS scene 1.
 - **The scene plan and the pill rules live in the `lecture-scenes` skill**:
   context -> problem -> method, 2-3 pills per scene ordered with the subject

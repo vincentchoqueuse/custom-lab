@@ -768,9 +768,9 @@ kbd {
 }
 
 /* ---------- info panel (I) ------------------------------------------------
-   What the experiment IS: description, lecture outline, teacher notes,
-   attribution. It replaced a banner that sat above the plot on every scene of
-   every lecture — three lines of permanent height for text read once. */
+   What the experiment IS: description, lecture outline, attribution. It
+   replaced a banner that sat above the plot on every scene of every
+   lecture — three lines of permanent height for text read once. */
 
 .info-backdrop {
   position: fixed;
@@ -913,48 +913,6 @@ kbd {
 .scene-row.current {
   background: var(--muted);
   font-weight: 600;
-}
-
-/* the Teacher Mode switch, in the heading of the block it governs */
-.teacher-switch {
-  margin-left: auto;
-  padding: 2px 9px;
-  font: inherit;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--muted-fg);
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.teacher-switch:hover {
-  color: var(--foreground);
-}
-
-.teacher-switch.on {
-  color: var(--primary-fg);
-  background: var(--primary);
-  border-color: var(--primary);
-}
-
-.info-body .notes {
-  margin: 0;
-  padding: 12px 14px;
-  background: var(--muted);
-  border-radius: var(--radius);
-  white-space: pre-line;
-  line-height: 1.55;
-  font-size: 13.5px;
-}
-
-.info-body .notes-hidden {
-  margin: 22px 0 0;
-  font-size: 13px;
-  color: var(--muted-fg);
-  font-style: italic;
 }
 
 .tags {

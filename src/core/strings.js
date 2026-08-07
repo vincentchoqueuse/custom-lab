@@ -55,8 +55,6 @@ export const STR = {
   LOCK_AXES: 'Lock the axes (A) — the frame stays put while the curve moves',
   AXES: 'Axes',
   CURSOR: 'Cursor',
-  ON: 'on',
-  OFF: 'off',
   READ_VALUES: 'Read the values under the pointer (C)',
   COLLAPSE_SIDEBAR: 'Toggle sidebar',
   SETTINGS: 'Settings',
@@ -65,8 +63,5 @@ export const STR = {
   ABOUT: 'About this experiment',
   NO_DESCRIPTION: 'This experiment carries no description yet.',
   LECTURE_OUTLINE: 'Lecture outline',
-  TEACHER_NOTES: 'Teacher notes',
-  NOTES_BEHIND_TEACHER_MODE:
-    'This scene carries teacher notes. They stay out of the page until Teacher Mode is on — a dialog opened in class is projected like everything else.',
   THICK_STROKES: 'Thick plot strokes',
 };

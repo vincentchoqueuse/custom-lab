@@ -89,6 +89,10 @@ export default {
   subtitle: 'TODO — one line about the experiment',
   tags: [],
 
+  doc: \`TODO — what the experiment demonstrates, in prose, for the info
+panel (I). Two to four paragraphs separated by blank lines; keep the measured
+numbers, drop the stage directions.\`,
+
   params: {
     N: int('N', { description: 'number of realizations', min: 10, max: 5000, step: 10, default: 500 }),
     mu: float('μ', { description: 'mean', min: -3, max: 3, step: 0.1, default: 0 }),
@@ -117,6 +121,10 @@ export default {
   subtitle: 'TODO — one line about the experiment',
   tags: [],
 
+  doc: \`TODO — what the experiment demonstrates, in prose, for the info
+panel (I). Two to four paragraphs separated by blank lines; keep the measured
+numbers, drop the stage directions.\`,
+
   params: {
     a: float('a', { description: 'parameter of the curve', min: 0.5, max: 5, step: 0.1, default: 2 }),
     // no random: true — this template draws nothing, so it gets no seed,
@@ -136,7 +144,6 @@ export default [
     title: 'Scene 1 — TODO',
     params: {},
     visible: ['${isMc ? 'N' : 'a'}'],
-    notes: \`TODO — the question to ask BEFORE touching the parameter.\`,
   },
 ];
 `;

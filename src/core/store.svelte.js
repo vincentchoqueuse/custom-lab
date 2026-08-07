@@ -40,7 +40,6 @@ export const app = $state({
   ui: {
     sidebar: true,
     theme: 'light',
-    teacher: false,
     presentation: false,
     palette: false,
     inspector: false,
@@ -345,11 +344,6 @@ function snapshotReadings() {
   for (const [k, o] of Object.entries(app.result.observables ?? {}))
     if ((o.type === 'scalar' || o.type === 'text') && o.meta?.label) out[k] = o.value;
   return out;
-}
-
-export function toggleTeacher() {
-  app.ui.teacher = !app.ui.teacher;
-  writePref('teacher', app.ui.teacher ? '1' : '0');
 }
 
 export function toggleCrosshair() {

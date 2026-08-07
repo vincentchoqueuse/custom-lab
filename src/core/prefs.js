@@ -1,4 +1,4 @@
-// Cosmetic preferences (theme, sidebar, teacher mode) persisted in
+// Cosmetic preferences (theme, sidebar, palette) persisted in
 // localStorage — NEVER experiment state, which lives in the URL.
 // Single owner of the storage keys and of the private-mode try/catch.
 

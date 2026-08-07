@@ -75,7 +75,7 @@ window chooses how it is read, N only sharpens it. Same rule everywhere.
 **PAIRS TRAVEL TOGETHER.**
 Two parameters that name the two axes of one picture are one gesture, and
 exposing half of it is exposing none. PCA had `x` alone for every scene while
-its own notes asked for "PC3 across, PC4 up" — a gesture the pills could not
+its own scene titles asked for "PC3 across, PC4 up" — a gesture the pills could not
 make. If a scene shows a plane, both axes are pills.
 
 **LENGTH — a pill reads `name = value unit`, and stays short.**
@@ -88,7 +88,7 @@ interface, it is a paragraph with a border. The explanation has two proper
 homes:
 
 - the param's `description` — drawer secondary text and tooltip;
-- the scene `notes` — where the formula and the reasoning belong anyway.
+- the manifest `doc` — where the formula and the reasoning belong anyway.
 
 `npm run check` enforces both the count and the length. A scene with one pill,
 or an option label over the limit, fails the catalogue checks.
@@ -113,12 +113,13 @@ invented in the abstract.
   otherwise leaks its default into old scenes and changes their story silently.
 - **"Très classique sans surprise."** For chrome, the expected thing beats the
   clever thing. Reach for the convention a reader already knows.
-- **Notes are gestures written to oneself**, and they are answer keys: Teacher
-  Mode only, absent from the DOM otherwise (CLAUDE.md, "Three roles").
+## Writing the doc
 
-## Writing the notes
-
-The three beats give the notes their shape too. A scene's notes should be
-readable while talking, so: the gesture first, the reasoning second, the number
-to check third. Name the measured values — "the gap goes 0.0062 → 0.0003" —
-because a professor who can quote a number owns the room's next question.
+A scene carries no notes: the argument the scenes stage is written up ONCE, in
+the manifest's `doc`, as public prose for the info panel (I). The three beats
+give the doc its shape too — the situation, the thing that breaks, the method
+and its price — written for any reader rather than as stage directions: "press
+R" becomes "redrawing shows…". Two to four paragraphs separated by blank
+lines, and KEEP THE MEASURED NUMBERS — "the gap goes 0.0062 → 0.0003" —
+because a doc that can quote a number is the difference between a claim and a
+demonstration.
