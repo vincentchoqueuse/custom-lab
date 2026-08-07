@@ -10,6 +10,24 @@ export default {
   subtitle: 'm and ω₀ tell the whole story: time, poles and frequency of one system',
   tags: ['second order', 'damping', 'poles', 'resonance', 'step response'],
 
+  doc: `Two numbers and the whole dynamics: ω₀ is the time scale, m is the SHAPE.
+At m = 0.3 the step response rings under an exponential envelope, with the
+overshoot e^(−mπ/√(1−m²)) printed beside the measurement; m = 0.7 leaves a
+single rebound, m = 1 is critical — the fastest without overshoot, a
+compromise rather than a law — and beyond it one pole heads toward zero
+and its slow mode drags everything.
+
+The pole view is the geometry: both poles travel the circle of radius ω₀
+at angle cos⁻¹(m), meeting at −ω₀ when m = 1, then separating along the
+real axis. Moving ω₀ inflates the circle without changing the shape.
+
+In frequency, |H| bulges below m = 1/√2 at ωr = ω₀√(1−2m²) with height
+K/(2m√(1−m²)) — 8 dB above K at m = 0.2 — and the bump vanishes exactly at
+0.707. The practical closing is identification: measuring K, Mr and ωr on
+a real Bode plot is enough to RECOVER m and ω₀, the reverse path of
+everything done here.`,
+
+
   params: {
     K: float('K', { description: 'static gain', min: 0.2, max: 2, step: 0.05, default: 1 }),
     m: float('m', {

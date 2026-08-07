@@ -11,6 +11,23 @@ export default {
   subtitle: 'P pushes, I erases, D calms — and each has its price',
   tags: ['PID', 'control', 'steady-state error', 'disturbance', 'closed loop'],
 
+  doc: `The three letters, each earning its keep on the same plant. P alone is
+fast and off target: the steady-state error is 1/(1+Kp), and it cannot
+reach zero because at zero error u = 0 — nobody is pushing any more. The
+load disturbance at t = 10 is suffered permanently.
+
+I erases everything: the integrator accumulates until the error is exactly
+zero, and the disturbance is absorbed and then removed. That is the real
+reason the I term exists — steady state, not speed. Too much of it and the
+accumulated memory overshoots: an integral has inertia.
+
+D calms — braking before the impact, melting the overshoot of an
+over-driven loop — and amplifies noise by roughly Kd/τf, turning the
+control signal into a wild sawtooth the moment the measurement carries
+σ = 0.02 of noise. That trade is why D is filtered, reduced, or simply
+absent in 90 % of industrial loops.`,
+
+
   params: {
     Kp: float('Kp', { description: 'proportional gain', min: 0, max: 12, step: 0.1, default: 3 }),
     Ki: float('Ki', { description: 'integral gain', min: 0, max: 5, step: 0.05, default: 1.5, precision: 2 }),

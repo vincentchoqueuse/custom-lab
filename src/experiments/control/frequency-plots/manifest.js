@@ -29,6 +29,28 @@ export default {
     'stability',
   ],
 
+  doc: `All four views plot THE SAME complex number H(jω); nothing changes between
+them but the way of looking. A first order at its cutoff reads −3.01 dB and
+−45°, and those two numbers are found four times: heights on the two Bode
+plots, length and angle of the segment on Nyquist, abscissa and ordinate on
+Black. The Nyquist locus of a first order is an exact half-circle — centred
+at K/2, radius K/2, cutoff at the top — and the geometry answers before the
+algebra why the phase never passes −90°.
+
+The second order adds the resonance: at m = 0.3 a +4.85 dB bump at
+ω₀√(1−2m²), a swelling on Nyquist, a nose on Black — the same bump lying
+down — vanishing exactly at m = 1/√2.
+
+The open loop is where the −1 point earns its keep. The phase margin is
+read at the 0 dB crossing, the gain margin at the −180° crossing — two
+lines, two gaps on the Bode plots; on Nyquist the same numbers are the
+factor left before −1 and the angle left on the unit circle; on Black the
+horizontal and vertical gaps to the critical point. Raising K scales the
+locus about the origin while −1 stays put — the whole idea of the Nyquist
+criterion — and at K = 6, exactly (τ₁+τ₂)/(τ₁τ₂), the locus passes through
+−1 and both margins fall to zero together.`,
+
+
   params: {
     sys: select('system', {
       description: 'the transfer function plotted',

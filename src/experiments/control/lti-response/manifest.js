@@ -18,6 +18,27 @@ export default {
   subtitle: 'Type num and den, choose the input — step, ramp or sinusoid',
   tags: ['LTI', 'transfer function', 'step', 'ramp', 'steady state'],
 
+  doc: `A transfer function typed by hand — num and den as coefficients in
+decreasing powers of s, carried in the URL so any system invented at the
+bench reaches the whole room as one link — and its responses. The step
+answers first: 1/(s+1)² is clean and slow, den = 1,0.4,1 rings, a zero adds
+overshoot, and the final value is the static gain num(0)/den(0).
+
+The ramp is a stopwatch: with unit static gain the output follows with a
+constant lag equal to the SUM of the time constants — 2 s for 1/(s+1)²,
+3 for three poles at −1 — and a zero brings it back down: zeros produce
+phase lead, literally. Break the static gain and the lag stops settling,
+opening as (1−H(0))·t.
+
+The sine is the living definition of H(jω): after the transient the output
+is a sinusoid at the same frequency, of amplitude |H(jω)| and shifted by
+its argument, the measured gain agreeing with the computed one to three
+decimals. Raising f traces a Bode plot point by point, by hand. And the
+pole view is where everything is decided: sliding a pole toward the axis
+makes the ringing appear, across it the statline reads "unstable" — the
+crossing visible on the plane a second before it is visible in time.`,
+
+
   params: {
     num: coeffs('num', {
       description: 'numerator of H(s), decreasing powers',

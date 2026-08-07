@@ -20,6 +20,26 @@ export default {
     'resonance',
   ],
 
+  doc: `One dial, K, and what closing the loop actually buys. The output comes
+closer to the setpoint — the remaining error is 1/(1+K) — the overshoot
+grows, and the settling time DOES NOT MOVE: K enters only the constant
+term of s² + 2mω₀s + ω₀²(1+K), so it moves ω₀ and not the real part of the
+poles. In frequency the same gesture reads as a bandwidth widened by
+√(1+K) and a damping divided by it: one cannot speed a system up with a
+plain gain without de-damping it, which is exactly why the PID exists.
+
+The resonance scene sharpens it into a threshold: a plant calm on its own
+(m > 1/√2) resonates in closed loop as soon as K > 2m² − 1. Resonance is
+not a property of the system — it is a property of the loop.
+
+The Nichols chart closes the chapter with its one idea: only the OPEN loop
+is drawn, and the grey contours are the places of equal CLOSED-loop gain.
+The contour the locus touches is the closed-loop resonance — 5.3 dB here,
+equal to the height of the bump on the Bode tab to 0.2 % — a property of
+the closed system read off the drawing of the open one, which is what a
+chart is for and why it was used before computers.`,
+
+
   params: {
     K: log('K', {
       description: 'proportional loop gain',

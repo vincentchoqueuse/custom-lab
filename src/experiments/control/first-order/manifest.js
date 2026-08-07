@@ -10,6 +10,27 @@ export default {
   subtitle: 'τ governs everything — and one zero is enough to send the output backwards',
   tags: ['first order', 'time constant', 'pole', 'zero', 'non-minimum phase'],
 
+  doc: `The pure first order and its three graphical readings: 63 % at t = τ, 95 %
+at 3τ — the settling time a specification quotes — and the tangent at the
+origin meeting the final value exactly at τ. The gain K changes none of it,
+which is what makes τ interesting. The impulse response is the derivative
+of the step response, sharing the same τ, with area K: a slow system is
+also a soft one. The pole sits at −1/τ, and the cutoff of the Bode plot at
+1/τ is the same number read in frequency, with −20 dB per decade beyond
+and −45° exactly at the corner: fast in time is wide in frequency.
+
+A zero changes the opening. The output jumps at t = 0 to K·τz/τ — the
+numerator differentiates, and the derivative of a step is a step — and past
+τz > τ the response overshoots and comes back: phase lead, the thing a PD
+controller manufactures on purpose.
+
+A zero in the RIGHT half-plane makes the output start the wrong way before
+coming back — the inverse overshoot of an aircraft that dips when the stick
+is pulled, of a hot-water tank. Speeding up the loop does not fix it: that
+is the fundamental limit the whole control course will meet, announced by
+a phase that dives toward −180° while the gain says nothing at all.`,
+
+
   params: {
     K: float('K', { description: 'static gain', min: 0.2, max: 3, step: 0.05, default: 1 }),
     tau: log('τ', {
