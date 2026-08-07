@@ -82,7 +82,7 @@ which is the whole craft of compensation, in one slider.`,
     // experiment, not to the catalogue's standard set ('poles' is the static
     // pole map; this is the path).
     plane('locus', 'The root locus', {
-      curves: [{ source: 'branches', color: '#0072BD', width: 2 }],
+      curves: [{ source: 'branches', color: '#0072BD', width: 2, label: 'the locus' }],
       clouds: [
         { source: 'openPoles', color: '#7E2F8E', r: 5, opacity: 1, label: 'poles (K = 0)' },
         { source: 'openZeros', color: '#77AC30', r: 4.5, opacity: 1, label: 'zero (K → ∞)' },

@@ -75,6 +75,7 @@ trustworthy error bar — and the second half is the valuable one.`,
       'Consistency ±3σ',
       scatter('err', {
         size: 2,
+        label: 'measured error',
         overlays: [
           band('errTube', { color: '#D95319', opacity: 0.15, label: '±3σ predicted' }),
           hline(() => 0, { color: '#EDB120', dashed: true }),

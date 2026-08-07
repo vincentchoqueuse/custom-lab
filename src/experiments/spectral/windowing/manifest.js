@@ -97,6 +97,7 @@ both: all of windowing is that one trade-off.`,
     figure(
       'time',
       line('signal', {
+        label: 'windowed signal',
         overlays: [
           line('envUp', { color: '#D95319', dashed: true, label: 'envelope' }),
           line('envDown', { color: '#D95319', dashed: true }),

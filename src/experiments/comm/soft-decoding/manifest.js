@@ -86,7 +86,7 @@ Structure AND confidence, both of them.`,
             label: 'data | parity',
           }),
         ],
-        axes: { x: 'trame', y: 'position du bit' },
+        axes: { x: 'frame', y: 'bit position' },
       })
     ),
 

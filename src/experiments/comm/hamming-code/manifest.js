@@ -92,7 +92,7 @@ is STRUCTURED redundancy, and the structure is what decides.`,
             label: 'data | parity',
           }),
         ],
-        axes: { x: 'trame', y: 'position du bit' },
+        axes: { x: 'frame', y: 'bit position' },
       })
     ),
 

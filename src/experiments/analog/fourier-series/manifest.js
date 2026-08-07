@@ -102,10 +102,11 @@ the pulse train at duty cycle one half.`,
       stem('spectrum', {
         color: '#0072BD',
         opacity: 0.85,
+        label: 'harmonics |cₙ|',
         overlays: [
           line('envelope', { color: '#D95319', width: 2, label: 'envelope' }),
         ],
-        axes: { x: 'n (rang de l\'harmonique)', y: 'amplitude de l\'harmonique' },
+        axes: { x: 'n — harmonic order', y: 'harmonic amplitude' },
       })
     ),
 

@@ -65,9 +65,10 @@ Cramér–Rao experiment next door.`,
       'Densities & draws',
       line('truePdf', {
         width: 2.5,
+        label: 'true density',
         overlays: [
-          line('estimatedPdf', { color: '#D95319', width: 2.5, dashed: true }),
-          scatter('samplesRug', { color: '#7E2F8E', size: 3.5, opacity: 0.55 }),
+          line('estimatedPdf', { color: '#D95319', width: 2.5, dashed: true, label: 'estimated density' }),
+          scatter('samplesRug', { color: '#7E2F8E', size: 3.5, opacity: 0.55, label: 'the sample' }),
         ],
         axes: { x: 'x', y: 'density' },
       })

@@ -81,6 +81,7 @@ converter.`,
       'error-hist',
       'Distribution of the error',
       histogram('errorLsb', {
+        label: 'measured error',
         overlays: [density('errPdfLsb', { label: 'uniform on [−½, ½]' })],
         // PINNED to the quantizer's own frame. In signal units the frame moved
         // with every bit added, so the one thing worth seeing — that the shape

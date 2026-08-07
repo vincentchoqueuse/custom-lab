@@ -67,6 +67,7 @@ spectrum analyser, and Δf = 2.405·f_m exactly.`,
     figure(
       'time',
       line('sig', {
+        label: 's(t)',
         overlays: [
           line('envUp', { color: '#D95319', dashed: true, label: 'envelope' }),
           line('envDown', { color: '#D95319', dashed: true }),

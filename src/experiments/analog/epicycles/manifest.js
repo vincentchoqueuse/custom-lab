@@ -70,10 +70,10 @@ two modules over turns exactly that decision into a field.`,
     // machine IS this experiment's subject, and the spectrum explains it.
     plane('epicycles', 'The circles, drawing', {
       curves: [
-        { source: 'contour', color: '#EDB120', width: 1.4, dashed: true },
-        { source: 'circles', color: 'var(--muted-fg)', width: 0.9 },
-        { source: 'arm', color: '#7E2F8E', width: 1.6 },
-        { source: 'trace', color: '#0072BD', width: 2.4 },
+        { source: 'contour', color: '#EDB120', width: 1.4, dashed: true, label: 'the contour' },
+        { source: 'circles', color: 'var(--muted-fg)', width: 0.9, label: 'the circles' },
+        { source: 'arm', color: '#7E2F8E', width: 1.6, label: 'the arm' },
+        { source: 'trace', color: '#0072BD', width: 2.4, label: 'the trace' },
       ],
       markers: { source: 'pen', color: '#D95319', label: 'the pen' },
       minHalf: 1.25,

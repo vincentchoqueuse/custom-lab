@@ -242,6 +242,54 @@ function checkAxesMargin() {
 }
 
 /**
+ * WHO IS WHO: a view that draws several series names each of them. The legend
+ * is built from labels, so an unlabeled series in a multi-series view is a
+ * curve the room cannot identify — the one question a projected figure must
+ * never raise. The unit of the rule is the VISUAL IDENTITY (type + color +
+ * dash): a pair drawn identically (an envelope's two halves) may share one
+ * label, since two chips saying the same thing only lengthen the legend.
+ * Stack panels are exempt — their y-axis label IS their name — but every
+ * stack overlay, drawn across all panels, must say what it is.
+ */
+function checkLegends(manifest, key, bad) {
+  const DATA = new Set(['line', 'scatter', 'histogram', 'bars', 'stem', 'density', 'band']);
+  const groups = [];
+  for (const v of manifest.views ?? []) {
+    const name = `${key}/${v.id ?? v.figure}`;
+    if (v.kind === 'plot') {
+      groups.push([name, [v.spec, ...(v.spec.overlays ?? [])].filter((l) => DATA.has(l.type))]);
+    } else if (v.kind === 'plane') {
+      groups.push([
+        name,
+        [
+          ...(v.spec.clouds ?? []).map((c) => ({ type: 'scatter', ...c })),
+          ...(v.spec.curves ?? []).map((c) => ({ type: 'line', ...c })),
+          ...(v.spec.markers ? [{ type: 'scatter', ...v.spec.markers }] : []),
+        ],
+      ]);
+    } else if (v.kind === 'stack') {
+      for (const o of v.spec.overlays ?? [])
+        if (DATA.has(o.type) && !o.label)
+          bad.push(`${name}: stack overlay '${o.source}' has no label`);
+    }
+  }
+  for (const [name, layers] of groups) {
+    if (layers.length < 2) continue;
+    const byLook = new Map();
+    for (const l of layers) {
+      const look = `${l.type}, ${l.color ?? 'default color'}${l.dashed ? ', dashed' : ''}`;
+      if (!byLook.has(look)) byLook.set(look, []);
+      byLook.get(look).push(l);
+    }
+    for (const [look, ls] of byLook)
+      if (!ls.some((l) => l.label))
+        bad.push(
+          `${name}: '${ls.map((l) => l.source).join("', '")}' (${look}) has no legend label`
+        );
+  }
+}
+
+/**
  * Every declarative axis carries a name.
  *
  * An unlabelled axis is still TICKED: it therefore reads as if it measured
@@ -410,7 +458,7 @@ const FRENCH_WORDS =
   'puissance|largeur|hauteur|longueur|profondeur|durée|vitesse|pente|somme|nombre|taille|' +
   'taux|ordre|degré|instable|marginalement|' +
   // signals, systems, communications
-  'bruit|signaux|onde|porteuse|codage|décodage|filtrage|repliement|échantillon|' +
+  'bruit|signaux|onde|porteuse|codage|décodage|filtrage|repliement|échantillon|trame|trames|' +
   'échantillonnage|fenêtre|fenêtrage|spectre|fréquence|secondaire|secondaires|principale|' +
   'retard|entrée|sortie|réponse|impulsionnelle|indicielle|fréquentielle|temporelle|' +
   'statique|dynamique|ouverture|fermeture|maillage|treillis|' +
@@ -807,6 +855,7 @@ async function checkCatalogue() {
   let figuresOk = true;
   let scenesOk = true;
   const axisBad = [];
+  const legendBad = [];
   let nViews = 0;
   let nScenes = 0;
   const subjectRanks = [];
@@ -838,6 +887,7 @@ async function checkCatalogue() {
         continue;
       }
       checkAxisLabels(manifest, key, axisBad);
+      checkLegends(manifest, key, legendBad);
       expRanks.get(sub.name).push([exp.name, manifest.order]);
       visible.push([key, manifest.title ?? ''], [key, manifest.subtitle ?? ''], [key, manifest.doc ?? '']);
       for (const [pk, p] of Object.entries(manifest.params ?? {})) {
@@ -846,6 +896,33 @@ async function checkCatalogue() {
         for (const o of p.options ?? []) if (o.label) visible.push([`${key}.${pk}`, String(o.label)]);
       }
       for (const v of views) if (v.title) visible.push([`${key}/${v.id}`, v.title]);
+      // axes and legend labels are projected text too — the French axes of
+      // one spectrum view survived every sweep because nothing harvested them
+      for (const v of manifest.views ?? []) {
+        const axis = (a, w) => {
+          const s = typeof a === 'string' ? a : a?.label;
+          if (s) visible.push([w, s]);
+        };
+        const layerText = (l, w) => {
+          if (l?.label) visible.push([w, String(l.label)]);
+          axis(l?.axes?.x, w);
+          axis(l?.axes?.y, w);
+        };
+        const w = `${key}/${v.id ?? v.figure}`;
+        if (v.kind === 'plot') {
+          layerText(v.spec, w);
+          for (const o of v.spec.overlays ?? []) layerText(o, w);
+        } else if (v.kind === 'plane') {
+          axis(v.spec.axes?.x, w);
+          axis(v.spec.axes?.y, w);
+          for (const c of [...(v.spec.clouds ?? []), ...(v.spec.curves ?? [])]) layerText(c, w);
+          if (v.spec.markers) layerText(v.spec.markers, w);
+        } else if (v.kind === 'stack') {
+          axis(v.spec.axes?.x, w);
+          for (const pnl of v.spec.panels ?? []) layerText(pnl, w);
+          for (const o of v.spec.overlays ?? []) layerText(o, w);
+        }
+      }
       // `derived` readings are FUNCTIONS, so their text only exists once
       // evaluated — which is how a drawer reading "oui (L_cp ≥ L−1)" survived
       // the conversion and this check's first version alike. Evaluated here on
@@ -921,6 +998,7 @@ async function checkCatalogue() {
   checkOrdering(subjectRanks, expRanks);
   checkLanguage(visible.filter(([, s]) => s), paramNames);
   report('axes', axisBad, 'every declarative axis carries a name');
+  report('legends', legendBad, 'every multi-series view names each visual identity', { cap: 40 });
   console.log(`  ${dim('scenes')}`);
   if (scenesOk)
     console.log(

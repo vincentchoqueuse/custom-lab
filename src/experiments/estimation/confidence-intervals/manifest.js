@@ -92,8 +92,9 @@ data — it becomes narrower.`,
       'distribution',
       'Distribution of x̄',
       histogram('means', {
+        label: 'x̄ over M samples',
         overlays: [
-          density('theoreticalDensity', { color: '#D95319' }),
+          density('theoreticalDensity', { color: '#D95319', label: 'theory N(μ, σ²/N)' }),
           vline('mu', { color: '#EDB120', dashed: true, label: 'μ' }),
         ],
         axes: { x: 'x̄', y: 'frequency' },
