@@ -9,6 +9,26 @@ export default {
   subtitle: 'Shannon live: below Fs/2 all is well, above it frequencies fold back',
   tags: ['analog', 'digital', 'sampling', 'aliasing', 'Shannon', 'Nyquist'],
 
+  doc: `A sinusoid, its samples, and the signal a sinc interpolation rebuilds from
+the samples alone. Below Fs/2 the reconstruction covers the original
+exactly — Shannon's theorem is an equality, not an approximation, and it
+stays true with barely more than two points per period, long after the eye
+has stopped believing it.
+
+At 45 Hz sampled at 50 the same points trace a 5 Hz signal, and the
+reconstruction agrees: two different signals, identical samples. The
+information is gone, not merely degraded. This is the wagon wheel of
+westerns and the moiré of camera sensors, and the apparent-frequency view
+shows f bouncing off Fs/2 as off a wall.
+
+A square wave makes the folding concrete: at 15 Hz its harmonics sit at 45,
+75 and 105 Hz, all beyond Fs/2 = 25, and each folds back inside the band —
+45 lands on 5, 75 on 25, 105 on 5 again. The reconstruction is no longer a
+square wave; it has been contaminated by its own folded harmonics. Hence
+the rule that filtering happens BEFORE sampling, never after, and why every
+converter carries an anti-aliasing filter.`,
+
+
   params: {
     source: select('source', {
       description: 'continuous signal being sampled',

@@ -24,7 +24,16 @@ export default {
         oversampling at first order, fifteen at second, against six per BIT for
         a plain converter. And the bill, which the experiment also measures: the
         TOTAL noise gets worse, because shaping moves noise rather than removing
-        it.`,
+        it — by exactly the central binomial coefficient C(2L, L), 2 at first
+        order and 6 at second, and the measured ratio lands on 5.97.
+
+        How a single comparator can be worth seven effective bits is the
+        opening astonishment: the information is in the DENSITY of the ones,
+        a local average that the filter downstream computes. And the model has
+        an honest edge, which the last scene measures rather than hides — the
+        C(2L, L) identity assumes the quantization error is white, which is
+        excellent at four bits and a useful lie at one, where the error is
+        produced by the signal and correlated with it.`,
 
   params: {
     bits: int('b', { description: 'quantizer resolution', min: 1, max: 8, default: 1, unit: 'bits' }),

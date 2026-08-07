@@ -10,6 +10,27 @@ export default {
   subtitle: 'The ADC staircase, its error, and the 6 dB per bit rule',
   tags: ['digital', 'ADC', 'quantization', 'SNR', 'dither'],
 
+  doc: `A signal rounded to 2^b levels, and what the rounding costs. At b = 3 the
+staircase is impossible to miss; at b = 8 it disappears into the line. The
+error histogram sits on the uniform density over ±Δ/2 — the assumption
+behind the familiar Δ²/12 — until b drops low enough that the error
+acquires structure and stops being a noise at all: the uniform model is an
+approximation, valid when Δ is small against the signal, and the experiment
+shows where that condition stops being a formality.
+
+The SNR view measures the law of the chapter: 6.02b + 1.76 + 20·log₁₀A.
+Each bit buys 6 dB — and so does filling the range: an input at half
+amplitude wastes exactly one bit, which is why getting the gain in front of
+an ADC right is the entire art.
+
+Dither is the counter-intuitive coda. At low resolution the error is a
+periodic pattern locked to the signal — distortion, not noise — and adding
+a small random signal before rounding dissolves it into white noise, at a
+cost of about 3 dB. Redrawing tells the two apart: the undithered pattern
+never changes, the dithered noise does. The trade is made in every audio
+converter.`,
+
+
   params: {
     b: int('b', { description: 'number of bits', min: 1, max: 12, default: 8, unit: 'bits' }),
     A: float('A', {

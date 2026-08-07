@@ -9,6 +9,29 @@ export default {
   subtitle: 'The spectrum repeats every Fs — and aliasing is the sum of the copies',
   tags: ['analog', 'digital', 'sampling', 'periodization', 'Poisson', 'Shannon'],
 
+  doc: `What the samples know, answered in frequency. The spectrum of a sampled
+signal is not X(f): it is X(f) plus its copies shifted by every multiple of
+Fs. At a high rate the copies are far away and the central one untouched;
+lowering Fs does not shrink the spectrum — it moves the copies closer, until
+they bite into the central copy and ADD to it. Aliasing is not a mysterious
+deformation, it is a sum, and the statline measures the in-band error it
+causes.
+
+Two dials fight the overlap from opposite sides: raising Fs separates the
+copies, widening the signal in time narrows its spectrum — the same trade
+seen twice. The sinc is the special case that settles the theory: its
+spectrum is rectangular, stopping dead, so above twice that edge the copies
+do not touch at all and the error is EXACTLY zero — Shannon's theorem shown
+rather than recited, and the only one of the four sources to achieve it,
+the others having infinite tails.
+
+The last scene proves the picture is not a drawing. The transform of the
+samples themselves, Σ x(nTs)·e^(−j2πf nTs), computed without ever using
+X(f), lands exactly on the sum of the copies: the Poisson summation
+formula, which is the whole theorem in one sentence — sampling in time is
+periodizing in frequency.`,
+
+
   params: {
     signal: select('signal', {
       description: 'source (transform known in closed form)',

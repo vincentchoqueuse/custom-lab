@@ -9,6 +9,32 @@ export default {
   subtitle: 'Zeros, then a filter — and what each step does to the spectrum',
   tags: ['digital', 'upsampling', 'interpolation', 'zero stuffing', 'images', 'DAC'],
 
+  doc: `From samples to a signal at L times the rate, in two steps — and the first
+one computes nothing at all. Inserting L−1 zeros between the samples adds
+no information and changes the spectrum not at all: X_up(f) = X(f) exactly,
+verified to 1e-12. What changes is the BAND the view shows, now reaching
+L·Fs/2, and the spectral copies that had always existed at k·Fs ± f₀ are
+suddenly inside it: the images, exactly L−1 of them. Only one sample in L
+being non-zero, the average power has also been divided by L.
+
+The second step is a low-pass at Fs/2 with gain L, drawn over the spectrum
+so that what it keeps and cuts is visible. The images fall by 62 dB, the
+zeros become a sinusoid — and the interpolated curve passes EXACTLY through
+the original samples, because the kernel is 1 at the center and 0 at every
+other multiple of L. The data were not approximated, they were kept. The
+useful line comes back up by 20·log₁₀(L), the filter returning the power
+the stuffing divided.
+
+The filter's length is the engineering. Too short and the image survives
+almost untouched; lengthening it helps — but not monotonically, since the
+stop-band ripple slides as the length changes and the image falls sometimes
+into a notch, sometimes onto a lobe: measured, M = 4 is worse than M = 2.
+"Longer, therefore better" is true on average and false in particular,
+which is exactly why one measures. And the filter runs at L·Fs, so
+upsampling is not free — merely far cheaper than an analog filter of the
+same steepness.`,
+
+
   params: {
     // THE STEP is a parameter, not a tab: the two figures stay the same and it
     // is the chain that advances on them. A scene therefore opens at the step
