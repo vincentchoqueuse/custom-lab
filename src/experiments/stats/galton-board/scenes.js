@@ -6,8 +6,8 @@ export default [
     id: 'drop',
     title: 'The machine',
     view: 'board',
-    params: { D: 12, M: 500, p: 0.5 },
-    visible: ['M', 'D'],
+    params: { D: 12, B: 10, M: 3000, p: 0.5 },
+    visible: ['B', 'D'],
   },
   {
     id: 'pascal',

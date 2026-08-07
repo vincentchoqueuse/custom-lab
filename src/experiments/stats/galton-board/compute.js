@@ -4,15 +4,14 @@
 // BINOMIAL(D, p), and for D large enough the silhouette is the Gaussian. The
 // machine is the theorem: independence row by row in, bell curve out.
 //
-// Two figures. The board shows the MECHANISM — the pegs, a handful of real
-// trajectories, the bins they end in. The histogram shows the LAW — M balls
-// against the exact binomial (log-Gamma, no factorial overflow) and against
-// the Gaussian the CLT promises.
+// Two figures. The board shows the MECHANISM — B traced balls, each ending
+// as a dot stacked in its bin: what falls is what piles. The histogram shows
+// the LAW — M balls against the exact binomial (log-Gamma, no factorial
+// overflow) and against the Gaussian the CLT promises.
 // PURE, stateless, seeded — runs in a worker; deterministic at fixed seed.
 import { mulberry32 } from '../../../core/rng.js';
 import { logGamma, normalPdf } from '../../../core/numeric.js';
 
-const N_PATHS = 7; // trajectories actually drawn on the board
 
 /** Exact Binomial(D, p) pmf via log-Gamma — stable up to any D on the dial. */
 function binomialPmf(D, p, k) {
@@ -21,22 +20,28 @@ function binomialPmf(D, p, k) {
 }
 
 /**
- * @param {{D: number, M: number, p: number, seed: number}} params
+ * @param {{D: number, M: number, B: number, p: number, seed: number}} params
  * @returns {{observables: Object}}
  */
-export function compute({ D, M, p, seed }) {
+export function compute({ D, M, B, p, seed }) {
   const rng = mulberry32(seed);
 
   /* ---------- M balls through the board ---------------------------------- */
   const counts = new Float64Array(D + 1);
-  // the first few balls keep their full trajectory for the board view;
-  // lateral position after r rows with k rights is k − r/2 (pegs half a
-  // step apart), so the picture is the classic triangle
+  // The first B balls of the SAME stream keep their full trajectory for the
+  // board view, and each one lands as a dot in the pile below: what is seen
+  // falling is exactly what stacks. Lateral position after r rows with k
+  // rights is k − r/2 (pegs half a step apart) — the classic triangle.
+  const FLOOR = -D - 7.6; // where the pile stands
+  const BALL = 0.48; // one ball of stack height
   const px = [];
   const py = [];
+  const pileX = [];
+  const pileY = [];
+  const stack = new Float64Array(D + 1);
   for (let m = 0; m < M; m++) {
     let k = 0;
-    const keep = m < N_PATHS;
+    const keep = m < B;
     if (keep) {
       px.push(0);
       py.push(0);
@@ -51,6 +56,9 @@ export function compute({ D, M, p, seed }) {
     if (keep) {
       px.push(NaN);
       py.push(NaN);
+      pileX.push(k - D / 2);
+      pileY.push(FLOOR + BALL * stack[k]);
+      stack[k]++;
     }
     counts[k]++;
   }
@@ -91,30 +99,6 @@ export function compute({ D, M, p, seed }) {
   let gap = 0;
   for (let k = 0; k <= D; k++) gap = Math.max(gap, Math.abs(pmf[k] - normalPdf(k, mu, sd)));
 
-  /* ---------- the bins, filling under the board --------------------------- */
-  // the classic object has the histogram INSIDE it: the balls stack under the
-  // pegs. A step band grows from a floor below the last row, each bin under
-  // the lateral position its k lands at, height normalized on the PEAK OF THE
-  // LAW (not of the draw) so the frame never jumps while M feeds it — the
-  // silhouette converges upward into the binomial as the balls accumulate.
-  const FLOOR = -D - 4.4;
-  const pmfMax = Math.max(...pmf);
-  const bx = new Float64Array(4 * (D + 1));
-  const blo = new Float64Array(4 * (D + 1));
-  const bhi = new Float64Array(4 * (D + 1));
-  for (let k = 0; k <= D; k++) {
-    const xk = k - D / 2;
-    const h = FLOOR + (3.6 * freq[k]) / pmfMax;
-    const o = 4 * k;
-    bx[o] = xk - 0.44;
-    bx[o + 1] = xk - 0.38;
-    bx[o + 2] = xk + 0.38;
-    bx[o + 3] = xk + 0.44;
-    blo[o] = blo[o + 1] = blo[o + 2] = blo[o + 3] = FLOOR;
-    bhi[o] = bhi[o + 3] = FLOOR;
-    bhi[o + 1] = bhi[o + 2] = h;
-  }
-
   let meanMeas = 0;
   for (let k = 0; k <= D; k++) meanMeas += k * counts[k];
   meanMeas /= M;
@@ -125,7 +109,7 @@ export function compute({ D, M, p, seed }) {
   return {
     observables: {
       pegs: { x: Float64Array.from(pegX), y: Float64Array.from(pegY) },
-      bins: { x: bx, lo: blo, hi: bhi },
+      pile: { x: Float64Array.from(pileX), y: Float64Array.from(pileY) },
       paths: { x: Float64Array.from(px), y: Float64Array.from(py) },
       // the measured histogram, the exact law, the CLT silhouette
       landing: { x: kAxis, y: freq },

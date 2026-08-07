@@ -1,5 +1,5 @@
 import { float, int } from '../../../core/fields.js';
-import { view, line, scatter, bars, band, density } from '../../../core/views.js';
+import { view, line, scatter, bars, density } from '../../../core/views.js';
 
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
@@ -14,11 +14,12 @@ export default {
 through D rows of pegs and bounces right with probability p at each one; the
 bin it lands in counts its rights. Nothing else is going on — and that
 nothing else is the whole point: D independent yes/no decisions in, a bell
-silhouette out. The board view is the whole object: the pegs, a handful of
-real trajectories, and the bins filling live underneath as M feeds them —
-the bar heights share one fixed scale, so the silhouette converges upward
-into the bell instead of being renormalized out of sight. The histogram view
-then reads the same bins against the law.
+silhouette out. The board view is the whole object, kept honest: B traced
+balls zigzag through the pegs and EACH ONE lands as a dot stacked in its
+bin — the pile is the histogram of exactly the trajectories on screen,
+nothing invisible feeds it. Raising B drops more balls and the bell builds
+itself, one visible ball at a time. The histogram view then does the
+statistics at scale: M balls against the law.
 
 The bins fill as an exact Binomial(D, p), drawn from its closed form over
 the measured bars: the pegs write Pascal's triangle without being told to.
@@ -36,6 +37,12 @@ same convergence with draws that are not coin flips at all.`,
 
   params: {
     D: int('D', { description: 'rows of pegs', min: 3, max: 24, default: 12 }),
+    B: int('B', {
+      description: 'balls traced through the board view — each lands in the pile',
+      min: 1,
+      max: 60,
+      default: 10,
+    }),
     M: int('M', {
       description: 'balls dropped',
       min: 100,
@@ -56,7 +63,7 @@ same convergence with draws that are not coin flips at all.`,
 
   groups: [
     { title: 'The board', params: ['D', 'p'] },
-    { title: 'The drop', params: ['M'] },
+    { title: 'The drop', params: ['B', 'M'] },
   ],
 
   views: [
@@ -68,10 +75,10 @@ same convergence with draws that are not coin flips at all.`,
         size: 3,
         label: 'pegs',
         overlays: [
-          line('paths', { width: 1.6, opacity: 0.85, label: 'trajectories' }),
-          // the bins, stacking under the pegs — the classic object keeps its
-          // histogram inside the machine, and M feeds it live
-          band('bins', { color: '#0072BD', opacity: 0.55, label: 'the bins, filling' }),
+          line('paths', { width: 1.5, opacity: 0.6, label: 'trajectories' }),
+          // every traced ball ends as a dot stacked in its bin: the pile IS
+          // the histogram of exactly the trajectories on screen
+          scatter('pile', { color: '#0072BD', size: 5.5, label: 'the pile' }),
         ],
         axes: { x: 'lateral position', y: 'row' },
       })

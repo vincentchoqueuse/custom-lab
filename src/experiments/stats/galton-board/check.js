@@ -4,7 +4,7 @@
 import { compute } from './compute.js';
 import { standardChecks } from '../../../core/checks.js';
 
-const P = (over = {}) => ({ D: 12, M: 3000, p: 0.5, seed: 34, ...over });
+const P = (over = {}) => ({ D: 12, M: 3000, B: 10, p: 0.5, seed: 34, ...over });
 
 /** Binomial pmf by the Pascal recurrence — a second construction, sharing no
  *  code with the log-Gamma one in compute.js. */
@@ -105,24 +105,27 @@ export const checks = [
           if (k < 0 || k > 12 || Math.abs(k - Math.round(k)) > 1e-12) ok = false;
         }
       }
-      return { ok: ok && starts === 7, detail: `${starts} trajectories` };
+      return { ok: ok && starts === 10, detail: `${starts} trajectories` };
     },
   },
   {
-    name: 'the bins under the board hold exactly the histogram view\'s shares',
+    name: 'the pile is the histogram of the traced balls: every dot matches an endpoint',
     category: 'numeric',
     run() {
-      // one truth, two figures: bar k of the board band, unscaled, must be
-      // the same number as bar k of the histogram — same counts, same draw
-      const { observables: o } = compute(P());
-      const floor = o.bins.lo[0];
-      const pmfMax = Math.max(...o.binomial.y);
-      let worst = 0;
-      for (let k = 0; k <= 12; k++) {
-        const share = ((o.bins.hi[4 * k + 1] - floor) * pmfMax) / 3.6;
-        worst = Math.max(worst, Math.abs(share - o.landing.y[k]));
-      }
-      return { ok: worst < 1e-12, detail: `max|Δ|=${worst.toExponential(1)}` };
+      // one truth, two drawings: recount the traced trajectories' endpoints
+      // and demand the pile hold exactly those balls, column by column
+      const { observables: o } = compute(P({ B: 24 }));
+      const fromPaths = new Map();
+      for (let i = 0; i < o.paths.y.length; i++)
+        if (o.paths.y[i] === -12) {
+          const x = o.paths.x[i];
+          fromPaths.set(x, (fromPaths.get(x) ?? 0) + 1);
+        }
+      const fromPile = new Map();
+      for (const x of o.pile.x) fromPile.set(x, (fromPile.get(x) ?? 0) + 1);
+      let ok = o.pile.x.length === 24 && fromPaths.size === fromPile.size;
+      for (const [x, n] of fromPaths) if (fromPile.get(x) !== n) ok = false;
+      return { ok, detail: `${o.pile.x.length} balls in ${fromPile.size} columns` };
     },
   },
   standardChecks.determinism(compute, P(), 'landing'),
