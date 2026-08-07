@@ -1,0 +1,16 @@
+// Cloudflare Workers (static assets) deployment config.
+// The site is purely static: no Worker script, just the Vite build served
+// as assets. Cloudflare's Git integration builds with the command configured
+// in the dashboard (npm run check && npm run build) and then runs
+// `npx wrangler deploy`, which reads this file.
+{
+  "name": "pupitra",
+  "compatibility_date": "2026-08-07",
+  "assets": {
+    "directory": "./dist",
+    // Hash routing means the server only ever sees "/", but serving the app
+    // for any unknown path keeps a mistyped or truncated URL on the catalogue
+    // (the router then lands it on #/, the honest fallback).
+    "not_found_handling": "single-page-application"
+  }
+}
