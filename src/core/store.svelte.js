@@ -94,7 +94,12 @@ export function activeScene() {
   return m?.presets.find((p) => p.id === app.preset) ?? null;
 }
 
-/** Prompt Bar pills: the active scene's `visible` params. */
+/** Prompt Bar pills: the active scene's `visible` params.
+ *  `visibleIf` is honoured here exactly as in the drawer: a scene may list
+ *  both of two mode-gated params (an AM index and an FM index), and the bar
+ *  shows only the one the current mode makes real — flipping the mode pill
+ *  swaps them live. A pill for a param that cannot act would be a dead
+ *  control, the same dishonesty as a dice on a deterministic experiment. */
 export function visiblePills() {
   const m = manifest();
   if (!m) return [];
@@ -106,7 +111,14 @@ export function visiblePills() {
       : Object.keys(m.params)
           .filter((k) => k !== 'seed' && m.params[k].type !== 'readonly')
           .slice(0, 3);
-  return list.filter((k) => m.params[k]);
+  return list.filter((k) => {
+    const spec = m.params[k];
+    if (!spec) return false;
+    if (!spec.visibleIf) return true;
+    return Object.entries(spec.visibleIf).every(([p, v]) =>
+      Array.isArray(v) ? v.includes(app.params[p]) : app.params[p] === v
+    );
+  });
 }
 
 /** Currently masked params (black box), empty once revealed. */
