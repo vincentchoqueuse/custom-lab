@@ -10,6 +10,29 @@ export default {
   subtitle: 'A known signal in Gaussian noise: threshold, ROC and P_D vs SNR',
   tags: ['detection', 'Neyman–Pearson', 'ROC', 'false alarm', 'SNR'],
 
+  doc: `The statistic T under H₀ and under H₁: two Gaussians, and a threshold γ
+between them that cuts out P_FA on one side and P_D on the other. The two
+cannot be chosen independently — lowering P_FA pushes γ right and collapses
+P_D with it — so Neyman–Pearson fixes P_FA and maximizes P_D, and the only
+thing that softens the dilemma is separating the humps, which is what SNR
+means here.
+
+Each value of γ is one point, and the ROC is the locus of all of them.
+Moving P_FA slides the operating point along the curve without changing the
+detector at all; raising the SNR or N bulges the whole curve toward the
+ideal corner — a different statement entirely, and keeping the two apart is
+most of the chapter. The P_FA axis is logarithmic because the
+rare-false-alarm regime is where detection actually lives.
+
+At fixed P_FA the curve P_D(SNR) is a softened step with a floor at P_FA,
+where the detector is guessing. Doubling N shifts it 3 dB left, since
+d² = N·SNR: integrating for twice as long is worth twice the transmitted
+power, the design decision behind every long observation. The Monte Carlo
+point carries its own lesson at rare P_FA — with M draws the relative error
+goes as 1/√(M·P_FA), and at 10⁻⁴ the measured point can vanish entirely,
+zero having no place on a logarithmic axis.`,
+
+
   params: {
     // log sliders — MANDATORY for parameters spanning several orders of
     // magnitude (this experiment exists to stress-test exactly that)

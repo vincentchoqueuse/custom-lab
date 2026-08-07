@@ -25,7 +25,26 @@ The experiment makes that claim falsifiable. One dial, v, stretches class 1
 without changing its volume: at v = 1 the postulate is exactly true and the
 learned detector converges to the clairvoyant one; above it the true boundary
 becomes a conic, the affine model is misspecified, and the gap between the two
-ROC curves stops closing however much data is supplied.`,
+ROC curves stops closing however much data is supplied. That contrast is the
+difference between two kinds of error — variance goes away with data,
+misspecification does not.
+
+The posterior view reads the same fit as a probability: test points binned
+along the score, the observed fraction of class 1 in each bin against the
+σ(t) the model claims. At v = 1 the dots sit on the curve — the model is
+calibrated, a property most classifiers lack — and the threshold is
+Neyman–Pearson's γ read on a probability scale, with the prior absorbed into
+the intercept: changing π₁ translates the sigmoid without bending it, and the
+ROC does not move. Above v = 1 the dots leave the curve, and the misspecified
+model is not merely suboptimal — it misreports its own confidence.
+
+The last scene breaks the easy case. When the two classes are separable the
+maximum-likelihood estimate does not exist: doubling w strictly improves any
+candidate, so ‖w‖ diverges while the cost heads to zero. A ridge penalty
+restores a strictly convex objective and a finite optimum — the real argument
+for regularization is not that it generalizes better but that without it the
+estimate is not there. Separability is a small-sample accident, which is
+exactly when a perfect training score is most tempting.`,
 
   params: {
     d: float('d', {

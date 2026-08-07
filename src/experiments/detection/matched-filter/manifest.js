@@ -10,6 +10,26 @@ export default {
   subtitle: 'Correlate with what you are looking for: the peak rises out of the noise, gain 10·log₁₀(N)',
   tags: ['matched filter', 'correlation', 'SNR', 'processing gain', 'radar'],
 
+  doc: `One pulse in noise, its shape, width and amplitude known exactly — only its
+position is not. At mild SNR anyone can point at it. At −10 dB per sample the
+pulse is invisible, and pressing the dice changes nothing about that; the
+question the chapter opens on is whether the information is therefore lost.
+
+It is not, because the knowledge of the shape has not been used yet. The
+correlator concentrates the whole energy of the pulse, N·SNR, onto a single
+lag, while the noise only adds up as √N: the peak stands at τ some 15 dB
+below what the eye could do, and the purple estimate sits on the yellow
+truth. Lowering the SNR until the peak too is lost, around 0.02, shows that
+the limit is real — just much further down.
+
+The processing-gain view states the law: the output SNR is N times the input
+SNR, so every doubling of the observation buys 3 dB — a straight line on a
+logarithmic N axis, confirmed by Monte Carlo. And at equal energy the pulse
+shape moves nothing at all: the matched filter exploits the energy and the
+fact that the shape is known, never the shape itself. This is radar, GPS,
+and the reason spreading codes are long.`,
+
+
   params: {
     shape: select('pulse', {
       description: 'shape of the known pulse',

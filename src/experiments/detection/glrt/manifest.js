@@ -27,7 +27,13 @@ export default {
 
         Not knowing σ costs a threshold that has to be estimated as it goes —
         CFAR — and that loss is a fixed number of decibels which shrinks as the
-        reference window grows.`,
+        reference window grows, while the false-alarm rate itself no longer
+        depends on σ at all: that invariance is what the name promises, and
+        the harness verifies it over two decades of noise power.
+
+        On one ROC the matched filter is a ceiling — the Neyman–Pearson lemma,
+        not an observation about these curves — and each detector's distance
+        below it is the price of what it does not know.`,
 
   params: {
     snr: log('SNR', {

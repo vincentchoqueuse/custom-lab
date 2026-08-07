@@ -29,7 +29,18 @@ export default {
         window be? Too short and the two tones are not resolved and the noise
         floor E|â| = σ√(π/N) rises to meet them; too long and the receiver
         misses a key that was pressed quickly. The standard answers about 40 ms,
-        and the figures say why.`,
+        and the figures say why.
+
+        Two details reward a closer look. The eight frequencies — 697, 770,
+        852, 941 against 1209, 1336, 1477, 1633 — were chosen so that none is
+        a harmonic or a sum of two others: a voice on the line produces
+        harmonics, and those pairs make sure a voice does not accidentally
+        spell a digit. And the failures have structure: a wrong decision is
+        almost never random but a neighbour in the same row or column, one
+        tone recovered and the other lost. Even the model has an honest edge —
+        above about 15 dB the spread of the estimated amplitude is leakage
+        from the other tone rather than noise, and the Rice law visibly stops
+        being the right description.`,
 
   params: {
     key: select('key', {
