@@ -6,6 +6,9 @@
 {
   "name": "pupitra",
   "compatibility_date": "2026-08-07",
+  // The workers.dev URL stays on alongside the custom domain — it is the
+  // test address and a free fallback. Flip to false to serve pupitra.org only.
+  "workers_dev": true,
   "assets": {
     "directory": "./dist",
     // Hash routing means the server only ever sees "/", but serving the app
