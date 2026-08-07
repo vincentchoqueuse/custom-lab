@@ -263,6 +263,114 @@ kbd {
   color: var(--foreground);
 }
 
+/* THE SEARCH BAR — the landing's first gesture, chatbot-style: one wide
+   rounded field with the caret already in it. The pill radius and the
+   focus ring are the ⌘K palette's promise worn on the front door. */
+.landing .search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 640px;
+  margin: 22px 0 0;
+  padding: 12px 18px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  color: var(--muted-fg);
+  transition: border-color var(--t), box-shadow var(--t);
+}
+
+.landing .search:focus-within {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px var(--ring-soft);
+}
+
+.landing .search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  font: inherit;
+  font-size: 15px;
+  color: var(--foreground);
+}
+
+.landing .search input::placeholder {
+  color: var(--muted-fg);
+}
+
+.landing .search .clear {
+  display: flex;
+  padding: 4px;
+  border: none;
+  background: none;
+  border-radius: 999px;
+  color: var(--muted-fg);
+  cursor: pointer;
+}
+
+.landing .search .clear:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
+
+/* the hits replace the module grid while a query is live */
+.landing .search-results {
+  max-width: 640px;
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.landing .hit {
+  display: block;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: var(--foreground);
+}
+
+.landing .hit + .hit {
+  border-top: 1px solid var(--border);
+}
+
+.landing .hit.selected {
+  background: var(--accent);
+}
+
+.landing .hit-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.landing .hit-title {
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.landing .hit-subj {
+  font-size: 11.5px;
+  color: var(--muted-fg);
+}
+
+.landing .hit-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--muted-fg);
+}
+
+.landing .search-results .empty {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--muted-fg);
+}
+
 /* prose, not flex: flex would split the sentence into items and orphan the
    half after the mono span onto its own line */
 .landing .verified {

@@ -218,10 +218,14 @@ presentation mode is a lecture gesture that lives on its key (`L`).
 **Landing page (`#/`).** The catalogue introducing itself: name, one-sentence
 identity with the experiment/module/scene counts (computed from the registry at
 runtime — nothing on the page can go stale), the check.js promise with a repo
-link, and the modules as cards in lecture order, every experiment a link. The
-single-letter shortcuts are inert here — there is no experiment for them to
-drive — and the header shows no presentation button; ⌘K and the sidebar work as
-everywhere.
+link, and the modules as cards in lecture order, every experiment a link. **The
+first gesture is a search bar**, chatbot-style: the page lands with the caret
+already in it (not on a phone, where autofocus pops the keyboard), typing swaps
+the module grid for the hits, ↑/↓ and Enter open one, Escape restores the grid.
+It is the ⌘K palette's filter — one implementation in `core/registry.js` —
+worn as a hero input instead of an overlay. The single-letter shortcuts are
+inert here — there is no experiment for them to drive — and the header shows no
+presentation button; ⌘K and the sidebar work as everywhere.
 
 **Central area.** Light-background PlotFrame (projector legibility), pure SVG
 rendering, statline of key observables, export. Minimal tabs when the experiment has several

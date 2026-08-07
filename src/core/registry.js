@@ -172,6 +172,29 @@ export function allExperiments() {
   return subjects.flatMap((s) => s.experiments);
 }
 
+/** @param {string} id — subject id, e.g. 'estimation' */
+export function subjectTitle(id) {
+  return subjects.find((s) => s.id === id)?.title ?? id;
+}
+
+/**
+ * THE experiment search — one filter for the command palette and the landing
+ * bar, so "Kalman" finds the same thing wherever it is typed. A plain
+ * substring match over everything a visitor might reach for: title, subtitle,
+ * tags, subject title. Empty query → the whole catalogue, in sidebar order.
+ */
+export function searchExperiments(query) {
+  const q = query.trim().toLowerCase();
+  const all = allExperiments();
+  if (!q) return all;
+  return all.filter((e) =>
+    [e.title, e.subtitle ?? '', subjectTitle(e.subject), ...(e.tags ?? [])]
+      .join(' ')
+      .toLowerCase()
+      .includes(q)
+  );
+}
+
 /** Manifest defaults — readonly params carry no value and are skipped. */
 export function defaultsFor(manifest) {
   const out = {};

@@ -2,29 +2,14 @@
   // Command Palette (⌘K): experiment search. Phase-1 scope: fuzzy-ish filter
   // over title/subtitle/tags/subject, keyboard navigation, Enter to open.
   import { app, navigate } from '../core/store.svelte.js';
-  import { allExperiments, subjects } from '../core/registry.js';
+  import { searchExperiments, subjectTitle } from '../core/registry.js';
   import { STR } from '../core/strings.js';
 
   let query = $state('');
   let selected = $state(0);
   let inputEl = $state(null);
 
-  const experiments = allExperiments();
-
-  function subjectTitle(id) {
-    return subjects.find((s) => s.id === id)?.title ?? id;
-  }
-
-  const results = $derived.by(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return experiments;
-    return experiments.filter((e) =>
-      [e.title, e.subtitle, subjectTitle(e.subject), ...(e.tags ?? [])]
-        .join(' ')
-        .toLowerCase()
-        .includes(q)
-    );
-  });
+  const results = $derived(searchExperiments(query));
 
   $effect(() => {
     inputEl?.focus();

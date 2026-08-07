@@ -23,6 +23,8 @@ export const STR = {
   LANDING_REPO: 'Source & checks on GitHub',
   EMBED_OPEN: 'Open this scene in the full catalogue',
   LANDING_HINT: 'Open any experiment, then drive it from the keyboard: ←/→ walk the lecture scenes, R draws again, F freezes a ghost for before/after.',
+  LANDING_SEARCH: 'Find an experiment — try "Fourier", "Kalman", "noise"…',
+  CLEAR_SEARCH: 'Clear the search',
   SEARCH_PLACEHOLDER: 'Type to search experiments…',
   NO_RESULTS: 'No matching experiment',
   PARAMETERS: 'Parameters',
