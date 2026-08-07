@@ -40,11 +40,11 @@ two modules over turns exactly that decision into a field.`,
     shape: select('shape', {
       description: 'the closed contour to retrace',
       options: [
-        { value: 'heart', label: 'a heart' },
-        { value: 'star', label: 'a five-point star' },
         { value: 'square', label: 'a square' },
+        { value: 'star', label: 'a five-point star' },
+        { value: 'heart', label: 'a heart' },
       ],
-      default: 'heart',
+      default: 'square',
     }),
     K: int('K', { description: 'circles in the chain', min: 1, max: 64, default: 8 }),
     tau: float('τ', {
