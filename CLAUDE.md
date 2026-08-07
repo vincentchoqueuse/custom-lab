@@ -13,7 +13,7 @@ Document organized from durable to interchangeable:
 
 # 1. Vision
 
-A **purely static** web application (no server, deployable on Netlify) that serves as a
+A **purely static** web application (no server, deployable on any static host) that serves as a
 **live demonstration instrument for lecture halls**: a catalog of interactive
 experiments (statistics, estimation, detection, digital communications) that are
 scriptable, projectable, and drivable. Not a course companion — the professor's bench.

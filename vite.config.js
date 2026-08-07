@@ -19,7 +19,7 @@ export default defineConfig({
       renderModernChunks: false,
     }),
   ],
-  // Relative base: the build is deployable from any static host path (Netlify, subdir…).
+  // Relative base: the build is deployable from any static host path (subdirectory included).
   base: './',
   worker: {
     // Classic (iife) worker: module workers require Safari 15+, too recent

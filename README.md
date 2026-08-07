@@ -1,6 +1,6 @@
 # pupitra
 
-**Live site: <https://vincentchoqueuse.github.io/pupitra/>**
+**Live site: <https://pupitra.org/>**
 
 Pupitra, from the French **pupitre** — the lectern. Not a course companion:
 the professor's bench. (The default seed stays 34, a surviving nod to the
@@ -30,9 +30,10 @@ npm run build            # static build in dist/, deployable as-is
 npm run new:experiment   # scaffold a new experiment (4 files, runs immediately)
 ```
 
-Pushes to `main` run the checks, build, and deploy to
-[GitHub Pages](https://vincentchoqueuse.github.io/pupitra/) via
-`.github/workflows/deploy.yml`.
+Pushes to `main` are built and deployed by Cloudflare's Git integration
+(`npm run check && npm run build`, then `npx wrangler deploy` reading
+`wrangler.jsonc`) and served at [pupitra.org](https://pupitra.org/). The
+check harness gates every deploy: a red check means no release.
 
 ## Keyboard (lecture-ready)
 
@@ -53,7 +54,7 @@ Any scene becomes a live, drivable figure inside a Moodle page, an LMS
 activity or any HTML document — add `embed=1` to its URL:
 
 ```html
-<iframe src="https://vincentchoqueuse.github.io/pupitra/#/spectral/subspace?df=0.5&embed=1"
+<iframe src="https://pupitra.org/#/spectral/subspace?df=0.5&embed=1"
         title="pupitra — High-resolution methods" loading="lazy"
         style="width:100%; height:620px; border:none"></iframe>
 ```
