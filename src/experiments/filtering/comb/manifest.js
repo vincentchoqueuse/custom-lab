@@ -10,6 +10,27 @@ export default {
   subtitle: 'An echo in time, a comb in frequency — D sets the teeth, g their depth',
   tags: ['digital', 'comb', 'echo', 'flanger', 'Karplus–Strong'],
 
+  doc: `The simplest recursive filter there is: the output adds to itself, delayed
+by D samples — an echo of the echo of the echo, hence IIR. Its impulse
+response is the geometric train gᵏ, one spike every D samples, never quite
+zero; the non-recursive echo keeps TWO spikes, and the whole difference
+between FIR and IIR is in that toggle.
+
+In frequency the echo makes a comb: resonances at k·Fs/D of height 1/(1−g),
+soft notches between. D sets the spacing and g the height — two parameters,
+two orthogonal effects, the most legible filter of the course. The
+recursive form resonates hard and notches little; the simple echo does the
+opposite; and flipping the sign of g swaps resonances and notches, eating
+DC at 1/(1+|g|) — the antiphase reflection that digs holes in a room's
+response near a wall.
+
+The alignment scene is the musical payoff: with Fs/D on the fundamental,
+every harmonic sits on a resonance and the whole signal lifts at once;
+sliding D moves the harmonics into the notches and empties the timbre —
+that is a flanger. And a recursive comb plucked with noise is a guitar
+string: Karplus–Strong, one teaser later in the catalogue.`,
+
+
   params: {
     structure: select('structure', {
       description: 'simple echo (FIR) or recursive (IIR)',

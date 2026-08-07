@@ -10,6 +10,34 @@ export default {
   subtitle: 'LMS, NLMS, RLS — speed, accuracy, complexity: pick two',
   tags: ['adaptive', 'LMS', 'NLMS', 'RLS', 'stochastic gradient', 'identification'],
 
+  doc: `A filter that starts from zero, never sees the unknown system, and is
+driven by one signal only: its own error. Walking the iterations forward
+shows the output climb onto the reference and the error collapse toward the
+noise floor it can never cross — that is the whole of adaptive filtering,
+and every other view is a summary of it.
+
+The step size is ONE law, not two: doubling μ descends faster and lands on
+a plateau higher by μ·tr(R)/(2 − μ·tr(R)), measured and theoretical landing
+within a few per cent of each other. The divergence threshold is the finer
+lesson: the textbook bound 2/tr(R) makes the MEAN converge, but the
+variance decides, and the measured explosion at 0.195 sits on the
+variance condition, not the textbook one. On a correlated input the real
+threshold falls far below what the theory announces — which is why NLMS,
+whose dimensionless step is bounded by 2 whatever the input power, is what
+practice actually uses.
+
+Colouring the input at identical power slows LMS three and a half times —
+conditioning λmax/λmin is the culprit, each eigenmode converging at its own
+rate with the slowest holding everyone up, the descent zigzagging where it
+used to dive. RLS inverts R instead of following it and converges in
+fifteen iterations regardless — at L² operations per sample instead of L.
+And when the system jumps mid-run the hierarchy inverts: RLS with λ = 1
+has infinite memory and never catches up, forgetting (λ = 0.99) buys
+tracking at the price of the plateau, and plain LMS with a large step
+nearly hides the jump altogether. The dumbest of the three is the best
+when the world moves — measured, not asserted.`,
+
+
   params: {
     algo: select('algorithm', {
       description: 'adaptive rule updating the coefficients',

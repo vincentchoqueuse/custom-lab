@@ -10,6 +10,25 @@ export default {
   subtitle: 'Truncate, window, delay — FIR design in three moves',
   tags: ['digital', 'FIR', 'windowing', 'Gibbs', 'linear phase'],
 
+  doc: `A low-pass built by windowing: the ideal response is an infinite non-causal
+sinc, of which N coefficients are kept, recentred at (N−1)/2 — the delay is
+born there, before any calculation. With raw truncation the first stop-band
+lobe sits at −21 dB, and raising N from 21 to 101 steepens the transition
+while leaving the lobe exactly where it was: Gibbs does not yield to the
+number of coefficients. Adding computation is not enough; the method has to
+change.
+
+The window is the method. At the same N: rectangular −21 dB, Hann −44,
+Hamming −53, Blackman −74 — paid for in transition width. This is exactly
+the trade of the spectral-windowing experiment, the same mathematics applied
+to synthesis: choosing a window is choosing where to spend one's decibels.
+
+The last scene prices the delay. The phase is linear, so every frequency
+waits the same (N−1)/2 samples and the shape is preserved — clean, but
+late: 5 ms at N = 81, and a 4001-coefficient filter is 250 ms of latency,
+which is why a musician would refuse it.`,
+
+
   params: {
     fc: float('f_c', {
       description: 'cutoff frequency (Fs = 8 kHz)',

@@ -10,6 +10,27 @@ export default {
   subtitle: 'Bilinear, pre-warping, impulse invariance — analog becomes digital',
   tags: ['digital', 'IIR', 'bilinear', 'impulse invariance', 'warping'],
 
+  doc: `An analog prototype carried into the digital world, and the two maps that
+do it. The bilinear transform wraps the entire jω axis onto the unit
+circle: the digital response sits on the analog one across the useful band,
+then dives at Nyquist, where the method has piled n zeros at z = −1 — not a
+defect but its signature. Left-half-plane poles land inside the circle, so
+stability is a theorem, not a hope.
+
+The wrapping is a tangent, and forgetting to pre-warp shows what that
+costs: a filter asked for 1000 Hz cuts at 948, one asked for 3000 cuts at
+2204. Pre-warping corrects exactly one point of the axis — but it is the
+right one, and the cutoff lands on the target.
+
+Impulse invariance is the other philosophy: h[n] = T·h_a(nT) exactly,
+verified to 3e-16 — the time response is the truth and the frequency
+response pays for it, the analog tail beyond Fs/2 folding back into the
+band. Raising the order shortens the tail and the aliasing melts away. The
+synthesis question the experiment leaves open on purpose: which method for
+an audio low-pass, and which to preserve a time response? The answers
+differ.`,
+
+
   params: {
     method: select('method', {
       description: 'discretization of the analog prototype (Fs = 8 kHz)',

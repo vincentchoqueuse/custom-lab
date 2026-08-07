@@ -10,6 +10,26 @@ export default {
   subtitle: 'A periodic signal sculpted — four filters for two multiplications',
   tags: ['digital', 'SVF', 'resonance', 'harmonics', 'synthesis'],
 
+  doc: `The Chamberlin state-variable filter: two multiplications per sample, and
+four outputs at once — low-pass, band-pass, high-pass, notch. Same poles,
+four numerators: the four filters are four TAPS of one loop, not four
+filters, and switching between them changes not a single coefficient. That
+economy is why the SVF has ruled synthesizers since the 1980s.
+
+The gain view teaches what any filter does, harmonic by harmonic: the input
+square wave is a comb of odd harmonics, and each is multiplied by the value
+of the curve at its frequency — verified to 1e-6. Taking f_c below the
+third harmonic leaves only the fundamental: a sine, sculpted out of a
+square.
+
+Resonance is the instrument's voice: at Q = 12 a +20 dB bump at f_c throws
+forward whichever harmonic passes under it, and sliding f_c is the "wah" —
+f_c moving and nothing else. The notch is the same machinery used
+surgically: it dives exactly at f_c, placed on one harmonic it removes it
+and barely alters the waveform — the 50 Hz rejection filter of every
+measuring instrument.`,
+
+
   params: {
     source: select('source', {
       description: 'periodic input signal',
