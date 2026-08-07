@@ -10,6 +10,28 @@ export default {
   subtitle: 'Fitting y = a·x + b by least squares — and what the slope is worth',
   tags: ['least squares', 'straight line', 'residuals', 'R²', 'leverage'],
 
+  doc: `The vertical grey segments are the quantity being minimized — the sum of
+their squares, not the distance to the line: y is what is being predicted
+from x. The fitted line never coincides with the true one, and cannot: the
+line is not observed, only twenty noisy points are, and redrawing makes the
+estimate dance around the truth.
+
+The residuals are the only honest diagnostic. With the right model they are a
+shapeless cloud around zero, and two properties are exact rather than
+approximate: they sum to zero, and they are orthogonal to x — the line has
+extracted everything x could say about y. When curvature appears in that
+view, the straight line has stopped being enough, and polynomial regression
+begins.
+
+The slope law carries the design lesson. The distribution of â has standard
+deviation σ/√Sxx, so doubling the RANGE of x halves it while doubling the
+number of points only divides it by √2: where the points are placed matters
+more than how many there are. And the last scene opens the next chapter — one
+point dragged away bends the whole line, because squaring the errors gives
+the largest one a crushing weight. Least squares has no defence against a
+wrong value, which is the door into robust methods.`,
+
+
   params: {
     a: float('a', { description: 'true slope', min: -3, max: 3, step: 0.1, default: 1.5 }),
     b: float('b', { description: 'true intercept', min: -5, max: 5, step: 0.2, default: 1 }),

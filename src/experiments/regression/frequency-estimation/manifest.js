@@ -10,6 +10,23 @@ export default {
   subtitle: 'A nonconvex criterion searched on a grid — the step sets cost against precision',
   tags: ['least squares', 'frequency', 'grid search', 'nonconvex'],
 
+  doc: `Estimating the frequency of a noisy sinusoid by minimizing a cost that is
+anything but convex: the basins of J are spaced 1/T apart, and a local
+method started in the wrong one stays there. A grid sweeps everything, so no
+basin can hide — at a price counted in the statline, about 380 evaluations
+of J at the fine step.
+
+The step is the design variable. Larger than the basin width 1/T, the grid
+can straddle the true minimum entirely and land elsewhere; the rule that the
+step must be small compared with 1/T is the first estimator sizing
+calculation of the course. And even with no noise at all the error is not
+zero: an argmin over a grid cannot do better than ±Δf/2, which is
+quantization rather than estimation. At Δf → 0 the noise imposes its own
+limit — the Cramér–Rao bound, falling as 1/T³, which is why frequency
+estimation is surprisingly precise. Doing better than a grid at equal cost
+is the subject of the optimization chapter.`,
+
+
   params: {
     f: float('f', {
       description: 'true frequency',

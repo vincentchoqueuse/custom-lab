@@ -23,7 +23,19 @@ export default {
         linear beyond δ: efficiency on clean data, resistance far out. RANSAC
         stops counting a point altogether once it leaves the band, which is
         what buys a breakdown point of one half — the largest any estimator can
-        have.`,
+        have.
+
+        The breakdown view reads that number more carefully than the textbook
+        does. Contaminated points SCATTERED over the range are not a set but
+        many sets of one, and RANSAC still returns the clean line past
+        ε = 0.5; the cliff appears only when the bad points are pushed
+        together onto a line of their own and become the majority. A breakdown
+        point is not "how many outliers" but "how many ORGANISED outliers".
+
+        Nothing here is free, and the last scene prices it: on clean Gaussian
+        data L1 keeps about 64 % of the efficiency of least squares, Huber
+        with δ ≈ 1.5σ about 95 % — the insurance premium — while RANSAC's
+        band has to be chosen, and choosing it needs to know the noise.`,
 
   params: {
     a: float('a', { description: 'true slope', min: -3, max: 3, step: 0.1, default: 1.5 }),

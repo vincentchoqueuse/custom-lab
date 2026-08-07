@@ -10,6 +10,27 @@ export default {
   subtitle: 'Least squares and ridge: fitting, overfitting, regularization',
   tags: ['least squares', 'regression', 'polynomial', 'overfitting', 'ridge', 'regularization'],
 
+  doc: `A cubic is generated and a polynomial of degree d is fitted, and the three
+regimes of the chapter each get a scene. At d = 3 everything behaves: the
+estimated curve stays near the truth and the coefficients bracket the true
+values. At d = 1 what remains is bias — a straight line cannot follow a
+cubic, and no amount of data repairs a model too poor to hold the truth. At
+d = 9 with fifteen points the polynomial fits the noise: redrawing makes the
+curve dance violently, which is variance made visible, and the estimated
+coefficients explode while the true ones stay small.
+
+Ridge is the cure with a dial. Minimizing ‖y−Xa‖² + λ‖a‖² penalizes large
+coefficients: raising λ calms the fit and brings it back toward the truth,
+and pushing further flattens it — variance traded for bias, and the trade can
+be overpaid.
+
+The trade-off view draws the curve of the chapter, MSE(λ) = bias²(λ) +
+variance(λ): no bias and enormous variance at λ → 0, the reverse at λ → ∞,
+and the minimum strictly between them — the best estimator is biased. More
+noise moves the minimum right: more regularization, exactly when the data
+deserve less trust.`,
+
+
   params: {
     a0: float('a₀', { description: 'constant coefficient', min: -2, max: 2, step: 0.1, default: 0.5 }),
     a1: float('a₁', { description: 'coefficient of x', min: -2, max: 2, step: 0.1, default: -1 }),

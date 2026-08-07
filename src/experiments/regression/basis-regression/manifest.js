@@ -10,6 +10,29 @@ export default {
   subtitle: 'Linear does not mean straight — same least squares, new shapes',
   tags: ['basis functions', 'least squares', 'RBF', 'kernel', 'train/test', 'overfitting'],
 
+  doc: `The model is linear — in the weights, not in x. It is the same least squares
+as polynomial regression, the same closed form; what changes is the
+dictionary, and the first view shows the fit as literally the sum of its
+bumps. The width ℓ exposes both failure modes: too wide and the bumps merge
+into a rigid shape that underfits, too narrow and spikes grow between the
+data points while ‖w‖ explodes — where λ rescues the solution exactly as
+ridge did. A good ℓ is visible to the eye: neighbouring bumps overlapping at
+about half height.
+
+One target, four philosophies, and the square wave separates them. Fourier
+produces the Gibbs oscillations, with the same ~9 % overshoot as the Fourier
+series experiment. Polynomials fail globally, because a polynomial cannot be
+flat. RBFs keep their error local. And a single sigmoid, M = 1, is enough —
+one neuron is an edge detector. The basis must resemble the signal: that is
+the whole art, and the precise meaning of the phrase "a prior".
+
+The complexity view is the curve worth a chapter of machine learning. The
+training error falls forever, since adding functions can only help fit
+points already seen; the test error, on fresh data, is U-shaped, with a
+floor at σ² below which nothing can go. The bottom of the U is the right M,
+and past it the model is learning the noise.`,
+
+
   params: {
     basis: select('basis', {
       description: 'family of functions φⱼ',
