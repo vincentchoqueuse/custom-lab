@@ -22,25 +22,8 @@ info panel.
 
 ## Licensing of contributions
 
-pupitra is licensed under the [AGPL-3.0](LICENSE). So that the project can be
-maintained and licensed coherently over time — including under other licence
-terms when a single AGPL offering is not workable for an institution — its
-maintainer must remain the sole licensor of the codebase. By submitting a
-contribution (pull request, patch, or any other form), you agree to the
-following:
-
-1. **Certification.** The contribution is your own original work (or you have
-   the right to submit it), and you have the authority to grant the rights
-   below.
-2. **Public licence.** Your contribution is licensed to everyone under the
-   AGPL-3.0, like the rest of the project.
-3. **Maintainer grant.** You additionally grant the project maintainer
-   (Vincent Choqueuse) a perpetual, worldwide, non-exclusive, royalty-free,
-   irrevocable licence to use, reproduce, modify, sublicense and distribute
-   your contribution, including under licence terms other than the AGPL-3.0.
-
-You keep the copyright on your contribution. The grant is non-exclusive: it
-takes nothing away from you — you remain free to use your own work however
-you wish. If you cannot or do not wish to agree to these terms, please open
-an issue instead of a pull request, so the feature can be discussed and
-implemented independently.
+pupitra is licensed under the [AGPL-3.0](LICENSE), and contributions are the
+simplest possible deal — inbound equals outbound: by submitting a pull
+request you certify the work is your own (or that you have the right to
+submit it), and you license it under the AGPL-3.0 like the rest of the
+project. You keep your copyright. Nothing else is asked.
