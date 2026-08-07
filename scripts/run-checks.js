@@ -441,7 +441,7 @@ const NAME_WORDS = new Set([
   'equalizer', 'family', 'function', 'grid', 'image', 'input', 'mapping', 'method', 'mode',
   'modulation', 'order', 'shape',
   'key', 'num', 'outlier', 'output', 'pulse', 'signal', 'source', 'sources', 'stage', 'standardize',
-  'structure', 'system', 'table', 'target', 'tracking', 'window', 'zero-padding',
+  'structure', 'system', 'table', 'target', 'tracking', 'wavelet', 'window', 'zero-padding',
 ]);
 
 function checkLanguage(strings, names) {
