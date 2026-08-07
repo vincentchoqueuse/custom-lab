@@ -10,6 +10,27 @@ export default {
   subtitle: 'Two estimators of σ²: divide by N or by N−1?',
   tags: ['estimator', 'bias', 'variance', 'sampling distribution'],
 
+  doc: `Two estimators of the same variance, dividing by N and by N−1, and at two
+hundred points they land on top of each other — the difference is a factor
+200/199, half a percent, invisible and correctly so. This is where most
+intuition lives: years of using one or the other without ever seeing them
+disagree. Taking N down through 50, 20, 10 opens a gap that redrawing never
+closes or flips, which is what distinguishes a bias from bad luck.
+
+At N = 5 the histogram of the ÷N estimator sits to the left of σ²: its mean
+is σ²(N−1)/N, so it underestimates on average every time. The reason is that
+x̄ fits the data better than μ does, so the deviations measured from it are
+too small — one degree of freedom has already been spent. The bias is exactly
+−σ²/N: it quadruples when σ doubles and vanishes as 1/N, so that by N = 100
+the choice of divisor is no longer visible.
+
+The width of the histograms deserves as much attention as their position. At
+N = 5 both estimators fluctuate enormously — being unbiased is not the same
+as being accurate — and the spread shrinks as 2σ⁴/(N−1) for both. At small N
+the real problem is not the bias but the variance, and there is no divisor
+that removes it.`,
+
+
   params: {
     mu: float('μ', { description: 'true mean', min: -5, max: 5, step: 0.1, default: 0 }),
     sigma: float('σ', { description: 'true standard deviation', min: 0.5, max: 3, step: 0.1, default: 1.5 }),

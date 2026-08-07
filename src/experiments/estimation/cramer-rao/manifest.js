@@ -11,6 +11,31 @@ export default {
     'Estimating μ from N Gaussian draws: no estimator gets below σ²/N',
   tags: ['Cramér–Rao', 'Fisher information', 'efficiency', 'estimator'],
 
+  doc: `N values are drawn from N(μ, σ²) with σ known, and μ is to be estimated.
+Three recipes turn the draws into a μ̂ — the mean, the median, and the
+midrange, the midpoint of the smallest and largest value — and the question
+is how precise an estimator is allowed to be. The dashed line at σ²/N is the
+Cramér–Rao bound: no unbiased estimator can go below it. That is a theorem,
+not an observation about this particular figure.
+
+The mean sits exactly on the floor — it is efficient, and looking for
+something better is wasted effort. The median runs parallel to it, a factor
+π/2 above; the ratio view puts its efficiency at 2/π ≈ 0.637, meaning 36 %
+of the Fisher information is discarded, permanently rather than at small
+samples only — the price of its robustness. The midrange bends away from
+both, its variance falling only as 1/ln N, so collecting more data barely
+helps it. What each estimator throws away is the useful reading: the median
+keeps only the ranks, the midrange keeps only the two worst points.
+
+Two numbers on this screen are routinely confused. N is the sample size
+inside one experiment and is what the variance depends on; M is how many
+times the experiment is repeated and only sets how well that variance is
+MEASURED — raising M smooths the curves without moving them. The link
+forward is the theorem that closes the chapter: the maximum likelihood
+estimator is asymptotically efficient, which is to say it eventually reaches
+this floor.`,
+
+
   params: {
     mu: float('μ', {
       description: 'THE parameter to estimate — true population mean',

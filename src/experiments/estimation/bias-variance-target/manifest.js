@@ -10,6 +10,27 @@ export default {
   subtitle: 'Four estimators of the center — on target is not tight, and the MSE decides',
   tags: ['estimator', 'bias', 'variance', 'MSE', 'shrinkage'],
 
+  doc: `Four estimators of the same center, drawn from the same data and shown as
+shots on a target. The vocabulary of the chapter can be read straight off the
+picture: the mean is on target and tight, the median on target and a little
+looser, the shrunk mean off target but very tight, and the single observation
+on target and catastrophically scattered. On target means unbiased, tight
+means low variance — and the two are independent properties, which is the
+first thing the figure settles.
+
+The MSE printed under each target is what decides between them, and at N = 5
+the off-target marksman wins: shrinkage buys tightness at the price of a
+bias, and at small N the trade is profitable. Raising N to 100 removes the
+advantage — the variance is already small, and there is nothing left for
+shrinkage to buy.
+
+The trade-off view puts the argument in closed form, with no Monte Carlo
+anywhere: MSE(λ) = 2(1−λ)²μ² + 2λ²σ²/N, minimized at λ* = μ²/(μ²+σ²/N),
+which is strictly below 1. The optimal estimator is always somewhat biased —
+an algebraic fact, not an accident of the data. The same U curve returns as
+ridge regression in the polynomial-fit experiment: one idea, two costumes.`,
+
+
   params: {
     mu: float('μ', { description: 'center of the target (both coordinates)', min: 0, max: 5, step: 0.1, default: 2 }),
     sigma: float('σ', { description: 'standard deviation of each shot', min: 0.5, max: 3, step: 0.1, default: 1.5 }),

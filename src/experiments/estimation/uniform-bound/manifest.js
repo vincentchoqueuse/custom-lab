@@ -10,6 +10,26 @@ export default {
   subtitle: 'X ~ U[0, θ]: max, max+min or 2x̄ — three estimators of θ',
   tags: ['estimator', 'bias', 'MSE', 'uniform', 'order statistic'],
 
+  doc: `N points drawn from U[0, θ], and θ to be estimated. Three candidates come up
+naturally: the sample maximum, because nothing smaller can be right; twice
+the sample mean, because the mean of the law is θ/2; and the maximum
+corrected by adding the minimum. Redrawing separates them — the maximum is
+always below θ, since no sample can exceed the bound it came from, while
+max+min lands above θ about half the time.
+
+The sampling view makes the maximum's defect exact: its bias is −θ/(N+1),
+and adding the minimum corrects it exactly because E[min] = θ/(N+1) makes up
+the same deficit. The estimator 2x̄ is centered too, but far more spread out.
+
+On log–log axes the slopes are convergence rates, and they carry the headline
+of the chapter. The maximum and max+min fall with slope −1, an error in 1/N;
+2x̄ falls with slope −1/2, the usual 1/√N of the central limit theorem. At
+N = 100 the maximum is about seven times more precise: exploiting the
+regularity of the support beats averaging. One surprise is worth keeping —
+the maximum and max+min have the SAME mean squared error, 2θ²/((N+1)(N+2)).
+Correcting the bias cost nothing here, and gained nothing either.`,
+
+
   params: {
     theta: float('θ', { description: 'true upper bound', min: 0.5, max: 10, step: 0.1, default: 5 }),
     N: int('N', { description: 'sample size', min: 2, max: 200, default: 10 }),

@@ -8,8 +8,7 @@ export default {
   random: true,
   title: 'Confidence intervals',
   subtitle: 'Frequentist coverage and the width of the interval',
-  // The prose the info panel (I) shows. Written for a reader, not for a
-  // teacher: the notes in scenes.js remain the private half.
+  // The prose the info panel (I) shows.
   doc: `A confidence interval is the estimate that admits what it does not know:
 not "μ is 5.1" but "μ is somewhere in [4.4, 5.8]", with a level attached to the
 claim. This experiment draws M independent samples, builds an interval from each
@@ -28,9 +27,14 @@ pay for it in vagueness. Nothing you can do makes an interval both narrower and
 surer, and that trade is the point.
 
 Whether σ is known decides which law the interval is built from — Gaussian if
-it is, Student with N−1 degrees of freedom if it is not. At N = 30 the two are
-nearly the same picture; take N down to 3 and the Student interval visibly
-stretches, which is what paying for an estimated σ looks like.`,
+it is, Student with N−1 degrees of freedom if it is not. Keeping 1.96 with an
+estimated σ would use the data twice, once for x̄ and once for σ̂, and the
+coverage would fall below the level; Student's t is exactly the price of the
+second use. At N = 30 the two laws differ by two percent and nobody would
+notice; at N = 5 the Student quantile is 2.78 against 1.96, forty percent
+wider. And once each law is used where it belongs, the coverage curve is flat
+in N for both: a correct interval does not become more correct with more
+data — it becomes narrower.`,
 
   tags: ['frequentist', 'interval', 'Student'],
 

@@ -10,12 +10,6 @@ export default [
     params: { N: 30, conf: 0.95 },
     visible: ['N', 'conf'], // Prompt Bar pills
     masked: [], // black box: pill shows "?", revealHidden action
-    notes: `The question to put to the room before touching N: if N goes from 30
-to 200, does the coverage change? Most of them will answer that it goes up, and
-it is worth collecting that answer out loud before moving the slider.
-
-It does not. The intervals get narrower and the proportion containing μ stays at
-95 %, because the level is what was asked for and the width is what it costs.`,
   },
   {
     id: 'level-80',
@@ -23,9 +17,6 @@ It does not. The intervals get narrower and the proportion containing μ stays a
     view: 'realizations',
     params: { conf: 0.8 },
     visible: ['conf', 'N'],
-    notes: `At 1−α = 0.80 the red intervals become common enough to count, and
-counting them out loud is the cheapest way to make the frequentist definition
-concrete: roughly one in five misses, by construction rather than by accident.`,
   },
   {
     id: 'which-law',
@@ -33,24 +24,5 @@ concrete: roughly one in five misses, by construction rather than by accident.`,
     view: 'coverage',
     params: { N: 30, conf: 0.95, known: true },
     visible: ['known', 'N'],
-    notes: `The method, and the scene the first two were building to: the
-interval has to be built from a LAW, and which law depends on what is known.
-
-Start with σ known, the Gaussian interval, and read the coverage: it sits on
-0.95 at every N. Then switch to σ unknown. If the same 1.96 were kept, the
-interval would be too narrow and the coverage would fall below the level — the
-data has been used twice, once for x̄ and once for σ̂, and the second use costs
-something. Student's t is exactly the price, and the drawer prints the degrees
-of freedom.
-
-Take N down to 5 and back with the switch flipping between the two. At N = 30
-the two laws differ by two percent and nobody would notice; at N = 5 the
-Student quantile is 2.78 against 1.96, forty percent wider. That is the whole
-practical content of the t distribution, and it is visible in one gesture.
-
-Worth ending on: the coverage curve is flat for BOTH laws, once each is used
-where it belongs. A correct interval does not become more correct with more
-data — it becomes narrower.`,
   },
 ];
-// notes: Teacher Mode only. Never projected by default, never in the URL.
