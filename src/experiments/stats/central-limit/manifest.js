@@ -5,7 +5,7 @@ import { canonicalLaws } from '../_lib/laws.js';
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'central-limit',
-  order: 5,
+  order: 6,
   random: true,
   title: 'Central limit theorem',
   subtitle: 'The mean of n draws turns Gaussian — whatever the distribution',
