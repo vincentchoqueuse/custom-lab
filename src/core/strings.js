@@ -3,7 +3,7 @@
 // content (titles, labels, notes) never lives here: it belongs to manifests.
 export const STR = {
   APP_NAME: 'pupitra',
-  REPO_URL: 'https://github.com/vincentchoqueuse/custom-lab',
+  REPO_URL: 'https://github.com/vincentchoqueuse/pupitra',
   GITHUB: 'View source on GitHub',
   // The branch the site is built from: a link to the science must point at the
   // code that produced the figure on screen, not at whatever is being written

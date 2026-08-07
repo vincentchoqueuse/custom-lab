@@ -1,6 +1,6 @@
 # pupitra
 
-**Live site: <https://vincentchoqueuse.github.io/custom-lab/>**
+**Live site: <https://vincentchoqueuse.github.io/pupitra/>**
 
 Pupitra, from the French **pupitre** — the lectern. Not a course companion:
 the professor's bench. (The default seed stays 34, a surviving nod to the
@@ -31,7 +31,7 @@ npm run new:experiment   # scaffold a new experiment (4 files, runs immediately)
 ```
 
 Pushes to `main` run the checks, build, and deploy to
-[GitHub Pages](https://vincentchoqueuse.github.io/custom-lab/) via
+[GitHub Pages](https://vincentchoqueuse.github.io/pupitra/) via
 `.github/workflows/deploy.yml`.
 
 ## Keyboard (lecture-ready)
@@ -53,7 +53,7 @@ Any scene becomes a live, drivable figure inside a Moodle page, an LMS
 activity or any HTML document — add `embed=1` to its URL:
 
 ```html
-<iframe src="https://vincentchoqueuse.github.io/custom-lab/#/spectral/subspace?df=0.5&embed=1"
+<iframe src="https://vincentchoqueuse.github.io/pupitra/#/spectral/subspace?df=0.5&embed=1"
         title="pupitra — High-resolution methods" loading="lazy"
         style="width:100%; height:620px; border:none"></iframe>
 ```
