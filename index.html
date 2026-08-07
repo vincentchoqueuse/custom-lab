@@ -16,6 +16,21 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cstyle%3E*{color:%2318181b}@media(prefers-color-scheme:dark){*{color:%23fafafa}}%3C/style%3E%3Cmask id='p'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Cline x1='6.4' y1='22.8' x2='25.6' y2='22.8' stroke='%23000' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M 7.6 22.8 C 12.4 22.8 12.9 8.9 16 8.9 C 19.1 8.9 19.6 22.8 24.4 22.8' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round'/%3E%3C/mask%3E%3Crect x='.6' y='.6' width='30.8' height='30.8' rx='6.6' fill='currentColor' mask='url(%23p)'/%3E%3C/svg%3E"
     />
     <title>pupitra</title>
+    <script>
+      // THE THEME, BEFORE FIRST PAINT — the stored choice (the same
+      // `pupitra:theme` key core/prefs.js owns; duplicated here because this
+      // must run before any module loads), else the system's. Without this,
+      // every reload in dark mode flashes white for as long as the bundle
+      // takes to arrive.
+      try {
+        var theme = localStorage.getItem('pupitra:theme');
+      } catch (e) {
+        var theme = null;
+      }
+      if (theme !== 'light' && theme !== 'dark')
+        theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    </script>
   </head>
   <body>
     <div id="app"></div>

@@ -77,6 +77,14 @@
     schedule(key, params);
   });
 
+  // The theme rides the ROOT element, not only the .app div: the body's own
+  // background must follow it, or every overscroll and every reload in dark
+  // mode flashes the browser's white. index.html paints the first frame from
+  // the same key; this effect keeps <html> honest through every toggle.
+  $effect(() => {
+    document.documentElement.dataset.theme = app.ui.theme;
+  });
+
   /* ---------- the viewport, watched once ---------------------------------- */
   // ONE listener for the whole application. The plot canvas depends on it, and
   // a component polling window.innerWidth on its own would not re-render when
@@ -94,8 +102,12 @@
   /* ---------- cosmetic prefs (localStorage: never experiment state) ------- */
 
   function loadPrefs() {
+    // no stored choice → follow the system, matching what the pre-paint
+    // script in index.html already painted (a mismatch here would flip the
+    // page a frame after it appeared)
     const theme = readPref('theme');
     if (theme === 'light' || theme === 'dark') app.ui.theme = theme;
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) app.ui.theme = 'dark';
     // no stored preference: start collapsed on narrow screens (tablet/phone)
     const sidebarPref = readPref('sidebar');
     app.ui.sidebar = sidebarPref !== null ? sidebarPref !== '0' : window.innerWidth > 900;
