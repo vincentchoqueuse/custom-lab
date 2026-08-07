@@ -10,6 +10,7 @@
 import { rk4Step, polyEvalComplex } from '../../../core/numeric.js';
 import { bodeSweep, bodeObservables, naturalPulsation, polyTransfer } from '../_lib/bode.js';
 import { polyRoots } from '../_lib/lti.js';
+import { realize } from '../_lib/sim.js';
 
 const T_END = 20;
 const H = 0.005;
@@ -19,19 +20,6 @@ function inputOf(kind, f) {
   if (kind === 'step') return (t) => 1;
   if (kind === 'ramp') return (t) => t;
   return (t) => Math.sin(2 * Math.PI * f * t);
-}
-
-/** Controllable canonical realization of num/den (descending powers). */
-function realize(num, den) {
-  const a0 = den[0];
-  const a = den.map((v) => v / a0); // monic denominator, length n+1
-  const n = a.length - 1;
-  const b = new Float64Array(n + 1); // numerator padded to length n+1
-  for (let i = 0; i < num.length; i++) b[n + 1 - num.length + i] = num[i] / a0;
-  const D = b[0];
-  const C = new Float64Array(n);
-  for (let i = 1; i <= n; i++) C[i - 1] = b[i] - b[0] * a[i];
-  return { n, a, C, D };
 }
 
 /**

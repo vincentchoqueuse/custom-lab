@@ -5,7 +5,7 @@ import { at, gainView, phaseView, GUIDE, GUIDE_COLOR } from '../../../core/respo
 /** @type {import('../../../core/types').ExperimentManifest} */
 export default {
   id: 'pid',
-  order: 6,
+  order: 7,
   random: true,
   title: 'PID, three dials',
   subtitle: 'P pushes, I erases, D calms — and each has its price',
